@@ -168,6 +168,12 @@ main{max-width:820px;margin:0 auto;padding:30px 20px}
 .comp-tab.ativa{background:var(--vermelho);border-color:var(--vermelho)}
 .widget-wrap{background:#fff;border-radius:12px;overflow:hidden;min-height:420px}
 .widget-wrap.oculto{display:none}
+.resumo-hoje{background:rgba(255,255,255,.05);border:1px solid var(--linha);border-radius:12px;padding:14px;margin-bottom:14px}
+.resumo-hoje .rh-comp{font-size:.72rem;color:var(--vermelho);font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin:10px 0 6px}
+.resumo-hoje .rh-comp:first-child{margin-top:0}
+.rh-linha{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.86rem}
+.rh-linha:last-child{border-bottom:none}
+.rh-hora{color:var(--cinza);font-weight:700;font-size:.8rem}
 </style>
 </head>
 <body>
@@ -237,7 +243,12 @@ function sairSatelite(){
   </div>
 
   <div class="card" style="padding-bottom:6px">
-    <h3 style="font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px">⚽ Todos os jogos do dia</h3>
+    <h3 style="font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px">🔴 Só os jogos de hoje</h3>
+    <div class="resumo-hoje" id="resumoHojeCustom">
+      <p class="nota-rodape" style="margin:0">Carregando os jogos de hoje...</p>
+    </div>
+
+    <h3 style="font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;margin:20px 0 12px">⚽ Todos os jogos do dia</h3>
     <div class="comp-tabs" id="compTabs">
       <button class="comp-tab ativa" onclick="mudarCompeticao('brasileirao')">Brasileirão</button>
       <button class="comp-tab" onclick="mudarCompeticao('copa-brasil')">Copa do Brasil</button>
@@ -304,11 +315,65 @@ function sairSatelite(){
           el.dataset.diaAdicionado = '1';
         });
       }
+      const NOMES_COMP = {wCompBrasileirao:'Brasileirão', wCompCopaBrasil:'Copa do Brasil', wCompLibertadores:'Libertadores', wCompSulamericana:'Sul-Americana'};
+      function extrairJogosHoje(wrap, nomeComp){
+        const jogos = [];
+        let statusAtual = null;
+        const nos = wrap.querySelectorAll('[data-dia-adicionado], [class*="game-card_container__"]');
+        nos.forEach(no=>{
+          if (no.dataset && no.dataset.diaAdicionado){
+            statusAtual = no.textContent.trim().toUpperCase().indexOf('HOJE') === 0 ? 'hoje' : 'outro';
+            return;
+          }
+          if (statusAtual !== 'hoje') return;
+          const nomes = no.querySelectorAll('[class*="game-card-competitor_name__"]');
+          if (nomes.length < 2) return;
+          const mandante = nomes[0].textContent.trim();
+          const visitante = nomes[1].textContent.trim();
+          if (!mandante || !visitante) return;
+          let horario = '';
+          const folhas = no.querySelectorAll('*');
+          for (const el of folhas){
+            if (el.children.length === 0){
+              const t = el.textContent.trim();
+              if (/^\d{1,2}:\d{2}$/.test(t)){ horario = t; break; }
+            }
+          }
+          jogos.push({mandante, visitante, horario, comp: nomeComp});
+        });
+        return jogos;
+      }
+      function montarResumoHoje(){
+        const el = document.getElementById('resumoHojeCustom');
+        if (!el) return;
+        let todos = [];
+        Object.entries(NOMES_COMP).forEach(([id, nome])=>{
+          const wrap = document.getElementById(id);
+          if (wrap) todos = todos.concat(extrairJogosHoje(wrap, nome));
+        });
+        const vistos = new Set();
+        todos = todos.filter(j=>{
+          const k = j.comp+'|'+j.mandante+'|'+j.visitante+'|'+j.horario;
+          if (vistos.has(k)) return false;
+          vistos.add(k); return true;
+        });
+        if (!todos.length){
+          el.innerHTML = '<p class="nota-rodape" style="margin:0">Nenhum jogo de hoje encontrado nessas competições (ou o widget ainda está carregando).</p>';
+          return;
+        }
+        const porComp = {};
+        todos.forEach(j=>{ (porComp[j.comp] = porComp[j.comp] || []).push(j); });
+        el.innerHTML = Object.entries(porComp).map(([comp, lista])=>
+          '<div class="rh-comp">'+comp+'</div>' +
+          lista.map(j=>'<div class="rh-linha"><span>'+j.mandante+' <span style="color:var(--cinza)">×</span> '+j.visitante+'</span><span class="rh-hora">'+(j.horario||'')+'</span></div>').join('')
+        ).join('');
+      }
       function tentarTodos(){
         document.querySelectorAll('.widget-wrap').forEach(w=>{
           if (!w.dataset.jogosClicado && acharEClicar(w)) w.dataset.jogosClicado = '1';
           adicionarDiaSemana(w);
         });
+        montarResumoHoje();
       }
       const observer = new MutationObserver(tentarTodos);
       observer.observe(document.body, {childList:true, subtree:true});
@@ -316,7 +381,7 @@ function sairSatelite(){
       const intervalo = setInterval(()=>{
         tentativas++;
         tentarTodos();
-        if (tentativas > 20) clearInterval(intervalo);
+        if (tentativas > 40) clearInterval(intervalo);
       }, 500);
     })();
   </script>
