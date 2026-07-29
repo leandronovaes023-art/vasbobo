@@ -273,7 +273,7 @@ function sairSatelite(){
     // um iframe isolado), assim que a aba "Jogos" aparecer no DOM a gente clica nela sozinho,
     // uma vez por widget, pra já abrir na visão correta.
     (function autoAbrirAbaJogos(){
-      const DIAS = ['dom','seg','ter','qua','qui','sex','sáb'];
+      const DIAS = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
       function acharEClicar(wrap){
         const els = wrap.querySelectorAll('*');
         for (const el of els){
@@ -284,7 +284,11 @@ function sairSatelite(){
         }
         return false;
       }
+      function chaveDia(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
       function adicionarDiaSemana(wrap){
+        const hoje = new Date(); hoje.setHours(0,0,0,0);
+        const amanha = new Date(hoje.getTime()+86400000);
+        const chaveHoje = chaveDia(hoje), chaveAmanha = chaveDia(amanha);
         const els = wrap.querySelectorAll('*');
         els.forEach(el=>{
           if (el.children.length !== 0 || el.dataset.diaAdicionado) return;
@@ -292,7 +296,11 @@ function sairSatelite(){
           const m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
           if (!m) return;
           const d = new Date(+m[3], +m[2]-1, +m[1]);
-          el.textContent = t + ' · ' + DIAS[d.getDay()];
+          let rotulo = DIAS[d.getDay()];
+          const chaveD = chaveDia(d);
+          if (chaveD === chaveHoje) rotulo = 'HOJE · ' + rotulo;
+          else if (chaveD === chaveAmanha) rotulo = 'AMANHÃ · ' + rotulo;
+          el.innerHTML = t + ' <b style="font-size:1.15em">· ' + rotulo + '</b>';
           el.dataset.diaAdicionado = '1';
         });
       }
