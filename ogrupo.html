@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>try{if(!localStorage.getItem('vasbobo:sessao')){location.replace('/');}}catch(e){location.replace('/');}</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyDNk1IhC1KpF9UKdwyMjhybrhuJ-BsfkSs",
+  authDomain: "vasbobo-crvg.firebaseapp.com",
+  projectId: "vasbobo-crvg",
+  storageBucket: "vasbobo-crvg.firebasestorage.app",
+  messagingSenderId: "967008085523",
+  appId: "1:967008085523:web:744136b984604b20bc81e6"
+});
+const dbGrupo = firebase.firestore();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O Grupo — Vasbobo</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --preto:#F2F0EA;--branco:#17171B;--vermelho:#C0121B;
+  --cinza:#6C6C74;--linha:#DAD7D0;--ouro:#A97B12;--verde:#22794F;
+  --carvao:rgba(255,255,255,.92);
+  --carvao2:rgba(255,255,255,.86);
+  --card:rgba(255,255,255,.9);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
+body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg,#F4F2ED 0%,#EFE9E2 50%,#F4F2ED 100%);z-index:-1}
+
+/* padrão de losango no fundo */
+body::after{content:"";position:fixed;inset:0;opacity:.05;
+  background-image:repeating-linear-gradient(45deg,var(--branco) 0,var(--branco) 1px,transparent 0,transparent 50%);
+  background-size:20px 20px;z-index:-1}
+
+header{border-bottom:3px solid var(--branco);background:rgba(250,249,246,.88);backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:10}
+.header-inner{max-width:1100px;margin:0 auto;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-family:'Anton',sans-serif;font-size:1.8rem;text-transform:uppercase;letter-spacing:.04em}
+.logo span{color:var(--vermelho)}
+.voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;
+  cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
+.voltar:hover{border-color:var(--branco);color:var(--branco)}
+
+.page-title{max-width:1100px;margin:40px auto 8px;padding:18px 22px;background:rgba(244,242,237,.92);
+  border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.page-title h1{font-family:'Anton',sans-serif;font-size:clamp(2rem,6vw,3.5rem);text-transform:uppercase;line-height:1}
+.page-title p{color:var(--cinza);font-size:.9rem;margin-top:8px;line-height:1.6}
+
+/* Placar geral */
+.placar-geral{max-width:1100px;margin:24px auto;padding:0 20px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.stat-geral{background:var(--card);border:1px solid var(--linha);border-radius:12px;
+  padding:14px 16px;text-align:center;backdrop-filter:blur(6px)}
+.stat-geral .num{font-family:'Anton',sans-serif;font-size:2rem;color:var(--ouro)}
+.stat-geral .label{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cinza);margin-top:4px}
+
+/* Grid de perfis */
+.grid{max-width:1100px;margin:0 auto;padding:0 20px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+
+/* Card de perfil */
+.perfil{background:var(--card);border:1px solid var(--linha);border-radius:16px;
+  overflow:hidden;backdrop-filter:blur(8px);transition:transform .2s,border-color .2s}
+.perfil:hover{transform:translateY(-4px);border-color:rgba(192,18,27,.5)}
+.perfil-header{padding:20px 20px 14px;display:flex;align-items:flex-start;gap:14px;
+  border-bottom:1px solid var(--linha);position:relative}
+.avatar{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-family:'Anton',sans-serif;font-size:1.6rem;flex:none;border:2px solid var(--linha);overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.perfil-info{flex:1;min-width:0}
+.perfil-nome{font-family:'Anton',sans-serif;font-size:1.35rem;text-transform:uppercase;letter-spacing:.04em}
+.perfil-titulo{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin-top:3px;font-weight:700}
+.perfil-sub{color:var(--cinza);font-size:.78rem;margin-top:4px;line-height:1.4}
+.rank-badge{position:absolute;top:14px;right:14px;font-family:'Anton',sans-serif;font-size:.75rem;
+  letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid}
+
+/* Barras */
+.perfil-body{padding:16px 20px}
+.barras{display:grid;gap:8px;margin-bottom:14px}
+.barra-item{display:flex;align-items:center;gap:10px;font-size:.78rem}
+.barra-label{color:var(--cinza);width:90px;flex:none;letter-spacing:.04em}
+.barra-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.barra-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* Stats rápidas */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.stat{background:rgba(0,0,0,.05);border:1px solid var(--linha);border-radius:10px;padding:10px 12px;text-align:center}
+.stat .n{font-family:'Anton',sans-serif;font-size:1.2rem}
+.stat .l{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cinza);margin-top:2px}
+
+/* Frase icônica */
+.frase{background:rgba(192,18,27,.08);border-left:3px solid var(--vermelho);border-radius:0 8px 8px 0;
+  padding:10px 14px 24px;font-size:.85rem;font-style:italic;color:#33333A;line-height:1.5;margin-bottom:14px;cursor:pointer;position:relative}
+.frase::after{content:"toque para outra frase";position:absolute;bottom:6px;right:10px;left:14px;
+  font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--vermelho);opacity:.7;font-style:normal;
+  text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Desculpa */
+.desculpa-btn{width:100%;background:none;border:1px solid var(--linha);color:var(--cinza);
+  border-radius:9px;padding:9px;font-family:'Inter',sans-serif;font-size:.78rem;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.desculpa-btn:hover{border-color:var(--vermelho);color:var(--branco)}
+.desculpa-txt{margin-top:8px;font-size:.82rem;color:#33333A;background:rgba(0,0,0,.05);
+  border-radius:8px;padding:10px 12px;display:none;line-height:1.5}
+
+/* Botão copiar */
+.copiar-btn{width:100%;background:var(--vermelho);color:#FFFFFF;border:none;
+  border-radius:9px;padding:10px;font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-top:8px}
+.copiar-btn:hover{filter:brightness(1.12)}
+.copiar-btn.ok{background:var(--verde)}
+
+/* Modal */
+.veu{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:50;display:none}
+.veu.aberto{display:flex}
+.modal{background:rgba(14,14,18,.98);border:1px solid var(--linha);border-top:4px solid var(--vermelho);
+  border-radius:16px;padding:28px;max-width:480px;width:100%;text-align:center}
+.modal h2{font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase;margin-bottom:10px}
+.modal p{color:var(--cinza);font-size:.9rem;margin-bottom:18px;line-height:1.6}
+.modal .grande{font-family:'Anton',sans-serif;font-size:2.5rem;margin:12px 0}
+
+/* Filtro */
+.filtros{max-width:1100px;margin:20px auto 20px;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap}
+.filtro{background:var(--card);border:1px solid var(--linha);color:var(--cinza);border-radius:99px;
+  padding:7px 16px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  font-family:'Inter',sans-serif}
+.filtro.ativo{border-color:var(--branco);color:var(--branco);background:rgba(247,246,242,.08)}
+
+@media(max-width:600px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+
+.nav-sat{max-width:1100px;margin:0 auto;padding:12px 20px 0;display:flex;gap:6px;flex-wrap:wrap}
+.nav-sat a{background:var(--card);border:1px solid var(--linha);color:var(--cinza);border-radius:9px;
+  padding:8px 13px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  text-decoration:none;font-family:'Inter',sans-serif}
+.nav-sat a.ativa{background:var(--branco);color:#FFFFFF;border-color:var(--branco)}
+.nav-sat a:hover{border-color:var(--cinza)}
+
+.topo-btn{position:fixed;left:14px;bottom:14px;width:44px;height:44px;border-radius:50%;
+  background:var(--branco);color:#FFFFFF;border:none;font-size:1.15rem;cursor:pointer;
+  box-shadow:0 8px 26px rgba(23,23,27,.35);z-index:45;display:none;align-items:center;justify-content:center}
+.topo-btn.on{display:flex}
+
+/* === fundo padronizado (mesma foto do index.html) === */
+  body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.jpg") center top / cover no-repeat;z-index:-2}
+  body::after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(244,242,237,.24) 0%,rgba(244,242,237,.34) 45%,rgba(244,242,237,.52) 100%);z-index:-1}
+/* === cabeçalho padronizado (igual ao index.html) === */
+/* === cabeçalho padronizado (igual ao index.html) === */
+  .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
+  .oculto{display:none!important}
+
+  header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
+  .header-inner{max-width:1320px;margin:0 auto;padding:26px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
+  h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
+  .logo-row{display:flex;align-items:center;gap:14px}
+  .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--branco);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
+  .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
+  .eyebrow{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
+  .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px)}
+  .who b{text-transform:capitalize}
+  .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
+  .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
+
+  nav{max-width:1320px;margin:0 auto;padding:14px 20px 0;display:flex;gap:8px;flex-wrap:wrap}
+  .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:.88rem;padding:10px 15px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:10px 10px 0 0;cursor:pointer;backdrop-filter:blur(6px)}
+  .tab.ativa{background:var(--branco);color:#FFFFFF}
+  .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+  main{max-width:1320px;margin:0 auto;padding:20px 20px 60px}
+  .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
+  .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo-row">
+        <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
+        <div>
+          <div class="eyebrow">Direto do Bar da Tia</div>
+          <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
+        </div>
+      </div>
+      <div class="who">
+        <span>Fala, <b id="whoNome"></b>!</span>
+        <span class="adm oculto" id="whoAdm">admin</span>
+        <button onclick="sairSatelite()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <a href="/" class="tab" data-tab="jogos">Jogos</a>
+    <a href="/#rank" class="tab" data-tab="rank">Ranking</a>
+    <a href="/#castigos" class="tab" data-tab="castigos">🎡 Castigos</a>
+    <a href="/ogrupo.html" class="tab ativa" style="text-decoration:none" data-tab="ogrupo">O Grupo 🔥</a>
+    <a href="/galeria.html" class="tab" style="text-decoration:none" data-tab="galeria">🎨 Obras-Primas</a>
+    <a href="/hoje.html" class="tab" style="text-decoration:none" data-tab="hoje">📅 Hoje</a>
+    <a href="/futebol.html" class="tab" style="text-decoration:none" data-tab="futebol">⚽ O Que Mais Entende</a>
+    <a href="/#partidas" class="tab" data-tab="partidas">Partidas</a>
+    <a href="/#elenco" class="tab oculto" data-tab="elenco">Elenco</a>
+    <a href="/#admin" class="tab oculto" data-tab="admin">Configurações</a>
+  </nav>
+
+<script>
+function sairSatelite(){
+  let nome='';
+  try{nome=localStorage.getItem('vasbobo:sessao')||'';}catch(e){}
+  if(confirm('Sair da conta'+(nome?(' de '+nome):'')+'? Você vai precisar entrar de novo.')){
+    try{localStorage.removeItem('vasbobo:sessao');}catch(e){}
+    location.href='/';
+  }
+}
+(async function(){
+  let nome='';
+  try{nome=localStorage.getItem('vasbobo:sessao')||'';}catch(e){}
+  if(!nome)return;
+  const elNome=document.getElementById('whoNome');
+  if(elNome)elNome.textContent=nome.charAt(0).toUpperCase()+nome.slice(1);
+  try{
+    const snap=await dbGrupo.collection('shared').doc('vasbobo_v2').get();
+    if(snap.exists){
+      const dadosApp=JSON.parse(snap.data().value);
+      const u=dadosApp.usuarios&&dadosApp.usuarios[nome];
+      if(u&&u.admin){
+        const elAdm=document.getElementById('whoAdm');
+        if(elAdm)elAdm.classList.remove('oculto');
+        document.querySelectorAll('[data-tab="elenco"],[data-tab="admin"]').forEach(el=>el.classList.remove('oculto'));
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
+<div class="page-title">
+  <h1>O <span style="color:var(--vermelho)">Grupo</span></h1>
+  <p>247.039 mensagens analisadas · 3 anos de estresse coletivo · dados reais do zap do Vasbobo 🖤🤍</p>
+</div>
+
+<div class="placar-geral">
+  <div class="stat-geral"><div class="num">247k</div><div class="label">Mensagens enviadas</div></div>
+  <div class="stat-geral"><div class="num" style="color:var(--vermelho)">48k</div><div class="label">Só do Novaes</div></div>
+  <div class="stat-geral"><div class="num" style="color:var(--verde)">1.096</div><div class="label">Porras do Novaes</div></div>
+  <div class="stat-geral"><div class="num">483</div><div class="label">Vezes que Daniel citou o Novaes</div></div>
+  <div class="stat-geral"><div class="num" style="color:var(--ouro)">2023</div><div class="label">Ano que o Vasco subiu e virou o grupo</div></div>
+</div>
+
+<div style="max-width:1100px;margin:28px auto 0;padding:16px 22px;background:rgba(244,242,237,.92);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)">
+  <h2 style="font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase;margin-bottom:4px">🥊 As Grandes Rixas do Vasbobo</h2>
+  <p style="color:var(--cinza);font-size:.82rem;margin-bottom:16px">Contado nas próprias mensagens — quem mais se citou (e se atacou) em 3 anos de grupo.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px">
+
+    <div class="perfil" style="padding:0">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'Anton',sans-serif;font-size:1.1rem;text-transform:uppercase">Novaes <span style="color:var(--vermelho)">vs</span> Daniel</span>
+        <span style="font-size:.68rem;color:var(--cinza);letter-spacing:.1em;text-transform:uppercase">905 × 488 citações</span>
+      </div>
+      <div style="padding:16px 20px">
+        <div class="frase" style="cursor:default;margin-bottom:10px">Daniel: "deve estar ocupado colocando o FROUXINHO pra ninar"</div>
+        <div class="frase" style="cursor:default;margin-bottom:0">Novaes: "Daniel foi abraçar o primeiro técnico que veio por ódio ao Diniz"</div>
+      </div>
+    </div>
+
+    <div class="perfil" style="padding:0">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--linha);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'Anton',sans-serif;font-size:1.1rem;text-transform:uppercase">Wallace <span style="color:var(--vermelho)">vs</span> Alex</span>
+        <span style="font-size:.68rem;color:var(--cinza);letter-spacing:.1em;text-transform:uppercase">121 × 67 citações</span>
+      </div>
+      <div style="padding:16px 20px">
+        <div class="frase" style="cursor:default;margin-bottom:10px">Alex: "Po Wallace, calma aí cara kkkk o Léo não é pouco melhor, é MUITO MELHOR"</div>
+        <div class="frase" style="cursor:default;margin-bottom:0">Wallace: (nunca concorda, só analisa mais e briga de novo)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="filtros">
+  <button class="filtro ativo" onclick="filtrar('todos',this)">Todos</button>
+  <button class="filtro" onclick="filtrar('falador',this)">🗣️ Mais faladores</button>
+  <button class="filtro" onclick="filtrar('zoeiro',this)">😂 Zoeiros</button>
+  <button class="filtro" onclick="filtrar('analitico',this)">🧠 Analíticos</button>
+  <button class="filtro" onclick="filtrar('fantasma',this)">👻 Fantasmas</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+
+<script>
+const PERFIS = [
+  {
+    id:'novaes', foto:'rostos/novaes.jpg', nome:'Novaes', apelido:'O Fundador Fundido',
+    emoji:'👑', cor:'#E0A93F', corBg:'rgba(224,169,63,.15)',
+    msgs:48264, pct:26.5, tags:['falador'],
+    titulo:'Presidente Vitalício do Sofrimento',
+    sub:'26,5% de todas as mensagens do grupo. O grupo É ele.',
+    hora:'11h (trabalha ou não?)',
+    barras:[
+      {l:'Atividade',v:100,c:'#E0A93F'},
+      {l:'Palavrões',v:78,c:'#C0121B'},
+      {l:'Otimismo',v:72,c:'#3BA06A'},
+      {l:'Análise tática',v:65,c:'#7B8CDE'},
+      {l:'Dormir tarde',v:40,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'48.264',l:'Mensagens'},
+      {n:'1.096',l:'Porras ditas'},
+      {n:'1.529',l:'Vezes disse "acho"'},
+      {n:'3.335',l:'Reclamações'},
+    ],
+    frases:[
+      '"Doidão vc fala ainda mais merda. Melhor se poupar kkk"',
+      '"Isso é bizarro em um nível absurdo"',
+      '"Cocão corre o tempo todo. Ocupa espaço"',
+      '"To igual uma putinha sorrindo pra TV sozinho já"',
+      '"Eita. Mais tarde vai tá como..."',
+      '"Ai tu vem o elenco ridículo que temos"',
+      "Você e Daniel são muito viúvas dele kkk",
+      "Daniel foi abraçar o primeiro técnico que veio por ódio ao Diniz",
+      "Como deve estar o cu do novaes? — Daniel, sobre mim. Justo.",
+    ],
+    desculpas:[
+      'O árbitro foi comprado pelo Flamengo desde 1998.',
+      'Meu palpite estava certo mas o VAR do coração interferiu.',
+      'Eu sabia o placar mas mudei na última hora por causa de um pressentimento.',
+      'Tava com febre. Febre vascaína. É diferente.',
+      'O grupo me desconcentrou com meme na hora que ia palpitar.',
+      'O Vegetti não correu no segundo tempo. Culpa dele.',
+    ],
+    rival:'Daniel', rivalN:905,
+    castigo:'novaes',
+    badge:'#1 DO GRUPO',badgeCor:'#E0A93F',
+  },
+  {
+    id:'daniel', foto:'rostos/daniel.jpg', nome:'Daniel', apelido:'O Pitbull das 9h',
+    emoji:'🐕', cor:'#C0121B', corBg:'rgba(192,18,27,.15)',
+    msgs:26735, pct:14.7, tags:['falador','zoeiro'],
+    titulo:'CEO da Caixa Alta e da Zoação',
+    sub:'Cita o Novaes 483 vezes. Acorda às 9h pra brigar antes do café.',
+    hora:'09h (primeira briga antes do café)',
+    barras:[
+      {l:'Atividade',v:75,c:'#E0A93F'},
+      {l:'Palavrões',v:82,c:'#C0121B'},
+      {l:'Citar Novaes',v:95,c:'#C0121B'},
+      {l:'Caixa alta',v:98,c:'#C0121B'},
+      {l:'Análise tática',v:20,c:'#7B8CDE'},
+    ],
+    stats:[
+      {n:'26.735',l:'Mensagens'},
+      {n:'483',l:'Vezes citou Novaes'},
+      {n:'1.629',l:'Palavrões'},
+      {n:'1.765',l:'Reclamações'},
+    ],
+    frases:[
+      '"O RENATO É VICIADO EM PONTUAR"',
+      '"MAIS UM JOGO Q NAO VOU"',
+      '"Foda q tinha gente aki do grupo"',
+      '"Essa porra de jogador ê técnico de deus"',
+      '"La tem uma porrada de ex palmeiras"',
+      '"Fala p rapaz ai q é só mudar o tecnico"',
+      "@Leandro Novaes deve estar ocupado colocando o FROUXINHO pra ninar",
+      "Tu lembra do idiota do nosso lado falando?",
+      "Vou pagar um curso pro Novaes",
+    ],
+    desculpas:[
+      'Novaes me distraiu no grupo exatamente na hora que ia palpitar.',
+      'ARBITRAGEM ESCANDALOSA. COMPRARAM O JUIZ.',
+      'Eu não estava dormindo, estava ponderando estrategicamente.',
+      'O jogo era pra ser às 16h, ninguém me avisou que mudou.',
+      'Fiz o palpite certo mas digitei errado. Culpa do autocorrect.',
+      'Sei lá. Puta que pariu.',
+    ],
+    rival:'Novaes', rivalN:488,
+    castigo:'daniel',
+    badge:'PITBULL',badgeCor:'#C0121B',
+  },
+  {
+    id:'velloso', foto:'rostos/velloso.jpg', nome:'Velloso', apelido:'O Fantasma das 23h',
+    emoji:'🌙', cor:'#7B8CDE', corBg:'rgba(123,140,222,.15)',
+    msgs:15667, pct:8.6, tags:['falador','analitico'],
+    titulo:'Chefe do Reclamão Noturno Anônimo',
+    sub:'Acorda às 23h só pra falar que o Novaes não viu o gol na arquibancada.',
+    hora:'23h (acorda quando o jogo acaba)',
+    barras:[
+      {l:'Atividade',v:60,c:'#E0A93F'},
+      {l:'Reclamar',v:88,c:'#C0121B'},
+      {l:'Citar Novaes',v:70,c:'#C0121B'},
+      {l:'Drama',v:90,c:'#7B8CDE'},
+      {l:'Acordar cedo',v:5,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'15.667',l:'Mensagens'},
+      {n:'119',l:'Vezes citou Novaes'},
+      {n:'1.176',l:'Reclamações'},
+      {n:'23h',l:'Hora mais ativa'},
+    ],
+    frases:[
+      '"Como sempre o Novaes não vê o gol do Vasco na arquibancada"',
+      '"Território hostil"',
+      '"Ele tem vaga no elenco….o foda que são os 11"',
+      '"Tem uma porrada de jogador que eu nunca ouvi falar"',
+      '"Eu gosto pra caralho da kappa"',
+      '"Zé comeia está falando que é a cereja do bolo"',
+      "@Daniel só fala merda",
+      "@Daniel faz o seguinte: me chama no particular pra falar de corrida, aqui é grupo de Vasco",
+      "Vegetti é o caralho, Daniel",
+    ],
+    desculpas:[
+      'Eu palpitei mas o grupo não estava prestando atenção.',
+      'Estava analisando taticamente o adversário. Levou tempo.',
+      'O campo estava molhado. Mudou tudo.',
+      'Eu sabia que ia dar errado mas não quis criar pânico no grupo.',
+      'Técnico tático ruim. Escalo melhor dormindo.',
+      'O Novaes sempre zica quando faz elogios. Culpa dele como sempre.',
+    ],
+    castigo:'velloso',
+    badge:'NOTURNO',badgeCor:'#7B8CDE',
+  },
+  {
+    id:'nerd', foto:'rostos/nerd.jpg', nome:'Nerd', apelido:'O Analista Irritado',
+    emoji:'🤓', cor:'#3BA06A', corBg:'rgba(59,160,106,.15)',
+    msgs:13953, pct:7.7, tags:['falador','analitico'],
+    titulo:'PHD em Futebol, Especialista em Sofrer',
+    sub:'8,2% de palavrões — o mais palavrento do grupo proporcionalmente. Analisa tudo e ainda erra.',
+    hora:'22h (pós-expediente de analista)',
+    barras:[
+      {l:'Atividade',v:58,c:'#E0A93F'},
+      {l:'Palavrões',v:92,c:'#C0121B'},
+      {l:'Análise tática',v:88,c:'#3BA06A'},
+      {l:'Raiva',v:85,c:'#C0121B'},
+      {l:'Paciência',v:12,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'13.953',l:'Mensagens'},
+      {n:'8,2%',l:'Taxa de palavrões'},
+      {n:'473',l:'Análises táticas'},
+      {n:'1.479',l:'Kkkks'},
+    ],
+    frases:[
+      '"Ai o torcedor médio fica: o problema são Coutinho e Payet"',
+      '"Ao invés de pagar caro em jogadores merda?"',
+      '"e tem torcedor que não abriu o olho ainda"',
+      '"Eu comecei a xingar o Leo Pelé"',
+      '"Mandei pra cá sem ler o grupo antes kkk"',
+      '"O outro acha que é uma merda kkkkkk"',
+      "Onde o burguês safado compra a força de trabalho do nosso companheiro e executa uma mais valia absurda em Novaes",
+      "Novaes tá em cárcere kkkkk",
+      "Novaes, tem vascaíno pra um caralho aqui kkkk",
+    ],
+    desculpas:[
+      'Minha análise estava correta. A execução do time falhou.',
+      'Eu palpitei baseado em dados. Os dados mentiram.',
+      'Sistematicamente, o técnico comprometeu meu palpite.',
+      'Expliquei 47 vezes que ia dar errado. Ninguém ouviu.',
+      'A probabilidade de errar era de 30%. Caí nos 30%.',
+      'Vou fazer um PowerPoint explicando onde errei.',
+    ],
+    castigo:'nerd',
+    badge:'PHD',badgeCor:'#3BA06A',
+  },
+  {
+    id:'douglas', foto:'rostos/douglas.jpg', nome:'Douglas', apelido:'O Zoeiro Científico',
+    emoji:'😂', cor:'#E0A93F', corBg:'rgba(224,169,63,.15)',
+    msgs:12518, pct:6.9, tags:['falador','zoeiro'],
+    titulo:'Campeão Mundial de Kkkk (10,7%)',
+    sub:'O homem que ri de tudo, inclusive quando o Vasco perde de 5. Especialmente quando perde.',
+    hora:'11h (ri no horário comercial)',
+    barras:[
+      {l:'Atividade',v:55,c:'#E0A93F'},
+      {l:'Zoação',v:97,c:'#E0A93F'},
+      {l:'Kkkks',v:100,c:'#E0A93F'},
+      {l:'Análise tática',v:60,c:'#7B8CDE'},
+      {l:'Empatia',v:8,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'12.518',l:'Mensagens'},
+      {n:'10,7%',l:'Taxa de kkkkk'},
+      {n:'1.340',l:'Kkkks enviados'},
+      {n:'919',l:'Palavrões'},
+    ],
+    frases:[
+      '"deve ter, MC Darlan, Lexa, De la Cruz kkkk"',
+      '"eu vi aqui, com cachorro e tudo kkk"',
+      '"se eu fosse o leandro eu preferia morrer kkkk"',
+      '"Não sei da onde vc tira que o Vegetti não corre"',
+      '"teve que vim até a PM kkkkkkk"',
+      '"e esses reservas aqui, podem tomar a titularidade tranquilamente"',
+      "Diniz não podia esperar dez rodadas, Ancellotti espera 6 anos kkkkkkkkk",
+      "Diniz burro pra caralho, Daniel",
+      "@Daniel cadê o Leandro, todo jogo ele some um dia, preocupado com nosso irmão",
+    ],
+    desculpas:[
+      'Kkkkkkkk (não tem desculpa, acho graça mesmo).',
+      'Eu palpitei errado mas a cara do Novaes quando o Vasco tomou gol valeu.',
+      'Errei pra ter assunto pra zoar alguém depois.',
+      'O palpite certo seria menos engraçado.',
+      'Kkkkk foi mal.',
+      'Minha desculpa favorita: kkkkkkkkk.',
+    ],
+    castigo:'douglas',
+    badge:'😂 REI',badgeCor:'#E0A93F',
+  },
+  {
+    id:'azevedo', foto:'rostos/azevedo.jpg', nome:'Azevedo', apelido:'O Sábio do Amanhã',
+    emoji:'🧘', cor:'#AFAFB8', corBg:'rgba(175,175,184,.1)',
+    msgs:10016, pct:5.5, tags:['falador','analitico'],
+    titulo:'Especialista em Achar que o Vasco Vai Melhorar',
+    sub:'Ativo às 23h. Fala "né pai" mais vezes que o Vasco vence seguido.',
+    hora:'23h (padrão notívago)',
+    barras:[
+      {l:'Atividade',v:50,c:'#E0A93F'},
+      {l:'Otimismo',v:65,c:'#3BA06A'},
+      {l:'Análise tática',v:72,c:'#7B8CDE'},
+      {l:'Kkkks',v:74,c:'#E0A93F'},
+      {l:'Urgência',v:20,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'10.016',l:'Mensagens'},
+      {n:'7,4%',l:'Taxa de kkkkk'},
+      {n:'1.029',l:'Reclamações'},
+      {n:'23h',l:'Hora mais ativa'},
+    ],
+    frases:[
+      '"Mas não será campeão todo ano né pai"',
+      '"Ano que vem o raian será mais utilizado"',
+      '"Ninguém é intocável não, cara"',
+      '"Sinceramente acho que o Jorginho faria um trabalho melhor"',
+      '"E não chama a responsabilidade"',
+      '"Porque colocou o Zé gabriel"',
+      "To me sentindo muito otário kkk",
+      "Ganhou o bolão sozinho kkk",
+      "Porra já fui viúva do Bernardo, cara",
+    ],
+    desculpas:[
+      'Eu estava certo, o Vasco é que errou.',
+      'Né pai, qualquer um erraria esse palpite.',
+      'A tendência era boa. O resultado foi circunstancial.',
+      'Ano que vem esse palpite teria dado certo.',
+      'Errando agora pra calibrar pro próximo jogo.',
+      'Né não? Achei que ia, né.',
+    ],
+    castigo:'azevedo',
+    badge:'SÁBIO',badgeCor:'#AFAFB8',
+  },
+  {
+    id:'vitor', foto:'rostos/vitor.jpg', nome:'Vitor', apelido:'O Emojeiro Profissional',
+    emoji:'😂😂😂', cor:'#E0A93F', corBg:'rgba(224,169,63,.1)',
+    msgs:6870, pct:3.8, tags:['zoeiro'],
+    titulo:'34 emojis por mensagem. Média oficial.',
+    sub:'Mandou uma sequência de 38 emojis 😂 seguidos. Sem palavras. Só emojis.',
+    hora:'22h (ri até tarde)',
+    barras:[
+      {l:'Atividade',v:38,c:'#E0A93F'},
+      {l:'Emojis',v:100,c:'#E0A93F'},
+      {l:'Textos longos',v:10,c:'#AFAFB8'},
+      {l:'Análise tática',v:35,c:'#7B8CDE'},
+      {l:'Sobriedade',v:15,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'6.870',l:'Mensagens'},
+      {n:'38',l:'Emojis em 1 msg'},
+      {n:'22h',l:'Hora mais ativa'},
+      {n:'😂',l:'Personalidade'},
+    ],
+    frases:[
+      '"😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂😂"',
+      '"E o alisson saindo que nem imbecil"',
+      '"Cara, o Léo Jardim é mt seguro"',
+      '"Todo mundo empatou, zerou o game"',
+      '"O currículo desse André ramalho não é ruim, apostaria nele"',
+      '"Neymar e Coutinho lesionados"',
+      "Que Real Madrid? Aquele que a gente tacou a pica no Di Stéfano lá na Europa? Aqui é Vasco",
+      "Viu que 50% do time titular é ridículo e 100% dos reservas também",
+      "É muito burro, mas é muito",
+    ],
+    desculpas:[
+      '😂😂😂 (sem desculpa)',
+      'Eu errei mas o meme que mandei logo depois compensou.',
+      '😅😅😅 desculpas',
+      'Palpitei com o coração. E com 14 emojis de coração.',
+      '🙈🙈🙈',
+      'Se meu palpite fosse emoji teria acertado.',
+    ],
+    castigo:'vitor',
+    badge:'😂😂😂',badgeCor:'#E0A93F',
+  },
+  {
+    id:'jorge', foto:'rostos/jorge.jpg', nome:'Jorge', apelido:'O Fantasma Opinativo',
+    emoji:'👻', cor:'#AFAFB8', corBg:'rgba(175,175,184,.08)',
+    msgs:3186, pct:1.8, tags:['fantasma'],
+    titulo:'Aparece uma vez por semana. Sempre com razão.',
+    sub:'Zero kkkk registrado em 3 anos. O homem não ri. Julga.',
+    hora:'18h (horário do fantasma)',
+    barras:[
+      {l:'Atividade',v:18,c:'#AFAFB8'},
+      {l:'Objetividade',v:95,c:'#3BA06A'},
+      {l:'Kkkks',v:0,c:'#AFAFB8'},
+      {l:'Misteriosidade',v:98,c:'#7B8CDE'},
+      {l:'Aparecer',v:12,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'3.186',l:'Mensagens'},
+      {n:'0',l:'Kkkks (zero)'},
+      {n:'18h',l:'Hora mais ativa'},
+      {n:'👻',l:'Presença no grupo'},
+    ],
+    frases:[
+      '"Queria a vitória, mas jogo fora e foda"',
+      '"Ainda to pensando em ir pro jogo, mas ta com cara de ser uma pelada da porra"',
+      '"Quem aqui é bom de bola? Tem chance ainda de estourar como menino de xerem"',
+      '"Se bobear Renato nem viaja"',
+      '"Decidiu em muitos outros jogos"',
+      '"Isso e copa do mundo porraaa"',
+      "Se fosse o Renato tava falando que os colombianos são uns merdas finalizando",
+      "Evair pro Edmundo, Alex pantaneiro e Leandro Amaral pro Romário, pqp",
+      "Carregando um monte de burro",
+    ],
+    desculpas:[
+      'Errei. Não tenho mais nada a acrescentar.',
+      'O jogo foi uma pelada da porra. Impossível palpitar.',
+      'Prefiro errar em silêncio do que acertar com alarde.',
+      'Assisti o jogo. O jogo foi mal. Ponto.',
+      'Já era foda, né.',
+      'Foda.',
+    ],
+    castigo:'jorge',
+    badge:'FANTASMA',badgeCor:'#AFAFB8',
+  },
+  {
+    id:'wallace', foto:'rostos/wallace.jpg', nome:'Wallace', apelido:'O Analista Surpresa',
+    emoji:'🧠', cor:'#7B8CDE', corBg:'rgba(123,140,222,.12)',
+    msgs:15702, pct:8.6, tags:['falador','analitico'],
+    titulo:'O Que o Grupo Subestima Mas Não Deveria',
+    sub:'647 análises táticas. Mais que Nerd. Mais que Velloso. O respeito chegou.',
+    hora:'11h (horário nobre)',
+    barras:[
+      {l:'Atividade',v:61,c:'#E0A93F'},
+      {l:'Análise tática',v:85,c:'#7B8CDE'},
+      {l:'Kkkks',v:72,c:'#E0A93F'},
+      {l:'Reclamar',v:78,c:'#C0121B'},
+      {l:'Ser subestimado',v:99,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'15.702',l:'Mensagens'},
+      {n:'647',l:'Análises táticas'},
+      {n:'7,2%',l:'Taxa de kkkkk'},
+      {n:'1.217',l:'Reclamações'},
+    ],
+    frases:[
+      '"Entendiam o que era vestir essa camisa"',
+      '"Oscar era pra ta em SJ. É o nome!"',
+      '"Neymar se peidar vira notícia"',
+      '"Flamengo disparou e nos regredimos"',
+      '"ontem foi placar mentiroso, agora que acabou a emoção, e eu vi os melhores momentos de novo, a ilusão acabou"',
+      '"Poo to tentando chegar vivo amanhã"',
+      "Tudo é uma vergonha no futebol do Vasco e nosso presidente segue calado",
+      "Me admiro que teve gente aqui achando que o Vasco faria um campeonato tranquilo... a ficha caiu só agora",
+      "Ele não vai se submeter a treinador burro não. Já aguentou foi muito...",
+    ],
+    desculpas:[
+      'Minhas análises estavam corretas. O time não executou.',
+      'Eu avisei que ia dar errado. 47 mensagens antes do jogo.',
+      'Placar mentiroso. Vi os melhores momentos de novo. A ilusão acabou.',
+      'O grupo não valorizou minha análise tática. Resultado: erro.',
+      'Estava tentando chegar vivo, não deu pra palpitar direito.',
+      'Neymar se peida e todo mundo perde o foco. Culpa do Neymar.',
+    ],
+    rival:'Alex', rivalN:121,
+    castigo:'wallace',
+    badge:'SURPRESA',badgeCor:'#7B8CDE',
+  },
+  {
+    id:'andre', foto:'rostos/andre.jpg', nome:'Andre', apelido:'O Calibrado',
+    emoji:'⚖️', cor:'#3BA06A', corBg:'rgba(59,160,106,.1)',
+    msgs:2304, pct:1.3, tags:['fantasma'],
+    titulo:'Fala pouco. Quando fala, é certeiro.',
+    sub:'2.304 mensagens em 3 anos. Economiza palavras. Gasta só quando vale.',
+    hora:'10h (pontual)',
+    barras:[
+      {l:'Atividade',v:15,c:'#AFAFB8'},
+      {l:'Precisão',v:88,c:'#3BA06A'},
+      {l:'Economia de palavras',v:92,c:'#3BA06A'},
+      {l:'Kkkks',v:28,c:'#E0A93F'},
+      {l:'Drama',v:18,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'2.304',l:'Mensagens'},
+      {n:'1,3%',l:'Do grupo'},
+      {n:'10h',l:'Hora mais ativa'},
+      {n:'⚖️',l:'Personalidade'},
+    ],
+    frases:[
+      '"Sal grosso superfaturado... hahahaha"',
+      '"Ele tá com o cu na reta né"',
+      '"Vasco nunca venceu o Mirassol"',
+      '"Mas ele mudou a maneira do time jogar"',
+      '"Vem jogando mal a algum tempo"',
+      '"Esse mesmo time meteu 2x0 lá em Curitiba"',
+      "Tomar no cu, Daniel, porra",
+      "Ainda bem porra nenhuma, Novaes, esse cara é muito merda",
+      "Zagueiro fez gol contra, porra, Vegetti tem que sair",
+    ],
+    desculpas:[
+      'Não tenho desculpa. Errei. Simples.',
+      'Fiz a análise certa e mesmo assim errei. O jogo é traiçoeiro.',
+      'O Vasco nunca venceu o Mirassol. Deveria ter palpitado empate.',
+      'Meu palpite foi calibrado. O Vasco foi descalibrado.',
+      'Sal grosso superfaturado... errei mesmo.',
+      'Já era.',
+    ],
+    castigo:'andre',
+    badge:'CALIBRADO',badgeCor:'#3BA06A',
+  },
+  {
+    id:'juan', foto:'rostos/juan.jpg', nome:'Juan', apelido:'O Sonhador Realista',
+    emoji:'🌟', cor:'#E0A93F', corBg:'rgba(224,169,63,.1)',
+    msgs:1835, pct:1.0, tags:['fantasma','zoeiro'],
+    titulo:'Quer ver o Novaes pelado nadando no Maracanã',
+    sub:'Pedido real feito no grupo. Literalmente. Registrado para a eternidade.',
+    hora:'20h (sonhador do entardecer)',
+    barras:[
+      {l:'Atividade',v:12,c:'#AFAFB8'},
+      {l:'Sonhos absurdos',v:99,c:'#E0A93F'},
+      {l:'Kkkks',v:88,c:'#E0A93F'},
+      {l:'Aparecer',v:15,c:'#AFAFB8'},
+      {l:'Bom senso',v:30,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'1.835',l:'Mensagens'},
+      {n:'9,5%',l:'Taxa de kkkkk'},
+      {n:'20h',l:'Hora mais ativa'},
+      {n:'1',l:'Pedido bizarro ao Novaes'},
+    ],
+    frases:[
+      '"Quero ver o Novaes pelado nadando no rio Maracanã"',
+      '"É so vasco ganhar amanha"',
+      '"E o pior que o vasco vai ganhar"',
+      '"Do jeito que a Justiça e o Gepe gosta do Vasco"',
+      '"Deixa nós sonhar..."',
+      '"Vai na disposição para bater em segurança"',
+      "Silêncio que você não é entendedor de futebol kkkkkkkk",
+      "ENTÃO O DUVIDOSO É VOCÊ KKKKKKK",
+      "Caralho que ansiedade da porra",
+    ],
+    desculpas:[
+      'Eu sonhava que o Vasco ganharia. O sonho me traiu.',
+      'Deixa eu sonhar... Que o meu palpite estava certo.',
+      'O Novaes pelado no Maracanã teria dado sorte. Confirmado.',
+      'Palpitei com esperança. A esperança é traiçoeira.',
+      'Bragantino devia ter ajudado mais.',
+      'É só o Vasco ganhar amanhã. O amanhã não chegou.',
+    ],
+    castigo:'juan',
+    badge:'SONHADOR',badgeCor:'#E0A93F',
+  },
+  {
+    id:'joao', foto:'rostos/joao.jpg', nome:'João', apelido:'O Clássico Intragável',
+    emoji:'🍺', cor:'#C0121B', corBg:'rgba(192,18,27,.1)',
+    msgs:3889, pct:2.1, tags:['zoeiro'],
+    titulo:'Prometeu pagar até puta se o Vasco ganha. Registrado.',
+    sub:'Diz que vai ao churrasco mas nunca combina data. Mestre da promessa vaga.',
+    hora:'11h (começa o dia com polêmica)',
+    barras:[
+      {l:'Atividade',v:25,c:'#AFAFB8'},
+      {l:'Promessas vazias',v:96,c:'#C0121B'},
+      {l:'Zoação',v:82,c:'#E0A93F'},
+      {l:'Kkkks',v:35,c:'#E0A93F'},
+      {l:'Cumprir promessa',v:5,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'3.889',l:'Mensagens'},
+      {n:'2,1%',l:'Do grupo'},
+      {n:'11h',l:'Hora mais ativa'},
+      {n:'∞',l:'Promessas não cumpridas'},
+    ],
+    frases:[
+      '"Vascão ganhado pago até a puta pra vc"',
+      '"Vc só sabe falar de piroca"',
+      '"Temos que marcar um dia pra fazer um churrasco lá"',
+      '"Amanhã essa hora estaremos na barreira bebendo felizes"',
+      '"Da pra ir andando do bar dos coroas pro estádio né?"',
+      '"Fala com sua mãe"',
+      "Eu só Vasco pra caralho",
+      "Alguém tem que fazer as merdas pros outros trabalharem, se todo mundo fizer certo não sobra trabalho",
+      "Já está um calor no caralho",
+    ],
+    desculpas:[
+      'Eu ia acertar mas o grupo me perturbou com o assunto da puta do Vasco.',
+      'Prometo que acerto no próximo. Dessa vez de verdade.',
+      'O churrasco que a gente não fez me tirou a concentração.',
+      'Ia acertar mas alguém falou de piroca e perdi o fio.',
+      'Tô pagando a puta prometida de 2023. Sem dinheiro pra palpitar.',
+      'Fala com sua mãe sobre minha desculpa.',
+    ],
+    castigo:'joao',
+    badge:'PROMESSEIRO',badgeCor:'#C0121B',
+  },
+  ,{
+    id:'alex', foto:'rostos/alex.jpg', nome:'Alex', apelido:'O Eterno Achador',
+    emoji:'🤔', cor:'#7B8CDE', corBg:'rgba(123,140,222,.12)',
+    msgs:10792, pct:6.0, tags:['falador','analitico'],
+    titulo:'Mestre do "Eu Acho" — 360 Vezes Contadas',
+    sub:'A palavra mais usada depois de "Vasco" é "acho". Analisa tudo. Tem certeza de nada.',
+    hora:'11h (acha que vai ser produtivo de manhã)',
+    barras:[
+      {l:'Atividade',v:52,c:'#E0A93F'},
+      {l:'Dizer eu acho',v:99,c:'#7B8CDE'},
+      {l:'Análise tática',v:72,c:'#7B8CDE'},
+      {l:'Zoação',v:64,c:'#E0A93F'},
+      {l:'Certeza de algo',v:4,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'10.792',l:'Mensagens'},
+      {n:'360',l:'Vezes disse "acho"'},
+      {n:'177',l:'Vezes disse "ruim"'},
+      {n:'6,4%',l:'Taxa de kkkkk'},
+    ],
+    frases:[
+      '"Eu acho q a ordem é volante, ponta, zagueiro e dps lateral"',
+      '"A falta de critério mata o futebol brasileiro"',
+      '"Eu tenho medo de Coutinho, Payet e Vegetti jogando juntos kkkkkk"',
+      '"Po Wallace, calma aí cara kkkkk o Léo não é pouco melhor, é MUITO MELHOR"',
+      '"Se o Vegetti tivesse isso que falta nele, não tava no Vasco, tava na Europa"',
+      '"A barreira vai virar baile 🕺🏻"',
+      "Não existe o JV ser banco, caralho",
+      "Foi culpa do Léo, porra",
+      "Eu devo ser maluco, Antônio kkkkkk",
+    ],
+    desculpas:[
+      'Eu achei que ia dar certo. O problema é que o "acho" traiu.',
+      'Minha análise estava tecnicamente correta. O Vasco executou errado.',
+      'Pra mim, eu acho, salvo engano, que o palpite foi razoável considerando o contexto.',
+      'A falta de critério do árbitro matou meu palpite. Como mata o futebol brasileiro.',
+      'Eu acho que eu acho demais. Essa é a raiz do problema.',
+      'Tinham que distribuir soco no árbitro. Acho.',
+    ],
+    rival:'Wallace', rivalN:67,
+    castigo:'alex',
+    badge:'ACHADOR',badgeCor:'#7B8CDE',
+  }
+  ,{
+    id:'pedro', foto:'rostos/pedro.jpg', nome:'Pedro', apelido:'O Analista Noturno',
+    emoji:'🌃', cor:'#3BA06A', corBg:'rgba(59,160,106,.12)',
+    msgs:1337, pct:0.7, tags:['analitico','zoeiro'],
+    titulo:'1.337 Mensagens, a Maioria Depois das 22h',
+    sub:'Analisa cada lance com detalhe, xinga com estilo e ainda encontra tempo pra fazer oferenda a Apollo pelo Vasco.',
+    hora:'23h (auge da análise pós-jogo)',
+    barras:[
+      {l:'Atividade noturna',v:78,c:'#3BA06A'},
+      {l:'Análise tática',v:80,c:'#7B8CDE'},
+      {l:'Vtnc por minuto',v:70,c:'#C0121B'},
+      {l:'Detalhe no lance',v:85,c:'#3BA06A'},
+      {l:'Fé em entidades gregas',v:35,c:'#E0A93F'},
+    ],
+    stats:[
+      {n:'1.337',l:'Mensagens'},
+      {n:'35',l:'"Vtnc" registrados'},
+      {n:'25,8%',l:'Mensagens longas (análise)'},
+      {n:'23h',l:'Hora mais ativa'},
+    ],
+    frases:[
+      '"Defensivamente não achei não. Ganhou vários 1x1. Agora pra atacar até agora errou tudo"',
+      '"Já fiz até oferenda a Apollo hoje e vocês aí reclamando de mim. Αυτός είναι ο Βάσκο!"',
+      '"Meu irmão, gramado ruim, arbitragem ruim, jogo ruim, narração ruim, que combo"',
+      '"Na câmera de frente da pra ver que pega no braço dele sim. Totalmente sem querer, mas pega"',
+      '"Esse time do Atlético pode dar a mão ao Vasco em questão de bunda mole que não marca ngm"',
+      '"Isso NAO É PENALTI"',
+      "Fdp, da dois minutos de acréscimo",
+      "Isso aqui é sacanagem — Grêmio, Cruzeiro e Bragantino com futebol pior que o Vasco",
+      "O zagueiro do Nova Iguaçu é muito burro",
+    ],
+    desculpas:[
+      'Analisei tacionamente cada lance. O erro não foi de leitura, foi de execução do time.',
+      'Fiz oferenda a Apollo antes do jogo. Aparentemente ele também é rival.',
+      'Vtnc, mas o palpite fazia sentido até o segundo tempo começar.',
+      'Câmera de frente comprova: o erro foi total, mas sem querer.',
+      'O gramado ruim, a arbitragem ruim e meu palpite ruim formaram um combo perfeito.',
+      'Estava confiante na conquista. A conquista não estava confiante em mim.',
+    ],
+    castigo:'pedro',
+    badge:'NOTURNO',badgeCor:'#3BA06A',
+  }
+  ,{
+    id:'leodoro', foto:'rostos/leodoro.jpg', nome:'Leodoro', apelido:'O Questionador Direto',
+    emoji:'❓', cor:'#C0121B', corBg:'rgba(192,18,27,.1)',
+    msgs:514, pct:0.3, tags:['zoeiro','analitico'],
+    titulo:'18,5% das Mensagens Dele São Perguntas',
+    sub:'Não afirma, questiona. "Quem é Botafogo, cara?" e "Qual é o problema de jogar feio?" — ele quer respostas, não likes.',
+    hora:'10h (já chega perguntando)',
+    barras:[
+      {l:'Atividade',v:28,c:'#E0A93F'},
+      {l:'Perguntar tudo',v:92,c:'#C0121B'},
+      {l:'Direto ao ponto',v:85,c:'#7B8CDE'},
+      {l:'Palavrões',v:65,c:'#C0121B'},
+      {l:'Paciência',v:30,c:'#AFAFB8'},
+    ],
+    stats:[
+      {n:'514',l:'Mensagens'},
+      {n:'95',l:'Perguntas feitas'},
+      {n:'30',l:'"Crlh" registrados'},
+      {n:'10,9%',l:'Taxa de palavrão'},
+    ],
+    frases:[
+      '"Então vira flamengo porra. Ou sustenta que tu é vasco"',
+      '"O problema do vasco, e o vasco"',
+      '"Qual é o problema de jogar feio ?"',
+      '"Quem e botafogo cara ?"',
+      '"como e bom acordar segunda com 3 pontos a mais"',
+      '"Vai acabar porra. Eles não são real madrid"',
+      "Então vira Flamengo, porra. Ou sustenta que tu é Vasco",
+      "Mantém tua postura, porra",
+      "Pqp, esse ano é brigar pra não cair de novo",
+    ],
+    desculpas:[
+      'Fiz a pergunta certa. O time que não soube responder em campo.',
+      'Questionei o palpite antes de mandar. Devia ter questionado depois também.',
+      'O problema do meu palpite é o meu palpite.',
+      'Crlh, não tinha como prever esse time jogando assim.',
+      'Perguntei se ia dar certo. Ninguém respondeu. Errei sozinho.',
+      'Direto ao ponto: errei.',
+    ],
+    castigo:'leodoro',
+    badge:'?????',badgeCor:'#C0121B',
+  }
+  ,{
+    id:'luiz', foto:'rostos/luiz.jpg', nome:'Luiz', apelido:'O Mobilizador Oficial',
+    emoji:'📣', cor:'#22794F', corBg:'rgba(34,121,79,.1)',
+    msgs:843, pct:0.5, tags:['zoeiro','falador'],
+    titulo:'"Bora" é a Palavra Mais Usada Por Ele. 51 Vezes.',
+    sub:'Se tem churras, jogo ou resenha, ele que organiza. "Cole vambora", "quem vai domingo?", "tamo te esperando".',
+    hora:'9h (já mobilizando cedo) e 22h',
+    barras:[
+      {l:'Atividade',v:47,c:'#E0A93F'},
+      {l:'Mobilizar a galera',v:95,c:'#22794F'},
+      {l:'Kkkks',v:70,c:'#E0A93F'},
+      {l:'Mensagens curtas',v:88,c:'#7B8CDE'},
+      {l:'Organização de churras',v:90,c:'#22794F'},
+    ],
+    stats:[
+      {n:'843',l:'Mensagens'},
+      {n:'51',l:'"Bora" registrados'},
+      {n:'45%',l:'Mensagens curtas e diretas'},
+      {n:'17',l:'Menções ao churras/Tropí'},
+    ],
+    frases:[
+      '"Hoje churras na Tropí"',
+      '"Vem @Daniel, tamo te esperando"',
+      '"quem vai domingo?"',
+      '"Praaaaa cima galera!!"',
+      '"BORA QUE É HOJE CARAI"',
+      '"Mas com @Antônio Nerd, eu nunca estarei sozinho"',
+      "Caralho, alguém concordou comigo! Te amo, moleque kk",
+      "Não tem MVP do Medellín não? kkkkkkk",
+      "O momento dos caras brilharem kkkkkk",
+    ],
+    desculpas:[
+      'Bora que é hoje, mas o palpite de hoje não colou.',
+      'Mobilizei todo mundo pro jogo. Não consegui mobilizar o Vasco a ganhar.',
+      'Tava ocupado organizando o próximo churras e esqueci de revisar o placar.',
+      'Palpite errado, mas a galera reunida valeu mais que o resultado.',
+      'Cole vambora da próxima que aí eu acerto.',
+      'A dívida do Vasco foi de 700MM pra 1,2BI. Meu palpite também quebrou.',
+    ],
+    castigo:'luiz',
+    badge:'MOBILIZADOR',badgeCor:'#22794F',
+  }
+];
+
+const CASTIGOS = {
+  novaes:[
+    {e:'🎤',t:'Áudio obrigatório',d:'Manda áudio de 1 minuto elogiando o Fluminense no grupo. Sem gaguejar.'},
+    {e:'📝',t:'Redação de 5 linhas',d:'Escreve no grupo por que o Vasco foi melhor que o Flamengo em 2023. Com argumentos sérios.'},
+    {e:'🔇',t:'Silêncio de 2h',d:'Zero mensagens no grupo por 2 horas. O grupo percebe depois de 3 minutos.'},
+    {e:'🏆',t:'Elogio ao rival',d:'Manda um print elogiando o scaler do Flamengo no grupo e diz "bem jogado".'},
+    {e:'📊',t:'Análise do próprio erro',d:'Faz uma análise tática de por que o palpite foi uma merda completa.'},
+  ],
+  daniel:[
+    {e:'📢',t:'Mensagem em minúsculo',d:'Próximas 10 mensagens todas em minúsculo. Sem exceção. Sem caps lock.'},
+    {e:'🤝',t:'Elogiar o Novaes',d:'Manda 3 elogios sinceros pro Novaes no grupo. Foto junto se possível.'},
+    {e:'🎭',t:'Explicação educada',d:'Faz a próxima reclamação do Vasco de forma educada, sem palavrão e sem caixa alta.'},
+    {e:'🔇',t:'Não citar Novaes',d:'Passa 24h sem citar o Novaes. O recorde atual é 47 minutos.'},
+    {e:'📸',t:'Foto com camisa do rival',d:'Foto usando camisa de time rival (mesmo que rabiscada). Vale editar no paint.'},
+  ],
+  velloso:[
+    {e:'☀️',t:'Acordar às 9h',d:'Manda mensagem no grupo às 9h. Prova que é possível existir antes do meio-dia.'},
+    {e:'👏',t:'Elogiar o Novaes',d:'Reconhece publicamente que o Novaes viu um gol na arquibancada.'},
+    {e:'🎯',t:'Otimismo proibido',d:'Passa o próximo jogo só mandando mensagens positivas. Sem reclamar. Você consegue.'},
+    {e:'📞',t:'Ligação de voz',d:'Manda um áudio no grupo de 30 segundos SEM reclamar de nada. Sim, é possível.'},
+    {e:'🌅',t:'Foto da manhã',d:'Prova que você existe às 8h mandando foto tomando café.'},
+  ],
+  nerd:[
+    {e:'🎓',t:'Análise proibida',d:'Próximo jogo sem análise tática. Só reações emocionais. Tipo humano normal.'},
+    {e:'🤫',t:'Concordar com leigo',d:'Concorda publicamente com uma análise do João. Sem asterisco nem "mas".'},
+    {e:'😂',t:'Admitir que não sabia',d:'Escreve no grupo: "errei, não sabia nada sobre esse jogo".'},
+    {e:'📱',t:'PowerPoint do erro',d:'Faz uma apresentação de 3 slides explicando onde a análise falhou. Manda no grupo.'},
+    {e:'🙏',t:'Pedir desculpa para o Vegetti',d:'Escreve no grupo pedindo desculpa por ter xingado o Vegetti em algum jogo específico.'},
+  ],
+  douglas:[
+    {e:'😐',t:'Zero kkkk por 24h',d:'Passa 24h sem mandar nenhum kkk, haha ou 😂. O recorde atual é 12 minutos.'},
+    {e:'😢',t:'Mensagem séria',d:'Manda uma análise séria do jogo. Sem piada. Sem ironia. Um parágrafo de verdade.'},
+    {e:'🎪',t:'Reconhecer que errou',d:'Admite que o palpite foi uma tragédia sem tentar achar graça.'},
+    {e:'📖',t:'Definição de futebol',d:'Explica o que é impedimento no grupo. Sério. Sem rir.'},
+    {e:'🤝',t:'Não zoar ninguém',d:'Passa o próximo jogo sem zoar ninguém. Nem o Novaes. É só 90 minutos.'},
+  ],
+  azevedo:[
+    {e:'⏰',t:'Acordar cedo',d:'Foto tomando café antes das 8h. Com data e hora visível na foto.'},
+    {e:'🎯',t:'Previsão sem "né pai"',d:'Faz uma previsão do próximo jogo sem usar "né pai" ou "né". Uma vez que seja.'},
+    {e:'🔥',t:'Urgência fingida',d:'Manda uma mensagem com senso de urgência de verdade. Tipo "PRECISA RESPONDER AGORA".'},
+    {e:'📣',t:'Grito de guerra',d:'Manda áudio gritando "VAAAASCO" por pelo menos 5 segundos.'},
+    {e:'🤔',t:'Admitir incerteza',d:'Escreve "não sei" no grupo. Sem completar com "né pai". Só "não sei".'},
+  ],
+  vitor:[
+    {e:'📝',t:'Mensagem sem emoji',d:'Manda 5 mensagens seguidas sem NENHUM emoji. Só texto. Como nos anos 90.'},
+    {e:'🗣️',t:'Explicar o emoji',d:'Manda uma mensagem explicando em texto o que o último emoji que enviou significa.'},
+    {e:'😤',t:'Raiva em palavras',d:'Expressa a raiva do último jogo SEM emoji. Só palavras. Tipo jornal.'},
+    {e:'📊',t:'Análise sem 😂',d:'Faz uma análise do time sem usar nenhum emoji de riso.'},
+    {e:'✍️',t:'Texto longo',d:'Manda mensagem com mais de 100 palavras. Uma só mensagem. Sem emoji.'},
+  ],
+  jorge:[
+    {e:'💬',t:'10 mensagens seguidas',d:'Manda 10 mensagens durante o próximo jogo. O recorde atual é 4.'},
+    {e:'😂',t:'Mandar um kkk',d:'Manda um kkkk. Só um. Prova que é fisicamente possível.'},
+    {e:'📣',t:'Opinião antes do apito',d:'Manda opinião sobre o jogo ANTES do apito final. Ao vivo. Ousadia máxima.'},
+    {e:'🌙',t:'Aparecer de manhã',d:'Manda mensagem antes das 10h. Sem ser sobre jogo. Qualquer coisa.'},
+    {e:'👋',t:'Dar bom dia',d:'Manda "bom dia" no grupo. Simples. Revolucionário.'},
+  ],
+  wallace:[
+    {e:'🤫',t:'Análise secreta',d:'Manda uma análise e espera alguém perguntar quem escreveu antes de revelar.'},
+    {e:'📢',t:'Autopromoção',d:'Diz no grupo "olha, eu disse isso semana passada" com print provando.'},
+    {e:'🏆',t:'Cobrar respeito',d:'Escreve: "eu tenho mais análises que o Nerd. É um fato. Respeitem."'},
+    {e:'📊',t:'Apresentação tática',d:'Faz análise tática do próximo adversário e manda ANTES do jogo.'},
+    {e:'👊',t:'Zoar o Nerd',d:'Manda mensagem zoando o Nerd por ter feito menos análises táticas.'},
+  ],
+  andre:[
+    {e:'💬',t:'Ser prolixo',d:'Manda uma mensagem com mais de 50 palavras. Qualquer assunto.'},
+    {e:'😂',t:'Contar piada',d:'Conta uma piada no grupo. Que seja engraçada. Não pode ser "já era".'},
+    {e:'🎤',t:'Áudio de 30s',d:'Manda áudio de exatamente 30 segundos falando sobre o Vasco.'},
+    {e:'🏆',t:'Elogiar alguém',d:'Elogia publicamente uma análise de outro membro. Com nome.'},
+    {e:'📱',t:'Selfie no jogo',d:'Manda foto/selfie assistindo o próximo jogo.'},
+  ],
+  joao:[
+    {e:'🍖',t:'Marcar o churrasco',d:'Escolhe DATA E HORA para o churrasco. Agora. No grupo. Sem "a gente combina depois".'},
+    {e:'💰',t:'Pagar a promessa',d:'Chama o Novaes no privado e pergunta como vai pagar a promessa de 2023.'},
+    {e:'📅',t:'Compromisso real',d:'Faz uma promessa no grupo com data específica e a galera como testemunha.'},
+    {e:'🔇',t:'Silêncio sobre churrasco',d:'Passa 30 dias sem mencionar churrasco. Possível ou não?'},
+    {e:'📸',t:'Foto na Barreira',d:'Manda foto na Barreira antes do próximo jogo. Prova presença.'},
+  ],
+  alex:[
+    {e:'🤔',t:'Uma frase sem acho',d:'Manda uma opinião sobre o próximo jogo SEM usar a palavra "acho". Uma. Só uma. Você consegue.'},
+    {e:'🎯',t:'Certeza absoluta',d:'Faz uma previsão com 100% de certeza. Sem "acho", "talvez", "salvo engano". Aposte a alma.'},
+    {e:'📊',t:'Ranking dos achos',d:'Conta quantas vezes disse "acho" no último jogo e posta o número no grupo. Com honestidade.'},
+    {e:'🗣️',t:'Áudio sem acho',d:'Manda áudio de 30 segundos comentando o jogo sem dizer "acho" nenhuma vez. Vale tentar.'},
+    {e:'✅',t:'Admitir que sabia',d:'Escreve no grupo: "eu SABIA que ia acontecer isso" — sem o acho. Uma vez na vida.'},
+  ],
+  pedro:[
+    {e:'📞',t:'Ligação em vez de texto',d:'Liga (áudio) pro grupo comentando o próximo jogo em vez de mandar texto. A voz do "vtnc" ao vivo.'},
+    {e:'☀️',t:'Comentar de dia',d:'Manda uma análise do jogo antes das 18h. Ineditismo total.'},
+    {e:'🙏',t:'Confessar a oferenda',d:'Conta pro grupo, com detalhes, a última oferenda que fez pro Vasco ganhar.'},
+    {e:'🤐',t:'Sem "vtnc"',d:'Comenta um lance polêmico inteiro sem usar "vtnc", "pqp" ou "fdp". Nível impossível.'},
+    {e:'📋',t:'Resumo raso',d:'Comenta um lance em UMA frase, sem nenhum detalhe tático. Só "foi ruim" e pronto.'},
+  ],
+  leodoro:[
+    {e:'💬',t:'Só afirmações hoje',d:'Passa o próximo jogo inteiro só afirmando. Zero pontos de interrogação. Nem um.'},
+    {e:'🐌',t:'Resposta detalhada',d:'Responde uma pergunta de alguém com parágrafo completo, sem cortar em 3 palavras.'},
+    {e:'😌',t:'Elogiar o feio',d:'Explica, sem ironia, por que "jogar feio e ganhar" também é bonito.'},
+    {e:'🕐',t:'Comentar de madrugada',d:'Manda uma opinião sobre o Vasco de madrugada. Ineditismo total pro perfil dele.'},
+    {e:'🤝',t:'Concordar sem perguntar',d:'Concorda com uma opinião do grupo sem fazer nenhuma pergunta de volta. Nível difícil.'},
+  ],
+  luiz:[
+    {e:'🚫',t:'Não organizar nada',d:'Passa uma semana inteira sem propor churras, bar ou encontro. Silêncio de mobilizador.'},
+    {e:'📵',t:'Sem "bora"',d:'Comenta o próximo jogo inteiro sem usar "bora" nenhuma vez. Palavra proibida.'},
+    {e:'🍽️',t:'Confirmar presença sozinho',d:'Vai pro próximo evento sozinho, sem chamar ninguém no grupo antes. Ousadia rara.'},
+    {e:'💸',t:'Pagar a conta',d:'Se oferece pra bancar o próximo churras sozinho. Sem depender de vaquinha.'},
+    {e:'😐',t:'Mensagem longa',d:'Manda uma mensagem com mais de 100 caracteres. Sai do estilo telegráfico por uma vez.'},
+  ],
+  juan:[
+    {e:'🏊',t:'Reproduzir o pedido',d:'Manda a mensagem original do Novaes pelado no grupo com contexto completo.'},
+    {e:'🌙',t:'Aparecer mais',d:'Manda mensagem todo dia por uma semana. Prova existência contínua.'},
+    {e:'💭',t:'Sonho proibido',d:'Faz um palpite completamente realista. Sem sonho. Placar possível de verdade.'},
+    {e:'📢',t:'Cobrar Novaes',d:'Cobra publicamente a promessa do Novaes nadando no Maracanã.'},
+    {e:'🎯',t:'Aparecer cedo',d:'Manda mensagem antes das 18h. Qualquer coisa. Só apareça.'},
+  ],
+};
+
+let fraseAtual = {};
+let perfisFiltrados = PERFIS;
+
+function filtrar(tipo, btn) {
+  document.querySelectorAll('.filtro').forEach(b=>b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  perfisFiltrados = tipo==='todos' ? PERFIS : PERFIS.filter(p=>p.tags.includes(tipo));
+  renderGrid();
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = perfisFiltrados.map(p => renderPerfil(p)).join('');
+}
+
+function renderPerfil(p) {
+  const fi = fraseAtual[p.id] || 0;
+  const frase = p.frases[fi % p.frases.length];
+  const barrasHtml = p.barras.map(b=>`
+    <div class="barra-item">
+      <span class="barra-label">${b.l}</span>
+      <div class="barra-track"><div class="barra-fill" style="width:${b.v}%;background:${b.c}"></div></div>
+      <span style="font-size:.72rem;color:var(--cinza);width:28px;text-align:right">${b.v}%</span>
+    </div>`).join('');
+  const statsHtml = p.stats.map(s=>`
+    <div class="stat"><div class="n">${s.n}</div><div class="l">${s.l}</div></div>`).join('');
+  return `
+  <div class="perfil" data-tags="${p.tags.join(',')}">
+    <div class="perfil-header" style="background:${p.corBg}">
+      <div class="avatar" style="background:${p.corBg};border-color:${p.cor};font-size:${p.emoji.length>2?'1.1rem':'1.6rem'}">${p.foto?`<img src="${FOTOS_PERFIL[p.id]||p.foto}" alt="${p.nome}">`:p.emoji}</div>
+      <div class="perfil-info">
+        <div class="perfil-nome">${p.nome}</div>
+        <div class="perfil-titulo" style="color:${p.cor}">${p.titulo}</div>
+        <div class="perfil-sub">${p.sub}</div>
+      </div>
+      <div class="rank-badge" style="color:${p.badgeCor};border-color:${p.badgeCor}">${p.badge}</div>
+    </div>
+    <div class="perfil-body">
+      ${p.rival?`<div style="font-size:.72rem;color:var(--vermelho);font-weight:800;letter-spacing:.04em;margin-bottom:12px">🥊 Maior rival: ${p.rival} (${p.rivalN} citações)</div>`:''}
+      <div class="barras">${barrasHtml}</div>
+      <div class="stats">${statsHtml}</div>
+      <div class="frase" onclick="proximaFrase('${p.id}')">${frase}</div>
+      <button class="copiar-btn" id="btn-${p.id}" onclick="copiarPerfil('${p.id}')">📲 Copiar card pro grupo</button>
+    </div>
+  </div>`;
+}
+
+function proximaFrase(id) {
+  fraseAtual[id] = ((fraseAtual[id]||0)+1);
+  const p = PERFIS.find(x=>x.id===id);
+  const fi = fraseAtual[id] % p.frases.length;
+  const el = document.querySelector(`[data-tags] .frase`);
+  // buscar o card correto
+  const cards = document.querySelectorAll('.perfil');
+  cards.forEach(card=>{
+    const btn = card.querySelector('.copiar-btn');
+    if(btn && btn.id===`btn-${id}`){
+      card.querySelector('.frase').textContent = p.frases[fi];
+    }
+  });
+}
+
+function copiarPerfil(id) {
+  const p = PERFIS.find(x=>x.id===id);
+  const frase = p.frases[(fraseAtual[id]||0) % p.frases.length];
+  const texto = `${p.emoji} *${p.nome.toUpperCase()}* — ${p.titulo}\n\n${p.sub}\n\n"${frase.replace(/"/g,'')}"`;
+  navigator.clipboard.writeText(texto).then(()=>{
+    const btn = document.getElementById(`btn-${id}`);
+    btn.textContent='✓ Copiado!';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='📲 Copiar card pro grupo';btn.classList.remove('ok');},2000);
+  });
+}
+
+let FOTOS_PERFIL={};
+renderGrid();
+(async function carregarFotosPerfilPersistentes(){
+  try{
+    const snap=await dbGrupo.collection('fotos_perfil').get();
+    snap.forEach(d=>{FOTOS_PERFIL[d.id]=d.data().data;});
+    if(Object.keys(FOTOS_PERFIL).length)renderGrid();
+  }catch(e){}
+})();
+
+window.addEventListener('scroll',()=>{
+  const b=document.getElementById('topoBtn');
+  if(b)b.classList.toggle('on',window.scrollY>500);
+});
+
+</script>
+<button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
+</body>
+</html>

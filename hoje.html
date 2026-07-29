@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>try{if(!localStorage.getItem('vasbobo:sessao')){location.replace('/');}}catch(e){location.replace('/');}</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyDNk1IhC1KpF9UKdwyMjhybrhuJ-BsfkSs",
+  authDomain: "vasbobo-crvg.firebaseapp.com",
+  projectId: "vasbobo-crvg",
+  storageBucket: "vasbobo-crvg.firebasestorage.app",
+  messagingSenderId: "967008085523",
+  appId: "1:967008085523:web:744136b984604b20bc81e6"
+});
+const dbHoje = firebase.firestore();
+
+// ===== CHAVE DA API ANTHROPIC (busca via IA) =====
+// Mesma chave usada no app principal (index.html). Pegue a sua em https://console.anthropic.com/settings/keys
+const ANTHROPIC_API_KEY = 'COLE_SUA_CHAVE_AQUI';
+async function chamarClaude(prompt,maxTokens){
+  if(!ANTHROPIC_API_KEY||ANTHROPIC_API_KEY==='COLE_SUA_CHAVE_AQUI')return null;
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':ANTHROPIC_API_KEY,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({model:'claude-sonnet-5',max_tokens:maxTokens||1800,
+      messages:[{role:'user',content:prompt}],
+      tools:[{type:'web_search_20250305',name:'web_search',max_uses:4}]})
+  });
+  const data=await resp.json();
+  const texto=(data.content||[]).map(b=>b.type==='text'?b.text:'').filter(Boolean).join('\n');
+  const m=texto.match(/\{[\s\S]*\}/);
+  if(!m)return null;
+  try{return JSON.parse(m[0]);}catch(e){return null;}
+}
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogos de Hoje — Vasbobo</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --preto:#F2F0EA;--branco:#17171B;--vermelho:#C0121B;
+  --cinza:#6C6C74;--linha:#DAD7D0;--ouro:#A97B12;--verde:#22794F;
+  --carvao:rgba(255,255,255,.92);
+  --carvao2:rgba(255,255,255,.86);
+  --card:rgba(255,255,255,.9);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
+body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg,#F4F2ED 0%,#EFE9E2 50%,#F4F2ED 100%);z-index:-1}
+
+header{border-bottom:3px solid var(--branco);background:rgba(250,249,246,.88);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10}
+.header-inner{max-width:820px;margin:0 auto;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-family:'Anton',sans-serif;font-size:1.8rem;text-transform:uppercase;letter-spacing:.04em}
+.logo span{color:var(--vermelho)}
+.voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
+.voltar:hover{border-color:var(--branco);color:var(--branco)}
+
+main{max-width:820px;margin:0 auto;padding:30px 20px}
+.page-title h1{font-family:'Anton',sans-serif;font-size:clamp(1.8rem,5vw,2.6rem);text-transform:uppercase;line-height:1}
+.page-title p{color:var(--cinza);font-size:.88rem;margin-top:8px;line-height:1.6}
+.page-title{padding:18px 22px;background:rgba(244,242,237,.92);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+
+.card{background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:22px;margin-top:24px;backdrop-filter:blur(8px)}
+.btn-buscar{width:100%;background:var(--vermelho);color:#FFFFFF;border:none;border-radius:11px;
+  padding:16px;font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.btn-buscar:hover{filter:brightness(1.12)}
+.btn-buscar:disabled{opacity:.5;cursor:wait}
+
+.status{text-align:center;color:var(--cinza);font-size:.85rem;margin-top:16px;display:none;line-height:1.6}
+.status.on{display:block}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--linha);border-top-color:var(--vermelho);
+  border-radius:50%;animation:girar 0.8s linear infinite;vertical-align:middle;margin-right:8px}
+@keyframes girar{to{transform:rotate(360deg)}}
+
+.resultado{display:none;margin-top:20px}
+.resultado.on{display:block}
+.preview-msg{background:rgba(255,255,255,.85);border:1px solid var(--linha);border-radius:12px;padding:18px;
+  font-size:.92rem;line-height:1.7;white-space:pre-wrap;font-family:'Inter',sans-serif;color:#33333A;
+  max-height:500px;overflow-y:auto}
+.btn-copiar{width:100%;background:var(--verde);color:#FFFFFF;border:none;border-radius:11px;
+  padding:15px;font-family:'Inter',sans-serif;font-weight:800;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;
+  cursor:pointer;margin-top:14px}
+.btn-copiar.copiado{background:var(--ouro);color:var(--preto)}
+
+.aviso-erro{background:rgba(192,18,27,.08);border:1px solid var(--vermelho);border-radius:10px;
+  padding:14px 16px;font-size:.85rem;color:#7A1015;margin-top:16px;display:none;line-height:1.5}
+.aviso-erro.on{display:block}
+
+.info-auto{background:rgba(15,35,26,.5);border:1px solid var(--verde);border-radius:10px;padding:14px 16px;
+  font-size:.82rem;color:#1D5C38;line-height:1.6;margin-top:20px}
+.info-auto b{color:var(--branco)}
+
+.cronometros{display:none;margin-top:20px}
+.cronometros.on{display:block}
+.crono-item{background:rgba(255,255,255,.75);border:1px solid var(--linha);border-radius:12px;
+  padding:14px 18px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.crono-item.crono-rival{border-color:var(--ouro);background:rgba(224,169,63,.08)}
+.crono-jogo{font-size:.85rem;font-weight:600}
+.crono-tempo{font-family:'Anton',sans-serif;font-size:1.15rem;color:var(--ouro);white-space:nowrap}
+
+.conferencia{display:none;margin-top:16px}
+.conferencia.on{display:block}
+.jogo-edit{background:rgba(255,255,255,.75);border:1px solid var(--linha);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.jogo-edit.marcado{border-color:var(--ouro)}
+.jogo-edit-linha{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.jogo-edit input[type=text],.jogo-edit input[type=time]{background:rgba(255,255,255,.9);border:1px solid var(--linha);
+  color:var(--branco);border-radius:7px;padding:8px 10px;font-size:.85rem;width:100%;font-family:'Inter',sans-serif}
+.jogo-edit-check{display:flex;align-items:center;gap:8px;font-size:.82rem;margin-top:8px;color:var(--cinza)}
+.jogo-edit-check input{width:auto}
+.jogo-edit-remover{background:none;border:1px solid var(--vermelho);color:var(--vermelho);border-radius:7px;
+  padding:5px 10px;font-size:.7rem;cursor:pointer;float:right;font-family:'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase}
+.btn-add{width:100%;background:none;border:1px dashed var(--linha);color:var(--cinza);border-radius:10px;
+  padding:12px;font-size:.85rem;cursor:pointer;margin-top:6px;font-family:'Inter',sans-serif}
+.btn-add:hover{border-color:var(--branco);color:var(--branco)}
+
+.nav-sat{max-width:1100px;margin:0 auto;padding:12px 20px 0;display:flex;gap:6px;flex-wrap:wrap}
+.nav-sat a{background:var(--card);border:1px solid var(--linha);color:var(--cinza);border-radius:9px;
+  padding:8px 13px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  text-decoration:none;font-family:'Inter',sans-serif}
+.nav-sat a.ativa{background:var(--branco);color:#FFFFFF;border-color:var(--branco)}
+.nav-sat a:hover{border-color:var(--cinza)}
+
+.topo-btn{position:fixed;left:14px;bottom:14px;width:44px;height:44px;border-radius:50%;
+  background:var(--branco);color:#FFFFFF;border:none;font-size:1.15rem;cursor:pointer;
+  box-shadow:0 8px 26px rgba(23,23,27,.35);z-index:45;display:none;align-items:center;justify-content:center}
+.topo-btn.on{display:flex}
+
+/* === fundo padronizado (mesma foto do index.html) === */
+  body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.jpg") center top / cover no-repeat;z-index:-2}
+  body::after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(244,242,237,.24) 0%,rgba(244,242,237,.34) 45%,rgba(244,242,237,.52) 100%);z-index:-1}
+/* === cabeçalho padronizado (igual ao index.html) === */
+/* === cabeçalho padronizado (igual ao index.html) === */
+  .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
+  .oculto{display:none!important}
+
+  header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
+  .header-inner{max-width:1320px;margin:0 auto;padding:26px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
+  h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
+  .logo-row{display:flex;align-items:center;gap:14px}
+  .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--branco);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
+  .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
+  .eyebrow{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
+  .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px)}
+  .who b{text-transform:capitalize}
+  .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
+  .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
+
+  nav{max-width:1320px;margin:0 auto;padding:14px 20px 0;display:flex;gap:8px;flex-wrap:wrap}
+  .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:.88rem;padding:10px 15px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:10px 10px 0 0;cursor:pointer;backdrop-filter:blur(6px)}
+  .tab.ativa{background:var(--branco);color:#FFFFFF}
+  .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+  main{max-width:1320px;margin:0 auto;padding:20px 20px 60px}
+  .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
+  .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
+.comp-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.comp-tab{background:rgba(255,255,255,.06);border:1px solid var(--linha);color:var(--branco);border-radius:8px;
+  padding:8px 14px;font-size:.78rem;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif}
+.comp-tab.ativa{background:var(--vermelho);border-color:var(--vermelho)}
+.widget-wrap{background:#fff;border-radius:12px;overflow:hidden;min-height:420px}
+.widget-wrap.oculto{display:none}
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo-row">
+        <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
+        <div>
+          <div class="eyebrow">Direto do Bar da Tia</div>
+          <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
+        </div>
+      </div>
+      <div class="who">
+        <span>Fala, <b id="whoNome"></b>!</span>
+        <span class="adm oculto" id="whoAdm">admin</span>
+        <button onclick="sairSatelite()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <a href="/" class="tab" data-tab="jogos">Jogos</a>
+    <a href="/#rank" class="tab" data-tab="rank">Ranking</a>
+    <a href="/#castigos" class="tab" data-tab="castigos">🎡 Castigos</a>
+    <a href="/ogrupo.html" class="tab" style="text-decoration:none" data-tab="ogrupo">O Grupo 🔥</a>
+    <a href="/galeria.html" class="tab" style="text-decoration:none" data-tab="galeria">🎨 Obras-Primas</a>
+    <a href="/hoje.html" class="tab ativa" style="text-decoration:none" data-tab="hoje">📅 Hoje</a>
+    <a href="/futebol.html" class="tab" style="text-decoration:none" data-tab="futebol">⚽ O Que Mais Entende</a>
+    <a href="/#partidas" class="tab" data-tab="partidas">Partidas</a>
+    <a href="/#elenco" class="tab oculto" data-tab="elenco">Elenco</a>
+    <a href="/#admin" class="tab oculto" data-tab="admin">Configurações</a>
+  </nav>
+
+<script>
+function sairSatelite(){
+  let nome='';
+  try{nome=localStorage.getItem('vasbobo:sessao')||'';}catch(e){}
+  if(confirm('Sair da conta'+(nome?(' de '+nome):'')+'? Você vai precisar entrar de novo.')){
+    try{localStorage.removeItem('vasbobo:sessao');}catch(e){}
+    location.href='/';
+  }
+}
+(async function(){
+  let nome='';
+  try{nome=localStorage.getItem('vasbobo:sessao')||'';}catch(e){}
+  if(!nome)return;
+  const elNome=document.getElementById('whoNome');
+  if(elNome)elNome.textContent=nome.charAt(0).toUpperCase()+nome.slice(1);
+  try{
+    const snap=await dbHoje.collection('shared').doc('vasbobo_v2').get();
+    if(snap.exists){
+      const dadosApp=JSON.parse(snap.data().value);
+      const u=dadosApp.usuarios&&dadosApp.usuarios[nome];
+      if(u&&u.admin){
+        const elAdm=document.getElementById('whoAdm');
+        if(elAdm)elAdm.classList.remove('oculto');
+        document.querySelectorAll('[data-tab="elenco"],[data-tab="admin"]').forEach(el=>el.classList.remove('oculto'));
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
+<main>
+  <div class="page-title">
+    <h1>📅 Jogos de <span style="color:var(--vermelho)">Hoje</span></h1>
+  </div>
+
+  <div class="card" style="padding-bottom:6px">
+    <h3 style="font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px">⚽ Todos os jogos do dia</h3>
+    <div class="comp-tabs" id="compTabs">
+      <button class="comp-tab ativa" onclick="mudarCompeticao('brasileirao')">Brasileirão</button>
+      <button class="comp-tab" onclick="mudarCompeticao('copa-brasil')">Copa do Brasil</button>
+      <button class="comp-tab" onclick="mudarCompeticao('libertadores')">Libertadores</button>
+      <button class="comp-tab" onclick="mudarCompeticao('sulamericana')">Sul-Americana</button>
+    </div>
+    <p class="nota-rodape" style="margin:8px 0 12px">Dados ao vivo fornecidos por 365Scores — jogos de hoje e os próximos, atualizados sozinhos.</p>
+    <div class="widget-wrap" id="wCompBrasileirao">
+      <div data-widget-type="entityScores" data-entity-type="league" data-entity-id="113" data-lang="pt-br" data-widget-id="c0129f99-3e1c-44a9-a333-92fdddf42fbe"></div>
+    </div>
+    <div class="widget-wrap oculto" id="wCompCopaBrasil">
+      <div data-widget-type="entityScores" data-entity-type="league" data-entity-id="115" data-lang="pt-br" data-widget-id="7d648eaa-5e5a-45ca-89df-d9bde5ff5e0c"></div>
+    </div>
+    <div class="widget-wrap oculto" id="wCompLibertadores">
+      <div data-widget-type="entityScores" data-entity-type="league" data-entity-id="102" data-lang="pt-br" data-widget-id="42761e54-6bfa-4ce2-9419-6bab6a8a2e1b"></div>
+    </div>
+    <div class="widget-wrap oculto" id="wCompSulamericana">
+      <div data-widget-type="entityScores" data-entity-type="league" data-entity-id="389" data-lang="pt-br" data-widget-id="9e29fc91-eff2-4c91-8236-e688d7bea849"></div>
+    </div>
+    <div id="powered-by" style="text-align:center;font-size:.68rem;color:var(--cinza);margin:6px 0 14px">Desenvolvido por <a id="powered-by-link" href="https://www.365scores.com/pt-br" target="_blank" style="color:var(--cinza)">365Scores.com</a></div>
+  </div>
+  <script src="https://widgets.365scores.com/main.js"></script>
+  <script>
+    function mudarCompeticao(c){
+      document.querySelectorAll('#compTabs .comp-tab').forEach(b=>b.classList.remove('ativa'));
+      event.currentTarget.classList.add('ativa');
+      const mapa={brasileirao:'wCompBrasileirao','copa-brasil':'wCompCopaBrasil',libertadores:'wCompLibertadores',sulamericana:'wCompSulamericana'};
+      Object.values(mapa).forEach(id=>document.getElementById(id).classList.add('oculto'));
+      document.getElementById(mapa[c]).classList.remove('oculto');
+    }
+    // O widget do 365Scores abre por padrão na aba "Resumo", que às vezes mostra dado errado
+    // (tudo como "Adiado"). Como o widget renderiza dentro da nossa própria página (não é
+    // um iframe isolado), assim que a aba "Jogos" aparecer no DOM a gente clica nela sozinho,
+    // uma vez por widget, pra já abrir na visão correta.
+    (function autoAbrirAbaJogos(){
+      const DIAS = ['dom','seg','ter','qua','qui','sex','sáb'];
+      function acharEClicar(wrap){
+        const els = wrap.querySelectorAll('*');
+        for (const el of els){
+          if (el.children.length === 0 && el.textContent.trim() === 'Jogos'){
+            el.click();
+            return true;
+          }
+        }
+        return false;
+      }
+      function adicionarDiaSemana(wrap){
+        const els = wrap.querySelectorAll('*');
+        els.forEach(el=>{
+          if (el.children.length !== 0 || el.dataset.diaAdicionado) return;
+          const t = el.textContent.trim();
+          const m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+          if (!m) return;
+          const d = new Date(+m[3], +m[2]-1, +m[1]);
+          el.textContent = t + ' · ' + DIAS[d.getDay()];
+          el.dataset.diaAdicionado = '1';
+        });
+      }
+      function tentarTodos(){
+        document.querySelectorAll('.widget-wrap').forEach(w=>{
+          if (!w.dataset.jogosClicado && acharEClicar(w)) w.dataset.jogosClicado = '1';
+          adicionarDiaSemana(w);
+        });
+      }
+      const observer = new MutationObserver(tentarTodos);
+      observer.observe(document.body, {childList:true, subtree:true});
+      let tentativas = 0;
+      const intervalo = setInterval(()=>{
+        tentativas++;
+        tentarTodos();
+        if (tentativas > 20) clearInterval(intervalo);
+      }, 500);
+    })();
+  </script>
+
+  <div class="card">
+    <button class="btn-buscar" id="btnBuscar" onclick="buscarJogos(false)">🔄 Atualizar agora</button>
+    <div class="status" id="status"><span class="spin"></span><span id="statusTxt"></span></div>
+    <div class="aviso-erro" id="erro"></div>
+
+    <div class="conferencia" id="conferencia">
+      <h3 style="font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;margin-top:18px" id="tituloConferencia">
+        ✅ Confira antes de gerar a mensagem</h3>
+      <p style="font-size:.8rem;color:var(--cinza);margin:6px 0 14px;line-height:1.5" id="textoConferencia">
+        A busca automática pode errar de vez em quando. Confira os jogos abaixo, corrija o que precisar e marque quem é rival direto do Vasco.
+        Se faltar algum jogo, adicione manualmente.
+      </p>
+      <div id="listaEdicao"></div>
+      <button class="btn-add" onclick="adicionarJogoManual()">+ Adicionar jogo manualmente</button>
+      <button class="btn-copiar" style="background:var(--vermelho);margin-top:16px" onclick="gerarMensagemFinal()">✍️ Gerar mensagem com esses jogos</button>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <div class="preview-msg" id="previewMsg"></div>
+      <button class="btn-copiar" id="btnCopiar" onclick="copiarMensagem()">📲 Copiar mensagem pro grupo</button>
+      <button class="btn-add" style="margin-top:10px" onclick="voltarConferencia()">← Corrigir jogos de novo</button>
+    </div>
+  </div>
+
+  <div class="card cronometros" id="cronometros"></div>
+
+</main>
+
+<script>
+/* ---- cache diário no Firebase com 2 revisões (manhã 6h / tarde 18h) ---- */
+function chaveHoje(){ const d=new Date(); return 'vasbobo_hoje_'+d.toISOString().slice(0,10).replace(/-/g,''); }
+function revisaoNecessaria(){ return 1; } // 1 busca automática por dia (era 2x/dia) — economiza custo da API. Use "🔄 Atualizar agora" se precisar forçar antes.
+async function lerCacheHoje(){
+  try{ const s=await dbHoje.collection('shared').doc(chaveHoje()).get();
+    if(s.exists)return s.data(); }catch(e){}
+  return null;
+}
+async function salvarCacheHoje(info){
+  try{ await dbHoje.collection('shared').doc(chaveHoje()).set({
+    info: JSON.stringify(info), rev: revisaoNecessaria(), quando: Date.now() }); }catch(e){}
+}
+async function autoIniciar(){
+  if(!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY==='COLE_SUA_CHAVE_AQUI'){
+    const hoje=new Date();
+    const dataFormatada = hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+    abrirConferencia({ temJogosHoje:false, jogos:[] }, dataFormatada);
+    return;
+  }
+  const cache = await lerCacheHoje();
+  if(cache && cache.rev >= revisaoNecessaria()){
+    try{
+      const info = JSON.parse(cache.info);
+      window._posicaoVasco = info.posicaoVasco||null;
+      window._pontosVasco = info.pontosVasco||null;
+      const hoje=new Date();
+      const dataFormatada = hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+      dataAtualFormatada = dataFormatada;
+      jogosEmEdicao = (info.jogos||[]).map(j=>({id:'e'+(idEdicaoSeq++),mandante:j.mandante||'',visitante:j.visitante||'',
+        horario:j.horario||'',ondeAssistir:j.ondeAssistir||'',relevante:!!j.relevanteVasco,
+        timeRival:j.timeRivalNoJogo||'',posicaoRival:j.posicaoRival||'',motivo:j.motivoRelevancia||'',
+        competicao:j.competicao||'',ehVasco:!!j.ehVasco}));
+      montarMensagem(info, dataFormatada);
+      return;
+    }catch(e){}
+  }
+  buscarJogos(true);
+}
+
+async function buscarJogos(automatico) {
+  if(!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY==='COLE_SUA_CHAVE_AQUI'){
+    const hoje0=new Date();
+    const dataFormatada0 = hoje0.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+    abrirConferencia({ temJogosHoje:false, jogos:[] }, dataFormatada0);
+    return;
+  }
+  const btn = document.getElementById('btnBuscar');
+  const status = document.getElementById('status');
+  const resultado = document.getElementById('resultado');
+  const erro = document.getElementById('erro');
+
+  btn.disabled = true;
+  status.classList.add('on');
+  resultado.classList.remove('on');
+  erro.classList.remove('on');
+
+  const hoje = new Date();
+  const dataISO = hoje.toISOString().slice(0,10);
+  const dataFormatada = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+  try {
+    const prompt = 'Hoje é '+dataFormatada+' ('+dataISO+'). Pesquise na web (fontes principais, nesta ordem de prioridade: sofascore.com, depois 365scores.com/pt-br/where-to-watch, depois ge.globo) e monte um raio-x dos jogos de futebol de HOJE ('+dataISO+') envolvendo times brasileiros no Campeonato Brasileiro Série A, na Copa do Brasil, na Copa Libertadores ou na Copa Sudamericana.\n\n'+
+      'Passo 1: descubra a posição atual do Vasco da Gama na tabela do Campeonato Brasileiro Série A (colocação e pontos) e identifique os times que estão na "briga direta" com o Vasco na tabela — os 3 times imediatamente acima e os 3 imediatamente abaixo dele.\n\n'+
+      'Passo 2: liste TODOS os jogos de hoje ('+dataISO+') dessas 4 competições que tenham pelo menos um time brasileiro (incluindo, se houver, jogo do próprio Vasco). Para cada jogo, informe mandante, visitante, competição, horário no fuso de Brasília (formato HH:MM), onde assistir no Brasil (TV aberta, fechada ou streaming), se é jogo do Vasco, e se um dos dois times participantes é um dos rivais diretos do Vasco identificados no Passo 1.\n\n'+
+      'Responda SOMENTE com JSON válido, sem markdown e sem texto fora do JSON, no formato exato:\n'+
+      '{"posicaoVasco":numero ou null,"pontosVasco":numero ou null,"jogos":[{"mandante":"...","visitante":"...","competicao":"...","horario":"HH:MM","ondeAssistir":"...","ehVasco":true ou false,"relevanteVasco":true ou false,"timeRivalNoJogo":"nome do time rival, vazio se não houver","posicaoRival":numero ou null,"motivoRelevancia":"frase curta, vazio se não houver"}]}\n'+
+      'Se não encontrar nenhum jogo hoje nessas competições, responda {"posicaoVasco":numero ou null,"pontosVasco":numero ou null,"jogos":[]}.';
+
+    const r = await chamarClaude(prompt, 2000);
+    if(!r) throw new Error('sem resposta da IA (verifique se ANTHROPIC_API_KEY foi preenchida em hoje.html)');
+
+    const posicaoVasco = r.posicaoVasco ?? null;
+    const pontosVasco = r.pontosVasco ?? null;
+    const jogos = (r.jogos||[]).map(f=>({
+      mandante: f.mandante||'',
+      visitante: f.visitante||'',
+      competicao: f.competicao||'',
+      ehVasco: !!f.ehVasco,
+      horario: f.horario||'',
+      ondeAssistir: f.ondeAssistir||'',
+      relevanteVasco: !!f.relevanteVasco && !f.ehVasco,
+      timeRivalNoJogo: f.timeRivalNoJogo||'',
+      posicaoRival: f.posicaoRival ?? null,
+      motivoRelevancia: f.motivoRelevancia||(f.relevanteVasco?('está na briga direta com o Vasco na tabela'):''),
+      resultadoIdealVasco: f.relevanteVasco?('Secar o '+(f.timeRivalNoJogo||f.mandante)):'',
+    })).sort((a,b)=>a.horario.localeCompare(b.horario));
+
+    const info = { temJogosHoje: jogos.length>0, posicaoVasco, pontosVasco, jogos };
+
+    window._posicaoVasco = posicaoVasco;
+    window._pontosVasco = pontosVasco;
+    await salvarCacheHoje(info);
+    if (automatico) {
+      dataAtualFormatada = dataFormatada;
+      jogosEmEdicao = jogos.map(j=>({id:'e'+(idEdicaoSeq++),...j,relevante:j.relevanteVasco,timeRival:j.timeRivalNoJogo,motivo:j.motivoRelevancia}));
+      montarMensagem(info, dataFormatada);
+    } else {
+      abrirConferencia(info, dataFormatada);
+    }
+  } catch (e) {
+    const semChave = !ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'COLE_SUA_CHAVE_AQUI';
+    erro.textContent = semChave
+      ? '⚠️ A chave da API (ANTHROPIC_API_KEY) ainda não foi preenchida no arquivo hoje.html do site publicado. Sem ela, a busca automática não funciona. Adicione os jogos manualmente abaixo por enquanto.'
+      : '⚠️ Não consegui buscar os jogos agora. Tente novamente em instantes, ou adicione manualmente.';
+    erro.classList.add('on');
+    abrirConferencia({ temJogosHoje:false, jogos:[] }, dataFormatada);
+  } finally {
+    btn.disabled = false;
+    status.classList.remove('on');
+  }
+}
+
+/* ============ ETAPA DE CONFERÊNCIA (editável) ============ */
+let dataAtualFormatada = '';
+let jogosEmEdicao = [];
+let idEdicaoSeq = 0;
+
+function abrirConferencia(info, dataFormatada) {
+  dataAtualFormatada = dataFormatada;
+  jogosEmEdicao = (info.jogos || []).map(j => ({
+    id: 'e' + (idEdicaoSeq++),
+    mandante: j.mandante || '',
+    visitante: j.visitante || '',
+    horario: j.horario || '',
+    ondeAssistir: j.ondeAssistir || '',
+    relevante: !!j.relevanteVasco,
+    timeRival: j.timeRivalNoJogo || '',
+    posicaoRival: j.posicaoRival || '',
+    motivo: j.motivoRelevancia || '',
+  }));
+  document.getElementById('resultado').classList.remove('on');
+  document.getElementById('conferencia').classList.add('on');
+  renderEdicao();
+}
+
+function renderEdicao() {
+  const box = document.getElementById('listaEdicao');
+  if (!jogosEmEdicao.length) {
+    box.innerHTML = '<p style="color:var(--cinza);font-size:.85rem;text-align:center;padding:16px 0">Nenhum jogo encontrado. Adicione manualmente abaixo se houver jogo hoje.</p>';
+    return;
+  }
+  box.innerHTML = jogosEmEdicao.map(j => `
+    <div class="jogo-edit ${j.relevante?'marcado':''}">
+      <button class="jogo-edit-remover" onclick="removerJogoEdicao('${j.id}')">remover</button>
+      <div class="jogo-edit-linha">
+        <input type="text" placeholder="Mandante" value="${escAttr(j.mandante)}" oninput="atualizarCampo('${j.id}','mandante',this.value)">
+        <input type="text" placeholder="Visitante" value="${escAttr(j.visitante)}" oninput="atualizarCampo('${j.id}','visitante',this.value)">
+      </div>
+      <div class="jogo-edit-linha">
+        <input type="time" value="${escAttr(j.horario)}" oninput="atualizarCampo('${j.id}','horario',this.value)">
+        <input type="text" placeholder="Onde assistir" value="${escAttr(j.ondeAssistir)}" oninput="atualizarCampo('${j.id}','ondeAssistir',this.value)">
+      </div>
+      <label class="jogo-edit-check">
+        <input type="checkbox" ${j.relevante?'checked':''} onchange="atualizarCampo('${j.id}','relevante',this.checked)">
+        É rival direto do Vasco na tabela (torcer contra)
+      </label>
+      ${j.relevante ? `<input type="text" placeholder="Nome do time rival (ex: Ceará)" value="${escAttr(j.timeRival)}"
+        oninput="atualizarCampo('${j.id}','timeRival',this.value)" style="margin-top:8px">` : ''}
+    </div>`).join('');
+}
+
+function escAttr(s){ return (s||'').replace(/"/g,'&quot;'); }
+
+function atualizarCampo(id, campo, valor) {
+  const j = jogosEmEdicao.find(x => x.id === id);
+  if (!j) return;
+  j[campo] = valor;
+  if (campo === 'relevante') renderEdicao();
+}
+
+function removerJogoEdicao(id) {
+  jogosEmEdicao = jogosEmEdicao.filter(x => x.id !== id);
+  renderEdicao();
+}
+
+function adicionarJogoManual() {
+  jogosEmEdicao.push({
+    id: 'e' + (idEdicaoSeq++),
+    mandante: '', visitante: '', horario: '', ondeAssistir: '',
+    relevante: false, timeRival: '', posicaoRival: '', motivo: ''
+  });
+  renderEdicao();
+}
+
+function voltarConferencia() {
+  document.getElementById('resultado').classList.remove('on');
+  document.getElementById('conferencia').classList.add('on');
+}
+
+function gerarMensagemFinal() {
+  const jogosValidos = jogosEmEdicao.filter(j => j.mandante.trim() && j.visitante.trim());
+  const info = {
+    temJogosHoje: jogosValidos.length > 0,
+    posicaoVasco: window._posicaoVasco || null,
+    pontosVasco: window._pontosVasco || null,
+    jogos: jogosValidos.map(j => ({
+      mandante: j.mandante, visitante: j.visitante, horario: j.horario,
+      competicao: j.competicao||'', ehVasco: !!j.ehVasco,
+      ondeAssistir: j.ondeAssistir || 'a confirmar',
+      relevanteVasco: j.relevante,
+      timeRivalNoJogo: j.timeRival,
+      posicaoRival: j.posicaoRival,
+      resultadoIdealVasco: j.relevante ? ('Secar o ' + (j.timeRival || j.mandante)) : ''
+    }))
+  };
+  document.getElementById('conferencia').classList.remove('on');
+  document.getElementById('resultado').classList.add('on');
+  montarMensagem(info, dataAtualFormatada);
+}
+
+let mensagemGerada = '';
+let jogosAtivos = [];
+let timerCronometros = null;
+
+const ZOACOES_SECAR = [
+  'Temos que secar o {time} se não fodeu 🙏',
+  'Hoje é dia de torcer contra o {time}. Sofrimento coletivo, meu povo 🖤🤍',
+  'Bora rezar pro {time} tropeçar hoje. É modo sobrevivência.',
+  '{time} jogando hoje. Já sabe: torce contra igual sua vida depende disso (depende).',
+  'Mais um dia secando o {time}. A escalação emocional já tá pronta.',
+  'Hoje o inimigo declarado é o {time}. Todo mundo no grupo de oração.',
+  'Liga o modo torcida-do-mal: hoje é secar o {time} até o apito final.',
+];
+
+const SEM_JOGO_HOJE = [
+  'Hoje não rola Brasileirão. Aproveita pra descansar o coração, amanhã sofre de novo 🖤🤍',
+  'Dia de folga do sofrimento. Sem jogo da Série A hoje. Aproveita.',
+  'Hoje o coração vascaíno descansa. Zero jogo da Série A no radar.',
+];
+
+function zoacaoAleatoria(lista, time) {
+  const t = lista[Math.floor(Math.random() * lista.length)];
+  return t.replace('{time}', time || '');
+}
+
+function montarMensagem(info, dataFormatada) {
+  const resultado = document.getElementById('resultado');
+  const preview = document.getElementById('previewMsg');
+  jogosAtivos = [];
+
+  if (!info.temJogosHoje || !info.jogos || info.jogos.length === 0) {
+    mensagemGerada = `⚽ *SÉRIE A* — ${dataFormatada}\n\n${zoacaoAleatoria(SEM_JOGO_HOJE)}\n\n_Vasbobo_`;
+    preview.textContent = mensagemGerada;
+    resultado.classList.add('on');
+    return;
+  }
+
+  const jogosVasco = info.jogos.filter(j => j.ehVasco);
+  const rivaisHoje = info.jogos.filter(j => j.relevanteVasco && !j.ehVasco);
+
+  let msg = `⚽ *SÉRIE A DE HOJE* — ${dataFormatada}\n`;
+  if (info.posicaoVasco) {
+    msg += `📍 Vasco em ${info.posicaoVasco}º lugar${info.pontosVasco ? ' com ' + info.pontosVasco + ' pts' : ''}\n`;
+  }
+
+  if (jogosVasco.length > 0) {
+    msg += `\n🖤🤍 *HOJE TEM VASCO!* 🔥\n`;
+    jogosVasco.forEach(j => {
+      msg += `⚔️ ${j.mandante} x ${j.visitante} — *${j.horario}* (${j.competicao||'jogo oficial'})\n📺 ${j.ondeAssistir}\n`;
+    });
+  }
+
+  if (rivaisHoje.length > 0) {
+    msg += `\n🔥 *NA BRIGA DIRETA HOJE:*\n`;
+    rivaisHoje.forEach(j => {
+      msg += `${zoacaoAleatoria(ZOACOES_SECAR, j.timeRivalNoJogo || j.mandante)}\n`;
+    });
+  }
+
+  msg += `\n📋 *JOGOS DO DIA:*\n`;
+  info.jogos.forEach((j, i) => {
+    msg += `\n🕐 *${j.horario}* — ${j.mandante} x ${j.visitante}${j.competicao&&j.competicao!=='Série A'?' ('+j.competicao+')':''}${j.ehVasco?' 🖤🤍':''}\n📺 ${j.ondeAssistir}`;
+    if (j.relevanteVasco) {
+      msg += `\n🎯 ${j.resultadoIdealVasco || ('Secar o ' + (j.timeRivalNoJogo||''))} (${j.posicaoRival ? j.posicaoRival+'º na tabela' : 'rival direto'})`;
+    }
+    msg += `\n`;
+    if (j.relevanteVasco) jogosAtivos.push(j);
+  });
+
+  msg += `\n📲 vasbobo.netlify.app`;
+
+  mensagemGerada = msg;
+  document.getElementById('previewMsg').textContent = msg;
+  resultado.classList.add('on');
+
+  montarCronometros(info.jogos);
+}
+
+function horarioParaData(horarioStr) {
+  const hoje = new Date();
+  const [h, m] = (horarioStr||'').split(':').map(Number);
+  if (isNaN(h)) return null;
+  const d = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), h, m||0, 0);
+  return d;
+}
+
+function montarCronometros(jogos) {
+  const box = document.getElementById('cronometros');
+  const comHora = jogos.filter(j => horarioParaData(j.horario));
+  if (!comHora.length) { box.innerHTML=''; box.classList.remove('on'); return; }
+
+  box.innerHTML = comHora.map((j,i) => `
+    <div class="crono-item ${j.relevanteVasco?'crono-rival':''}">
+      <div class="crono-jogo">${j.mandante} x ${j.visitante}${j.relevanteVasco?' 🖤🤍':''}</div>
+      <div class="crono-tempo" id="crono-${i}">--:--:--</div>
+    </div>`).join('');
+  box.classList.add('on');
+
+  if (timerCronometros) clearInterval(timerCronometros);
+  function atualizar() {
+    comHora.forEach((j, i) => {
+      const el = document.getElementById('crono-'+i);
+      if (!el) return;
+      const alvo = horarioParaData(j.horario);
+      const diff = alvo - new Date();
+      if (diff <= 0) { el.textContent = 'Rolando 🔴'; return; }
+      const h = Math.floor(diff/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      el.textContent = `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+    });
+  }
+  atualizar();
+  timerCronometros = setInterval(atualizar, 1000);
+}
+
+function copiarMensagem() {
+  navigator.clipboard.writeText(mensagemGerada).then(() => {
+    const btn = document.getElementById('btnCopiar');
+    btn.textContent = '✓ Copiado! Cola no grupo';
+    btn.classList.add('copiado');
+    setTimeout(() => {
+      btn.textContent = '📲 Copiar mensagem pro grupo';
+      btn.classList.remove('copiado');
+    }, 2500);
+  });
+}
+
+function temChaveIA(){ return !!(ANTHROPIC_API_KEY && ANTHROPIC_API_KEY!=='COLE_SUA_CHAVE_AQUI'); }
+(function ajustarUiConformeChave(){
+  const btn=document.getElementById('btnBuscar');
+  const tit=document.getElementById('tituloConferencia');
+  const txt=document.getElementById('textoConferencia');
+  if(!temChaveIA()){
+    if(btn)btn.style.display='none';
+    if(tit)tit.textContent='✅ Cadastre os jogos de hoje';
+    if(txt)txt.textContent='Busca automática desativada por escolha do grupo (evita custo de API). Adicione os jogos de hoje manualmente abaixo.';
+  }
+})();
+autoIniciar();
+
+window.addEventListener('scroll',()=>{
+  const b=document.getElementById('topoBtn');
+  if(b)b.classList.toggle('on',window.scrollY>500);
+});
+
+</script>
+<button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
+</body>
+</html>

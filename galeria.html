@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script>try{if(!localStorage.getItem('vasbobo:sessao')){location.replace('/');}}catch(e){location.replace('/');}</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyDNk1IhC1KpF9UKdwyMjhybrhuJ-BsfkSs",
+  authDomain: "vasbobo-crvg.firebaseapp.com",
+  projectId: "vasbobo-crvg",
+  storageBucket: "vasbobo-crvg.firebasestorage.app",
+  messagingSenderId: "967008085523",
+  appId: "1:967008085523:web:744136b984604b20bc81e6"
+});
+const dbGal = firebase.firestore();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obras-Primas — Vasbobo</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --preto:#F2F0EA;--branco:#17171B;--vermelho:#C0121B;
+  --cinza:#6C6C74;--linha:#DAD7D0;--ouro:#A97B12;
+  --carvao:rgba(255,255,255,.92);
+  --carvao2:rgba(255,255,255,.86);
+  --card:rgba(255,255,255,.9);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
+body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg,#F4F2ED 0%,#EFE9E2 50%,#F4F2ED 100%);z-index:-1}
+
+header{border-bottom:3px solid var(--branco);background:rgba(250,249,246,.88);backdrop-filter:blur(10px);position:sticky;top:0;z-index:20}
+.header-inner{max-width:1100px;margin:0 auto;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase;letter-spacing:.04em}
+.logo span{color:var(--vermelho)}
+.voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
+.voltar:hover{border-color:var(--branco);color:var(--branco)}
+
+main{max-width:1100px;margin:0 auto;padding:30px 20px}
+.page-title{padding:18px 22px;background:rgba(244,242,237,.92);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.page-title h1{font-family:'Anton',sans-serif;font-size:clamp(1.8rem,5vw,2.6rem);text-transform:uppercase;line-height:1}
+.page-title p{color:var(--cinza);font-size:.88rem;margin-top:8px;line-height:1.6}
+.resenha-sec{padding:16px 22px;background:rgba(244,242,237,.92);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08);margin-top:26px}
+
+.filtros{display:flex;gap:8px;margin:20px 0;flex-wrap:wrap}
+.filtro{background:var(--card);border:1px solid var(--linha);color:var(--cinza);border-radius:99px;
+  padding:8px 18px;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif}
+.filtro.ativo{border-color:var(--branco);color:var(--branco);background:rgba(247,246,242,.08)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+.item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;background:var(--card);
+  border:1px solid var(--linha)}
+.item img,.item video{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.item:hover img,.item:hover video{transform:scale(1.06)}
+.item .play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:34px;height:34px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:var(--branco);font-size:.9rem;pointer-events:none}
+
+.contagem{color:var(--cinza);font-size:.78rem;margin-top:6px}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;
+  padding:20px;z-index:50}
+.lightbox.on{display:flex}
+.lightbox-conteudo{max-width:92vw;max-height:80vh;position:relative}
+.lightbox img,.lightbox video{max-width:92vw;max-height:80vh;border-radius:10px;display:block;margin:0 auto}
+.lb-fechar{position:fixed;top:16px;right:16px;background:rgba(20,20,24,.85);border:1px solid var(--linha);color:var(--branco);
+  border-radius:9px;padding:10px 16px;cursor:pointer;font-size:1rem;z-index:52;font-weight:700}
+.lb-nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(20,20,24,.85);border:1.5px solid var(--linha);
+  color:var(--branco);border-radius:50%;width:52px;height:52px;font-size:1.6rem;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;z-index:52}
+.lb-nav:hover{border-color:var(--branco)}
+.lb-prev{left:12px}
+.lb-next{right:12px}
+@media(max-width:640px){.lb-prev{left:6px}.lb-next{right:6px}.lb-nav{width:44px;height:44px;font-size:1.3rem}}
+.lb-contador{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);color:var(--cinza);font-size:.78rem;
+  background:rgba(20,20,24,.7);padding:4px 12px;border-radius:99px;z-index:52}
+
+.carregando{text-align:center;color:var(--cinza);padding:40px 0}
+.oculto{display:none!important}
+.card-admin{background:var(--card);border:1px solid var(--ouro);border-radius:14px;padding:16px 18px;margin-top:18px;backdrop-filter:blur(6px)}
+.btn-upload{display:inline-block;background:var(--vermelho);color:#FFFFFF;border-radius:9px;padding:10px 18px;
+  font-family:'Inter',sans-serif;font-weight:800;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.item .remover-x{position:absolute;top:6px;right:6px;background:rgba(192,18,27,.92);color:#fff;border:none;
+  border-radius:7px;width:26px;height:26px;font-size:.85rem;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center}
+
+.resenha-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.membro{background:var(--card);border:1px solid var(--linha);border-radius:14px;overflow:hidden;
+  cursor:pointer;transition:transform .2s,border-color .2s;backdrop-filter:blur(6px)}
+.membro:hover{transform:translateY(-3px);border-color:var(--vermelho)}
+.membro img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.membro .m-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:.9rem;text-transform:uppercase;
+  letter-spacing:.04em;padding:9px 12px 2px}
+.membro .m-zoacao{font-size:.72rem;color:var(--cinza);padding:0 12px 11px;line-height:1.45;min-height:44px}
+
+.nav-sat{max-width:1100px;margin:0 auto;padding:12px 20px 0;display:flex;gap:6px;flex-wrap:wrap}
+.nav-sat a{background:var(--card);border:1px solid var(--linha);color:var(--cinza);border-radius:9px;
+  padding:8px 13px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  text-decoration:none;font-family:'Inter',sans-serif}
+.nav-sat a.ativa{background:var(--branco);color:#FFFFFF;border-color:var(--branco)}
+.nav-sat a:hover{border-color:var(--cinza)}
+
+.topo-btn{position:fixed;left:14px;bottom:14px;width:44px;height:44px;border-radius:50%;
+  background:var(--branco);color:#FFFFFF;border:none;font-size:1.15rem;cursor:pointer;
+  box-shadow:0 8px 26px rgba(23,23,27,.35);z-index:45;display:none;align-items:center;justify-content:center}
+.topo-btn.on{display:flex}
+
+/* === fundo padronizado (mesma foto do index.html) === */
+  body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.jpg") center top / cover no-repeat;z-index:-2}
+  body::after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(244,242,237,.24) 0%,rgba(244,242,237,.34) 45%,rgba(244,242,237,.52) 100%);z-index:-1}
+/* === cabeçalho padronizado (igual ao index.html) === */
+/* === cabeçalho padronizado (igual ao index.html) === */
+  .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
+  .oculto{display:none!important}
+
+  header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
+  .header-inner{max-width:1320px;margin:0 auto;padding:26px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
+  h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
+  .logo-row{display:flex;align-items:center;gap:14px}
+  .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--branco);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
+  .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
+  .eyebrow{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
+  .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px)}
+  .who b{text-transform:capitalize}
+  .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
+  .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
+
+  nav{max-width:1320px;margin:0 auto;padding:14px 20px 0;display:flex;gap:8px;flex-wrap:wrap}
+  .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:.88rem;padding:10px 15px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:10px 10px 0 0;cursor:pointer;backdrop-filter:blur(6px)}
+  .tab.ativa{background:var(--branco);color:#FFFFFF}
+  .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+  main{max-width:1320px;margin:0 auto;padding:20px 20px 60px}
+  .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
+  .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
+</style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo-row">
+        <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
+        <div>
+          <div class="eyebrow">Direto do Bar da Tia</div>
+          <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
+        </div>
+      </div>
+      <div class="who">
+        <span>Fala, <b id="whoNome"></b>!</span>
+        <span class="adm oculto" id="whoAdm">admin</span>
+        <button onclick="sairSatelite()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <a href="/" class="tab" data-tab="jogos">Jogos</a>
+    <a href="/#rank" class="tab" data-tab="rank">Ranking</a>
+    <a href="/#castigos" class="tab" data-tab="castigos">🎡 Castigos</a>
+    <a href="/ogrupo.html" class="tab" style="text-decoration:none" data-tab="ogrupo">O Grupo 🔥</a>
+    <a href="/galeria.html" class="tab ativa" style="text-decoration:none" data-tab="galeria">🎨 Obras-Primas</a>
+    <a href="/hoje.html" class="tab" style="text-decoration:none" data-tab="hoje">📅 Hoje</a>
+    <a href="/futebol.html" class="tab" style="text-decoration:none" data-tab="futebol">⚽ O Que Mais Entende</a>
+    <a href="/#partidas" class="tab" data-tab="partidas">Partidas</a>
+    <a href="/#elenco" class="tab oculto" data-tab="elenco">Elenco</a>
+    <a href="/#admin" class="tab oculto" data-tab="admin">Configurações</a>
+  </nav>
+
+<script>
+function sairSatelite(){
+  let nome='';
+  try{nome=localStorage.getItem('vasbobo:sessao')||'';}catch(e){}
+  if(confirm('Sair da conta'+(nome?(' de '+nome):'')+'? Você vai precisar entrar de novo.')){
+    try{localStorage.removeItem('vasbobo:sessao');}catch(e){}
+    location.href='/';
+  }
+}
+(async function(){
+  let nome='';
+  try{nome=localStorage.getItem('vasbobo:sessao')||'';}catch(e){}
+  if(!nome)return;
+  const elNome=document.getElementById('whoNome');
+  if(elNome)elNome.textContent=nome.charAt(0).toUpperCase()+nome.slice(1);
+  try{
+    const snap=await dbGal.collection('shared').doc('vasbobo_v2').get();
+    if(snap.exists){
+      const dadosApp=JSON.parse(snap.data().value);
+      const u=dadosApp.usuarios&&dadosApp.usuarios[nome];
+      if(u&&u.admin){
+        const elAdm=document.getElementById('whoAdm');
+        if(elAdm)elAdm.classList.remove('oculto');
+        document.querySelectorAll('[data-tab="elenco"],[data-tab="admin"]').forEach(el=>el.classList.remove('oculto'));
+      }
+    }
+  }catch(e){}
+})();
+</script>
+
+<main>
+  <div class="page-title">
+    <h1>🎨 Obras-<span style="color:var(--vermelho)">Primas</span></h1>
+    <p>O acervo oficial dos amigos vascaínos — arquibancada, Barreira, churrasco e vexames eternizados. Cada foto aqui é uma obra-prima da resenha. 🖤🤍</p>
+  </div>
+
+  <div class="resenha-sec">
+    <h2 style="font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.09em;text-transform:uppercase;margin:0 0 4px">👥 A Resenha em Pessoa</h2>
+    <p style="color:var(--cinza);font-size:.8rem;margin-bottom:14px">O elenco titular do Vasbobo. Toca na foto pra trocar a zoação.</p>
+    <div class="resenha-grid" id="resenhaGrid"></div>
+  </div>
+
+  <div class="card-admin oculto" id="painelAdmin">
+    <h3 style="font-family:'Inter',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">🛠️ Painel do admin</h3>
+    <p style="font-size:.78rem;color:var(--cinza);margin-bottom:12px;line-height:1.5">Adicione fotos novas (vão pro Firebase e aparecem pra todo mundo na hora) ou remova qualquer foto da galeria clicando no ✕ dela. Vídeos novos precisam vir pelo zip por causa do tamanho.</p>
+    <label class="btn-upload" for="inputUpload">📤 Adicionar fotos</label>
+    <input type="file" id="inputUpload" accept="image/*" multiple style="display:none" onchange="enviarFotos(this.files)">
+    <span id="uploadStatus" style="font-size:.78rem;color:var(--verde);margin-left:10px"></span>
+  </div>
+
+  <div class="filtros">
+    <button class="filtro ativo" onclick="filtrar('todos',this)">Tudo</button>
+    <button class="filtro" onclick="filtrar('fotos',this)">📷 Fotos</button>
+    <button class="filtro" onclick="filtrar('videos',this)">🎬 Vídeos</button>
+  </div>
+  <div class="contagem" id="contagem"></div>
+
+  <div class="grid" id="grid"></div>
+  <div class="carregando oculto" id="carregando">Carregando mais...</div>
+</main>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-nav lb-prev" onclick="navegar(-1)">‹</button>
+  <div class="lightbox-conteudo" id="lbConteudo">
+    <button class="lb-fechar" onclick="fecharLightbox()">✕ Fechar</button>
+    <div class="lb-contador" id="lbContador"></div>
+  </div>
+  <button class="lb-nav lb-next" onclick="navegar(1)">›</button>
+</div>
+
+<script>
+const MEMBROS = [
+  {n:'Novaes', f:'rostos/novaes.jpg', z:[
+    'Fundador, presidente e 26% de todas as mensagens. O grupo É ele.',
+    '1.096 porras registradas em ata. Recorde absoluto.',
+    'Sorri sozinho pra TV quando o Vasco ganha. Temos provas.']},
+  {n:'Velloso', f:'rostos/velloso.jpg', z:[
+    'Acorda às 23h só pra reclamar. Pontualidade britânica.',
+    'Viu o Novaes perder o gol na arquibancada. Nunca esqueceu.',
+    '"Território hostil" — ele, sobre qualquer lugar.']},
+  {n:'Daniel', f:'rostos/daniel.jpg', z:[
+    'Cita o Novaes 483 vezes. Obcecado ou apaixonado?',
+    'CAPS LOCK PERMANENTEMENTE ATIVADO DESDE 2023.',
+    'Primeira briga do dia: 9h da manhã, antes do café.']},
+  {n:'Nerd', f:'rostos/nerd.jpg', z:[
+    'PHD em futebol. Vice em palpite.',
+    '8,2% de palavrão por mensagem. Analista raiz.',
+    'Explica o erro tático em 47 mensagens. Ninguém pediu.']},
+  {n:'Douglas', f:'rostos/douglas.jpg', z:[
+    'Campeão mundial de kkkkk (10,7% de aproveitamento).',
+    'Ri do Vasco perdendo. Principalmente do Vasco perdendo.',
+    '"se eu fosse o leandro eu preferia morrer kkkk" — arte pura.']},
+  {n:'Azevedo', f:'rostos/azevedo.jpg', z:[
+    'Todo palpite termina em "né pai". Todo.',
+    'Ativo às 23h. De dia é só lenda.',
+    'Acha que o Vasco melhora ano que vem. Desde 2023.']},
+  {n:'Vitor', f:'rostos/vitor.jpg', z:[
+    '38 emojis numa mensagem só. Sem uma palavra. Poeta.',
+    '😂😂😂 é a resposta dele pra 90% da vida.',
+    'Se o palpite fosse em emoji, era campeão.']},
+  {n:'Alex', f:'rostos/alex.jpg', z:[
+    '360 "eu acho" contabilizados. Certeza? Nunca teve.',
+    'Analisa tudo, garante nada. O Eterno Achador.',
+    '"A falta de critério mata o futebol brasileiro" — ele, sempre.']},
+  {n:'Wallace', f:'rostos/wallace.jpg', z:[
+    '647 análises táticas. Mais que o Nerd. Respeita.',
+    'O placar mentiu pra ele uma vez. Nunca superou.',
+    'Subestimado pelo grupo, confirmado pelos dados.']},
+  {n:'João', f:'rostos/joao.jpg', z:[
+    'Prometeu pagar até... aquilo... se o Vasco ganhasse. Registrado.',
+    'Vai marcar o churrasco "semana que vem" desde 2023.',
+    'Mestre da promessa vaga e do sumiço estratégico.']},
+  {n:'Juan', f:'rostos/juan.jpg', z:[
+    'Pediu pra ver o Novaes nadando no Maracanã. Registrado em ata.',
+    'Aparece uma vez por mês. Sempre sonhando alto.',
+    '"Deixa nós sonhar..." — o lema oficial dele.']},
+  {n:'Andre', f:'rostos/andre.jpg', z:[
+    'Fala pouco. Erra pouco. Suspeito.',
+    '2.304 mensagens em 3 anos. Economia de guerra.',
+    '"Sal grosso superfaturado" — análise financeira dele.']},
+  {n:'Pedro', f:'rostos/pedro.jpg', z:[
+    'Presença confirmada, mensagens não. O observador.',
+    'Lê tudo, responde nada. Estrategista do silêncio.',
+    'Quando fala, o grupo para. Raridade tem valor.']},
+  {n:'Luiz', f:'rostos/luiz.jpg', z:[
+    'O fantasma bom: aparece, curte, some.',
+    'Modo leitura ativado desde a criação do grupo.',
+    'Nunca brigou com ninguém. Único do grupo. Impressionante.']},
+];
+let zoacaoIdx = {};
+function renderResenha(){
+  const grid = document.getElementById('resenhaGrid');
+  grid.innerHTML = MEMBROS.map((m,i)=>{
+    const zi = (zoacaoIdx[i]||0) % m.z.length;
+    const idPerfil = m.n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    return `<div class="membro" onclick="trocarZoacaoMembro(${i})">
+      <img src="${FOTOS_PERFIL[idPerfil]||m.f}" alt="${m.n}" loading="lazy">
+      <div class="m-nome">${m.n}</div>
+      <div class="m-zoacao">${m.z[zi]}</div>
+    </div>`;
+  }).join('');
+}
+function trocarZoacaoMembro(i){
+  zoacaoIdx[i] = (zoacaoIdx[i]||0)+1;
+  renderResenha();
+}
+let FOTOS_PERFIL={};
+renderResenha();
+(async function carregarFotosPerfilPersistentes(){
+  try{
+    const snap=await dbGal.collection('fotos_perfil').get();
+    snap.forEach(d=>{FOTOS_PERFIL[d.id]=d.data().data;});
+    if(Object.keys(FOTOS_PERFIL).length)renderResenha();
+  }catch(e){}
+})();
+
+const FOTOS = Array.from({length:104}, (_,i) => 'img/foto'+String(i+1).padStart(3,'0')+'.jpg');
+const VIDEOS = Array.from({length:7}, (_,i) => 'vid/video'+String(i+1).padStart(3,'0')+'.mp4');
+
+let itens = [
+  ...FOTOS.map(src => ({tipo:'foto', src, ref:src, extra:false})),
+  ...VIDEOS.map(src => ({tipo:'video', src, ref:src, extra:false})),
+];
+// embaralha ordem de exibição
+itens = itens.sort(() => Math.random() - 0.5);
+
+/* ---- integração Firebase: admin, extras e ocultas ---- */
+let souAdminGal=false, ocultasGal=[], extrasGal=[];
+async function initGaleriaFirebase(){
+  let euGal=null;
+  try{euGal=localStorage.getItem('vasbobo:sessao');}catch(e){}
+  try{
+    const s=await dbGal.collection('shared').doc('vasbobo_v2').get();
+    if(s.exists){
+      const d=JSON.parse(s.data().value);
+      souAdminGal=!!(d.usuarios&&d.usuarios[euGal]&&d.usuarios[euGal].admin);
+    }
+  }catch(e){}
+  try{
+    const o=await dbGal.collection('shared').doc('galeria_ocultas').get();
+    if(o.exists) ocultasGal=o.data().lista||[];
+  }catch(e){}
+  try{
+    const q=await dbGal.collection('galeria_extras').get();
+    q.forEach(doc=>extrasGal.push({id:doc.id, ...doc.data()}));
+    extrasGal.sort((a,b)=>(b.quando||0)-(a.quando||0));
+  }catch(e){}
+  if(souAdminGal) document.getElementById('painelAdmin').classList.remove('oculto');
+  reconstruirItens();
+}
+function reconstruirItens(){
+  const estaticas=[
+    ...FOTOS.filter(src=>!ocultasGal.includes(src)).map(src=>({tipo:'foto',src,ref:src,extra:false})),
+    ...VIDEOS.filter(src=>!ocultasGal.includes(src)).map(src=>({tipo:'video',src,ref:src,extra:false})),
+  ];
+  const extras=extrasGal.map(e=>({tipo:'foto',src:e.dataUrl,ref:e.id,extra:true}));
+  itens=[...extras, ...estaticas.sort(()=>Math.random()-0.5)];
+  itensFiltrados=itens;
+  carregados=0;
+  document.getElementById('grid').innerHTML='';
+  carregarMais();
+}
+async function removerMidia(ref, extra){
+  if(!souAdminGal) return;
+  if(extra){
+    try{await dbGal.collection('galeria_extras').doc(ref).delete();}catch(e){}
+    extrasGal=extrasGal.filter(e=>e.id!==ref);
+  }else{
+    ocultasGal.push(ref);
+    try{await dbGal.collection('shared').doc('galeria_ocultas').set({lista:ocultasGal});}catch(e){}
+  }
+  reconstruirItens();
+}
+async function enviarFotos(files){
+  if(!souAdminGal||!files||!files.length) return;
+  const st=document.getElementById('uploadStatus');
+  let enviadas=0;
+  for(const file of files){
+    if(!file.type.startsWith('image/')) continue;
+    st.textContent='Enviando '+(enviadas+1)+' de '+files.length+'…';
+    const dataUrl=await comprimirImagem(file);
+    if(!dataUrl){continue;}
+    try{
+      const doc=await dbGal.collection('galeria_extras').add({dataUrl, quando:Date.now(), por:localStorage.getItem('vasbobo:sessao')||''});
+      extrasGal.unshift({id:doc.id, dataUrl, quando:Date.now()});
+      enviadas++;
+    }catch(e){}
+  }
+  st.textContent=enviadas?('✓ '+enviadas+' foto'+(enviadas>1?'s':'')+' adicionada'+(enviadas>1?'s':'')+' pra todo mundo!'):'Nenhuma foto enviada.';
+  setTimeout(()=>{st.textContent='';},4000);
+  document.getElementById('inputUpload').value='';
+  reconstruirItens();
+}
+function comprimirImagem(file){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const max=1000;
+      let w=img.width,h=img.height;
+      if(w>max||h>max){const r=Math.min(max/w,max/h);w=Math.round(w*r);h=Math.round(h*r);}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      const dataUrl=c.toDataURL('image/jpeg',0.7);
+      resolve(dataUrl.length<900000?dataUrl:null);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);resolve(null);};
+    img.src=url;
+  });
+}
+
+let itensFiltrados = itens;
+let indiceAtual = 0;
+let carregados = 0;
+const LOTE = 30;
+
+function filtrar(tipo, btn) {
+  document.querySelectorAll('.filtro').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  if (tipo === 'todos') itensFiltrados = itens;
+  else if (tipo === 'fotos') itensFiltrados = itens.filter(i => i.tipo === 'foto');
+  else itensFiltrados = itens.filter(i => i.tipo === 'video');
+  carregados = 0;
+  document.getElementById('grid').innerHTML = '';
+  carregarMais();
+}
+
+function carregarMais() {
+  const grid = document.getElementById('grid');
+  const fim = Math.min(carregados + LOTE, itensFiltrados.length);
+  for (let i = carregados; i < fim; i++) {
+    const item = itensFiltrados[i];
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.onclick = () => abrirLightbox(i);
+    const xBtn = souAdminGal ? `<button class="remover-x" onclick="event.stopPropagation();removerMidia('${item.ref}',${item.extra})">✕</button>` : '';
+    if (item.tipo === 'foto') {
+      div.innerHTML = xBtn + `<img src="${item.src}" loading="lazy" alt="Foto do grupo">`;
+    } else {
+      div.innerHTML = xBtn + `<video src="${item.src}" preload="metadata" muted></video><div class="play">▶</div>`;
+    }
+    grid.appendChild(div);
+  }
+  carregados = fim;
+  document.getElementById('contagem').textContent = `${itensFiltrados.length} arquivo${itensFiltrados.length===1?'':'s'}`;
+}
+
+function abrirLightbox(indice) {
+  indiceAtual = indice;
+  mostrarItemLightbox();
+  document.getElementById('lightbox').classList.add('on');
+}
+
+function mostrarItemLightbox() {
+  const item = itensFiltrados[indiceAtual];
+  const conteudo = document.getElementById('lbConteudo');
+  const antigo = conteudo.querySelector('img,video');
+  if (antigo) antigo.remove();
+  let el;
+  if (item.tipo === 'foto') {
+    el = document.createElement('img');
+    el.src = item.src;
+  } else {
+    el = document.createElement('video');
+    el.src = item.src;
+    el.controls = true;
+    el.autoplay = true;
+  }
+  conteudo.insertBefore(el, conteudo.firstChild);
+  document.getElementById('lbContador').textContent = `${indiceAtual+1} / ${itensFiltrados.length}`;
+}
+
+function navegar(delta) {
+  indiceAtual = (indiceAtual + delta + itensFiltrados.length) % itensFiltrados.length;
+  mostrarItemLightbox();
+}
+
+function fecharLightbox() {
+  document.getElementById('lightbox').classList.remove('on');
+  const v = document.querySelector('#lbConteudo video');
+  if (v) v.pause();
+}
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('on')) return;
+  if (e.key === 'ArrowLeft') navegar(-1);
+  if (e.key === 'ArrowRight') navegar(1);
+  if (e.key === 'Escape') fecharLightbox();
+});
+
+window.addEventListener('scroll', () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
+    if (carregados < itensFiltrados.length) carregarMais();
+  }
+});
+
+carregarMais();
+initGaleriaFirebase();
+
+window.addEventListener('scroll',()=>{
+  const b=document.getElementById('topoBtn');
+  if(b)b.classList.toggle('on',window.scrollY>500);
+});
+
+</script>
+<button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
+</body>
+</html>
