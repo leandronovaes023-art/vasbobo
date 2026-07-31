@@ -61,14 +61,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
 <meta property="og:url" content="https://vasbobo.netlify.app/">
 <meta property="og:title" content="App - Vasbobo — Estresse coletivo">
 <meta property="og:description" content="O QG do grupo. Palpite, MVP, nota pros jogadores e zoação garantida na resenha. Direto do Bar da Tia 🖤🤍">
-<meta property="og:image" content="https://vasbobo.netlify.app/preview.jpg">
+<meta property="og:image" content="https://vasbobo.netlify.app/icons/icon-512.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="pt_BR">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="App - Vasbobo — Estresse coletivo">
 <meta name="twitter:description" content="O QG do grupo. Palpite, MVP, nota pros jogadores e zoação garantida na resenha.">
-<meta name="twitter:image" content="https://vasbobo.netlify.app/preview.jpg">
+<meta name="twitter:image" content="https://vasbobo.netlify.app/icons/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -2026,6 +2026,10 @@ async function sair(){
 function mudarAba(a){
   aba=a;jogoAberto=null;
   try{sessionStorage.setItem('vasbobo:aba',a);}catch(e){}
+  try{
+    const novoHash=a==='jogos'?'':('#'+a);
+    if(location.hash!==novoHash)history.replaceState(null,'',location.pathname+novoHash);
+  }catch(e){}
   const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',partidas:'tabPartidas',castigos:'tabCastigos',elenco:'tabElenco',admin:'tabAdmin',raiox:'tabRaioX'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
@@ -3388,10 +3392,9 @@ function iniciarMidiaJanela(){
     eu=sessao;
     entrarNoApp();
     const h=location.hash.replace('#','');
-    const validas=['rank','castigos','partidas','elenco','admin','jogadores'];
+    const validas=['rank','castigos','partidas','elenco','admin','jogadores','raiox'];
     if(validas.includes(h)){
       mudarAba(h);
-      history.replaceState(null,'',location.pathname); // consome o link, refresh não fica preso nele
     }else{
       let salva=null;
       try{salva=sessionStorage.getItem('vasbobo:aba');}catch(e){}
