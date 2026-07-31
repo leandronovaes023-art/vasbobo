@@ -189,6 +189,21 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .palp-ok{color:var(--verde)} .palp-falta{color:var(--cinza)}
 
   .jogo-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border:1px solid var(--linha);border-radius:11px;margin-bottom:8px;background:var(--carvao2);cursor:pointer;width:100%;text-align:left;color:var(--branco);font-family:inherit;backdrop-filter:blur(6px)}
+  .cal-filtros{display:flex;gap:6px;flex-wrap:wrap}
+  .cal-filtro{background:var(--carvao2);border:1px solid var(--linha);color:var(--cinza);border-radius:99px;padding:6px 13px;font-size:.74rem;font-weight:700;letter-spacing:.02em;cursor:pointer;font-family:'Inter',sans-serif}
+  .cal-filtro.ativa{background:var(--vermelho);border-color:var(--vermelho);color:#fff}
+  .cal-mes{color:#9A9AA5;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:5px}
+  .cal-mes:first-child{margin-top:0}
+  .cal-linha{display:grid;grid-template-columns:78px 1fr 64px 1fr;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.78rem;color:#EDEDF0}
+  .cal-linha:last-child{border-bottom:none}
+  .cal-data{color:#9A9AA5;font-size:.72rem}
+  .cal-jogo{font-weight:700}
+  .cal-hora{color:#9A9AA5;font-size:.72rem;text-align:center}
+  .cal-comp{color:#9A9AA5;font-size:.7rem;text-align:right}
+  @media(max-width:480px){
+    .cal-linha{grid-template-columns:1fr;gap:2px;padding:9px 0}
+    .cal-data{order:1}.cal-jogo{order:2}.cal-hora{order:3;text-align:left}.cal-comp{order:4;text-align:left}
+  }
   .jogo-item:hover{border-color:var(--cinza)}
   .jogo-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:1.02rem;text-transform:uppercase;letter-spacing:.02em}
   .jogo-nome .x{color:var(--cinza)}
@@ -403,6 +418,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .fq-fechar:hover{border-color:#F2F0EA}
 .fq-fechar .cruz-btn{color:var(--vermelho);font-size:1.1em}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -2091,11 +2107,10 @@ function renderListaJogos(){
   }
 
   const encerradosIds=lista.filter(([i,j])=>j.resultado).map(([i])=>i);
-  const ultimoEncerrado=encerradosIds.length?encerradosIds[encerradosIds.length-1]:null;
   let arquivados=0;
   let mesAtual='';
   lista.forEach(([id,j])=>{
-    if(j.resultado&&id!==ultimoEncerrado){arquivados++;return;}
+    if(j.resultado){arquivados++;return;}
     const mes=nomeMes(j.data);
     if(mes!==mesAtual){mesAtual=mes;html+='<div class="mes-sep">'+mes+'</div>';}
     const s=statusJogo(j);
@@ -2106,8 +2121,8 @@ function renderListaJogos(){
       '<span style="display:flex;align-items:center;gap:10px">'+(placarTexto(j,true)?'<span class="placar-final">'+placarTexto(j,true)+(j.resultado?'':' (ao vivo)')+'</span>':'')+'<span class="selo '+cls+'">'+txt+'</span></span></button>';
   });
   if(arquivados>0){
-    html+='<button class="jogo-item" onclick="mudarAba(\'partidas\')"><span><span class="jogo-nome">🗂️ Jogos anteriores</span>'+
-      '<div class="meta">'+arquivados+' jogo'+(arquivados>1?'s':'')+' encerrado'+(arquivados>1?'s':'')+' guardado'+(arquivados>1?'s':'')+' na aba Partidas</div></span>'+
+    html+='<button class="jogo-item" onclick="mudarAba(\'partidas\')"><span><span class="jogo-nome">✠ Jogos e Calendário CRVG</span>'+
+      '<div class="meta">'+arquivados+' jogo'+(arquivados>1?'s':'')+' encerrado'+(arquivados>1?'s':'')+' guardado'+(arquivados>1?'s':'')+' ali</div></span>'+
       '<span class="selo s-encerrado">arquivo</span></button>';
   }
   sec.innerHTML=html;
@@ -2402,7 +2417,44 @@ async function salvarDataHora(){
   render();
 }
 
-/* =================== ABA PARTIDAS (gestão, só admin) =================== */
+/* =================== ABA JOGOS E CALENDÁRIO CRVG =================== */
+let filtroCalendarioComp='todas';
+let mostrarTodosEncerrados=false;
+function fmtDataCal(j){
+  const d=new Date(j.data+'T12:00:00');
+  return cap(d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}));
+}
+function toggleTodosEncerrados(){ mostrarTodosEncerrados=!mostrarTodosEncerrados; renderPartidas(); }
+function mudarFiltroCalendario(c){ filtroCalendarioComp=c; renderPartidas(); }
+async function gerarImagemCalendario(){
+  const el=document.getElementById('calendarioParaImagem');
+  if(!el||typeof html2canvas==='undefined'){avisar('Não consegui gerar a imagem agora. Tenta de novo em alguns segundos.');return null;}
+  return await html2canvas(el,{backgroundColor:'#17171B',scale:2});
+}
+async function compartilharCalendarioImagem(){
+  const canvas=await gerarImagemCalendario();
+  if(!canvas)return;
+  canvas.toBlob(async (blob)=>{
+    const file=new File([blob],'calendario-vasco.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file],title:'Calendário do Vasco — Vasbobo'}); }catch(e){}
+    }else{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='calendario-vasco.png'; a.click();
+      avisar('Esse navegador não deixa compartilhar direto — baixei a imagem, é só anexar no WhatsApp.');
+    }
+  },'image/png');
+}
+async function copiarCalendarioImagem(){
+  const canvas=await gerarImagemCalendario();
+  if(!canvas)return;
+  canvas.toBlob(async (blob)=>{
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      avisar('Imagem copiada! Já pode colar no WhatsApp.');
+    }catch(e){ avisar('Esse navegador não deixa copiar imagem — usa o botão de compartilhar.'); }
+  },'image/png');
+}
 function renderPartidas(){
   const sec=document.getElementById('secPartidas');
   const adm=souAdmin();
@@ -2420,16 +2472,70 @@ function renderPartidas(){
   const lista=jogosOrdenados();
   const encerrados=lista.filter(([i,j])=>j.resultado).reverse();
   const futuros=lista.filter(([i,j])=>!j.resultado);
-  html+='<div class="card"><h2>🗂️ Jogos encerrados</h2><p class="nota-rodape" style="margin:0 0 12px">O arquivo da temporada — do mais recente para o mais antigo. Abra qualquer jogo para rever palpites, notas e a resenha.</p>';
-  if(!encerrados.length) html+='<div class="vazio">Nenhum jogo encerrado ainda.</div>';
-  encerrados.forEach(([id,j])=>{
-    html+='<div class="jogo-item" style="cursor:default"><span><span class="jogo-nome">'+nomeJogo(j)+'</span>'+
-      '<div class="meta">'+fmtData(j)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+Object.keys(j.palpites).length+' palpite(s)</div></span>'+
-      '<span style="display:flex;align-items:center;gap:8px"><span class="placar-final">'+placarTexto(j,true)+'</span>'+
-      '<button class="btn fantasma" onclick="abrirJogo(\''+id+'\');mudarAbaDetalhe()">abrir</button>'+
-      (adm?'<button class="btn-x" onclick="excluirJogoId(\''+id+'\')">excluir</button>':'')+'</span></div>';
-  });
+
+  // --- Jogos: só o mais recente encerrado + link pra ver todo o histórico ---
+  html+='<div class="card"><h2>🗂️ Jogos</h2><p class="nota-rodape" style="margin:0 0 12px">O jogo mais recente que a galera já palpitou.</p>';
+  if(!encerrados.length){
+    html+='<div class="vazio">Nenhum jogo encerrado ainda.</div>';
+  }else{
+    const [id0,j0]=encerrados[0];
+    html+='<div class="jogo-item" style="cursor:default"><span><span class="jogo-nome">'+nomeJogo(j0)+'</span>'+
+      '<div class="meta">'+fmtData(j0)+' · '+esc(j0.competicao)+(j0.fase?' ('+esc(j0.fase)+')':'')+' · '+Object.keys(j0.palpites).length+' palpite(s)</div></span>'+
+      '<span style="display:flex;align-items:center;gap:8px"><span class="placar-final">'+placarTexto(j0,true)+'</span>'+
+      '<button class="btn fantasma" onclick="abrirJogo(\''+id0+'\');mudarAbaDetalhe()">abrir</button>'+
+      (adm?'<button class="btn-x" onclick="excluirJogoId(\''+id0+'\')">excluir</button>':'')+'</span></div>';
+    if(encerrados.length>1){
+      html+='<button class="btn fantasma" style="width:100%;margin-top:10px" onclick="toggleTodosEncerrados()">'+
+        (mostrarTodosEncerrados?'▲ Esconder o histórico':'Confira todos os jogos e palpites de cada Vasbobo ▾')+'</button>';
+      if(mostrarTodosEncerrados){
+        html+='<div style="margin-top:10px">';
+        encerrados.slice(1).forEach(([id,j])=>{
+          html+='<div class="jogo-item" style="cursor:default"><span><span class="jogo-nome">'+nomeJogo(j)+'</span>'+
+            '<div class="meta">'+fmtData(j)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+Object.keys(j.palpites).length+' palpite(s)</div></span>'+
+            '<span style="display:flex;align-items:center;gap:8px"><span class="placar-final">'+placarTexto(j,true)+'</span>'+
+            '<button class="btn fantasma" onclick="abrirJogo(\''+id+'\');mudarAbaDetalhe()">abrir</button>'+
+            (adm?'<button class="btn-x" onclick="excluirJogoId(\''+id+'\')">excluir</button>':'')+'</span></div>';
+        });
+        html+='</div>';
+      }
+    }
+  }
   html+='</div>';
+
+  // --- Calendário: só jogos futuros, filtrável por competição, com imagem compartilhável ---
+  const comps=[...new Set(futuros.map(([i,j])=>j.competicao).filter(Boolean))];
+  const filtrados=filtroCalendarioComp==='todas'?futuros:futuros.filter(([i,j])=>j.competicao===filtroCalendarioComp);
+  let mesAtual='',linhasCal='';
+  if(!filtrados.length){
+    linhasCal='<div class="vazio" style="color:#B8B8C0;border-color:rgba(255,255,255,.15)">Nenhum jogo futuro cadastrado ainda.</div>';
+  }else{
+    filtrados.forEach(([id,j])=>{
+      const mes=nomeMes(j.data);
+      if(mes!==mesAtual){mesAtual=mes;linhasCal+='<div class="cal-mes">'+mesAtual+'</div>';}
+      linhasCal+='<div class="cal-linha"><span class="cal-data">'+fmtDataCal(j)+'</span>'+
+        '<span class="cal-jogo">'+nomeJogo(j)+'</span>'+
+        '<span class="cal-hora">'+(j.hora||'A definir')+'</span>'+
+        '<span class="cal-comp">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</span></div>';
+    });
+  }
+  html+='<div class="card"><h2>✠ Calendário</h2>'+
+    '<p class="nota-rodape" style="margin:0 0 10px">Assim que um jogo termina, ele sai daqui — fica só o que vem pela frente.</p>'+
+    '<div class="cal-filtros">'+
+      '<button class="cal-filtro'+(filtroCalendarioComp==='todas'?' ativa':'')+'" onclick="mudarFiltroCalendario(\'todas\')">Todos</button>'+
+      comps.map(c=>'<button class="cal-filtro'+(filtroCalendarioComp===c?' ativa':'')+'" onclick="mudarFiltroCalendario(\''+c.replace(/'/g,"\\'")+'\')">'+esc(c)+'</button>').join('')+
+    '</div>'+
+    '<div id="calendarioParaImagem" style="background:#17171B;padding:16px;border-radius:12px;margin-top:12px">'+
+      '<div style="font-family:\'Anton\',sans-serif;text-transform:uppercase;letter-spacing:.03em;color:#fff;text-align:center;margin-bottom:12px">'+
+        '✠ Calendário — Vasco da Gama<span style="display:block;font-family:Inter,sans-serif;text-transform:none;letter-spacing:0;color:#9A9AA5;font-size:.7rem;margin-top:3px;font-weight:400">Direto do Bar da Tia · Vasbobo</span>'+
+      '</div>'+
+      linhasCal+
+    '</div>'+
+    '<p class="nota-rodape" style="margin:10px 0 0">Clique e compartilhe no WhatsApp — envia a imagem certinha, prontinha pra colar no grupo.</p>'+
+    '<div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">'+
+      '<button class="btn" onclick="compartilharCalendarioImagem()">📲 Compartilhar no WhatsApp</button>'+
+      '<button class="btn fantasma" onclick="copiarCalendarioImagem()">📋 Copiar imagem</button>'+
+    '</div></div>';
+
   if(adm){
     html+='<div class="card"><h2>📅 Próximos jogos (gestão) <span class="adm">admin</span></h2>';
     if(!futuros.length) html+='<div class="vazio">Nenhum jogo futuro cadastrado.</div>';
