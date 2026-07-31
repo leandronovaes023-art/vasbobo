@@ -62,12 +62,10 @@ async function chamarClaude(prompt,maxTokens){
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
 body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px;line-height:1.5}
-body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg,#F4F2ED 0%,#EFE9E2 50%,#F4F2ED 100%);z-index:-1}
 
 .voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
 .voltar:hover{border-color:var(--branco);color:var(--branco)}
 
-main{max-width:820px;margin:0 auto;padding:30px 20px}
 .page-title h1{font-family:'Anton',sans-serif;font-size:clamp(1.8rem,5vw,2.6rem);text-transform:uppercase;line-height:1}
 .page-title p{color:var(--cinza);font-size:.88rem;margin-top:8px;line-height:1.6}
 .page-title{padding:18px 22px;background:rgba(244,242,237,.92);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
@@ -163,7 +161,7 @@ main{max-width:820px;margin:0 auto;padding:30px 20px}
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
-  main{max-width:1320px;margin:0 auto;padding:20px 20px 60px}
+  main{max-width:1320px;margin:0 auto;padding:16px 20px 60px}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
 .comp-tabs{display:flex;gap:8px;flex-wrap:wrap}
@@ -220,12 +218,23 @@ main{max-width:820px;margin:0 auto;padding:30px 20px}
   </div>
   <script>
     let deferredPrompt = null;
+    let jaConfirmouInstalacao = false;
     window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; });
     async function instalarApp(){
       if (deferredPrompt){
         deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
+        const escolha = await deferredPrompt.userChoice;
         deferredPrompt = null;
+        if (escolha && escolha.outcome === 'accepted'){
+          if (typeof avisar === 'function') avisar('Instalando o app…', true);
+          setTimeout(()=>{
+            if (jaConfirmouInstalacao) return;
+            jaConfirmouInstalacao = true;
+            if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
+            const btn = document.getElementById('btnInstalarApp');
+            if (btn) btn.classList.add('oculto');
+          }, 5000);
+        }
       } else {
         document.getElementById('modalInstalar').classList.remove('oculto');
       }
@@ -233,6 +242,9 @@ main{max-width:820px;margin:0 auto;padding:30px 20px}
     window.addEventListener('appinstalled', ()=>{
       const btn = document.getElementById('btnInstalarApp');
       if (btn) btn.classList.add('oculto');
+      if (jaConfirmouInstalacao) return;
+      jaConfirmouInstalacao = true;
+      if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
     });
   </script>
 

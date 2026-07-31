@@ -632,12 +632,23 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
   <script>
     let deferredPrompt = null;
+    let jaConfirmouInstalacao = false;
     window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; });
     async function instalarApp(){
       if (deferredPrompt){
         deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
+        const escolha = await deferredPrompt.userChoice;
         deferredPrompt = null;
+        if (escolha && escolha.outcome === 'accepted'){
+          if (typeof avisar === 'function') avisar('Instalando o app…', true);
+          setTimeout(()=>{
+            if (jaConfirmouInstalacao) return;
+            jaConfirmouInstalacao = true;
+            avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
+            const btn = document.getElementById('btnInstalarApp');
+            if (btn) btn.classList.add('oculto');
+          }, 5000);
+        }
       } else {
         document.getElementById('modalInstalar').classList.remove('oculto');
       }
@@ -645,6 +656,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
     window.addEventListener('appinstalled', ()=>{
       const btn = document.getElementById('btnInstalarApp');
       if (btn) btn.classList.add('oculto');
+      if (jaConfirmouInstalacao) return;
+      jaConfirmouInstalacao = true;
       if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
     });
   </script>
@@ -657,7 +670,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos/Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab" id="tabPerfilPsico" onclick="mudarAba('perfilpsico')">🃏 Perfil Psicótico<span id="tabPpMes"></span></button>
+    <button class="tab oculto" id="tabPerfilPsico" onclick="mudarAba('perfilpsico')">🃏 Perfil Psicótico<span id="tabPpMes"></span></button>
     <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
@@ -730,7 +743,7 @@ const SYNC_POS_MS=30*1000;          // logo após o fim esperado: busca a cada 3
 const SYNC_POS_LIMITE_MIN=30;       // ...por até 30 min depois do fim esperado
 const SYNC_FALLBACK_MS=15*60000;    // passado esse prazo (jogo esticou: prorrogação/atraso), espaça as buscas
 const SEM_GOL='__semgol__';
-const ORDEM_POS=['Goleiro','Lateral-direito','Lateral-esquerdo','Zagueiro','Volante','Meia','Ponta/Atacante','Centroavante'];
+const ORDEM_POS=['Goleiro','Lateral','Zagueiro','Meio-Campo','Atacante'];
 
 const JOGADORES_INICIAIS=[
  ['p_leojardim','1','Léo Jardim','Goleiro'],
@@ -1971,6 +1984,8 @@ function entrarNoApp(){
   document.getElementById('tabPartidas').classList.remove('oculto');
   document.getElementById('tabElenco').classList.toggle('oculto',!adm);
   document.getElementById('tabJogadores').classList.toggle('oculto',!adm);
+  document.getElementById('tabPerfilPsico').classList.toggle('oculto',!adm);
+  document.getElementById('tabPerfilPsico').classList.toggle('oculto',!adm);
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
   render();
@@ -2244,10 +2259,7 @@ function renderDetalhe(){
   const ne=r?(casa?r.v:r.a):'–', nd=r?(casa?r.a:r.v):'–';
 
   let html='<button class="btn" onclick="voltarLista()" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;width:auto">← Voltar à Tela Principal</button>'+
-  '<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div>'+
-  '<div class="meta">'+fmtData(j)+' '+badgeTransmissao(j,true)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>'+
-  '<div class="placar-grande" style="margin-top:8px"><span>'+pe+'</span><span class="num">'+ne+'</span><span class="x">×</span><span class="num">'+nd+'</span><span>'+pd+'</span>'+(j.parcial&&!j.resultado?'<span class="selo s-andamento">parcial ao vivo</span>':'')+'</div></div>'+
-  '<span class="selo '+cls+'">'+txt+'</span></div>';
+  '<div class="card"><div class="meta" style="font-size:.85rem">'+fmtData(j)+' '+badgeTransmissao(j,true)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>';
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
   if(j.emCampoInfo&&souAdmin())html+='<div class="auto-info">📋 Lista de quem entrou em campo registrada em '+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' ('+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span></div>';
@@ -2389,7 +2401,13 @@ function renderAvaliacaoCard(j,s){
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
       '<span class="media-chip '+(media?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media?media.media.toFixed(1).replace('.',','):'–')+'<small id="votos_'+p.id+'">'+(media?media.n+' voto'+(media.n===1?'':'s'):'sem votos')+'</small></span></span></div>'+
       botoesNota+
-      '<div class="aval-controles"><input placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" onblur="salvarAvaliacao(\''+p.id+'\',\'com\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()">'+
+      '<div class="aval-controles"><div style="display:flex;gap:6px;align-items:center" id="comWrap_'+p.id+'"'+((minha.com||'')?' style="display:none"':'')+'>'+
+      '<input id="comInput_'+p.id+'" placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" onkeydown="if(event.key===\'Enter\'){event.preventDefault();confirmarComentario(\''+p.id+'\');}">'+
+      '<button type="button" onclick="confirmarComentario(\''+p.id+'\')" style="background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:0 14px;height:44px;font-weight:800;font-size:.78rem;cursor:pointer;flex:none">OK</button>'+
+      '</div>'+
+      '<div id="comRegistrado_'+p.id+'" class="salvo-tick on" style="display:'+((minha.com||'')?'flex':'none')+';align-items:center;font-size:.82rem;color:var(--cinza);gap:8px">'+
+      ((minha.com||'').indexOf('🎙️')===0||(minha.com||'').indexOf('🎙️')>=0?'🎙️ Áudio registrado':'✓ Comentário registrado')+
+      ' <button type="button" onclick="reabrirComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--vermelho);text-decoration:underline;cursor:pointer;font-size:.78rem">editar</button></div>'+
       '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+'</button></div>'+
       (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+(+c.nota).toLocaleString('pt-BR')+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
       '</div>';
@@ -2497,6 +2515,23 @@ function coletarComentarios(j,pid){
     if(av&&av.nota!==undefined&&av.nota!==null&&av.nota!=='')out.push({user,nota:av.nota,com:av.com||''});
   });
   return out;
+}
+async function confirmarComentario(pid){
+  const input=document.getElementById('comInput_'+pid);
+  if(!input)return;
+  const valor=input.value.trim();
+  if(!valor)return;
+  await salvarAvaliacao(pid,'com',valor);
+  const wrap=document.getElementById('comWrap_'+pid), reg=document.getElementById('comRegistrado_'+pid);
+  if(wrap)wrap.style.display='none';
+  if(reg)reg.style.display='flex';
+}
+function reabrirComentario(pid){
+  const wrap=document.getElementById('comWrap_'+pid), reg=document.getElementById('comRegistrado_'+pid);
+  if(wrap)wrap.style.display='flex';
+  if(reg)reg.style.display='none';
+  const input=document.getElementById('comInput_'+pid);
+  if(input)input.focus();
 }
 async function salvarAvaliacao(pid,campo,valor){
   const id=jogoAberto;
@@ -2813,8 +2848,11 @@ function mediasJogador(pid){
 function renderElenco(){
   const sec=document.getElementById('secElenco');
   let html='<div class="card"><h2>Elenco cruzmaltino</h2><p class="nota-rodape" style="margin:0">Gestão do elenco (só admins veem esta aba). Remover um jogador <b>não apaga nada</b>: palpites, notas e bônus antigos ligados a ele continuam valendo em todos os jogos — ele só some das listas de escolha dos próximos.</p></div>'+
+  '<div class="card" style="border-color:var(--vermelho)"><h2>🔄 Sincronizar com a lista oficial</h2>'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Atualiza posições, adiciona quem falta e desativa quem não está mais na lista — sem apagar histórico de ninguém.</p>'+
+  '<button class="btn" onclick="sincronizarElencoOficial()">Sincronizar agora</button></div>'+
   '<div class="card"><details open><summary>+ Cadastrar jogador</summary><div class="grid g3" style="margin-top:12px">'+
-  '<div><label for="npNum">Número</label><input id="npNum" placeholder="Ex.: 45" maxlength="3"></div>'+
+  '<div><label for="npNum">Número (opcional)</label><input id="npNum" placeholder="Ex.: 45" maxlength="3"></div>'+
   '<div><label for="npNome">Nome</label><input id="npNome" placeholder="Nome do jogador"></div>'+
   '<div><label for="npPos">Posição</label><select id="npPos">'+ORDEM_POS.map(p=>'<option>'+p+'</option>').join('')+'</select></div></div>'+
   '<button class="btn" style="margin-top:12px" onclick="addJogador()">Cadastrar</button></details></div>';
@@ -2833,6 +2871,30 @@ function renderElenco(){
       inativos.map(p=>'<div class="linha-tabela"><span>'+(p.num?p.num+' · ':'')+esc(p.nome)+' <small style="color:var(--cinza)">'+esc(p.pos)+'</small></span><button class="btn fantasma" onclick="reativarJogador(\''+p.id+'\')">Reativar</button></div>').join('')+'</details></div>';
   }
   sec.innerHTML=html;
+}
+const ELENCO_OFICIAL=[
+  ['Goleiro',['Léo Jardim','Daniel Fuzato']],
+  ['Lateral',['Puma Rodríguez','Paulo Henrique','Lucas Piton','Cuiabano','Paulinho']],
+  ['Zagueiro',['Robert Renan','Carlos Cuesta','Alan Saldivia','Lucas Freitas','Walace Fernandes']],
+  ['Meio-Campo',['Thiago Mendes','Cauan Barros','Ramon Rique','Tchê Tchê','Johan Rojas','Jair','JP - João Pedro','Mateus Carvalho']],
+  ['Atacante',['Andrés Gómez','Nuno Moreira','Adson','David','Brenner','Claudio Spinelli','Marino Hinestroza']],
+];
+async function sincronizarElencoOficial(){
+  if(!(await confirmar('Isso vai atualizar as posições, adicionar quem falta e desativar quem não está mais na lista oficial (sem apagar histórico). Continuar?')))return;
+  const nomesOficiais=new Set();
+  await mutar(()=>{
+    ELENCO_OFICIAL.forEach(([pos,nomes])=>{
+      nomes.forEach(nome=>{
+        nomesOficiais.add(nome);
+        const existente=dados.jogadores.find(p=>p.nome===nome);
+        if(existente){ existente.pos=pos; existente.ativo=true; }
+        else{ dados.jogadores.push({id:'p'+Date.now()+Math.random().toString(36).slice(2,6),num:'',nome,pos,ativo:true}); }
+      });
+    });
+    dados.jogadores.forEach(p=>{ if(!nomesOficiais.has(p.nome))p.ativo=false; });
+  });
+  avisar('Elenco sincronizado com a lista oficial!',true);
+  render();
 }
 async function addJogador(){
   const nome=document.getElementById('npNome').value.trim();
@@ -3266,10 +3328,23 @@ async function renderPerfilPsico(){
 }
 
 /* =================== CONFIGURAÇÕES (só admin) =================== */
+async function limparMinhasAvaliacoes(){
+  if(!(await confirmar('Isso vai apagar TODAS as suas notas, comentários e áudios (de "'+eu+'") em todos os jogos. Não dá pra desfazer. Continuar?')))return;
+  await mutar(()=>{
+    Object.values(dados.jogos).forEach(j=>{
+      if(j.avaliacoes&&j.avaliacoes[eu])delete j.avaliacoes[eu];
+    });
+  });
+  avisar('Suas avaliações de teste foram apagadas.',true);
+  render();
+}
 function renderAdmin(){
   const sec=document.getElementById('secAdmin');
   let html='<div class="card"><h2>Geral</h2>'+
   '<label style="display:flex;align-items:center;gap:10px;font-size:.9rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" style="width:auto" '+(modoTeste()?'checked':'')+' onchange="alternarModoTeste(this.checked)"> <span><b>Modo teste</b> — libera palpites e avaliações fora de hora, para experimentar o app. Desligue antes do uso valendo.</span></label></div>';
+  html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧹 Limpar minhas avaliações de teste</h2>'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Apaga suas notas/comentários/áudios em todos os jogos (só os seus — de "'+esc(eu)+'"). Não mexe em ninguém mais nem no placar dos jogos.</p>'+
+  '<button class="btn" style="background:var(--vermelho)" onclick="limparMinhasAvaliacoes()">Apagar minhas avaliações</button></div>';
   html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧪 Testar roleta e mensagens da rodada</h2>'+
   '<p class="nota-rodape" style="margin:0 0 12px">Simula as 3 telas sem gravar nada real — nada disso mexe no histórico de castigos do grupo. Só você (admin) vê este painel.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
