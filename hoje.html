@@ -245,6 +245,13 @@ function sairSatelite(){
       <button class="comp-tab" onclick="mudarCompeticao('sulamericana')">Sul-Americana</button>
     </div>
     <p class="nota-rodape" style="margin:8px 0 12px">Dados ao vivo fornecidos por 365Scores — jogos de hoje e os próximos, atualizados sozinhos.</p>
+    <div class="admin-aba-toggle oculto" data-tab="admin" id="adminAbaToggle" style="margin-bottom:12px;padding:10px;background:rgba(255,255,255,.05);border:1px dashed var(--linha);border-radius:8px">
+      <label style="font-size:.75rem;color:var(--cinza);display:block;margin-bottom:6px">⚙️ Admin: aba que abre por padrão nos widgets</label>
+      <select id="selectAbaPadrao" onchange="mudarAbaPadrao(this.value)" style="background:#111;color:#fff;border:1px solid var(--linha);border-radius:6px;padding:6px 10px;font-size:.82rem">
+        <option value="resumo">Resumo (padrão do widget — mostra hoje + próximos)</option>
+        <option value="jogos">Jogos (só partidas que ainda não começaram)</option>
+      </select>
+    </div>
     <div class="widget-wrap" id="wCompBrasileirao">
       <div data-widget-type="entityScores" data-entity-type="league" data-entity-id="113" data-lang="pt-br" data-widget-id="c0129f99-3e1c-44a9-a333-92fdddf42fbe"></div>
     </div>
@@ -268,12 +275,36 @@ function sairSatelite(){
       Object.values(mapa).forEach(id=>document.getElementById(id).classList.add('oculto'));
       document.getElementById(mapa[c]).classList.remove('oculto');
     }
-    // O widget do 365Scores abre por padrão na aba "Resumo", que às vezes mostra dado errado
-    // (tudo como "Adiado"). Como o widget renderiza dentro da nossa própria página (não é
-    // um iframe isolado), assim que a aba "Jogos" aparecer no DOM a gente clica nela sozinho,
-    // uma vez por widget, pra já abrir na visão correta.
+    // Por padrão o widget abre na aba "Resumo" (mostra hoje + próximos jogos juntos).
+    // O admin pode trocar pra "Jogos" (só partidas futuras) no controle acima, e isso fica
+    // salvo pra todo mundo. Como o widget renderiza dentro da nossa própria página (não é
+    // um iframe isolado), a gente consegue clicar na aba certa via JavaScript quando precisar.
     (function autoAbrirAbaJogos(){
       const DIAS = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+      let ABA_PREFERIDA = 'resumo';
+      window.mudarAbaPadrao = async function(valor){
+        ABA_PREFERIDA = valor;
+        document.querySelectorAll('.widget-wrap').forEach(w=>{ delete w.dataset.jogosClicado; });
+        try{
+          const snap = await dbHoje.collection('shared').doc('vasbobo_v2').get();
+          if(!snap.exists) return;
+          const dadosApp = JSON.parse(snap.data().value);
+          if(!dadosApp.config) dadosApp.config = {};
+          dadosApp.config.abaHojeWidget = valor;
+          await dbHoje.collection('shared').doc('vasbobo_v2').set({value: JSON.stringify(dadosApp), updatedAt: Date.now()});
+        }catch(e){ alert('Erro ao salvar a preferência. Tenta de novo.'); }
+      };
+      async function carregarPreferenciaAba(){
+        try{
+          const snap = await dbHoje.collection('shared').doc('vasbobo_v2').get();
+          if(snap.exists){
+            const dadosApp = JSON.parse(snap.data().value);
+            ABA_PREFERIDA = (dadosApp.config && dadosApp.config.abaHojeWidget) || 'resumo';
+            const sel = document.getElementById('selectAbaPadrao');
+            if(sel) sel.value = ABA_PREFERIDA;
+          }
+        }catch(e){}
+      }
       function acharEClicar(wrap){
         const els = wrap.querySelectorAll('*');
         for (const el of els){
@@ -310,7 +341,7 @@ function sairSatelite(){
         rodando = true;
         try{
           document.querySelectorAll('.widget-wrap').forEach(w=>{
-            if (!w.dataset.jogosClicado && acharEClicar(w)) w.dataset.jogosClicado = '1';
+            if (ABA_PREFERIDA === 'jogos' && !w.dataset.jogosClicado && acharEClicar(w)) w.dataset.jogosClicado = '1';
             adicionarDiaSemana(w);
           });
         } finally { rodando = false; }
@@ -320,14 +351,16 @@ function sairSatelite(){
         clearTimeout(debounceId);
         debounceId = setTimeout(tentarTodos, 300);
       }
-      const observer = new MutationObserver(tentarTodosDebounced);
-      observer.observe(document.body, {childList:true, subtree:true});
-      let tentativas = 0;
-      const intervalo = setInterval(()=>{
-        tentativas++;
-        tentarTodos();
-        if (tentativas > 40) clearInterval(intervalo);
-      }, 500);
+      carregarPreferenciaAba().then(()=>{
+        const observer = new MutationObserver(tentarTodosDebounced);
+        observer.observe(document.body, {childList:true, subtree:true});
+        let tentativas = 0;
+        const intervalo = setInterval(()=>{
+          tentativas++;
+          tentarTodos();
+          if (tentativas > 40) clearInterval(intervalo);
+        }, 500);
+      });
     })();
   </script>
 
