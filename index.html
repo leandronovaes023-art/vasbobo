@@ -233,8 +233,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .aval-topo{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .aval-nome{font-weight:700}
   .aval-nome small{color:var(--cinza);font-weight:400;margin-left:6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
-  .aval-controles{display:grid;grid-template-columns:110px 1fr;gap:10px;margin-top:10px}
-  @media(max-width:600px){.aval-controles{grid-template-columns:1fr}}
+  .aval-controles{display:grid;grid-template-columns:110px 1fr 44px;gap:10px;margin-top:10px}
+  @media(max-width:600px){.aval-controles{grid-template-columns:1fr 44px}}
+  .btn-mic{background:var(--carvao2);border:1px solid var(--linha);border-radius:9px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+  .btn-mic.gravando{background:var(--vermelho);color:#fff;border-color:var(--vermelho);animation:micPulso 1s ease-in-out infinite}
+  @keyframes micPulso{0%,100%{opacity:1}50%{opacity:.6}}
   .media-chip{font-family:'Anton',sans-serif;font-size:1.15rem;text-align:right;min-width:60px}
   .media-chip small{display:block;font-family:'Inter';font-size:.6rem;color:var(--cinza);letter-spacing:.1em;text-transform:uppercase}
   .n-alta{color:var(--verde)} .n-media{color:var(--ouro)} .n-baixa{color:var(--vermelho)}
@@ -623,7 +626,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos/Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">Jogadores</button>
+    <button class="tab" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
   </nav>
@@ -2102,6 +2105,22 @@ function renderListaJogos(){
   const lista=jogosOrdenados();
   let html='';
 
+  if(souAdmin()){
+    const agora=Date.now();
+    const pendentes=lista.filter(([id,j])=>{
+      if(j.resultado||!j.hora)return false;
+      const fim=inicioJogo(j).getTime()+DURACAO_JOGO_MIN*60000;
+      return agora-fim>3*3600000; // mais de 3h depois do fim esperado, sem resultado
+    });
+    if(pendentes.length){
+      html+='<div class="card" style="border-color:var(--vermelho);background:rgba(192,18,27,.08)"><h2 style="color:var(--vermelho)">⚠️ Placar pendente <span class="adm">admin</span></h2>'+
+        '<p class="nota-rodape" style="margin:0 0 10px">A busca automática não achou o resultado desses jogos ainda. Lança manualmente pra liberar o ranking e as notas:</p>'+
+        pendentes.map(([id,j])=>'<button class="jogo-item" onclick="abrirJogo(\''+id+'\')"><span><span class="jogo-nome">'+nomeJogo(j)+'</span>'+
+          '<div class="meta">'+fmtData(j)+' · '+esc(j.competicao)+'</div></span><span class="selo s-avaliar">lançar placar</span></button>').join('')+
+        '</div>';
+    }
+  }
+
   const dest=jogoDestaque();
   if(dest){
     const [id,j]=dest;
@@ -2294,12 +2313,89 @@ function renderAvaliacaoCard(j,s){
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
       '<span class="media-chip '+(media?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media?media.media.toFixed(1).replace('.',','):'–')+'<small id="votos_'+p.id+'">'+(media?media.n+' voto'+(media.n===1?'':'s'):'sem votos')+'</small></span></span></div>'+
       '<div class="aval-controles"><select aria-label="Sua nota para '+esc(p.nome)+'" onchange="salvarAvaliacao(\''+p.id+'\',\'nota\',this.value)">'+opts.join('')+'</select>'+
-      '<input placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" onblur="salvarAvaliacao(\''+p.id+'\',\'com\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()"></div>'+
+      '<input placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" onblur="salvarAvaliacao(\''+p.id+'\',\'com\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()">'+
+      '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">🎙️</button></div>'+
       (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+(+c.nota).toLocaleString('pt-BR')+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
       '</div>';
   });
   html+='</div>';
   return html;
+}
+/* =================== ÁUDIO DAS NOTAS (grava, salva, transcreve) =================== */
+let GRAV_MEDIA=null, GRAV_CHUNKS=[], GRAV_TIMER=null, GRAV_PID=null;
+async function alternarGravacao(pid){
+  if(GRAV_MEDIA&&GRAV_MEDIA.state==='recording'){ pararGravacao(); return; }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    GRAV_CHUNKS=[]; GRAV_PID=pid;
+    GRAV_MEDIA=new MediaRecorder(stream);
+    GRAV_MEDIA.ondataavailable=e=>{ if(e.data&&e.data.size)GRAV_CHUNKS.push(e.data); };
+    GRAV_MEDIA.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); enviarAudioGravado(pid); };
+    GRAV_MEDIA.start();
+    const btn=document.getElementById('mic_'+pid);
+    if(btn){btn.textContent='⏺️ 15s';btn.classList.add('gravando');}
+    let restam=15;
+    GRAV_TIMER=setInterval(()=>{
+      restam--;
+      const b=document.getElementById('mic_'+pid);
+      if(b)b.textContent='⏺️ '+restam+'s';
+      if(restam<=0)pararGravacao();
+    },1000);
+  }catch(e){ avisar('Não consegui acessar o microfone. Verifica a permissão do navegador.'); }
+}
+function pararGravacao(){
+  clearInterval(GRAV_TIMER);
+  if(GRAV_MEDIA&&GRAV_MEDIA.state==='recording')GRAV_MEDIA.stop();
+  const btn=document.getElementById('mic_'+GRAV_PID);
+  if(btn){btn.textContent='⏳';btn.classList.remove('gravando');}
+}
+function blobParaBase64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onloadend=()=>res(String(r.result).split(',')[1]||'');
+    r.onerror=rej;
+    r.readAsDataURL(blob);
+  });
+}
+async function enviarAudioGravado(pid){
+  const btn=document.getElementById('mic_'+pid);
+  if(!GRAV_CHUNKS.length){ if(btn){btn.textContent='🎙️';} return; }
+  const blob=new Blob(GRAV_CHUNKS,{type:'audio/webm'});
+  const chave=jogoAberto+'|'+pid+'|'+eu+'|'+Date.now();
+  try{
+    const b64=await blobParaBase64(blob);
+    await db.collection('audios').doc(chave).set({data:b64,mime:'audio/webm',quando:Date.now(),status:'pendente',jogo:jogoAberto,jogador:pid,usuario:eu});
+    if(btn)btn.textContent='🔄';
+    const r=await fetch('/.netlify/functions/transcrever',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mime:'audio/webm'})});
+    const info=await r.json();
+    if(info.texto){
+      await db.collection('audios').doc(chave).update({status:'transcrito',texto:info.texto});
+      await fundirTranscricaoNoComentario(pid,info.texto);
+      if(btn)btn.textContent='✅';
+      avisar('Áudio transcrito e salvo!',true);
+    }else{
+      await db.collection('audios').doc(chave).update({status:'erro'});
+      if(btn)btn.textContent='⚠️';
+      avisar('Áudio salvo, mas não consegui transcrever agora. Tenta de novo mais tarde.');
+    }
+  }catch(e){
+    if(btn)btn.textContent='⚠️';
+    avisar('Erro ao enviar o áudio. Verifica a conexão.');
+  }
+  setTimeout(()=>{ const b=document.getElementById('mic_'+pid); if(b){b.textContent='🎙️';b.classList.remove('gravando');} },2500);
+}
+async function fundirTranscricaoNoComentario(pid,texto){
+  const id=jogoAberto;
+  await mutar(()=>{
+    const j=dados.jogos[id];
+    if(!j)return;
+    if(!j.avaliacoes)j.avaliacoes={};
+    if(!j.avaliacoes[eu])j.avaliacoes[eu]={};
+    if(!j.avaliacoes[eu][pid])j.avaliacoes[eu][pid]={};
+    const atual=j.avaliacoes[eu][pid].com||'';
+    j.avaliacoes[eu][pid].com=(atual?atual+' — ':'')+'🎙️ '+texto;
+  });
+  render();
 }
 function coletarComentarios(j,pid){
   const out=[];
