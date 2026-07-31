@@ -170,28 +170,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
   .rodada-box{background:rgba(255,255,255,.65);border:1px solid rgba(23,23,27,.32);border-radius:12px;padding:12px 14px}
-  /* ===== cards de perfil (mesmo padrão do O Grupo) ===== */
-  .perfil{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;overflow:hidden;backdrop-filter:blur(8px);margin-bottom:16px}
-  .perfil-header{padding:20px 20px 14px;display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid var(--linha);position:relative}
-  .avatar{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:1.6rem;flex:none;border:2px solid var(--linha);overflow:hidden}
-  .avatar img{width:100%;height:100%;object-fit:cover}
-  .perfil-info{flex:1;min-width:0}
-  .perfil-nome{font-family:'Anton',sans-serif;font-size:1.35rem;text-transform:uppercase;letter-spacing:.04em}
-  .perfil-titulo{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin-top:3px;font-weight:700}
-  .perfil-sub{color:var(--cinza);font-size:.78rem;margin-top:4px;line-height:1.4}
-  .rank-badge{position:absolute;top:14px;right:14px;font-family:'Anton',sans-serif;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid}
-  .perfil-body{padding:16px 20px}
-  .barras{display:grid;gap:8px;margin-bottom:14px}
-  .barra-item{display:flex;align-items:center;gap:10px;font-size:.78rem}
-  .barra-label{color:var(--cinza);width:90px;flex:none;letter-spacing:.04em}
-  .barra-track{flex:1;height:6px;background:rgba(23,23,27,.08);border-radius:99px;overflow:hidden}
-  .barra-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
-  .pp-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-  .pp-stat{background:rgba(23,23,27,.05);border:1px solid var(--linha);border-radius:10px;padding:10px 12px;text-align:center}
-  .pp-stat .n{font-family:'Anton',sans-serif;font-size:1.2rem}
-  .pp-stat .l{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cinza);margin-top:2px}
-  .pp-frase{background:rgba(192,18,27,.08);border-left:3px solid var(--vermelho);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.85rem;font-style:italic;color:#33333A;line-height:1.5;margin-bottom:10px}
-  .pp-receita{font-size:.8rem;color:var(--cinza);line-height:1.5;margin-bottom:14px}
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
   .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid rgba(150,148,140,.4)}
@@ -664,7 +642,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos/Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab oculto" id="tabPerfilPsico" onclick="mudarAba('perfilpsico')">🃏 Perfil Psicótico<span id="tabPpMes"></span></button>
     <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
@@ -676,7 +653,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <section id="secDetalhe" class="oculto"></section>
     <section id="secRank" class="oculto"></section>
     <section id="secJogadores" class="oculto"></section>
-    <section id="secPerfilPsico" class="oculto"></section>
     <section id="secPartidas" class="oculto"></section>
     <section id="secCastigos" class="oculto"></section>
     <section id="secElenco" class="oculto"></section>
@@ -1979,8 +1955,6 @@ function entrarNoApp(){
   document.getElementById('tabPartidas').classList.remove('oculto');
   document.getElementById('tabElenco').classList.toggle('oculto',!adm);
   document.getElementById('tabJogadores').classList.toggle('oculto',!adm);
-  document.getElementById('tabPerfilPsico').classList.toggle('oculto',!adm);
-  document.getElementById('tabPerfilPsico').classList.toggle('oculto',!adm);
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
   render();
@@ -2011,7 +1985,7 @@ async function sair(){
 function mudarAba(a){
   aba=a;jogoAberto=null;
   try{sessionStorage.setItem('vasbobo:aba',a);}catch(e){}
-  const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',partidas:'tabPartidas',castigos:'tabCastigos',elenco:'tabElenco',admin:'tabAdmin',perfilpsico:'tabPerfilPsico'};
+  const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',partidas:'tabPartidas',castigos:'tabCastigos',elenco:'tabElenco',admin:'tabAdmin'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
     if(t)t.classList.toggle('ativa',k===a);
@@ -2027,7 +2001,6 @@ function render(){
   document.getElementById('secDetalhe').classList.toggle('oculto',!(aba==='jogos'&&jogoAberto));
   document.getElementById('secRank').classList.toggle('oculto',aba!=='rank');
   document.getElementById('secJogadores').classList.toggle('oculto',aba!=='jogadores');
-  document.getElementById('secPerfilPsico').classList.toggle('oculto',aba!=='perfilpsico');
   document.getElementById('secPartidas').classList.toggle('oculto',aba!=='partidas');
   document.getElementById('secCastigos').classList.toggle('oculto',aba!=='castigos');
   document.getElementById('secElenco').classList.toggle('oculto',aba!=='elenco');
@@ -2036,7 +2009,6 @@ function render(){
   if(aba==='jogos'&&jogoAberto)renderDetalhe();
   if(aba==='rank')renderRank();
   if(aba==='jogadores')renderJogadores();
-  if(aba==='perfilpsico')renderPerfilPsico();
   if(aba==='partidas')renderPartidas();
   if(aba==='castigos')renderCastigos();
   if(aba==='elenco'&&souAdmin())renderElenco();
@@ -3064,268 +3036,6 @@ function renderJogadores(){
 }
 
 /* =================== PERFIL PSICÓTICO: resenha mensal do zap =================== */
-const PP_PALAVROES=new Set('caralho,porra,merda,puta,putz,foda,fodase,foda-se,cacete,desgraça,desgraca,otário,otario,idiota,imbecil,burro,burra,arrombado,arrombada,corno,corna,viado,bosta,cuzao,cuzão,filho da puta,fdp,pqp,vsf,vtnc,cu,pinto,rola,piranha,vadia,safado,safada,babaca,imbecil,lixo,verme,animal,jumento,cavalo'.split(','));
-const PP_STOP=new Set([...STOPWORDS,'oi','ola','olá','kk','kkk','kkkk','kkkkk','rs','rsrs','pra','tô','to','ai','aí','ta','tá','vc','vcs','ne','né','entao','então','tbm','tambem','também','aqui','la','lá','hj','hoje','vasco','jogo','grupo','video','audio','áudio','imagem','figurinha','mensagem apagada','ligacao','ligação','perdida','omitted','media','midia','mídia','oculta','ocultada','gente','tipo','aew','eae','apagada']);
-let PP_MESES={};
-let PP_MES_ATUAL=null;
-
-function ppParseArquivo(texto){
-  const linhas=texto.replace(/\u200e/g,'').split(/\r?\n/);
-  const pat=/^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AaPp][Mm])?)\s*[-–—]\s*([^:]+):\s(.*)$/;
-  const patSis=/^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2})/;
-  const msgs=[];
-  let cur=null;
-  linhas.forEach(linha=>{
-    const m=pat.exec(linha);
-    if(m){
-      cur={data:ppNormalizarData(m[1]),hora:m[2],sender:m[3].trim(),texto:m[4]};
-      msgs.push(cur);
-    }else if(patSis.test(linha)){
-      cur=null;
-    }else if(cur){
-      cur.texto+='\n'+linha;
-    }
-  });
-  return msgs;
-}
-function ppNormalizarData(d){
-  // aceita DD/MM/AAAA ou DD/MM/AA e sempre devolve DD/MM/AAAA (com 4 dígitos)
-  const [dd,mm,yy]=d.split('/');
-  const ano=yy.length===2?('20'+yy):yy;
-  return dd.padStart(2,'0')+'/'+mm.padStart(2,'0')+'/'+ano;
-}
-const PP_TELEFONES={ // números que aparecem sem nome salvo no export, mapeados pra quem é
-  '+55 21 96830-4488':'Felippo Leodoro',
-  '+55 21 98103-9721':'Leonardo',
-  '+55 21 98893-3738':'Jorge Anjos',
-  '+55 21 98256-5886':'William Cosme',
-};
-function ppNomeSender(s){ return PP_TELEFONES[s]||s; }
-
-const PP_MEMBROS_CONHECIDOS=['Leandro Novaes','Daniel','Douglas Muniz','Antônio Nerd','Alexsander Rodrigues','André','Fabrício Veras','Luiz Cerqueira','Nico','Otair Senna','Pedro Fernandes','Thiago Azevedo','Thiago Velloso','Wallace Nascimento','Juan Melo','João Sousa','Felippo Leodoro','Leonardo','Jorge Anjos','William Cosme'];
-function ppCalcularMes(msgs,chaveMes){
-  const doMes=msgs.filter(m=>{
-    const [dd,mm,yyyy]=m.data.split('/');
-    return (yyyy+'-'+mm)===chaveMes;
-  }).map(m=>({...m,sender:ppNomeSender(m.sender)}));
-  const pessoas={};
-  const nomesConhecidos=[...new Set(doMes.map(m=>m.sender))];
-  const primeiroNome=n=>n.split(' ')[0];
-
-  doMes.forEach((m,i)=>{
-    const s=m.sender;
-    if(!pessoas[s])pessoas[s]={nome:s,total:0,palavras:{},caps:0,palavroes:0,mencoes:{},respondeA:{},exclamacoes:0,maiorMsg:''};
-    const p=pessoas[s];
-    p.total++;
-    const t=m.texto;
-    if(t.length>=8){
-      const letras=t.replace(/[^a-zà-üA-ZÀ-Ü]/g,'');
-      const maiusc=t.replace(/[^A-ZÀ-Ü]/g,'');
-      if(letras.length>=8&&maiusc.length/letras.length>0.7)p.caps++;
-    }
-    if(t.length>p.maiorMsg.length && t.length<220)p.maiorMsg=t;
-    p.exclamacoes+=(t.match(/!/g)||[]).length;
-    const palavrasMsg=t.toLowerCase().normalize('NFC').replace(/https?:\/\/\S+/g,' ').split(/[^a-zà-üç0-9]+/i);
-    palavrasMsg.forEach(w=>{
-      if(!w||w.length<4||PP_STOP.has(w))return;
-      p.palavras[w]=(p.palavras[w]||0)+1;
-      if(PP_PALAVROES.has(w))p.palavroes++;
-    });
-    nomesConhecidos.forEach(outro=>{
-      if(outro===s)return;
-      const alvo=primeiroNome(outro).toLowerCase();
-      if(alvo.length>=3 && t.toLowerCase().includes(alvo)){
-        p.mencoes[outro]=(p.mencoes[outro]||0)+1;
-      }
-    });
-    if(i>0){
-      const anterior=doMes[i-1];
-      if(anterior.sender!==s){
-        const [da,ha]=[anterior.data,anterior.hora];
-        const tAnt=new Date(da.split('/').reverse().join('-')+'T'+ha);
-        const tAtual=new Date(m.data.split('/').reverse().join('-')+'T'+m.hora);
-        if((tAtual-tAnt)<=10*60000){
-          p.respondeA[anterior.sender]=(p.respondeA[anterior.sender]||0)+1;
-        }
-      }
-    }
-  });
-
-  Object.values(pessoas).forEach(p=>{
-    p.topPalavras=Object.entries(p.palavras).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,6);
-    p.topMencao=Object.entries(p.mencoes).sort((a,b)=>b[1]-a[1])[0]||null;
-    p.topResposta=Object.entries(p.respondeA).sort((a,b)=>b[1]-a[1])[0]||null;
-    delete p.palavras; delete p.mencoes; delete p.respondeA;
-  });
-  PP_MEMBROS_CONHECIDOS.forEach(nome=>{
-    if(!pessoas[nome])pessoas[nome]={nome,total:0,topPalavras:[],caps:0,palavroes:0,topMencao:null,topResposta:null,exclamacoes:0,maiorMsg:''};
-  });
-  return {chaveMes,pessoas,totalMsgs:doMes.length};
-}
-
-function ppTituloMes(chave){
-  const [ano,mes]=chave.split('-');
-  const nomes=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-  return cap(nomes[+mes-1])+' de '+ano;
-}
-function ppGerarFrase(p){
-  const partes=[];
-  if(p.total===0){
-    return 'Sumiu completamente esse mês. Zero mensagens. Ou tá muito bem na vida, ou o Vasco decepcionou tanto que nem forças pra reclamar sobrou. De boas, mas o grupo sentiu (ou nem percebeu).';
-  }
-  if(p.total<=3)partes.push('Mandou só '+p.total+' mensagem'+(p.total>1?'s':'')+' — deve tar ocupado com a vida real, o cara é sumido igual palpite errado.');
-  else if(p.total<=30)partes.push('Apareceu de vez em quando, '+p.total+' mensagens — presença de quem não quer compromisso, mas também não sai do grupo.');
-  else if(p.total<=150)partes.push('Mandou '+p.total+' mensagens — nível "acompanha, mas sem exagero".');
-  else if(p.total<=500)partes.push('Detonou '+p.total+' mensagens — praticamente mora nesse grupo.');
-  else partes.push(p.total+' mensagens no mês! Alguém avisa a família que ele existe fora do WhatsApp.');
-  if(p.topPalavras.length)partes.push('Palavra favorita: "'+p.topPalavras[0][0]+'" ('+p.topPalavras[0][1]+'x) — já virou marca registrada.');
-  if(p.palavroes>=10)partes.push('Soltou o verbo '+p.palavroes+' vezes em palavrão — a boca não tem freio de mão.');
-  else if(p.palavroes>=3)partes.push('Xingou '+p.palavroes+' vezes — comedido, mas não é santo não.');
-  if(p.caps>=5)partes.push('Gritou (CAPS LOCK) em '+p.caps+' mensagens — o vizinho já deve ter reclamado.');
-  if(p.topMencao)partes.push('Falou de '+p.topMencao[0]+' '+p.topMencao[1]+' vezes — tem crush, treta ou implicância aí, escolha uma.');
-  if(p.topResposta)partes.push('Quem ele mais responde: '+p.topResposta[0]+' ('+p.topResposta[1]+' vezes) — parceria ou perseguição, a linha é tênue.');
-  return partes.join(' ');
-}
-function ppGerarReceita(p){
-  if(p.total===0)return '🚫 Receita: 0 mensagens em 30 dias. Ou tá muito feliz sem o grupo, ou já esqueceu que existe. De boa, mas já pode cogitar a expulsão (brincadeira... ou não).';
-  if(p.palavroes>=10||p.caps>=8)return '💊 Receita: 1 jogo do Vasco por semana (no máximo), 1 detox de grupo de zap por mês e talvez uma consulta com psicólogo de verdade — o de mentira aqui já fez o que pôde.';
-  if(p.total>=300)return '💊 Receita: sair de casa pelo menos 1x por semana, tomar sol, ligar pra família — o grupo vai sobreviver sem você por umas horas.';
-  if(p.total<=3)return '💊 Receita: manda um "oi" de vez em quando, ninguém mordeu ainda.';
-  return '💊 Receita: continue assim — nível saudável de participação. Só não esquece de assistir aos jogos do Vasco de vez em quando.';
-}
-
-async function ppCarregarMeses(){
-  try{
-    const snap=await db.collection('shared').doc('perfil_psicotico').get();
-    PP_MESES=snap.exists?(snap.data().meses||{}):{};
-  }catch(e){ PP_MESES={}; }
-}
-async function ppSalvarMes(chaveMes,resultado){
-  await db.collection('shared').doc('perfil_psicotico').set({meses:{...PP_MESES,[chaveMes]:resultado}},{merge:true});
-  PP_MESES[chaveMes]=resultado;
-}
-async function ppProcessarArquivo(){
-  const input=document.getElementById('ppArquivo');
-  const chaveMes=document.getElementById('ppChaveMes').value;
-  if(!input.files.length){avisar('Escolhe o arquivo .txt exportado do WhatsApp.');return;}
-  if(!chaveMes){avisar('Escolhe o mês/ano.');return;}
-  avisar('Processando… pode levar alguns segundos.',true);
-  const file=input.files[0];
-  const texto=await file.text();
-  const msgs=ppParseArquivo(texto);
-  const resultado=ppCalcularMes(msgs,chaveMes);
-  await ppSalvarMes(chaveMes,resultado);
-  PP_MES_ATUAL=chaveMes;
-  avisar('Mês processado e salvo! '+resultado.totalMsgs+' mensagens analisadas.',true);
-  renderPerfilPsico();
-}
-function ppMudarMes(chave){ PP_MES_ATUAL=chave; renderPerfilPsico(); }
-async function ppCompartilharPerfil(pessoaId){
-  const el=document.getElementById('ppCard_'+pessoaId);
-  if(!el||typeof html2canvas==='undefined')return;
-  const canvas=await html2canvas(el,{backgroundColor:'#17171B',scale:2});
-  canvas.toBlob(async blob=>{
-    const file=new File([blob],'perfil-psicotico.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file],title:'Perfil Psicótico'}); }catch(e){}
-    }else{
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download='perfil-psicotico.png'; a.click();
-    }
-  },'image/png');
-}
-async function ppCopiarPerfil(pessoaId){
-  const el=document.getElementById('ppCard_'+pessoaId);
-  if(!el||typeof html2canvas==='undefined')return;
-  const canvas=await html2canvas(el,{backgroundColor:'#17171B',scale:2});
-  canvas.toBlob(async blob=>{
-    try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); avisar('Imagem copiada!',true); }
-    catch(e){ avisar('Não consegui copiar nesse navegador.'); }
-  },'image/png');
-}
-const PP_USERNAME={'Leandro Novaes':'novaes','Daniel':'daniel','Douglas Muniz':'douglas','Antônio Nerd':'nerd','Alexsander Rodrigues':'alex','André':'andre','Fabrício Veras':'fabricio','Luiz Cerqueira':'luiz','Nico':'nico','Otair Senna':'otair','Pedro Fernandes':'pedro','Thiago Azevedo':'azevedo','Thiago Velloso':'velloso','Wallace Nascimento':'wallace','Juan Melo':'juan','João Sousa':'joao','Felippo Leodoro':'leodoro','Leonardo':'leonardo','Jorge Anjos':'jorge','William Cosme':'william'};
-function ppFotoUsuario(nome){ return fotoUsuario(PP_USERNAME[nome]||nome,64); }
-function ppTitulo(p,maxMsgs){
-  if(p.total===0)return {t:'👻 FANTASMA DO MÊS',c:'#6C6C74'};
-  if(p.palavroes>=10)return {t:'🤬 BOCA MAIS SUJA',c:'var(--vermelho)'};
-  if(p.caps>=8)return {t:'📢 GRITARIA CONSTANTE',c:'#A97B12'};
-  if(p.total===maxMsgs)return {t:'👑 REI DA RESENHA',c:'#A97B12'};
-  if(p.total<=3)return {t:'🫥 QUASE INVISÍVEL',c:'#6C6C74'};
-  return {t:'⚽ PRESENÇA GARANTIDA',c:'var(--vermelho)'};
-}
-async function renderPerfilPsico(){
-  const sec=document.getElementById('secPerfilPsico');
-  if(!Object.keys(PP_MESES).length){ await ppCarregarMeses(); }
-  const chaves=Object.keys(PP_MESES).sort().reverse();
-  if(!PP_MES_ATUAL)PP_MES_ATUAL=chaves[0]||null;
-  const elTabMes=document.getElementById('tabPpMes');
-  if(elTabMes)elTabMes.textContent=PP_MES_ATUAL?' — '+ppTituloMes(PP_MES_ATUAL).split(' de ')[0]:'';
-
-  let html='<div class="card"><h2>🃏 Perfil Psicótico</h2>'+
-    '<p class="nota-rodape" style="margin:0">Zoeira baseada em dado real do grupo: quem mais fala, palavras favoritas, quem xinga mais, quem some no mês. Tudo tirado das próprias mensagens de vocês.</p></div>';
-
-  if(souAdmin()){
-    html+='<div class="card"><details><summary>⚙️ Processar um novo mês (admin)</summary><div style="margin-top:12px">'+
-      '<p class="nota-rodape" style="margin:0 0 10px">No WhatsApp: abra o grupo → ⋮ → Mais → Exportar conversa → Sem mídia. Envie o .zip pra você mesmo, extraia e selecione o .txt aqui.</p>'+
-      '<div class="grid g2"><div><label for="ppChaveMes">Mês a processar</label><input type="month" id="ppChaveMes"></div>'+
-      '<div><label for="ppArquivo">Arquivo .txt exportado</label><input type="file" id="ppArquivo" accept=".txt"></div></div>'+
-      '<button class="btn" style="margin-top:12px" onclick="ppProcessarArquivo()">Processar e salvar</button>'+
-      '<p class="nota-rodape" style="margin-top:10px">Só os números de mensagens/palavras ficam salvos — o texto bruto da conversa não é guardado no site.</p>'+
-      '</div></details></div>';
-  }
-
-  if(!chaves.length){
-    html+='<div class="vazio">Nenhum mês processado ainda.'+(souAdmin()?' Usa a área acima pra processar o primeiro.':' Peça pro admin processar o mês.')+'</div>';
-    sec.innerHTML=html; return;
-  }
-
-  html+='<div class="cal-filtros" style="margin-bottom:14px">'+chaves.map(c=>'<button class="cal-filtro'+(c===PP_MES_ATUAL?' ativa':'')+'" onclick="ppMudarMes(\''+c+'\')">'+ppTituloMes(c)+'</button>').join('')+'</div>';
-
-  const dados_mes=PP_MESES[PP_MES_ATUAL];
-  if(!dados_mes){ sec.innerHTML=html+'<div class="vazio">Mês não encontrado.</div>'; return; }
-  const pessoas=Object.values(dados_mes.pessoas).sort((a,b)=>b.total-a.total);
-  const maxMsgs=Math.max(1,...pessoas.map(p=>p.total));
-  const maxPalavroes=Math.max(1,...pessoas.map(p=>p.palavroes));
-  const maxCaps=Math.max(1,...pessoas.map(p=>p.caps));
-
-  pessoas.forEach((p,i)=>{
-    const pid=('pp'+i+'_'+p.nome).replace(/[^a-zA-Z0-9]/g,'');
-    const frase=ppGerarFrase(p);
-    const receita=ppGerarReceita(p);
-    const tit=ppTitulo(p,maxMsgs);
-    const pctMsg=Math.round(p.total/maxMsgs*100);
-    const pctPalavrao=Math.round((p.palavroes/maxPalavroes)*100)||0;
-    const pctCaps=Math.round((p.caps/maxCaps)*100)||0;
-    html+='<div class="perfil" id="ppCard_'+pid+'">'+
-      '<div class="perfil-header">'+
-      '<div class="avatar">'+ppFotoUsuario(p.nome)+'</div>'+
-      '<div class="perfil-info"><div class="perfil-nome">'+esc(p.nome)+'</div>'+
-      '<div class="perfil-titulo" style="color:'+tit.c+'">'+tit.t+'</div>'+
-      '<div class="perfil-sub">'+ppTituloMes(PP_MES_ATUAL)+'</div></div>'+
-      '<div class="rank-badge" style="color:var(--vermelho);border-color:var(--vermelho)">'+(i+1)+'º</div>'+
-      '</div>'+
-      '<div class="perfil-body">'+
-      '<div class="barras">'+
-      '<div class="barra-item"><span class="barra-label">Mensagens</span><div class="barra-track"><div class="barra-fill" style="width:'+pctMsg+'%;background:var(--vermelho)"></div></div><span style="font-size:.72rem;color:var(--cinza);width:34px;text-align:right">'+p.total+'</span></div>'+
-      '<div class="barra-item"><span class="barra-label">Palavrão</span><div class="barra-track"><div class="barra-fill" style="width:'+pctPalavrao+'%;background:#A97B12"></div></div><span style="font-size:.72rem;color:var(--cinza);width:34px;text-align:right">'+p.palavroes+'</span></div>'+
-      '<div class="barra-item"><span class="barra-label">CAPS LOCK</span><div class="barra-track"><div class="barra-fill" style="width:'+pctCaps+'%;background:#6C6C74"></div></div><span style="font-size:.72rem;color:var(--cinza);width:34px;text-align:right">'+p.caps+'</span></div>'+
-      '</div>'+
-      '<div class="pp-stats">'+
-      '<div class="pp-stat"><div class="n">'+(p.topMencao?esc(p.topMencao[0]):'—')+'</div><div class="l">Mais citou</div></div>'+
-      '<div class="pp-stat"><div class="n">'+(p.topResposta?esc(p.topResposta[0]):'—')+'</div><div class="l">Mais respondeu</div></div>'+
-      '</div>'+
-      (p.topPalavras&&p.topPalavras.length?'<div style="margin-bottom:12px">'+p.topPalavras.map(([w,n])=>'<span class="chip">'+esc(w)+' <b>×'+n+'</b></span>').join('')+'</div>':'')+
-      '<div class="pp-frase">'+frase+'</div>'+
-      '<div class="pp-receita">'+receita+'</div>'+
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
-      '<button class="btn fantasma" style="flex:1" onclick="ppCompartilharPerfil(\''+pid+'\')">📲 Compartilhar</button>'+
-      '<button class="btn fantasma" style="flex:1" onclick="ppCopiarPerfil(\''+pid+'\')">📋 Copiar imagem</button>'+
-      '</div></div></div>';
-  });
-
-  sec.innerHTML=html;
-}
-
 /* =================== CONFIGURAÇÕES (só admin) =================== */
 async function limparDadosDeUsuario(){
   const nome=(document.getElementById('limparUsuarioNome').value||'').trim();
@@ -3534,7 +3244,7 @@ function iniciarMidiaJanela(){
     eu=sessao;
     entrarNoApp();
     const h=location.hash.replace('#','');
-    const validas=['rank','castigos','partidas','elenco','admin','jogadores','perfilpsico'];
+    const validas=['rank','castigos','partidas','elenco','admin','jogadores'];
     if(validas.includes(h)){
       mudarAba(h);
       history.replaceState(null,'',location.pathname); // consome o link, refresh não fica preso nele
