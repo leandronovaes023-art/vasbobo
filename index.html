@@ -169,7 +169,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:rgba(255,255,255,.65);border:1px solid rgba(23,23,27,.18);border-radius:12px;padding:12px 14px}
+  .rodada-box{background:rgba(255,255,255,.65);border:1px solid rgba(23,23,27,.32);border-radius:12px;padding:12px 14px}
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
   .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid rgba(150,148,140,.4)}
@@ -626,7 +626,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos/Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
+    <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
   </nav>
@@ -1046,8 +1046,22 @@ function mediaJogadorNoJogo(j,pid){
   return n?{media:s/n,n}:null;
 }
 /* Reizinho e Ribamar de um jogo encerrado */
+/* pontuação só "fecha" de verdade (coroa/ranking final) quando todo mundo que palpitou já votou
+   nos jogadores, ou depois de 12h do resultado — o que vier primeiro. Antes disso os pontos
+   aparecem como provisórios, porque o MVP da galera pode mudar até lá. */
+function pontuacaoLiberada(j){
+  if(!j.resultado)return false;
+  const palpitantes=Object.keys(j.palpites||{});
+  if(!palpitantes.length)return true;
+  const votantes=new Set(Object.keys(j.avaliacoes||{}).filter(u=>Object.keys(j.avaliacoes[u]||{}).length));
+  const todosVotaram=palpitantes.every(u=>votantes.has(u));
+  if(todosVotaram)return true;
+  const desde=j.resultadoEm||0;
+  return desde?(Date.now()-desde>12*3600000):true;
+}
 function premiacaoJogo(j){
   if(!j.resultado)return null;
+  if(!pontuacaoLiberada(j))return null;
   const chaveJ=fqChaveJogo(j);
   const linhas=Object.entries(j.palpites).map(([u,p])=>({
     u,
@@ -1834,7 +1848,7 @@ async function sincronizarJogos(){
       if(!x.historicoAuto)x.historicoAuto=[];
       x.historicoAuto.push(registro);
       if(r.encerrado){
-        x.resultado={v:gv,a:ga};
+        x.resultado={v:gv,a:ga};x.resultadoEm=Date.now();
         x.goleadores=mapearGoleadores(r.goleadores_vasco);
         x.fonteAuto=registro;
         x.parcial=null;
@@ -1923,6 +1937,7 @@ function entrarNoApp(){
   document.getElementById('whoAdm').classList.toggle('oculto',!adm);
   document.getElementById('tabPartidas').classList.remove('oculto');
   document.getElementById('tabElenco').classList.toggle('oculto',!adm);
+  document.getElementById('tabJogadores').classList.toggle('oculto',!adm);
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
   render();
@@ -1985,6 +2000,13 @@ function render(){
 
 /* =================== DESTAQUE E LISTA =================== */
 /* destaque: jogo ao vivo > próximo jogo sem resultado > último da lista */
+function abrirJogoNaAvaliacao(id){
+  abrirJogo(id);
+  setTimeout(()=>{
+    const el=document.querySelector('.aval-bloco');
+    if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+  },150);
+}
 function jogoDestaque(){
   const lista=jogosOrdenados();
   const agora=new Date();
@@ -2049,7 +2071,14 @@ function htmlRodadaBox(){
   if(usarRodada){
     const aoVivo=statusJogo(rj)==='andamento';
     const tabela=tabelaRodada(rj);
-    let html='<div class="rodada-box" style="cursor:pointer" onclick="abrirJogo(\''+rid+'\')"><h3><span>Ranking da Rodada · '+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+'</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+'</h3><div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
+    let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+'</h3>'+
+      '<div onclick="abrirJogo(\''+rid+'\')" style="cursor:pointer;font-size:1.08rem;font-weight:800;color:var(--vermelho);text-decoration:underline;text-underline-offset:3px;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' <span style="font-size:.75em">→</span></div>'+
+      '<div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
+    if(rj.resultado&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
+      html+='<button class="jogo-item" style="background:rgba(192,18,27,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
+        '<span><span class="jogo-nome" style="color:var(--vermelho)">🗳️ Você ainda não votou nos jogadores!</span>'+
+        '<div class="meta">Toque aqui pra avaliar e ajudar a definir o MVP da rodada</div></span></button>';
+    }
     if(!tabela.length){
       html+='<p class="nota-rodape" style="margin:0">Ninguém palpitou neste jogo. Rodada sem rei nem bobo.</p>';
     }else{
@@ -2068,6 +2097,9 @@ function htmlRodadaBox(){
           '<div class="premio-nome">'+prem.ribas.map(esc).join(' & ')+'</div>'+
           '<div class="premio-sub">'+prem.min+' pt'+(prem.min===1?'':'s')+' — errou até o hino. Agora a roleta do castigo te espera.</div>':'')+'</div>';
       }else if(tabela.length){
+        if(rj.resultado&&!pontuacaoLiberada(rj)){
+          html+='<p class="nota-rodape" style="margin-top:8px">🕐 <b>Pontuação provisória</b> — o MVP ainda pode mudar. A coroa fecha quando todo mundo que palpitou também votar nos jogadores, ou em até 12h depois do resultado.</p>';
+        }
         const lider=tabela[0], ultimo=tabela[tabela.length-1];
         const empatados=lider.pts===ultimo.pts;
         html+='<div class="chips-coroa" style="margin-top:10px"><span class="chip-coroa">'+esc(cap(lider.u))+' '+ICON_REI+'</span>'+
@@ -2138,11 +2170,13 @@ function renderListaJogos(){
       '</div>'+htmlRodadaBox()+htmlCastigoRodadaBox()+'</div></div>';
   }
 
+  const destId=dest?dest[0]:null;
   const encerradosIds=lista.filter(([i,j])=>j.resultado).map(([i])=>i);
   let arquivados=0;
   let mesAtual='';
   lista.forEach(([id,j])=>{
     if(j.resultado){arquivados++;return;}
+    if(id===destId)return;
     const mes=nomeMes(j.data);
     if(mes!==mesAtual){mesAtual=mes;html+='<div class="mes-sep">'+mes+'</div>';}
     const s=statusJogo(j);
@@ -2173,13 +2207,13 @@ function renderDetalhe(){
   const pe=casa?'Vasco':esc(j.adversario), pd=casa?esc(j.adversario):'Vasco';
   const ne=r?(casa?r.v:r.a):'–', nd=r?(casa?r.a:r.v):'–';
 
-  let html='<button class="btn fantasma" onclick="voltarLista()" style="margin-bottom:14px">← Voltar aos jogos</button>'+
+  let html='<button class="btn" onclick="voltarLista()" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;width:auto">← Voltar à Tela Principal</button>'+
   '<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div>'+
   '<div class="meta">'+fmtData(j)+' '+badgeTransmissao(j,true)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>'+
   '<div class="placar-grande" style="margin-top:8px"><span>'+pe+'</span><span class="num">'+ne+'</span><span class="x">×</span><span class="num">'+nd+'</span><span>'+pd+'</span>'+(j.parcial&&!j.resultado?'<span class="selo s-andamento">parcial ao vivo</span>':'')+'</div></div>'+
   '<span class="selo '+cls+'">'+txt+'</span></div>';
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
-  if(j.fonteAuto)html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). O admin pode corrigir na área abaixo, se precisar.</div>';
+  if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
   if(j.emCampoInfo)html+='<div class="auto-info">📋 Lista de quem entrou em campo registrada em '+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' ('+esc(j.emCampoInfo.fonte)+').</div>';
   if(!j.fonteAuto&&j.parcial)html+='<div class="auto-info">⚙️ Placar parcial obtido automaticamente às '+new Date(j.parcial.quando).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' (fonte: '+esc(j.parcial.fonte)+'), atualizando a cada poucos minutos.</div>';
   html+=renderMvpLinha(j);
@@ -2219,7 +2253,7 @@ function selectJogadores(idSel,valorAtual,incluirSemGol){
 function renderPalpiteCard(j,s){
   const meu=j.palpites[eu];
   const aberto=podePalpitar(j);
-  let html='<div class="card"><h2>Palpites</h2>';
+  let html='<div class="card"><h2>Palpites Vasbobo</h2>';
   if(aberto){
     html+='<div class="palpite-form"><span class="display" style="font-size:1rem">Vasco</span>'+
       '<input type="number" min="0" max="20" id="ppV" value="'+(meu?meu.v:'')+'" aria-label="Gols do Vasco">'+
@@ -2233,33 +2267,37 @@ function renderPalpiteCard(j,s){
       '<p class="nota-rodape" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">Palpites fecham '+FECHA_PALPITE_MIN+' minutos antes da bola rolar. '+tooltipPontuacao()+'</p>';
   }else if(meu){
     html+='<p style="font-size:.92rem">Seu palpite: <b class="display">Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>';
-  }else{
-    html+='<p class="nota-rodape" style="margin-top:0">Os palpites deste jogo já fecharam ('+FECHA_PALPITE_MIN+' min antes da bola rolar) e você ficou de fora. Na próxima!</p>';
   }
 
   const nomes=Object.keys(j.palpites);
   if(nomes.length){
-    html+='<div style="margin-top:14px">'+nomes.sort().map(n=>{
-      const p=j.palpites[n];
-      const pts=pontosPalpite(p,j,true);
-      let ptsHtml='';
-      if(pts&&(j.resultado||j.parcial)){
-        const cls=pts.exato?'p5':pts.acertouResultado?'p2':'p0';
-        ptsHtml='<span class="pontos '+cls+'">'+pts.total+' pt'+(pts.total===1?'':'s')+(pts.parcial?' *':'')+'</span>';
-        const bs=descricaoPontosPalpite(pts);
-        if(bs.length)ptsHtml+=' <span class="bonus">'+bs.join(' · ')+'</span>';
-      }
-      const escondido=aberto&&n!==eu;
-      return '<div class="linha-tabela"><span class="rank-nome">'+esc(n)+(n===eu?' (você)':'')+'</span>'+
-        '<span style="font-family:\'Anton\'">'+(escondido?'🙈 palpite oculto até fechar':'Vasco '+p.v+' × '+p.a+' '+esc(j.adversario))+'</span>'+
-        '<span>'+(escondido?'':(p.mvp||p.gol?'<span class="nota-rodape" style="margin:0">MVP: '+(p.mvp?esc(nomeJogador(p.mvp)):'—')+' · Gol: '+(p.gol?esc(nomeJogador(p.gol)):'—')+'</span> ':''))+ptsHtml+'</span></div>';
-    }).join('')+'</div>';
+    html+='<button class="btn fantasma" style="width:100%;margin-top:14px" onclick="togglePalpitesTodos()">'+
+      (mostrarTodosPalpites?'▲ Esconder palpites de todos':'Ver palpites de todos ▾')+'</button>';
+    if(mostrarTodosPalpites){
+      html+='<div style="margin-top:10px">'+nomes.sort().map(n=>{
+        const p=j.palpites[n];
+        const pts=pontosPalpite(p,j,true);
+        let ptsHtml='';
+        if(pts&&(j.resultado||j.parcial)){
+          const cls=pts.exato?'p5':pts.acertouResultado?'p2':'p0';
+          ptsHtml='<span class="pontos '+cls+'">'+pts.total+' pt'+(pts.total===1?'':'s')+(pts.parcial?' *':'')+'</span>';
+          const bs=descricaoPontosPalpite(pts);
+          if(bs.length)ptsHtml+=' <span class="bonus">'+bs.join(' · ')+'</span>';
+        }
+        const escondido=aberto&&n!==eu;
+        return '<div class="linha-tabela"><span class="rank-nome">'+esc(n)+(n===eu?' (você)':'')+'</span>'+
+          '<span style="font-family:\'Anton\'">'+(escondido?'🙈 palpite oculto até fechar':'Vasco '+p.v+' × '+p.a+' '+esc(j.adversario))+'</span>'+
+          '<span>'+(escondido?'':(p.mvp||p.gol?'<span class="nota-rodape" style="margin:0">MVP: '+(p.mvp?esc(nomeJogador(p.mvp)):'—')+' · Gol: '+(p.gol?esc(nomeJogador(p.gol)):'—')+'</span> ':''))+ptsHtml+'</span></div>';
+      }).join('')+'</div>';
+    }
   }else{
     html+='<p class="nota-rodape">Ninguém palpitou ainda. Chega primeiro!</p>';
   }
   html+='</div>';
   return html;
 }
+let mostrarTodosPalpites=false;
+function togglePalpitesTodos(){ mostrarTodosPalpites=!mostrarTodosPalpites; render(); }
 
 async function enviarPalpite(){
   const v=document.getElementById('ppV').value,a=document.getElementById('ppA').value;
@@ -2450,6 +2488,9 @@ function renderAdminJogo(j,s){
   html+='<details style="margin-top:14px"><summary>Quem entrou em campo ('+marcados.length+' registrados) — libera as notas</summary>'+
     '<p class="nota-rodape">A lista é buscada automaticamente após o jogo. Use aqui para forçar ou corrigir.</p>'+
     '<div class="grid g3" style="margin-top:8px">'+chkCampo+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:flex-end">'+
+    '<div style="flex:1;min-width:140px"><label for="npRapidoNome">Jogador não está na lista?</label><input id="npRapidoNome" placeholder="Nome do jogador"></div>'+
+    '<button class="btn fantasma" onclick="addJogadorRapido()">+ Adicionar à lista</button></div>'+
     '<div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"><button class="btn claro" onclick="salvarEmCampo()">Salvar quem jogou</button>'+
     '<button class="btn fantasma" onclick="buscarEscalacaoAgora()">🔎 Buscar quem jogou na web agora</button></div></details>';
   html+='<details style="margin-top:14px"><summary>Editar data e hora do jogo</summary><div class="grid g3" style="margin-top:10px">'+
@@ -2470,10 +2511,23 @@ async function buscarAgora(){
     const registro={quando:Date.now(),v:+r.gols_vasco,a:+r.gols_adversario,fonte:r.fonte||'busca na web'};
     if(!x.historicoAuto)x.historicoAuto=[];
     x.historicoAuto.push(registro);
-    if(r.encerrado){x.resultado={v:+r.gols_vasco,a:+r.gols_adversario};x.goleadores=mapearGoleadores(r.goleadores_vasco);x.fonteAuto=registro;x.parcial=null;}
+    if(r.encerrado){x.resultado={v:+r.gols_vasco,a:+r.gols_adversario};x.resultadoEm=Date.now();x.goleadores=mapearGoleadores(r.goleadores_vasco);x.fonteAuto=registro;x.parcial=null;}
     else x.parcial={v:+r.gols_vasco,a:+r.gols_adversario,quando:Date.now(),fonte:r.fonte||'busca na web'};
   });
   avisar(r.encerrado?'Resultado final registrado!':'Placar parcial atualizado.',true);
+  render();
+}
+async function addJogadorRapido(){
+  const nome=document.getElementById('npRapidoNome').value.trim();
+  if(!nome){avisar('Digita o nome do jogador.');return;}
+  const id='p'+Date.now();
+  const jogoId=jogoAberto;
+  await mutar(()=>{
+    dados.jogadores.push({id,num:'',nome,pos:'Meio',ativo:true});
+    const j=dados.jogos[jogoId];
+    if(j){ if(!j.emCampo)j.emCampo=[]; j.emCampo.push(id); }
+  });
+  avisar(nome+' adicionado ao elenco e marcado nessa lista!',true);
   render();
 }
 async function salvarEmCampo(){
@@ -2506,14 +2560,14 @@ async function lancarResultado(){
   if(+v>0&&gols.length===0&&!(await confirmar('O Vasco marcou mas você não indicou goleadores — o bônus de gol não será dado. Continuar mesmo assim?')))return;
   if(!(await confirmar('Lançar o resultado encerra o jogo e calcula os pontos. Confirmar?')))return;
   const id=jogoAberto;
-  await mutar(()=>{const j=dados.jogos[id];if(j){j.resultado={v:+v,a:+a};j.goleadores=gols;j.parcial=null;}});
+  await mutar(()=>{const j=dados.jogos[id];if(j){j.resultado={v:+v,a:+a};j.resultadoEm=Date.now();j.goleadores=gols;j.parcial=null;}});
   avisar('Resultado lançado. Pontos calculados!',true);
   render();
 }
 async function reabrirResultado(){
   if(!(await confirmar('Remover o resultado e reabrir o jogo?')))return;
   const id=jogoAberto;
-  await mutar(()=>{const j=dados.jogos[id];if(j){j.resultado=null;j.goleadores=[];j.fonteAuto=null;}});
+  await mutar(()=>{const j=dados.jogos[id];if(j){j.resultado=null;j.resultadoEm=null;j.goleadores=[];j.fonteAuto=null;}});
   render();
 }
 async function salvarDataHora(){
@@ -2791,8 +2845,8 @@ function renderRank(){
   const ordem=Object.entries(placar).sort((a,b)=>b[1].pts-a[1].pts||b[1].exato-a[1].exato||b[1].resultado-a[1].resultado);
 
   let html='<div class="rank-grid">'+
-  '<div class="card" style="margin-bottom:0"><h2>🏆 Ranking do Vasbobo</h2>'+
-  '<p class="nota-rodape" style="margin:0 0 12px">'+tooltipPontuacao()+'</p>'+
+  '<div class="card" style="margin-bottom:0">'+
+  '<div class="rodada-box" style="margin-bottom:12px">'+tooltipPontuacao()+'</div>'+
   htmlRodadaBox()+
   '<button class="btn fantasma" style="width:100%;margin-top:12px" onclick="toggleRankingGeral()">'+
     (mostrarRankingGeral?'▲ Esconder ranking geral':'Clique e veja o ranking geral ▾')+'</button>';
