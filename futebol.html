@@ -109,7 +109,8 @@ body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg
   .oculto{display:none!important}
 
   header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
-  .header-inner{max-width:1320px;margin:0 auto;padding:26px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 12px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
   .logo-row{display:flex;align-items:center;gap:14px}
@@ -140,23 +141,51 @@ body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg
           <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
         </div>
       </div>
-      <div class="who">
-        <span>Fala, <b id="whoNome"></b>!</span>
-        <span class="adm oculto" id="whoAdm">admin</span>
-        <button onclick="sairSatelite()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+      <div class="header-right-stack">
+        <div class="who">
+          <span>Fala, <b id="whoNome"></b>!</span>
+          <span class="adm oculto" id="whoAdm">admin</span>
+          <button onclick="sairSatelite()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+        </div>
+        <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">📲 App VASBOBO</button>
       </div>
     </div>
   </header>
+  <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
+    <div class="fq-modal" style="max-width:420px">
+      <h3 style="text-align:left;margin-bottom:14px">📲 App VASBOBO</h3>
+      <p style="font-size:.86rem;line-height:1.6;margin-bottom:14px">Instale o VASBOBO no seu celular e fica igual um app.</p>
+      <p style="font-size:.82rem;line-height:1.6;margin-bottom:8px"><b>Android:</b> menu do navegador (⋮) → "Instalar app" ou "Adicionar à tela inicial".</p>
+      <p style="font-size:.82rem;line-height:1.6;margin-bottom:14px"><b>iPhone:</b> botão de compartilhar (Safari) → "Adicionar à Tela de Início".</p>
+      <button class="btn" style="width:100%" onclick="document.getElementById('modalInstalar').classList.add('oculto')">Entendi</button>
+    </div>
+  </div>
+  <script>
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; });
+    async function instalarApp(){
+      if (deferredPrompt){
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      } else {
+        document.getElementById('modalInstalar').classList.remove('oculto');
+      }
+    }
+    window.addEventListener('appinstalled', ()=>{
+      const btn = document.getElementById('btnInstalarApp');
+      if (btn) btn.classList.add('oculto');
+    });
+  </script>
 
   <nav>
     <a href="/" class="tab" data-tab="jogos">✅ Bolão</a>
     <a href="/#rank" class="tab" data-tab="rank">🏆 Ranking</a>
     <a href="/#castigos" class="tab" data-tab="castigos"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</a>
-    <a href="/hoje.html" class="tab" style="text-decoration:none" data-tab="hoje">📅 Quem joga hoje</a>
-    <a href="/#partidas" class="tab" data-tab="partidas">✠ Jogos e Calendário CRVG</a>
+    <a href="/hoje.html" class="tab" style="text-decoration:none" data-tab="hoje">📅 Quem joga hoje?</a>
+    <a href="/#partidas" class="tab" data-tab="partidas">✠ Jogos/Calendário CRVG</a>
     <a href="/futebol.html" class="tab ativa" style="text-decoration:none" data-tab="futebol">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none" data-tab="ogrupo">🍻 O Grupo</a>
-    <a href="/galeria.html" class="tab" style="text-decoration:none" data-tab="galeria">🎨 Obras-Primas</a>
     <a href="/#elenco" class="tab oculto" data-tab="elenco">Elenco</a>
     <a href="/#admin" class="tab oculto" data-tab="admin">Configurações</a>
   </nav>
