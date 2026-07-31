@@ -618,7 +618,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   <nav>
     <button class="tab ativa" id="tabJogos" onclick="mudarAba('jogos')">✅ Bolão</button>
     <button class="tab" id="tabRank" onclick="mudarAba('rank')">🏆 Ranking</button>
-    <button class="tab" id="tabCastigos" onclick="mudarAba('castigos')">✋🟥 Castigos</button>
+    <button class="tab" id="tabCastigos" onclick="mudarAba('castigos')"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
     <a href="/hoje.html" class="tab" style="text-decoration:none">📅 Quem joga hoje</a>
     <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos e Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
@@ -1337,7 +1337,7 @@ function renderCastigos(){
   const sec=document.getElementById('secCastigos');
   dados.castigos=dados.castigos||{};
   const lista=Object.values(dados.castigos).sort((a,b)=>b.quando-a.quando);
-  let html='<div class="card"><h2>✋🟥 Castigos</h2><p class="nota-rodape" style="margin:0">Quem terminou a rodada em último gira a roleta — e o resultado fica guardado pra sempre, sem chance de girar de novo.</p></div>';
+  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Quem terminou a rodada em último gira a roleta — e o resultado fica guardado pra sempre, sem chance de girar de novo.</p></div>';
   if(!lista.length){
     html+='<div class="vazio">Ninguém pagou castigo ainda. Vai que essa rodada é a sua vez de escapar. 😏</div>';
   }else{
@@ -2027,7 +2027,7 @@ function atualizarCronometro(){
 }
 
 function htmlCastigoRodadaBox(){
-  return '<div class="rodada-box"><h3><span>✋🟥 Castigo da Rodada</span></h3>'+
+  return '<div class="rodada-box"><h3><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span></h3>'+
     '<p class="nota-rodape" style="margin:0 0 10px">No apito final, quem fechar em último (ou empatado em último) gira essa roleta:</p>'+
     '<div class="roleta-wrap-mini"><div class="roleta-ponteiro-mini">▼</div>'+
     '<svg class="roleta-svg-mini" viewBox="0 0 300 300"></svg>'+
