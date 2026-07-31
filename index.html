@@ -92,7 +92,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .oculto{display:none!important}
 
   header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
-  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 12px;display:flex;align-items:stretch;justify-content:space-between;gap:12px}
+  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 12px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
@@ -177,7 +177,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .mini-linha-ultimo .rank-nome{color:var(--vermelho);font-weight:900}
   .mini-linha-ultimo .pt{color:var(--vermelho);font-weight:900}
   .mini-linha:last-child{border-bottom:none}
-  .mini-linha .pt{font-family:'Anton',sans-serif}
+  .mini-linha .pt{font-family:'Anton',sans-serif;font-size:1.15rem}
   .premio{font-size:.8rem;line-height:1.5;margin-top:9px;padding-top:9px;border-top:1px dashed var(--linha)}
   .premio b{text-transform:capitalize}
   .premio-g{margin-top:10px;padding-top:10px;border-top:1px dashed var(--linha)}
@@ -1972,6 +1972,7 @@ async function sair(){
 /* =================== NAVEGAÇÃO =================== */
 function mudarAba(a){
   aba=a;jogoAberto=null;
+  try{sessionStorage.setItem('vasbobo:aba',a);}catch(e){}
   const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',partidas:'tabPartidas',castigos:'tabCastigos',elenco:'tabElenco',admin:'tabAdmin',perfilpsico:'tabPerfilPsico'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
@@ -2079,12 +2080,12 @@ function htmlRodadaBox(){
     const aoVivo=statusJogo(rj)==='andamento';
     const tabela=tabelaRodada(rj);
     let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+'</h3>'+
-      '<div onclick="abrirJogo(\''+rid+'\')" style="cursor:pointer;font-size:1.08rem;font-weight:800;color:var(--vermelho);text-decoration:underline;text-underline-offset:3px;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' <span style="font-size:.75em">→</span></div>'+
+      '<div onclick="abrirJogo(\''+rid+'\')" style="cursor:pointer;font-size:1.22rem;font-weight:800;color:var(--vermelho);text-decoration:underline;text-underline-offset:3px;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;text-transform:uppercase">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' <span style="font-size:.7em">→</span></div>'+
       '<div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
     if(rj.resultado&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
       html+='<button class="jogo-item" style="background:rgba(192,18,27,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
-        '<span><span class="jogo-nome" style="color:var(--vermelho)">🗳️ Você ainda não votou nos jogadores!</span>'+
-        '<div class="meta">Toque aqui pra avaliar e ajudar a definir o MVP da rodada</div></span></button>';
+        '<span><span class="jogo-nome" style="color:var(--vermelho);text-transform:uppercase;white-space:nowrap;font-size:.92rem">VOCÊ AINDA NÃO AVALIOU A SELEVASCO</span>'+
+        '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada.</div></span></button>';
     }
     if(!tabela.length){
       html+='<p class="nota-rodape" style="margin:0">Ninguém palpitou neste jogo. Rodada sem rei nem bobo.</p>';
@@ -2353,7 +2354,7 @@ function renderAvaliacaoCard(j,s){
     const temNota=minha.nota!==undefined&&minha.nota!==null&&minha.nota!=='';
     const botoesNota=temNota?
       '<div class="nota-escolhida">Sua nota: <b>'+(+minha.nota)+'</b> <button type="button" class="btn fantasma" style="padding:4px 12px;font-size:.72rem" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'\')">↺ Desfazer</button></div>':
-      '<div class="notas-botoes">'+Array.from({length:10},(_,i)=>10-i).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+'</div>';
+      '<div class="notas-botoes">'+Array.from({length:10},(_,i)=>i+1).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+'</div>';
     const comentarios=coletarComentarios(j,p.id);
     html+='<div class="aval-bloco"><div class="aval-topo">'+
       '<span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span>'+
@@ -3365,7 +3366,15 @@ function iniciarMidiaJanela(){
     eu=sessao;
     entrarNoApp();
     const h=location.hash.replace('#','');
-    if(['rank','castigos','partidas','elenco','admin'].includes(h)) mudarAba(h);
+    const validas=['rank','castigos','partidas','elenco','admin','jogadores','perfilpsico'];
+    if(validas.includes(h)){
+      mudarAba(h);
+      history.replaceState(null,'',location.pathname); // consome o link, refresh não fica preso nele
+    }else{
+      let salva=null;
+      try{salva=sessionStorage.getItem('vasbobo:aba');}catch(e){}
+      if(salva&&validas.includes(salva))mudarAba(salva); // refresh: mantém onde você estava
+    }
   }else{
     mostrar('login');
   }
