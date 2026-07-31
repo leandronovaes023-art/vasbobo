@@ -194,11 +194,11 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
         const escolha = await deferredPrompt.userChoice;
         deferredPrompt = null;
         if (escolha && escolha.outcome === 'accepted'){
-          if (typeof avisar === 'function') avisar('Instalando o app…', true);
+          if (typeof avisar === 'function') avisar('Instalando… aguarde, leva uns 5 segundos.', true, 5200);
           setTimeout(()=>{
             if (jaConfirmouInstalacao) return;
             jaConfirmouInstalacao = true;
-            if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
+            if (typeof avisar === 'function') avisar('Instalado! Agora é só arrastar pra tela inicial do celular.', true);
             const btn = document.getElementById('btnInstalarApp');
             if (btn) btn.classList.add('oculto');
           }, 5000);
@@ -210,9 +210,6 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
     window.addEventListener('appinstalled', ()=>{
       const btn = document.getElementById('btnInstalarApp');
       if (btn) btn.classList.add('oculto');
-      if (jaConfirmouInstalacao) return;
-      jaConfirmouInstalacao = true;
-      if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
     });
   </script>
 

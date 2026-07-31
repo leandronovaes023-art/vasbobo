@@ -39,7 +39,7 @@ const dbFut = firebase.firestore();
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
 body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px;line-height:1.5}
-body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg,#F4F2ED 0%,#EFE9E2 50%,#F4F2ED 100%);z-index:-1}
+body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.jpg") center top / cover no-repeat;z-index:-2}
 
 .voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
 .voltar:hover{border-color:var(--branco);color:var(--branco)}
@@ -179,11 +179,11 @@ body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg
         const escolha = await deferredPrompt.userChoice;
         deferredPrompt = null;
         if (escolha && escolha.outcome === 'accepted'){
-          if (typeof avisar === 'function') avisar('Instalando o app…', true);
+          if (typeof avisar === 'function') avisar('Instalando… aguarde, leva uns 5 segundos.', true, 5200);
           setTimeout(()=>{
             if (jaConfirmouInstalacao) return;
             jaConfirmouInstalacao = true;
-            if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
+            if (typeof avisar === 'function') avisar('Instalado! Agora é só arrastar pra tela inicial do celular.', true);
             const btn = document.getElementById('btnInstalarApp');
             if (btn) btn.classList.add('oculto');
           }, 5000);
@@ -195,9 +195,6 @@ body::before{content:"";position:fixed;inset:0;background:linear-gradient(135deg
     window.addEventListener('appinstalled', ()=>{
       const btn = document.getElementById('btnInstalarApp');
       if (btn) btn.classList.add('oculto');
-      if (jaConfirmouInstalacao) return;
-      jaConfirmouInstalacao = true;
-      if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
     });
   </script>
 

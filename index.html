@@ -214,17 +214,17 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .cal-filtros{display:flex;gap:6px;flex-wrap:wrap}
   .cal-filtro{background:var(--carvao2);border:1px solid var(--linha);color:var(--cinza);border-radius:99px;padding:6px 13px;font-size:.74rem;font-weight:700;letter-spacing:.02em;cursor:pointer;font-family:'Inter',sans-serif}
   .cal-filtro.ativa{background:var(--vermelho);border-color:var(--vermelho);color:#fff}
-  .cal-mes{color:#9A9AA5;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:5px}
+  .cal-mes{color:#6C6C74;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;border-bottom:1px solid var(--linha);padding-bottom:5px}
   .cal-mes:first-child{margin-top:0}
-  .cal-linha{display:grid;grid-template-columns:78px 1fr 64px 1fr;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.78rem;color:#EDEDF0}
+  .cal-linha{display:grid;grid-template-columns:66px 1fr 50px 1fr;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--linha);font-size:.72rem;color:#17171B}
   .cal-linha:last-child{border-bottom:none}
-  .cal-data{color:#9A9AA5;font-size:.72rem}
-  .cal-jogo{font-weight:700}
-  .cal-hora{color:#9A9AA5;font-size:.72rem;text-align:center}
-  .cal-comp{color:#9A9AA5;font-size:.7rem;text-align:right}
+  .cal-data{color:#6C6C74;font-size:.68rem;white-space:nowrap}
+  .cal-jogo{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cal-hora{color:#6C6C74;font-size:.68rem;text-align:center;white-space:nowrap}
+  .cal-comp{color:#6C6C74;font-size:.66rem;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   @media(max-width:480px){
-    .cal-linha{grid-template-columns:1fr;gap:2px;padding:9px 0}
-    .cal-data{order:1}.cal-jogo{order:2}.cal-hora{order:3;text-align:left}.cal-comp{order:4;text-align:left}
+    .cal-linha{grid-template-columns:56px 1fr 42px;font-size:.68rem}
+    .cal-comp{display:none}
   }
   .jogo-item:hover{border-color:var(--cinza)}
   .jogo-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:.01em}
@@ -255,8 +255,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .aval-topo{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .aval-nome{font-weight:700}
   .aval-nome small{color:var(--cinza);font-weight:400;margin-left:6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
-  .aval-controles{display:grid;grid-template-columns:1fr 44px;gap:10px;margin-top:10px}
-  .btn-mic{background:var(--vermelho);color:#fff;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+  .aval-controles-v{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+  .btn-mic{background:var(--carvao2);color:var(--vermelho);border:1.5px solid var(--vermelho);border-radius:22px;padding:10px 16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;align-self:flex-start}
+  .btn-ok-comentario{background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:0 18px;height:44px;font-weight:800;font-size:.8rem;cursor:pointer;flex:none}
   .notas-botoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
   .btn-nota{width:34px;height:34px;border-radius:8px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif}
   .btn-nota:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
@@ -334,18 +335,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .info-pontuacao > a{color:var(--vermelho);font-size:.82rem;font-weight:700;text-decoration:none;
     border-bottom:1px dashed var(--vermelho);cursor:pointer}
   .info-pontuacao > a:hover{border-bottom-style:solid}
-  .info-pontuacao .tooltip-pont{position:absolute;top:calc(100% + 8px);left:0;z-index:60;
-    width:300px;max-width:88vw;background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;
-    padding:14px 16px;box-shadow:0 16px 40px rgba(0,0,0,.22);opacity:0;visibility:hidden;
-    transform:translateY(-6px);transition:opacity .18s,transform .18s,visibility .18s}
-  .info-pontuacao:hover .tooltip-pont,.info-pontuacao:focus-within .tooltip-pont{opacity:0;visibility:hidden}
-  .info-pontuacao .tooltip-pont.aberto{opacity:1!important;visibility:visible!important;transform:translateY(0)!important}
+  .info-pontuacao .tooltip-pont{display:none;width:100%;max-width:100%;background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;
+    padding:14px 16px;box-shadow:0 6px 20px rgba(0,0,0,.14);margin-top:8px;box-sizing:border-box}
+  .info-pontuacao .tooltip-pont.aberto{display:block}
   .tooltip-pont{cursor:default}
   .tabela-pont{border-collapse:collapse;margin-bottom:10px;width:100%}
   .tabela-pont td{font-size:.74rem;color:#33333A;line-height:1.4;padding:4px 0;text-align:left;vertical-align:top}
   .tabela-pont td:first-child{font-weight:800;color:var(--ouro);padding-right:10px;white-space:nowrap;width:40px}
   .tooltip-pont .tp-link{font-size:.76rem;color:var(--vermelho);font-weight:800;text-decoration:none}
-  @media(max-width:600px){.info-pontuacao .tooltip-pont{left:auto;right:0}}
 
   .divisor-rodada{border:none;border-top:1px solid var(--linha);margin:16px 0}
   .chips-coroa{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;text-align:center}
@@ -640,11 +637,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
         const escolha = await deferredPrompt.userChoice;
         deferredPrompt = null;
         if (escolha && escolha.outcome === 'accepted'){
-          if (typeof avisar === 'function') avisar('Instalando o app…', true);
+          if (typeof avisar === 'function') avisar('Instalando… aguarde, leva uns 5 segundos.', true, 5200);
           setTimeout(()=>{
             if (jaConfirmouInstalacao) return;
             jaConfirmouInstalacao = true;
-            avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
+            if (typeof avisar === 'function') avisar('Instalado! Agora é só arrastar pra tela inicial do celular.', true);
             const btn = document.getElementById('btnInstalarApp');
             if (btn) btn.classList.add('oculto');
           }, 5000);
@@ -656,9 +653,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
     window.addEventListener('appinstalled', ()=>{
       const btn = document.getElementById('btnInstalarApp');
       if (btn) btn.classList.add('oculto');
-      if (jaConfirmouInstalacao) return;
-      jaConfirmouInstalacao = true;
-      if (typeof avisar === 'function') avisar('App instalado! Agora é só arrastar pra tela inicial do celular.', true);
     });
   </script>
 
@@ -993,10 +987,11 @@ function podeAvaliar(j){
   return !!(j.emCampo&&j.emCampo.length); // só libera com a lista de quem jogou
 }
 function textoSelo(s){return {aberto:['s-aberto','Palpites abertos'],andamento:['s-andamento','Bola rolando'],avaliar:['s-avaliar','Avalie os jogadores'],encerrado:['s-encerrado','Encerrado']}[s];}
-const SVG_TV_CRUZ='<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">'+
-  '<rect x="2.2" y="4" width="19.6" height="13.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/>'+
-  '<path d="M8.5 20.6h7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>'+
-  '<path d="M12 6.6l1.3 2.9 2.9-1.3-1.3 2.6 1.3 2.6-2.9-1.3-1.3 2.9-1.3-2.9-2.9 1.3 1.3-2.6-1.3-2.6 2.9 1.3z"/></svg>';
+const SVG_TV_CRUZ='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">'+
+  '<path d="M8 3.5 5 7M16 3.5l3 3.5" stroke-linecap="round"/>'+
+  '<rect x="3" y="7" width="18" height="13" rx="2.5"/>'+
+  '<circle cx="15.2" cy="13.5" r="2.6"/>'+
+  '<path d="M6 11h5M6 13.5h5M6 16h3" stroke-linecap="round"/></svg>';
 function badgeTransmissao(j,mini){
   if(!j.ondeAssistir)return '';
   return '<span class="tv-badge'+(mini?' mini':'')+'">'+SVG_TV_CRUZ+esc(j.ondeAssistir)+'</span>';
@@ -2213,8 +2208,9 @@ function renderListaJogos(){
     html+='<div class="card destaque"><div class="selo-destaque"><span class="cruz">✠</span> Jogo em destaque</div>'+
       '<div class="dest-grid"><div class="rodada-box">'+
       '<div class="jogo-nome" style="font-size:1.35rem">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
-      '<div class="data-grande" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+fmtData(j)+badgeTransmissao(j)+'</div>'+
-      '<div class="meta">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+      '<div class="data-grande">'+fmtData(j)+'</div>'+
+      '<div class="meta" style="font-size:.86rem;margin-top:4px">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+      (j.ondeAssistir?'<div style="margin-top:6px">'+badgeTransmissao(j)+'</div>':'')+
       (s==='aberto'&&j.hora?'<div class="cronometro" id="cronoDest" data-jogo="'+id+'">…</div>':'')+
       '<p style="font-size:.9rem;margin:10px 0 12px;color:#33333A">'+chamada+'.</p>'+
       '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" style="background:#17171B;border-color:#17171B" onclick="abrirJogo(\''+id+'\')">Abrir jogo</button><span class="selo '+cls+'">'+txt+'</span></div>'+
@@ -2259,7 +2255,8 @@ function renderDetalhe(){
   const ne=r?(casa?r.v:r.a):'–', nd=r?(casa?r.a:r.v):'–';
 
   let html='<button class="btn" onclick="voltarLista()" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;width:auto">← Voltar à Tela Principal</button>'+
-  '<div class="card"><div class="meta" style="font-size:.85rem">'+fmtData(j)+' '+badgeTransmissao(j,true)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>';
+  '<div class="card"><div class="meta" style="font-size:.86rem">'+fmtData(j)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>'+
+  (j.ondeAssistir?'<div style="margin-top:6px">'+badgeTransmissao(j,true)+'</div>':'');
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
   if(j.emCampoInfo&&souAdmin())html+='<div class="auto-info">📋 Lista de quem entrou em campo registrada em '+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' ('+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span></div>';
@@ -2401,14 +2398,16 @@ function renderAvaliacaoCard(j,s){
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
       '<span class="media-chip '+(media?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media?media.media.toFixed(1).replace('.',','):'–')+'<small id="votos_'+p.id+'">'+(media?media.n+' voto'+(media.n===1?'':'s'):'sem votos')+'</small></span></span></div>'+
       botoesNota+
-      '<div class="aval-controles"><div style="display:flex;gap:6px;align-items:center" id="comWrap_'+p.id+'"'+((minha.com||'')?' style="display:none"':'')+'>'+
-      '<input id="comInput_'+p.id+'" placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" onkeydown="if(event.key===\'Enter\'){event.preventDefault();confirmarComentario(\''+p.id+'\');}">'+
-      '<button type="button" onclick="confirmarComentario(\''+p.id+'\')" style="background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:0 14px;height:44px;font-weight:800;font-size:.78rem;cursor:pointer;flex:none">OK</button>'+
+      '<div class="aval-controles-v">'+
+      '<div style="display:flex;gap:8px;align-items:center" id="comWrap_'+p.id+'"'+((minha.com||'')?' style="display:none"':'')+'>'+
+      '<input id="comInput_'+p.id+'" placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" style="flex:1" onkeydown="if(event.key===\'Enter\'){event.preventDefault();confirmarComentario(\''+p.id+'\');}">'+
+      '<button type="button" onclick="confirmarComentario(\''+p.id+'\')" class="btn-ok-comentario">OK</button>'+
       '</div>'+
       '<div id="comRegistrado_'+p.id+'" class="salvo-tick on" style="display:'+((minha.com||'')?'flex':'none')+';align-items:center;font-size:.82rem;color:var(--cinza);gap:8px">'+
       ((minha.com||'').indexOf('🎙️')===0||(minha.com||'').indexOf('🎙️')>=0?'🎙️ Áudio registrado':'✓ Comentário registrado')+
       ' <button type="button" onclick="reabrirComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--vermelho);text-decoration:underline;cursor:pointer;font-size:.78rem">editar</button></div>'+
-      '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+'</button></div>'+
+      '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+' <span style="font-size:.72rem;font-weight:700">Gravar áudio</span></button>'+
+      '</div>'+
       (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+(+c.nota).toLocaleString('pt-BR')+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
       '</div>';
   });
@@ -2733,11 +2732,11 @@ function renderPartidas(){
     html+='<div class="vazio">Nenhum jogo encerrado ainda.</div>';
   }else{
     const [id0,j0]=encerrados[0];
-    html+='<div class="jogo-item" style="cursor:default"><span><span class="jogo-nome">'+nomeJogo(j0)+'</span>'+
-      '<div class="meta">'+fmtData(j0)+' · '+esc(j0.competicao)+(j0.fase?' ('+esc(j0.fase)+')':'')+' · '+Object.keys(j0.palpites).length+' palpite(s)</div></span>'+
-      '<span style="display:flex;align-items:center;gap:8px"><span class="placar-final">'+placarTexto(j0,true)+'</span>'+
-      '<button class="btn fantasma" onclick="abrirJogo(\''+id0+'\');mudarAbaDetalhe()">abrir</button>'+
-      (adm?'<button class="btn-x" onclick="excluirJogoId(\''+id0+'\')">excluir</button>':'')+'</span></div>';
+    html+='<div class="jogo-item" style="cursor:pointer" onclick="abrirJogo(\''+id0+'\');mudarAbaDetalhe()"><span><span class="jogo-nome" style="font-size:.94rem">'+nomeJogo(j0)+'</span>'+
+      '<div class="meta" style="font-size:.68rem">'+fmtData(j0)+' · '+esc(j0.competicao)+(j0.fase?' ('+esc(j0.fase)+')':'')+' · '+Object.keys(j0.palpites).length+' palpite(s)</div></span>'+
+      '<span style="display:flex;align-items:center;gap:8px"><span class="placar-final" style="font-size:.92rem">'+placarTexto(j0,true)+'</span>'+
+      '<button class="btn fantasma" style="font-size:.72rem;padding:7px 12px" onclick="event.stopPropagation();abrirJogo(\''+id0+'\');mudarAbaDetalhe()">abrir</button>'+
+      (adm?'<button class="btn-x" onclick="event.stopPropagation();excluirJogoId(\''+id0+'\')">excluir</button>':'')+'</span></div>';
     if(encerrados.length>1){
       html+='<button class="btn fantasma" style="width:100%;margin-top:10px" onclick="toggleTodosEncerrados()">'+
         (mostrarTodosEncerrados?'▲ Esconder o histórico':'Confira todos os jogos e palpites de cada Vasbobo ▾')+'</button>';
@@ -2778,9 +2777,9 @@ function renderPartidas(){
       '<button class="cal-filtro'+(filtroCalendarioComp==='todas'?' ativa':'')+'" onclick="mudarFiltroCalendario(\'todas\')">Todos</button>'+
       comps.map(c=>'<button class="cal-filtro'+(filtroCalendarioComp===c?' ativa':'')+'" onclick="mudarFiltroCalendario(\''+c.replace(/'/g,"\\'")+'\')">'+esc(c)+'</button>').join('')+
     '</div>'+
-    '<div id="calendarioParaImagem" style="background:#17171B;padding:16px;border-radius:12px;margin-top:12px">'+
-      '<div style="font-family:\'Anton\',sans-serif;text-transform:uppercase;letter-spacing:.03em;color:#fff;text-align:center;margin-bottom:12px">'+
-        '✠ Calendário — Vasco da Gama<span style="display:block;font-family:Inter,sans-serif;text-transform:none;letter-spacing:0;color:#9A9AA5;font-size:.7rem;margin-top:3px;font-weight:400">Direto do Bar da Tia · Vasbobo</span>'+
+    '<div id="calendarioParaImagem" style="background:#F8F6F1;padding:16px;border-radius:12px;margin-top:12px;border:1px solid var(--linha)">'+
+      '<div style="font-family:\'Anton\',sans-serif;text-transform:uppercase;letter-spacing:.03em;color:#17171B;text-align:center;margin-bottom:12px">'+
+        '✠ Calendário — Vasco da Gama<span style="display:block;font-family:Inter,sans-serif;text-transform:none;letter-spacing:0;color:#6C6C74;font-size:.7rem;margin-top:3px;font-weight:400">Direto do Bar da Tia · Vasbobo</span>'+
       '</div>'+
       linhasCal+
     '</div>'+
@@ -3328,6 +3327,20 @@ async function renderPerfilPsico(){
 }
 
 /* =================== CONFIGURAÇÕES (só admin) =================== */
+async function limparDadosDeUsuario(){
+  const nome=(document.getElementById('limparUsuarioNome').value||'').trim();
+  if(!nome){avisar('Digita o nome de login exato.');return;}
+  if(!(await confirmar('Isso vai apagar TODOS os palpites, notas, comentários e áudios de "'+nome+'" em todos os jogos. Não dá pra desfazer. Continuar?')))return;
+  let achou=false;
+  await mutar(()=>{
+    Object.values(dados.jogos).forEach(j=>{
+      if(j.palpites&&j.palpites[nome]){delete j.palpites[nome];achou=true;}
+      if(j.avaliacoes&&j.avaliacoes[nome]){delete j.avaliacoes[nome];achou=true;}
+    });
+  });
+  avisar(achou?'Dados de "'+nome+'" apagados!':'Não achei nada de "'+nome+'".',achou);
+  render();
+}
 async function limparMinhasAvaliacoes(){
   if(!(await confirmar('Isso vai apagar TODAS as suas notas, comentários e áudios (de "'+eu+'") em todos os jogos. Não dá pra desfazer. Continuar?')))return;
   await mutar(()=>{
@@ -3345,6 +3358,10 @@ function renderAdmin(){
   html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧹 Limpar minhas avaliações de teste</h2>'+
   '<p class="nota-rodape" style="margin:0 0 12px">Apaga suas notas/comentários/áudios em todos os jogos (só os seus — de "'+esc(eu)+'"). Não mexe em ninguém mais nem no placar dos jogos.</p>'+
   '<button class="btn" style="background:var(--vermelho)" onclick="limparMinhasAvaliacoes()">Apagar minhas avaliações</button></div>';
+  html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧹 Limpar dados de um usuário</h2>'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Apaga palpites, notas, comentários e áudios de um usuário específico (ex.: uma conta de teste) em todos os jogos.</p>'+
+  '<div style="display:flex;gap:10px;flex-wrap:wrap"><input id="limparUsuarioNome" placeholder="nome de login exato (ex.: teste)" style="flex:1;min-width:180px">'+
+  '<button class="btn" style="background:var(--vermelho)" onclick="limparDadosDeUsuario()">Apagar dados dele</button></div></div>';
   html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧪 Testar roleta e mensagens da rodada</h2>'+
   '<p class="nota-rodape" style="margin:0 0 12px">Simula as 3 telas sem gravar nada real — nada disso mexe no histórico de castigos do grupo. Só você (admin) vê este painel.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
