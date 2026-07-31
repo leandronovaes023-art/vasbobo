@@ -666,10 +666,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="tab" id="tabRank" onclick="mudarAba('rank')">🏆 Ranking</button>
     <button class="tab" id="tabCastigos" onclick="mudarAba('castigos')"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
     <a href="/hoje.html" class="tab" style="text-decoration:none">📅 Quem joga hoje?</a>
-    <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos/Calendário CRVG</button>
+    <button class="tab oculto" id="tabPartidas" onclick="mudarAba('jogoscalendario')">✠ Jogos/Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab" id="tabRaioX" onclick="mudarAba('raiox')">🧠 Perfil Psicótico</button>
+    <button class="tab" id="tabRaioX" onclick="mudarAba('perfilpsicotico')">🧠 Perfil Psicótico</button>
     <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
@@ -2030,7 +2030,7 @@ function mudarAba(a){
     const novoHash=a==='jogos'?'':('#'+a);
     if(location.hash!==novoHash)history.replaceState(null,'',location.pathname+novoHash);
   }catch(e){}
-  const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',partidas:'tabPartidas',castigos:'tabCastigos',elenco:'tabElenco',admin:'tabAdmin',raiox:'tabRaioX'};
+  const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',jogoscalendario:'tabPartidas',castigos:'tabCastigos',elenco:'tabElenco',admin:'tabAdmin',perfilpsicotico:'tabRaioX'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
     if(t)t.classList.toggle('ativa',k===a);
@@ -2046,8 +2046,8 @@ function render(){
   document.getElementById('secDetalhe').classList.toggle('oculto',!(aba==='jogos'&&jogoAberto));
   document.getElementById('secRank').classList.toggle('oculto',aba!=='rank');
   document.getElementById('secJogadores').classList.toggle('oculto',aba!=='jogadores');
-  document.getElementById('secRaioX').classList.toggle('oculto',aba!=='raiox');
-  document.getElementById('secPartidas').classList.toggle('oculto',aba!=='partidas');
+  document.getElementById('secRaioX').classList.toggle('oculto',aba!=='perfilpsicotico');
+  document.getElementById('secPartidas').classList.toggle('oculto',aba!=='jogoscalendario');
   document.getElementById('secCastigos').classList.toggle('oculto',aba!=='castigos');
   document.getElementById('secElenco').classList.toggle('oculto',aba!=='elenco');
   document.getElementById('secAdmin').classList.toggle('oculto',aba!=='admin');
@@ -2055,8 +2055,8 @@ function render(){
   if(aba==='jogos'&&jogoAberto)renderDetalhe();
   if(aba==='rank')renderRank();
   if(aba==='jogadores')renderJogadores();
-  if(aba==='raiox')renderRaioX();
-  if(aba==='partidas')renderPartidas();
+  if(aba==='perfilpsicotico')renderRaioX();
+  if(aba==='jogoscalendario')renderPartidas();
   if(aba==='castigos')renderCastigos();
   if(aba==='elenco'&&souAdmin())renderElenco();
   if(aba==='admin'&&souAdmin())renderAdmin();
@@ -2161,7 +2161,10 @@ function htmlRodadaBox(){
     const aoVivo=statusJogo(rj)==='andamento';
     const tabela=tabelaRodada(rj);
     let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+'</h3>'+
-      '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer;font-size:1.22rem;font-weight:800;color:var(--vermelho);text-decoration:underline;text-underline-offset:3px;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;text-transform:uppercase">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' <span style="font-size:.7em">→</span></div>'+
+      '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer;margin-bottom:8px">'+
+      '<div style="font-size:1.22rem;font-weight:800;color:var(--vermelho);text-transform:uppercase;line-height:1.3">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+'</div>'+
+      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--vermelho);color:#fff;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:4px">👆 Toque para abrir</span>'+
+      '</div>'+
       '<div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
     if(rj.resultado&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
       html+='<button class="jogo-item" style="background:rgba(192,18,27,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
@@ -3392,7 +3395,7 @@ function iniciarMidiaJanela(){
     eu=sessao;
     entrarNoApp();
     const h=location.hash.replace('#','');
-    const validas=['rank','castigos','partidas','elenco','admin','jogadores','raiox'];
+    const validas=['rank','castigos','jogoscalendario','elenco','admin','jogadores','perfilpsicotico'];
     if(validas.includes(h)){
       mudarAba(h);
     }else{
