@@ -92,7 +92,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .oculto{display:none!important}
 
   header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
-  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 12px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 12px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:nowrap}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
@@ -170,6 +170,28 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
   .rodada-box{background:rgba(255,255,255,.65);border:1px solid rgba(23,23,27,.32);border-radius:12px;padding:12px 14px}
+  /* ===== cards de perfil (mesmo padrão do O Grupo) ===== */
+  .perfil{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;overflow:hidden;backdrop-filter:blur(8px);margin-bottom:16px}
+  .perfil-header{padding:20px 20px 14px;display:flex;align-items:flex-start;gap:14px;border-bottom:1px solid var(--linha);position:relative}
+  .avatar{width:64px;height:64px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Anton',sans-serif;font-size:1.6rem;flex:none;border:2px solid var(--linha);overflow:hidden}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+  .perfil-info{flex:1;min-width:0}
+  .perfil-nome{font-family:'Anton',sans-serif;font-size:1.35rem;text-transform:uppercase;letter-spacing:.04em}
+  .perfil-titulo{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin-top:3px;font-weight:700}
+  .perfil-sub{color:var(--cinza);font-size:.78rem;margin-top:4px;line-height:1.4}
+  .rank-badge{position:absolute;top:14px;right:14px;font-family:'Anton',sans-serif;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid}
+  .perfil-body{padding:16px 20px}
+  .barras{display:grid;gap:8px;margin-bottom:14px}
+  .barra-item{display:flex;align-items:center;gap:10px;font-size:.78rem}
+  .barra-label{color:var(--cinza);width:90px;flex:none;letter-spacing:.04em}
+  .barra-track{flex:1;height:6px;background:rgba(23,23,27,.08);border-radius:99px;overflow:hidden}
+  .barra-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+  .pp-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .pp-stat{background:rgba(23,23,27,.05);border:1px solid var(--linha);border-radius:10px;padding:10px 12px;text-align:center}
+  .pp-stat .n{font-family:'Anton',sans-serif;font-size:1.2rem}
+  .pp-stat .l{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cinza);margin-top:2px}
+  .pp-frase{background:rgba(192,18,27,.08);border-left:3px solid var(--vermelho);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.85rem;font-style:italic;color:#33333A;line-height:1.5;margin-bottom:10px}
+  .pp-receita{font-size:.8rem;color:var(--cinza);line-height:1.5;margin-bottom:14px}
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
   .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid rgba(150,148,140,.4)}
@@ -284,8 +306,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .midia-janela.min .midia-corpo{display:none}
   .midia-janela.min .midia-top{border-bottom:none}
 
-  .tv-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(192,18,27,.08);
-    border:1.5px solid var(--vermelho);color:var(--vermelho);border-radius:8px;padding:4px 11px;
+  .tv-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(23,98,192,.08);
+    border:1.5px solid #1B6FC0;color:#1B6FC0;border-radius:8px;padding:4px 11px;
     font-family:'Inter',sans-serif;font-weight:800;font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;
     vertical-align:middle}
   .tv-badge svg{flex:none}
@@ -635,7 +657,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos/Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab" id="tabPerfilPsico" onclick="mudarAba('perfilpsico')">🃏 Perfil Psicótico</button>
+    <button class="tab" id="tabPerfilPsico" onclick="mudarAba('perfilpsico')">🃏 Perfil Psicótico<span id="tabPpMes"></span></button>
     <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
@@ -776,7 +798,7 @@ let timerTick=null, timerCrono=null, timerSync=null;
 
 /* =================== UTIL =================== */
 function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
-function avisar(msg,ok){const a=document.getElementById('aviso');a.textContent=msg;a.className='aviso'+(ok?' ok':'');a.style.display='block';clearTimeout(a._t);a._t=setTimeout(()=>a.style.display='none',4500);}
+function avisar(msg,ok,ms){const a=document.getElementById('aviso');a.textContent=msg;a.className='aviso'+(ok?' ok':'');a.style.display='block';clearTimeout(a._t);a._t=setTimeout(()=>a.style.display='none',ms||4500);}
 function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
 /* =================== FOTOS PERSISTENTES NO FIREBASE (perfil + castigo) =================== */
 /* Guardadas em coleções próprias (fora do doc principal, pra não estourar limite de 1MB do Firestore).
@@ -2180,7 +2202,7 @@ function renderListaJogos(){
       '<div class="meta">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
       (s==='aberto'&&j.hora?'<div class="cronometro" id="cronoDest" data-jogo="'+id+'">…</div>':'')+
       '<p style="font-size:.9rem;margin:10px 0 12px;color:#33333A">'+chamada+'.</p>'+
-      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" onclick="abrirJogo(\''+id+'\')">Abrir jogo</button><span class="selo '+cls+'">'+txt+'</span></div>'+
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" style="background:#17171B;border-color:#17171B" onclick="abrirJogo(\''+id+'\')">Abrir jogo</button><span class="selo '+cls+'">'+txt+'</span></div>'+
       '</div>'+htmlRodadaBox()+htmlCastigoRodadaBox()+'</div></div>';
   }
 
@@ -2443,8 +2465,7 @@ async function enviarAudioGravado(pid){
       await db.collection('audios').doc(chave).update({status:'transcrito',texto:info.texto});
       await fundirTranscricaoNoComentario(pid,info.texto);
       if(btn)btn.textContent='✅';
-      avisar('Áudio transcrito e salvo!',true);
-      mostrarConfirmacaoAudio(info.texto);
+      avisar('Ok, mensagem gravada ✓',true,1500);
     }else{
       await db.collection('audios').doc(chave).update({status:'erro'});
       if(btn)btn.textContent='⚠️';
@@ -2988,15 +3009,15 @@ let PP_MESES={};
 let PP_MES_ATUAL=null;
 
 function ppParseArquivo(texto){
-  const linhas=texto.split(/\r?\n/);
-  const pat=/^(\d{2}\/\d{2}\/\d{4}) (\d{1,2}:\d{2}) - ([^:]+): (.*)$/;
-  const patSis=/^(\d{2}\/\d{2}\/\d{4}) (\d{1,2}:\d{2}) - (.*)$/;
+  const linhas=texto.replace(/\u200e/g,'').split(/\r?\n/);
+  const pat=/^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s?[AaPp][Mm])?)\s*[-–—]\s*([^:]+):\s(.*)$/;
+  const patSis=/^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2})/;
   const msgs=[];
   let cur=null;
   linhas.forEach(linha=>{
     const m=pat.exec(linha);
     if(m){
-      cur={data:m[1],hora:m[2],sender:m[3].trim(),texto:m[4]};
+      cur={data:ppNormalizarData(m[1]),hora:m[2],sender:m[3].trim(),texto:m[4]};
       msgs.push(cur);
     }else if(patSis.test(linha)){
       cur=null;
@@ -3005,6 +3026,12 @@ function ppParseArquivo(texto){
     }
   });
   return msgs;
+}
+function ppNormalizarData(d){
+  // aceita DD/MM/AAAA ou DD/MM/AA e sempre devolve DD/MM/AAAA (com 4 dígitos)
+  const [dd,mm,yy]=d.split('/');
+  const ano=yy.length===2?('20'+yy):yy;
+  return dd.padStart(2,'0')+'/'+mm.padStart(2,'0')+'/'+ano;
 }
 const PP_TELEFONES={ // números que aparecem sem nome salvo no export, mapeados pra quem é
   '+55 21 96830-4488':'Felippo Leodoro',
@@ -3155,11 +3182,23 @@ async function ppCopiarPerfil(pessoaId){
     catch(e){ avisar('Não consegui copiar nesse navegador.'); }
   },'image/png');
 }
+const PP_USERNAME={'Leandro Novaes':'novaes','Daniel':'daniel','Douglas Muniz':'douglas','Antônio Nerd':'nerd','Alexsander Rodrigues':'alex','André':'andre','Fabrício Veras':'fabricio','Luiz Cerqueira':'luiz','Nico':'nico','Otair Senna':'otair','Pedro Fernandes':'pedro','Thiago Azevedo':'azevedo','Thiago Velloso':'velloso','Wallace Nascimento':'wallace','Juan Melo':'juan','João Sousa':'joao','Felippo Leodoro':'leodoro','Leonardo':'leonardo','Jorge Anjos':'jorge','William Cosme':'william'};
+function ppFotoUsuario(nome){ return fotoUsuario(PP_USERNAME[nome]||nome,64); }
+function ppTitulo(p,maxMsgs){
+  if(p.total===0)return {t:'👻 FANTASMA DO MÊS',c:'#6C6C74'};
+  if(p.palavroes>=10)return {t:'🤬 BOCA MAIS SUJA',c:'var(--vermelho)'};
+  if(p.caps>=8)return {t:'📢 GRITARIA CONSTANTE',c:'#A97B12'};
+  if(p.total===maxMsgs)return {t:'👑 REI DA RESENHA',c:'#A97B12'};
+  if(p.total<=3)return {t:'🫥 QUASE INVISÍVEL',c:'#6C6C74'};
+  return {t:'⚽ PRESENÇA GARANTIDA',c:'var(--vermelho)'};
+}
 async function renderPerfilPsico(){
   const sec=document.getElementById('secPerfilPsico');
   if(!Object.keys(PP_MESES).length){ await ppCarregarMeses(); }
   const chaves=Object.keys(PP_MESES).sort().reverse();
   if(!PP_MES_ATUAL)PP_MES_ATUAL=chaves[0]||null;
+  const elTabMes=document.getElementById('tabPpMes');
+  if(elTabMes)elTabMes.textContent=PP_MES_ATUAL?' — '+ppTituloMes(PP_MES_ATUAL).split(' de ')[0]:'';
 
   let html='<div class="card"><h2>🃏 Perfil Psicótico</h2>'+
     '<p class="nota-rodape" style="margin:0">Zoeira baseada em dado real do grupo: quem mais fala, palavras favoritas, quem xinga mais, quem some no mês. Tudo tirado das próprias mensagens de vocês.</p></div>';
@@ -3184,23 +3223,43 @@ async function renderPerfilPsico(){
   const dados_mes=PP_MESES[PP_MES_ATUAL];
   if(!dados_mes){ sec.innerHTML=html+'<div class="vazio">Mês não encontrado.</div>'; return; }
   const pessoas=Object.values(dados_mes.pessoas).sort((a,b)=>b.total-a.total);
+  const maxMsgs=Math.max(1,...pessoas.map(p=>p.total));
+  const maxPalavroes=Math.max(1,...pessoas.map(p=>p.palavroes));
+  const maxCaps=Math.max(1,...pessoas.map(p=>p.caps));
 
   pessoas.forEach((p,i)=>{
     const pid=('pp'+i+'_'+p.nome).replace(/[^a-zA-Z0-9]/g,'');
     const frase=ppGerarFrase(p);
     const receita=ppGerarReceita(p);
-    html+='<div class="card" id="ppCard_'+pid+'" style="background:#17171B;color:#F2F0EA;border-color:rgba(255,255,255,.14)">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">'+
-      '<span style="font-family:\'Anton\',sans-serif;font-size:1.15rem;text-transform:uppercase;letter-spacing:.03em">'+(i===0?'👑 ':'')+esc(p.nome)+'</span>'+
-      '<span style="background:var(--vermelho);color:#fff;border-radius:99px;padding:4px 12px;font-size:.78rem;font-weight:800">'+p.total+' msgs</span></div>'+
-      '<p style="font-size:.9rem;line-height:1.6;color:#D8D8DC">'+frase+'</p>'+
-      (p.topPalavras&&p.topPalavras.length?'<div style="margin-top:10px">'+p.topPalavras.map(([w,n])=>'<span class="chip" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#F2F0EA">'+esc(w)+' <b>×'+n+'</b></span>').join('')+'</div>':'')+
-      '<p style="font-size:.82rem;line-height:1.6;color:#B8B8C0;margin-top:12px;border-top:1px dashed rgba(255,255,255,.15);padding-top:10px">'+receita+'</p>'+
+    const tit=ppTitulo(p,maxMsgs);
+    const pctMsg=Math.round(p.total/maxMsgs*100);
+    const pctPalavrao=Math.round((p.palavroes/maxPalavroes)*100)||0;
+    const pctCaps=Math.round((p.caps/maxCaps)*100)||0;
+    html+='<div class="perfil" id="ppCard_'+pid+'">'+
+      '<div class="perfil-header">'+
+      '<div class="avatar">'+ppFotoUsuario(p.nome)+'</div>'+
+      '<div class="perfil-info"><div class="perfil-nome">'+esc(p.nome)+'</div>'+
+      '<div class="perfil-titulo" style="color:'+tit.c+'">'+tit.t+'</div>'+
+      '<div class="perfil-sub">'+ppTituloMes(PP_MES_ATUAL)+'</div></div>'+
+      '<div class="rank-badge" style="color:var(--vermelho);border-color:var(--vermelho)">'+(i+1)+'º</div>'+
       '</div>'+
-      '<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">'+
-      '<button class="btn fantasma" onclick="ppCompartilharPerfil(\''+pid+'\')">📲 Compartilhar</button>'+
-      '<button class="btn fantasma" onclick="ppCopiarPerfil(\''+pid+'\')">📋 Copiar imagem</button>'+
-      '</div>';
+      '<div class="perfil-body">'+
+      '<div class="barras">'+
+      '<div class="barra-item"><span class="barra-label">Mensagens</span><div class="barra-track"><div class="barra-fill" style="width:'+pctMsg+'%;background:var(--vermelho)"></div></div><span style="font-size:.72rem;color:var(--cinza);width:34px;text-align:right">'+p.total+'</span></div>'+
+      '<div class="barra-item"><span class="barra-label">Palavrão</span><div class="barra-track"><div class="barra-fill" style="width:'+pctPalavrao+'%;background:#A97B12"></div></div><span style="font-size:.72rem;color:var(--cinza);width:34px;text-align:right">'+p.palavroes+'</span></div>'+
+      '<div class="barra-item"><span class="barra-label">CAPS LOCK</span><div class="barra-track"><div class="barra-fill" style="width:'+pctCaps+'%;background:#6C6C74"></div></div><span style="font-size:.72rem;color:var(--cinza);width:34px;text-align:right">'+p.caps+'</span></div>'+
+      '</div>'+
+      '<div class="pp-stats">'+
+      '<div class="pp-stat"><div class="n">'+(p.topMencao?esc(p.topMencao[0]):'—')+'</div><div class="l">Mais citou</div></div>'+
+      '<div class="pp-stat"><div class="n">'+(p.topResposta?esc(p.topResposta[0]):'—')+'</div><div class="l">Mais respondeu</div></div>'+
+      '</div>'+
+      (p.topPalavras&&p.topPalavras.length?'<div style="margin-bottom:12px">'+p.topPalavras.map(([w,n])=>'<span class="chip">'+esc(w)+' <b>×'+n+'</b></span>').join('')+'</div>':'')+
+      '<div class="pp-frase">'+frase+'</div>'+
+      '<div class="pp-receita">'+receita+'</div>'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+      '<button class="btn fantasma" style="flex:1" onclick="ppCompartilharPerfil(\''+pid+'\')">📲 Compartilhar</button>'+
+      '<button class="btn fantasma" style="flex:1" onclick="ppCopiarPerfil(\''+pid+'\')">📋 Copiar imagem</button>'+
+      '</div></div></div>';
   });
 
   sec.innerHTML=html;
