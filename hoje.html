@@ -363,19 +363,30 @@ function sairSatelite(){
         }
         const porComp = {};
         todos.forEach(j=>{ (porComp[j.comp] = porComp[j.comp] || []).push(j); });
-        el.innerHTML = Object.entries(porComp).map(([comp, lista])=>
+        const novoHtml = Object.entries(porComp).map(([comp, lista])=>
           '<div class="rh-comp">'+comp+'</div>' +
           lista.map(j=>'<div class="rh-linha"><span>'+j.mandante+' <span style="color:var(--cinza)">×</span> '+j.visitante+'</span><span class="rh-hora">'+(j.horario||'')+'</span></div>').join('')
         ).join('');
+        if (novoHtml !== el.innerHTML) el.innerHTML = novoHtml; // só escreve se mudou de verdade, evita loop
       }
+      let rodando = false;
       function tentarTodos(){
-        document.querySelectorAll('.widget-wrap').forEach(w=>{
-          if (!w.dataset.jogosClicado && acharEClicar(w)) w.dataset.jogosClicado = '1';
-          adicionarDiaSemana(w);
-        });
-        montarResumoHoje();
+        if (rodando) return;
+        rodando = true;
+        try{
+          document.querySelectorAll('.widget-wrap').forEach(w=>{
+            if (!w.dataset.jogosClicado && acharEClicar(w)) w.dataset.jogosClicado = '1';
+            adicionarDiaSemana(w);
+          });
+          montarResumoHoje();
+        } finally { rodando = false; }
       }
-      const observer = new MutationObserver(tentarTodos);
+      let debounceId = null;
+      function tentarTodosDebounced(){
+        clearTimeout(debounceId);
+        debounceId = setTimeout(tentarTodos, 300);
+      }
+      const observer = new MutationObserver(tentarTodosDebounced);
       observer.observe(document.body, {childList:true, subtree:true});
       let tentativas = 0;
       const intervalo = setInterval(()=>{
