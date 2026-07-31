@@ -561,6 +561,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       </div>
     </div>
   <div class="header-who-row">
+          <button id="btnInstalarApp" onclick="instalarApp()" class="oculto" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700;margin-right:10px">📲 Instalar app</button>
           <div class="who">
             <span>Fala, <b id="whoNome"></b>!</span>
             <span class="adm oculto" id="whoAdm">admin</span>
@@ -568,6 +569,27 @@ console.log('Firebase conectado ao Vasbobo ✓');
           </div>
   </div>
   </header>
+  <script>
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('btnInstalarApp');
+      if (btn) btn.classList.remove('oculto');
+    });
+    async function instalarApp(){
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      const btn = document.getElementById('btnInstalarApp');
+      if (btn) btn.classList.add('oculto');
+    }
+    window.addEventListener('appinstalled', ()=>{
+      const btn = document.getElementById('btnInstalarApp');
+      if (btn) btn.classList.add('oculto');
+    });
+  </script>
 
   <nav>
     <button class="tab ativa" id="tabJogos" onclick="mudarAba('jogos')">Jogos</button>
