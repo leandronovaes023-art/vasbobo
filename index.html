@@ -170,21 +170,23 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
   .rodada-box{background:rgba(255,255,255,.65);border:1px solid rgba(23,23,27,.32);border-radius:12px;padding:12px 14px}
-  .rx-card{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;overflow:hidden;backdrop-filter:blur(8px);margin-bottom:16px}
-  .rx-head{padding:18px 18px 12px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--linha);position:relative}
-  .rx-avatar{width:56px;height:56px;border-radius:12px;flex:none;border:2px solid var(--linha);overflow:hidden;object-fit:cover}
-  .rx-nome{font-family:'Anton',sans-serif;font-size:1.15rem;text-transform:uppercase;letter-spacing:.03em}
-  .rx-cargo{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--vermelho);font-weight:800;margin-top:3px}
-  .rx-rank{position:absolute;top:14px;right:14px;font-family:'Anton',sans-serif;font-size:.7rem;color:var(--cinza)}
+  .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+  .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
+    letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
+  .rx-head{padding:20px 18px 12px;display:flex;align-items:flex-start;gap:12px;border-bottom:2px dashed #8A7F5E}
+  .rx-avatar{width:56px;height:56px;border-radius:50%;flex:none;border:3px solid var(--vermelho);overflow:hidden;object-fit:cover;filter:grayscale(.3)}
+  .rx-nome{font-family:'Anton',sans-serif;font-size:1.15rem;text-transform:uppercase;letter-spacing:.03em;color:#2A2416}
+  .rx-cargo{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--vermelho);font-weight:800;margin-top:3px}
+  .rx-rank{position:absolute;top:14px;right:14px;font-family:'Anton',sans-serif;font-size:.7rem;color:#8A7F5E}
   .rx-body{padding:14px 18px}
-  .rx-bio{font-size:.85rem;line-height:1.55;color:#33333A;font-style:italic;margin-bottom:12px}
+  .rx-bio{font-size:.85rem;line-height:1.55;color:#3A331F;margin-bottom:12px;background:rgba(255,255,255,.5);padding:10px 12px;border-radius:6px;border:1px solid #8A7F5E}
   .rx-barras{display:grid;gap:6px;margin-bottom:12px}
   .rx-barra{display:flex;align-items:center;gap:8px;font-size:.7rem}
-  .rx-barra-l{color:var(--cinza);width:78px;flex:none}
-  .rx-barra-t{flex:1;height:5px;background:rgba(23,23,27,.08);border-radius:99px;overflow:hidden}
-  .rx-barra-f{height:100%;border-radius:99px;background:var(--vermelho)}
-  .rx-frase{background:rgba(192,18,27,.07);border-left:3px solid var(--vermelho);padding:8px 12px;font-size:.78rem;margin-bottom:10px;border-radius:0 6px 6px 0}
-  .rx-diag{font-size:.76rem;color:var(--cinza);line-height:1.5}
+  .rx-barra-l{color:#6B6248;width:78px;flex:none}
+  .rx-barra-t{flex:1;height:7px;background:rgba(0,0,0,.08);border-radius:99px;overflow:hidden;border:1px solid rgba(0,0,0,.1)}
+  .rx-barra-f{height:100%;border-radius:99px;background:repeating-linear-gradient(45deg,var(--vermelho),var(--vermelho) 6px,#8f0f16 6px,#8f0f16 12px)}
+  .rx-frase{background:#fff;border:1px dashed var(--vermelho);padding:8px 12px;font-size:.78rem;margin-bottom:10px;border-radius:6px;font-style:italic}
+  .rx-diag{font-size:.76rem;color:#3A331F;line-height:1.6;background:rgba(192,18,27,.06);padding:8px 12px;border-radius:6px}
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
   .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid rgba(150,148,140,.4)}
@@ -657,7 +659,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos/Calendário CRVG</button>
     <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab" id="tabRaioX" onclick="mudarAba('raiox')">🩻 Raio-X Vascaíno</button>
+    <button class="tab" id="tabRaioX" onclick="mudarAba('raiox')">🧠 Perfil Psicótico</button>
     <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
@@ -3057,50 +3059,51 @@ function renderJogadores(){
 /* =================== PERFIL PSICÓTICO: resenha mensal do zap =================== */
 const RX_USERNAME={'Leandro Novaes':'novaes','Daniel':'daniel','Douglas Muniz':'douglas','Antônio Nerd':'nerd','Alexsander Rodrigues':'alex','André':'andre','Fabrício Veras':'fabricio','Luiz Cerqueira':'luiz','Nico':'nico','Otair Senna':'otair','Pedro Fernandes':'pedro','Thiago Azevedo':'azevedo','Thiago Velloso':'velloso','Wallace Nascimento':'wallace','Juan Melo':'juan','João Sousa':'joao','Felippo Leodoro':'leodoro','Leonardo':'leonardo','Jorge Anjos':'jorge','William Cosme':'william','Vítor RTM':'vitor'};
 const RAIOX_JULHO_2026=[
- {nome:'Leandro Novaes',cargo:'Presidente Vitalício do Sofrimento',bio:'2.706 mensagens em 31 dias — isso não é um membro de grupo, é uma coluna diária de jornal. Repetiu "técnico" 86 vezes (já entrevistou uns 12 candidatos na cabeça) e soltou 277 palavrões, uma média de quase 9 por dia. Pico religioso às 19h, hora da pré-análise pré-jogo.',frase:'A parada que fizeram com o Pedrinho é bem séria.',diag:'Overdose de administração emocional do grupo.',receita:'Delegar tarefas — mesmo sabendo que ninguém vai aceitar.',b:{Atividade:100,Cornetagem:100,Caps:29,Exclamação:100}},
- {nome:'Daniel',cargo:'Ministro da Caixa Alta',bio:'Citou "Novaes" 39 vezes — vive comentando o que o presidente disse. 55 mensagens em CAPS LOCK, recorde do mês. Responde ao Novaes 296 vezes, praticamente uma escolta pessoal.',frase:'Foda que eu nem sei quem devo gritar fora agora kkkk',diag:'Síndrome do Eco Presidencial.',receita:'Ativar o modo silencioso do celular durante coletivas.',b:{Atividade:56,Cornetagem:22,Caps:100,Exclamação:34}},
- {nome:'Douglas Muniz',cargo:'Ministro da Cornetagem',bio:'69 palavrões em 1.005 mensagens — praticamente um a cada 15 frases. Especialista particular em escalação (citou Spinelli 22 vezes, Brenner 20), sempre pronto pra montar time alheio.',frase:'Irmãos, a zaga dos caras é Maicon, Rodrigo Moledo, Jacy e o Thiago Santos que era volante kkk',diag:'Overdose de análise tática amadora.',receita:'Um curso de escalação com aproveitamento sobre o próprio time primeiro.',b:{Atividade:37,Cornetagem:25,Caps:20,Exclamação:3}},
- {nome:'Jorge Anjos',cargo:'Secretário de Relações Exteriores da Copa do Brasil',bio:'782 mensagens, quase todas girando em torno de "gol", "Copa" e "Brasil". Pico às 18h — sempre chega antes do horário, igual pontualidade que o time nunca teve.',frase:'Já discutiram por Vasco alguma coisa, Franklin Martins, Jorge Jesus, Ancelotti rsrsrs',diag:'Vício em polêmica de horário nobre.',receita:'Trocar o grupo por um podcast — ao menos lá ninguém rebate.',b:{Atividade:29,Cornetagem:12,Caps:5,Exclamação:15}},
- {nome:'Vítor RTM',cargo:'Fiscal Oficial do Lateral',bio:'246 mensagens rodando em torno de uma única obsessão: o Rayan (7 menções). 15 palavrões, 8 mensagens em caps — a paciência tem limite, e ele encontrou o dele em julho.',frase:'Tem que quebrar a perna desse anão.',diag:'Fixação seletiva em jogador específico.',receita:'Assistir ao jogo com o som mudo.',b:{Atividade:9,Cornetagem:5,Caps:15,Exclamação:0}},
- {nome:'Thiago Azevedo',cargo:'Coordenador Noturno de Reclamações',bio:'Pico de atividade às 23h — enquanto o grupo dorme, ele ainda está processando o jogo. 253 mensagens, a maioria depois do expediente.',frase:'Essa liminar tem que cair logo.',diag:'Insônia induzida por má gestão vascaína.',receita:'Desligar o wi-fi às 22h30.',b:{Atividade:9,Cornetagem:4,Caps:0,Exclamação:1}},
- {nome:'Thiago Velloso',cargo:'Analista-Chefe da Janela de Transferências',bio:'"Pedrinho" e "contratações" dominam seu vocabulário — 196 mensagens quase todas sobre quem vem e quem sai. Responde ao Novaes 49 vezes, sempre no debate do mercado.',frase:'Só que a convocação foi uma merda.',diag:'Ansiedade crônica pré-janela de transferências.',receita:'Desativar as notificações do ge até agosto.',b:{Atividade:7,Cornetagem:2,Caps:0,Exclamação:6}},
- {nome:'Antônio Nerd',cargo:'Embaixador do Silêncio Estratégico',bio:'Só 154 mensagens no mês — comedido pros seus padrões. Mas quando fala, fala grosso: "porra" e "caralho" dividem o pódio das palavras favoritas.',frase:'Porra, tu já pensou?',diag:'Economia de palavras, mas não de palavrão.',receita:'Nenhuma — parece estar bem assim.',b:{Atividade:6,Cornetagem:5,Caps:0,Exclamação:0}},
- {nome:'Alexsander Rodrigues',cargo:'Consultor de Assuntos Contratuais',bio:'112 mensagens focadas quase inteiramente em renovação e valores — parece mais preocupado com o próprio plano de sócio do que com o time.',frase:'Aí renovam mais caro do que tava antes.',diag:'Trauma financeiro recorrente.',receita:'Ler o contrato duas vezes antes de reclamar uma.',b:{Atividade:4,Cornetagem:1,Caps:4,Exclamação:3}},
- {nome:'André',cargo:'Editor-Chefe de Mensagens Editadas',bio:'105 mensagens, 7 palavrões, quase sempre no fim do dia (pico às 21h). Um dos poucos que edita a própria mensagem antes de mandar — cuidado que ninguém mais tem.',frase:'Quer ganhar sozinho??',diag:'Perfeccionismo tardio.',receita:'Confiar mais no primeiro instinto.',b:{Atividade:4,Cornetagem:3,Caps:0,Exclamação:0}},
- {nome:'Wallace Nascimento',cargo:'Correspondente Internacional (Sem Tempo pro Vasco)',bio:'85 mensagens, quase todas sobre Espanha, Brasil e França — o Mundial rendeu mais que o próprio Vasco esse mês. Só 2 palavrões, o mais educado do grupo.',frase:'Sou contra venda mesmo, e vou continuar sendo sempre.',diag:'Distração internacional aguda.',receita:'Voltar a acompanhar o campeonato local antes que seja tarde.',b:{Atividade:3,Cornetagem:1,Caps:0,Exclamação:0}},
- {nome:'Felippo Leodoro',cargo:'Perito em Substituições Questionáveis',bio:'82 mensagens, sempre no detalhe tático: "não era pra ter tirado o Rayan" é o tipo de frase que resume o mês dele.',frase:'Não era pra ter tirado o Rayan, perdeu o controle de bola na frente.',diag:'Síndrome do técnico de sofá.',receita:'Mandar currículo pro departamento de futebol, já que tem opinião formada.',b:{Atividade:3,Cornetagem:1,Caps:0,Exclamação:0}},
- {nome:'Juan Melo',cargo:'Juiz Supremo de Quem Entende de Futebol',bio:'70 mensagens, quase nenhum palavrão — prefere debater com ironia fina. Especialista em comparar craque com craque.',frase:'Silêncio que você não é entendedor de futebol kkkkkkkk',diag:'Sarcasmo em nível competitivo.',receita:'Nenhuma — está funcionando bem pra ele.',b:{Atividade:3,Cornetagem:0,Caps:0,Exclamação:3}},
- {nome:'Luiz Cerqueira',cargo:'Ministro do Churrasco Adiado',bio:'Só 29 mensagens, mas uma virou marca registrada: a cobrança eterna pelo churrasco que nunca acontece.',frase:'Quando vamos fazer um churras nesse caralho?',diag:'Frustração social crônica.',receita:'Marcar a data e cobrar todo santo dia até acontecer.',b:{Atividade:1,Cornetagem:1,Caps:0,Exclamação:9}},
- {nome:'Leonardo',cargo:'Recém-Chegado que Já Entendeu Tudo',bio:'18 mensagens, mas chegou com estilo: "salve, salve, sofredores" resume o espírito do grupo em uma frase só.',frase:'Opa! Salve, salve, sofredores.',diag:'Adaptação cultural instantânea.',receita:'Continuar assim, já pegou o jeito.',b:{Atividade:1,Cornetagem:0,Caps:0,Exclamação:3}},
- {nome:'Pedro Fernandes',cargo:'Convidado Ocasional de Honra',bio:'Só 16 mensagens, mas direto ao ponto: cobrar taça é o tema recorrente.',frase:'Entrega a taça, pô.',diag:'Presença rara, mas objetiva.',receita:'Aparecer mais — sentimos falta.',b:{Atividade:1,Cornetagem:1,Caps:0,Exclamação:0}},
- {nome:'João Sousa',cargo:'Filósofo Reserva do Grupo',bio:'14 mensagens no mês, cada uma parecendo uma pílula de sabedoria vascaína.',frase:'Tudo se resolve se o Vasco ganhar.',diag:'Otimismo condicional.',receita:'Continuar torcendo, é tudo que resta mesmo.',b:{Atividade:1,Cornetagem:0,Caps:0,Exclamação:0}},
- {nome:'William Cosme',cargo:'Visitante Ilustre (Modo Fantasma)',bio:'6 mensagens no mês inteiro, mas resumiu tudo em uma: desligou a TV e foi embora.',frase:'Jogo ruim da porra. Vou desligar a TV.',diag:'Sabedoria em dose mínima.',receita:'Nenhuma — ele já resolveu sozinho.',b:{Atividade:0,Cornetagem:0,Caps:0,Exclamação:0}},
- {nome:'Fabrício Veras',cargo:'Lenda Urbana do Grupo',bio:'Uma única mensagem em 31 dias. Existe? Ninguém sabe ao certo, mas o número dele está lá.',frase:'Fala comigo.',diag:'Presença quântica — existe e não existe ao mesmo tempo.',receita:'Aparecer de novo antes que vire piada oficial do grupo.',b:{Atividade:0,Cornetagem:0,Caps:0,Exclamação:0}},
+ {nome:'Leandro Novaes',cargo:'Presidente Vitalício do Sofrimento',bio:'Das mensagens enviadas, a maioria é sobre técnico — já entrevistou uns 12 candidatos só na cabeça. Das coisas que mandou normalmente é palavrão, em dose industrial. Surta com regularidade suspeita às 19h, hora da pré-análise pré-jogo — capaz de ter alarme configurado só pra isso.',frase:'A parada que fizeram com o Pedrinho é bem séria.',diag:'Overdose de administração emocional do grupo.',receita:'Delegar tarefas — mesmo sabendo que ninguém vai aceitar.',b:{Atividade:100,Cornetagem:100,Caps:29,Exclamação:100}},
+ {nome:'Daniel',cargo:'Ministro da Caixa Alta',bio:'Das mensagens enviadas, boa parte é sobre o que o Novaes acabou de falar — vive comentando a coleta em tempo real. Bateu recorde da ala em CAIXA ALTA. Responde tanto ao presidente que já parece escolta oficial.',frase:'Foda que eu nem sei quem devo gritar fora agora kkkk',diag:'Síndrome do Eco Presidencial.',receita:'Ativar o modo silencioso do celular durante coletivas.',b:{Atividade:56,Cornetagem:22,Caps:100,Exclamação:34}},
+ {nome:'Douglas Muniz',cargo:'Ministro da Cornetagem',bio:'Das coisas que mandou normalmente é escalação alheia — vive montando time de time dos outros. Palavrão solto com naturalidade de quem já perdeu a conta. Citou Spinelli e Brenner tanto que parece que trabalha pro departamento de scouting.',frase:'Irmãos, a zaga dos caras é Maicon, Rodrigo Moledo, Jacy e o Thiago Santos que era volante kkk',diag:'Overdose de análise tática amadora.',receita:'Um curso de escalação com aproveitamento sobre o próprio time primeiro.',b:{Atividade:37,Cornetagem:25,Caps:20,Exclamação:3}},
+ {nome:'Jorge Anjos',cargo:'Secretário de Relações Exteriores da Copa do Brasil',bio:'Das mensagens enviadas, a maioria gira em torno de gol, Copa e Brasil. Surta pontualmente às 18h — chega antes do horário, coisa que o time nunca fez.',frase:'Já discutiram por Vasco alguma coisa, Franklin Martins, Jorge Jesus, Ancelotti rsrsrs',diag:'Vício em polêmica de horário nobre.',receita:'Trocar o grupo por um podcast — ao menos lá ninguém rebate.',b:{Atividade:29,Cornetagem:12,Caps:5,Exclamação:15}},
+ {nome:'Vítor RTM',cargo:'Fiscal Oficial do Lateral',bio:'Das coisas que mandou normalmente é sobre uma única obsessão do mês: o Rayan. Palavrão frequente, algumas mensagens em caps — a paciência tem limite, e ele encontrou o dele em julho.',frase:'Tem que quebrar a perna desse anão.',diag:'Fixação seletiva em jogador específico.',receita:'Assistir ao jogo com o som mudo.',b:{Atividade:9,Cornetagem:5,Caps:15,Exclamação:0}},
+ {nome:'Thiago Azevedo',cargo:'Coordenador Noturno de Reclamações',bio:'Surta de madrugada — enquanto a ala dorme, ele ainda tá processando o jogo. Das mensagens enviadas, a maioria sai depois do expediente, direto pro plantão noturno de reclamação.',frase:'Essa liminar tem que cair logo.',diag:'Insônia induzida por má gestão vascaína.',receita:'Desligar o wi-fi às 22h30.',b:{Atividade:9,Cornetagem:4,Caps:0,Exclamação:1}},
+ {nome:'Thiago Velloso',cargo:'Analista-Chefe da Janela de Transferências',bio:'"Pedrinho" e "contratações" dominam o vocabulário — das coisas que mandou normalmente é sobre quem vem e quem sai. Vive respondendo ao Novaes no debate do mercado, o parceiro oficial da janela de transferências.',frase:'Só que a convocação foi uma merda.',diag:'Ansiedade crônica pré-janela de transferências.',receita:'Desativar as notificações do ge até agosto.',b:{Atividade:7,Cornetagem:2,Caps:0,Exclamação:6}},
+ {nome:'Antônio Nerd',cargo:'Embaixador do Silêncio Estratégico',bio:'Fala pouco pros padrões da ala, mas quando fala, fala grosso — "porra" e "caralho" dividem o pódio das palavras favoritas do mês.',frase:'Porra, tu já pensou?',diag:'Economia de palavras, mas não de palavrão.',receita:'Nenhuma — parece estar bem assim.',b:{Atividade:6,Cornetagem:5,Caps:0,Exclamação:0}},
+ {nome:'Alexsander Rodrigues',cargo:'Consultor de Assuntos Contratuais',bio:'Das mensagens enviadas, a maioria é sobre renovação e valor de plano — parece mais preocupado com a própria carteira de sócio do que com o time em campo.',frase:'Aí renovam mais caro do que tava antes.',diag:'Trauma financeiro recorrente.',receita:'Ler o contrato duas vezes antes de reclamar uma.',b:{Atividade:4,Cornetagem:1,Caps:4,Exclamação:3}},
+ {nome:'André',cargo:'Editor-Chefe de Mensagens Editadas',bio:'Das coisas que mandou normalmente é no fim do dia, surtando por volta das 21h. Um dos poucos internos que edita a própria mensagem antes de mandar — cuidado que ninguém mais na ala tem.',frase:'Quer ganhar sozinho??',diag:'Perfeccionismo tardio.',receita:'Confiar mais no primeiro instinto.',b:{Atividade:4,Cornetagem:3,Caps:0,Exclamação:0}},
+ {nome:'Wallace Nascimento',cargo:'Correspondente Internacional (Sem Tempo pro Vasco)',bio:'Das mensagens enviadas, a maioria nem é sobre o Vasco — foi tomado pela Espanha, Brasil e França no meio do Mundial. Palavrão quase zero, o interno mais educado do corredor.',frase:'Sou contra venda mesmo, e vou continuar sendo sempre.',diag:'Distração internacional aguda.',receita:'Voltar a acompanhar o campeonato local antes que seja tarde.',b:{Atividade:3,Cornetagem:1,Caps:0,Exclamação:0}},
+ {nome:'Felippo Leodoro',cargo:'Perito em Substituições Questionáveis',bio:'Das coisas que mandou normalmente é crítica tática fina — "não era pra ter tirado o Rayan" é o tipo de frase que resume o mês inteiro dele.',frase:'Não era pra ter tirado o Rayan, perdeu o controle de bola na frente.',diag:'Síndrome do técnico de sofá.',receita:'Mandar currículo pro departamento de futebol, já que tem opinião formada.',b:{Atividade:3,Cornetagem:1,Caps:0,Exclamação:0}},
+ {nome:'Juan Melo',cargo:'Juiz Supremo de Quem Entende de Futebol',bio:'Quase nenhum palavrão — prefere debater com ironia fina. Das mensagens enviadas, boa parte é comparando craque com craque, sempre com o verbo afiado.',frase:'Silêncio que você não é entendedor de futebol kkkkkkkk',diag:'Sarcasmo em nível competitivo.',receita:'Nenhuma — está funcionando bem pra ele.',b:{Atividade:3,Cornetagem:0,Caps:0,Exclamação:3}},
+ {nome:'Luiz Cerqueira',cargo:'Ministro do Churrasco Adiado',bio:'Pouco presente, mas com uma obsessão clara: a cobrança eterna pelo churrasco que a ala inteira promete e nunca marca.',frase:'Quando vamos fazer um churras nesse caralho?',diag:'Frustração social crônica.',receita:'Marcar a data e cobrar todo santo dia até acontecer.',b:{Atividade:1,Cornetagem:1,Caps:0,Exclamação:9}},
+ {nome:'Leonardo',cargo:'Recém-Chegado que Já Entendeu Tudo',bio:'Recém-internado, mas já entrou com a senha certa — "salve, salve, sofredores" resume o espírito do lugar em uma frase só.',frase:'Opa! Salve, salve, sofredores.',diag:'Adaptação cultural instantânea.',receita:'Continuar assim, já pegou o jeito.',b:{Atividade:1,Cornetagem:0,Caps:0,Exclamação:3}},
+ {nome:'Pedro Fernandes',cargo:'Convidado Ocasional de Honra',bio:'Aparece pouco no plantão, mas direto ao ponto: cobrar taça é o único assunto que importa.',frase:'Entrega a taça, pô.',diag:'Presença rara, mas objetiva.',receita:'Aparecer mais — sentimos falta.',b:{Atividade:1,Cornetagem:1,Caps:0,Exclamação:0}},
+ {nome:'João Sousa',cargo:'Filósofo Reserva do Grupo',bio:'Poucas visitas na ala esse mês, mas cada uma parece uma pílula de sabedoria vascaína encapsulada.',frase:'Tudo se resolve se o Vasco ganhar.',diag:'Otimismo condicional.',receita:'Continuar torcendo, é tudo que resta mesmo.',b:{Atividade:1,Cornetagem:0,Caps:0,Exclamação:0}},
+ {nome:'William Cosme',cargo:'Visitante Ilustre (Modo Fantasma)',bio:'Passou rapidinho pela ala esse mês, mas deixou o recado: desligou a TV e foi embora. Direto, sem neurose.',frase:'Jogo ruim da porra. Vou desligar a TV.',diag:'Sabedoria em dose mínima.',receita:'Nenhuma — ele já resolveu sozinho.',b:{Atividade:0,Cornetagem:0,Caps:0,Exclamação:0}},
+ {nome:'Fabrício Veras',cargo:'Lenda Urbana do Grupo',bio:'Apareceu uma única vez na ala em julho inteiro. Existe? Ninguém sabe ao certo, mas o crachá dele ainda está pendurado no corredor.',frase:'Fala comigo.',diag:'Presença quântica — existe e não existe ao mesmo tempo.',receita:'Aparecer de novo antes que vire piada oficial do grupo.',b:{Atividade:0,Cornetagem:0,Caps:0,Exclamação:0}},
 ];
 const RAIOX_SUMIDOS_JULHO_2026=['Nico','Otair Senna'];
 
 function renderRaioX(){
   const sec=document.getElementById('secRaioX');
-  let html='<div class="card"><h2>🩻 Raio-X Vascaíno — Julho de 2026</h2>'+
-    '<p class="nota-rodape" style="margin:0">Perfil de cada um baseado nas mensagens reais do grupo naquele mês — palavras mais usadas, quem mais fala com quem, e uma zoeira em cima disso tudo. Feito com carinho (e muito palavrão de vocês mesmos).</p></div>';
+  let html='<div class="card"><h2>🧠 Perfil Psicótico — Julho de 2026</h2>'+
+    '<p class="nota-rodape" style="margin:0">Bem-vindo à ala psiquiátrica do Vasbobo. Aqui cada interno tem sua ficha clínica, montada com prova real do que falou no grupo em julho — nada inventado, só muita internação merecida.</p></div>';
   RAIOX_JULHO_2026.forEach((p,i)=>{
     const pid=('rx'+i).replace(/[^a-zA-Z0-9]/g,'');
     html+='<div class="rx-card" id="rxCard_'+pid+'">'+
       '<div class="rx-head"><img class="rx-avatar" src="'+(FOTOS_PERFIL[RX_USERNAME[p.nome]||'']||('rostos/'+(RX_USERNAME[p.nome]||'')+'.jpg'))+'" alt="'+esc(p.nome)+'" onerror="this.style.display=\'none\'">'+
       '<div><div class="rx-nome">'+esc(p.nome)+'</div><div class="rx-cargo">'+esc(p.cargo)+'</div></div>'+
-      '<div class="rx-rank">'+(i+1)+'º</div></div>'+
-      '<div class="rx-body"><div class="rx-bio">'+esc(p.bio)+'</div>'+
-      '<div class="rx-barras">'+Object.entries(p.b).map(([l,v])=>'<div class="rx-barra"><span class="rx-barra-l">'+l+'</span><div class="rx-barra-t"><div class="rx-barra-f" style="width:'+v+'%"></div></div><span style="font-size:.68rem;color:var(--cinza);width:28px;text-align:right">'+v+'%</span></div>').join('')+'</div>'+
+      '<div class="rx-rank">quarto '+(i+1)+'</div></div>'+
+      '<div class="rx-body"><span class="rx-selo">🔒 Ficha clínica confidencial</span>'+
+      '<div class="rx-bio">'+esc(p.bio)+'</div>'+
+      '<div class="rx-barras">'+Object.entries(p.b).map(([l,v])=>'<div class="rx-barra"><span class="rx-barra-l">'+l+'</span><div class="rx-barra-t"><div class="rx-barra-f" style="width:'+v+'%"></div></div><span style="font-size:.68rem;color:#6B6248;width:28px;text-align:right">'+v+'%</span></div>').join('')+'</div>'+
       '<div class="rx-frase">💬 "'+esc(p.frase)+'"</div>'+
-      '<div class="rx-diag"><b>Diagnóstico:</b> '+esc(p.diag)+'<br><b>Receita:</b> '+esc(p.receita)+'</div>'+
+      '<div class="rx-diag"><b>🩺 Diagnóstico:</b> '+esc(p.diag)+'<br><b>💊 Prescrição:</b> '+esc(p.receita)+'</div>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'+
       '<button class="btn fantasma" style="flex:1" onclick="rxCompartilhar(\''+pid+'\')">📲 Compartilhar</button>'+
       '<button class="btn fantasma" style="flex:1" onclick="rxCopiar(\''+pid+'\')">📋 Copiar imagem</button>'+
       '</div></div></div>';
   });
   if(RAIOX_SUMIDOS_JULHO_2026.length){
-    html+='<div class="rx-card"><div class="rx-body"><div class="rx-cargo" style="margin-bottom:6px">👻 Sumidos do mês</div>'+
-      '<p style="font-size:.85rem;color:#33333A">'+RAIOX_SUMIDOS_JULHO_2026.map(esc).join(', ')+' — zero mensagens em julho. Ou estão muito bem na vida, ou esqueceram que o grupo existe. De boa, mas já pode cogitar a expulsão (brincadeira... ou não).</p></div></div>';
+    html+='<div class="rx-card"><div class="rx-body"><div class="rx-cargo" style="margin-bottom:6px">👻 Fuga da ala (alta voluntária)</div>'+
+      '<p style="font-size:.85rem;color:#3A331F">'+RAIOX_SUMIDOS_JULHO_2026.map(esc).join(', ')+' — não apareceram no plantão em julho. Ou estão muito bem na vida lá fora, ou esqueceram que a ala existe. De boa, mas já pode cogitar dar baixa no prontuário (brincadeira... ou não).</p></div></div>';
   }
   sec.innerHTML=html;
 }
@@ -3111,7 +3114,7 @@ async function rxCompartilhar(pid){
   canvas.toBlob(async blob=>{
     const file=new File([blob],'raiox-vascaino.png',{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file],title:'Raio-X Vascaíno'}); }catch(e){}
+      try{ await navigator.share({files:[file],title:'Perfil Psicótico'}); }catch(e){}
     }else{
       const url=URL.createObjectURL(blob);
       const a=document.createElement('a'); a.href=url; a.download='raiox-vascaino.png'; a.click();
