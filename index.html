@@ -233,9 +233,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .aval-topo{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .aval-nome{font-weight:700}
   .aval-nome small{color:var(--cinza);font-weight:400;margin-left:6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
-  .aval-controles{display:grid;grid-template-columns:110px 1fr 44px;gap:10px;margin-top:10px}
-  @media(max-width:600px){.aval-controles{grid-template-columns:1fr 44px}}
-  .btn-mic{background:var(--carvao2);border:1px solid var(--linha);border-radius:9px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+  .aval-controles{display:grid;grid-template-columns:1fr 44px;gap:10px;margin-top:10px}
+  .btn-mic{background:var(--vermelho);color:#fff;border:none;border-radius:50%;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+  .notas-botoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .btn-nota{width:34px;height:34px;border-radius:8px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif}
+  .btn-nota:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
+  .nota-escolhida{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:.92rem}
   .btn-mic.gravando{background:var(--vermelho);color:#fff;border-color:var(--vermelho);animation:micPulso 1s ease-in-out infinite}
   @keyframes micPulso{0%,100%{opacity:1}50%{opacity:.6}}
   .media-chip{font-family:'Anton',sans-serif;font-size:1.15rem;text-align:right;min-width:60px}
@@ -593,9 +596,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
     <div class="fq-modal" style="max-width:420px">
       <h3 style="text-align:left;margin-bottom:14px">📲 App VASBOBO</h3>
-      <p style="font-size:.86rem;line-height:1.6;margin-bottom:14px">Instale o VASBOBO no seu celular e fica igual um app.</p>
-      <p style="font-size:.82rem;line-height:1.6;margin-bottom:8px"><b>Android:</b> menu do navegador (⋮) → "Instalar app" ou "Adicionar à tela inicial".</p>
-      <p style="font-size:.82rem;line-height:1.6;margin-bottom:14px"><b>iPhone:</b> botão de compartilhar (Safari) → "Adicionar à Tela de Início".</p>
+      <p style="font-size:.86rem;line-height:1.6;margin-bottom:12px">Instale o VASBOBO no seu celular e fica igual um app.</p>
+      <p style="font-size:.8rem;line-height:1.6;margin-bottom:10px"><b>Android:</b> menu (⋮) → "Instalar app" &nbsp;|&nbsp; <b>iPhone:</b> compartilhar → "Adicionar à Tela de Início"</p>
+      <p style="font-size:.86rem;line-height:1.6;margin-bottom:14px;font-weight:700">Agora é só arrastar para a tela inicial do celular.</p>
       <button class="btn" style="width:100%" onclick="document.getElementById('modalInstalar').classList.add('oculto')">Entendi</button>
     </div>
   </div>
@@ -2214,7 +2217,7 @@ function renderDetalhe(){
   '<span class="selo '+cls+'">'+txt+'</span></div>';
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
-  if(j.emCampoInfo)html+='<div class="auto-info">📋 Lista de quem entrou em campo registrada em '+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' ('+esc(j.emCampoInfo.fonte)+').</div>';
+  if(j.emCampoInfo&&souAdmin())html+='<div class="auto-info">📋 Lista de quem entrou em campo registrada em '+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' ('+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span></div>';
   if(!j.fonteAuto&&j.parcial)html+='<div class="auto-info">⚙️ Placar parcial obtido automaticamente às '+new Date(j.parcial.quando).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' (fonte: '+esc(j.parcial.fonte)+'), atualizando a cada poucos minutos.</div>';
   html+=renderMvpLinha(j);
   html+=renderRodadaDetalhe(j);
@@ -2338,29 +2341,37 @@ function renderAvaliacaoCard(j,s){
     html+='<p class="nota-rodape" style="margin-top:0">🔒 Fim de jogo! Estou buscando automaticamente na web quem entrou em campo. As notas abrem assim que a lista de quem jogou chegar (em geral, poucos minutos).'+(souAdmin()?' <b>Admin:</b> dá para definir a lista manualmente na área do admin, logo abaixo.':'')+'</p></div>';
     return html;
   }
-  html+='<p class="nota-rodape" style="margin-top:0">Dê a nota (0 a 10) e deixe seu comentário sobre cada jogador. <b>Tudo salva automaticamente.</b>'+(j.emCampoInfo?' Lista de quem jogou registrada automaticamente (fonte: '+esc(j.emCampoInfo.fonte)+').':'')+(modoTeste()&&(!j.emCampo||!j.emCampo.length)?' <b style="color:var(--ouro)">(elenco completo liberado pelo modo teste)</b>':'')+'</p>';
+  html+='<p class="nota-rodape" style="margin-top:0">Dê a nota (0 a 10) e deixe seu comentário sobre cada jogador. <b>Tudo salva automaticamente.</b>'+(j.emCampoInfo&&souAdmin()?' Lista de quem jogou registrada automaticamente (fonte: '+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span>':'')+(modoTeste()&&(!j.emCampo||!j.emCampo.length)?' <b style="color:var(--ouro)">(elenco completo liberado pelo modo teste)</b>':'')+'</p>';
   const minhas=(j.avaliacoes||{})[eu]||{};
   lista.forEach(p=>{
     const minha=minhas[p.id]||{};
     const media=mediaJogadorNoJogo(j,p.id);
-    const opts=['<option value="">nota</option>'];
-    for(let n=10;n>=0;n-=0.5)opts.push('<option value="'+n+'" '+(minha.nota==n?'selected':'')+'>'+n.toLocaleString('pt-BR')+'</option>');
+    const temNota=minha.nota!==undefined&&minha.nota!==null&&minha.nota!=='';
+    const botoesNota=temNota?
+      '<div class="nota-escolhida">Sua nota: <b>'+(+minha.nota)+'</b> <button type="button" class="btn fantasma" style="padding:4px 12px;font-size:.72rem" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'\')">↺ Desfazer</button></div>':
+      '<div class="notas-botoes">'+Array.from({length:10},(_,i)=>10-i).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+'</div>';
     const comentarios=coletarComentarios(j,p.id);
     html+='<div class="aval-bloco"><div class="aval-topo">'+
       '<span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span>'+
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
       '<span class="media-chip '+(media?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media?media.media.toFixed(1).replace('.',','):'–')+'<small id="votos_'+p.id+'">'+(media?media.n+' voto'+(media.n===1?'':'s'):'sem votos')+'</small></span></span></div>'+
-      '<div class="aval-controles"><select aria-label="Sua nota para '+esc(p.nome)+'" onchange="salvarAvaliacao(\''+p.id+'\',\'nota\',this.value)">'+opts.join('')+'</select>'+
-      '<input placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" onblur="salvarAvaliacao(\''+p.id+'\',\'com\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()">'+
-      '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">🎙️</button></div>'+
+      botoesNota+
+      '<div class="aval-controles"><input placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" onblur="salvarAvaliacao(\''+p.id+'\',\'com\',this.value)" onkeydown="if(event.key===\'Enter\')this.blur()">'+
+      '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+'</button></div>'+
       (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+(+c.nota).toLocaleString('pt-BR')+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
       '</div>';
   });
+  html+='<button class="btn" style="width:100%;margin-top:6px" onclick="finalizarAvaliacao()">✅ Finalizar avaliação</button>';
   html+='</div>';
   return html;
 }
+function finalizarAvaliacao(){
+  avisar('Valeu por votar! Suas notas já estão salvas.',true);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 /* =================== ÁUDIO DAS NOTAS (grava, salva, transcreve) =================== */
 let GRAV_MEDIA=null, GRAV_CHUNKS=[], GRAV_TIMER=null, GRAV_PID=null;
+const ICONE_MIC='<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" fill="currentColor"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>';
 async function alternarGravacao(pid){
   if(GRAV_MEDIA&&GRAV_MEDIA.state==='recording'){ pararGravacao(); return; }
   try{
@@ -2410,7 +2421,8 @@ async function enviarAudioGravado(pid){
       await db.collection('audios').doc(chave).update({status:'transcrito',texto:info.texto});
       await fundirTranscricaoNoComentario(pid,info.texto);
       if(btn)btn.textContent='✅';
-      avisar('Áudio transcrito e salvo!',true);
+      const trecho=info.texto.length>90?info.texto.slice(0,90)+'…':info.texto;
+      avisar('Você disse: "'+trecho+'"?! Mensagem gravada com sucesso 🎙️',true);
     }else{
       await db.collection('audios').doc(chave).update({status:'erro'});
       if(btn)btn.textContent='⚠️';
@@ -2461,6 +2473,7 @@ async function salvarAvaliacao(pid,campo,valor){
   if(elM){elM.className='media-chip '+(media?classeNota(media.media):'');elM.childNodes[0].nodeValue=media?media.media.toFixed(1).replace('.',','):'–';}
   if(elV)elV.textContent=media?media.n+' voto'+(media.n===1?'':'s'):'sem votos';
   if(tick){tick.classList.add('on');setTimeout(()=>tick.classList.remove('on'),1600);}
+  if(campo==='nota')render();
 }
 
 /* =================== ADMIN DO JOGO (correção manual) =================== */
@@ -2888,7 +2901,7 @@ function renderRank(){
 }
 
 /* =================== ABA JOGADORES: dicionário da resenha =================== */
-const STOPWORDS=new Set('de,da,do,das,dos,e,o,a,os,as,um,uma,uns,umas,que,nao,não,com,sem,por,pra,pro,para,em,no,na,nos,nas,se,sim,foi,ser,ta,tá,esta,está,estava,e,eh,é,era,ele,ela,eles,elas,mas,mais,menos,muito,muita,bem,mal,ja,já,ainda,esse,essa,isso,este,isto,aquele,aquela,seu,sua,meu,minha,tem,teve,ter,vai,vou,hoje,ontem,jogo,jogou,jogando,partida,campo,bola,time,vasco,contra,quando,como,qual,cada,ate,até,depois,antes,entre,sobre,nada,tudo,todo,toda,so,só,la,lá,aqui,ali,entao,então,porque,pq,ne,né,cara,dele,dela,deu,pelo,pela,ao,aos,foi,ficou,fez,fazer,jogador,partidas,jogos'.split(','));
+const STOPWORDS=new Set('de,da,do,das,dos,e,o,a,os,as,um,uma,uns,umas,que,nao,não,com,sem,por,pra,pro,para,em,no,na,nos,nas,se,sim,foi,ser,ta,tá,esta,está,estava,e,eh,é,era,ele,ela,eles,elas,mas,mais,menos,muito,muita,bem,mal,ja,já,ainda,esse,essa,isso,este,isto,aquele,aquela,seu,sua,meu,minha,tem,teve,ter,vai,vou,hoje,ontem,jogo,jogou,jogando,partida,campo,bola,time,vasco,contra,quando,como,qual,cada,ate,até,depois,antes,entre,sobre,nada,tudo,todo,toda,so,só,la,lá,aqui,ali,entao,então,porque,pq,ne,né,cara,dele,dela,deu,pelo,pela,ao,aos,foi,ficou,fez,fazer,jogador,partidas,jogos,voce,você,vc,tu,eu,nos,nós,vos,lhe,lhes,meus,minhas,teus,tuas,nosso,nossa,nossos,nossas,esses,essas,estes,estas,aqueles,aquelas,aquilo,onde,quem,qualquer,alguem,alguém,ninguem,ninguém,outro,outra,outros,outras,mesmo,mesma,tao,tão,num,numa,pelos,pelas,das,dos,haver,ha,há,seja,seria,seriam,seram,seráo,será,serão,seus,suas,seu,ir,vamos,vem,vindo,fica,ficam,ficaram,tinha,tinham,estava,estavam,estao,estão,seremos'.split(','));
 function palavrasDoJogador(pid){
   const cont={};let nCom=0;
   Object.values(dados.jogos).forEach(j=>{
@@ -2905,6 +2918,21 @@ function palavrasDoJogador(pid){
   });
   const top=Object.entries(cont).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,6);
   return {top,nCom};
+}
+function audiosDoJogador(pid){
+  const linhas=[];
+  Object.values(dados.jogos).forEach(j=>{
+    Object.entries(j.avaliacoes||{}).forEach(([user,porJog])=>{
+      const av=porJog[pid];
+      if(av&&av.com&&av.com.indexOf('🎙️')!==-1){
+        linhas.push({user,texto:av.com.replace(/^.*🎙️\s*/,'')});
+      }
+    });
+  });
+  if(!linhas.length)return '';
+  return '<details style="margin-top:10px"><summary>🎙️ '+linhas.length+' áudio(s) enviado(s)</summary><div style="margin-top:6px">'+
+    linhas.map(l=>'<div class="linha-tabela"><span class="rank-nome">'+esc(l.user)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">"'+esc(l.texto)+'"</span></div>').join('')+
+    '</div></details>';
 }
 function renderJogadores(){
   const sec=document.getElementById('secJogadores');
@@ -2924,7 +2952,8 @@ function renderJogadores(){
       '<span style="display:flex;gap:16px;align-items:center">'+
       '<span class="media-chip '+(m.geral!==null?classeNota(m.geral):'')+'">'+(m.geral!==null?m.geral.toFixed(1).replace('.',','):'–')+'<small>média geral</small></span>'+
       '<span class="media-chip" style="color:var(--branco)">'+info.nCom+'<small>comentário'+(info.nCom===1?'':'s')+'</small></span></span></div>'+
-      (info.top.length?'<div style="margin-top:4px">'+info.top.map(([w,n])=>'<span class="chip">'+esc(w)+'<b>×'+n+'</b></span>').join('')+'</div>':'<p class="nota-rodape" style="margin-top:6px">Sem comentários ainda — esse aí tá passando batido na resenha.</p>')+
+      (info.top.length?'<div style="margin-top:4px">'+info.top.map(([w,n])=>'<span class="chip">'+esc(w)+' <b>×'+n+'</b></span>').join('')+'</div>':'<p class="nota-rodape" style="margin-top:6px">Sem comentários ainda — esse aí tá passando batido na resenha.</p>')+
+      audiosDoJogador(p.id)+
       '</div>';
   });
   sec.innerHTML=html;
