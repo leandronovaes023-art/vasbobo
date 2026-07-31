@@ -288,14 +288,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
 
   /* janela de mídia flutuante */
-  .midia-janela{position:fixed;right:6px;bottom:6px;width:min(230px,64vw);height:36vh;max-height:330px;
-    background:#FFFFFF;border:1px solid var(--linha);border-radius:14px;overflow:hidden;
+  .midia-janela{position:fixed;right:6px;bottom:6px;width:min(115px,32vw);height:18vh;max-height:165px;
+    background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;overflow:hidden;
     box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:40;display:flex;flex-direction:column}
-  .midia-top{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;
-    font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cinza);
+  .midia-top{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;
+    font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);
     border-bottom:1px solid var(--linha);background:rgba(255,255,255,.95);flex:none}
-  .midia-top button{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:6px;
-    padding:2px 9px;cursor:pointer;font-size:.75rem;font-family:'Inter',sans-serif}
+  .midia-top button{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:5px;
+    padding:1px 6px;cursor:pointer;font-size:.66rem;font-family:'Inter',sans-serif}
   .midia-corpo{flex:1;min-height:0;background:#000;display:flex;align-items:center;justify-content:center}
   .midia-corpo img,.midia-corpo video{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
   .midia-janela.min{height:auto;width:auto}
@@ -397,6 +397,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   background:var(--carvao);border:1px solid var(--linha);border-right:none;border-radius:12px 0 0 12px;
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
+.lembrete-avaliar{position:fixed;left:12px;bottom:12px;z-index:400;max-width:260px;background:#17171B;color:#fff;
+  border-radius:14px;padding:10px 14px;font-size:.76rem;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.35);
+  cursor:pointer;border:1px solid var(--vermelho);animation:lembreteFlutua 2.4s ease-in-out infinite}
+.lembrete-avaliar.oculto{display:none}
+.lembrete-avaliar b{color:#FF6B6B}
+@keyframes lembreteFlutua{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .fq-edge-corpo{cursor:pointer;padding:8px 4px 8px 8px;max-width:60px;overflow:hidden;
   transition:max-width .25s ease,padding .25s ease}
 .fq-edge-corpo img{width:58px;height:87px;border-radius:9px;object-fit:cover;object-position:top;display:block}
@@ -483,6 +489,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
         <tr><td>📈</td><td>Aproximação do placar — diferença de 2 gols</td><td><b>+2 pts</b></td></tr>
         <tr><td>📈</td><td>Aproximação do placar — diferença de 3 gols</td><td><b>+1 pt</b></td></tr>
         <tr><td>❌</td><td>Errou tudo</td><td><b>0 pts</b></td></tr>
+        <tr><td>🚫</td><td>Não avaliou os jogadores em até 24h após o resultado</td><td><b>-2 pts</b></td></tr>
       </table>
 
       <h4>🎯 Placar exato — 15 pts</h4>
@@ -606,6 +613,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
     </div>
     <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
   </div>
+  <div class="lembrete-avaliar oculto" id="lembreteAvaliar">
+    <span id="lembreteAvaliarTexto"></span>
+  </div>
   </header>
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
     <div class="fq-modal" style="max-width:420px">
@@ -724,7 +734,20 @@ console.log('Firebase conectado ao Vasbobo ✓');
 const CHAVE='vasbobo:v2';
 const CHAVE_SESSAO='vasbobo:sessao';
 const SENHA_PADRAO='vasco123';
-const PTS_EXATO=15, PTS_RESULTADO=8, PTS_UMTIME_ERROU=3, PTS_GOL=6, PTS_MVP=6;
+const PTS_EXATO=15, PTS_RESULTADO=8, PTS_UMTIME_ERROU=3, PTS_GOL=6, PTS_MVP=6, PTS_NAO_AVALIOU=-2;
+const PRAZO_AVALIAR_MS=24*3600000; // 24h após o resultado sair pra avaliar, senão perde PTS_NAO_AVALIOU
+function avaliou(j,usuario){
+  return !!(j.avaliacoes&&j.avaliacoes[usuario]&&Object.keys(j.avaliacoes[usuario]).length);
+}
+function prazoAvaliarVenceu(j){
+  if(!j.resultado||!j.resultadoEm)return false;
+  return Date.now()-j.resultadoEm>PRAZO_AVALIAR_MS;
+}
+function penalidadeNaoAvaliou(j,usuario){
+  if(!j.resultado||!j.palpites[usuario])return 0; // só quem palpitou pode ser penalizado
+  if(avaliou(j,usuario))return 0;
+  return prazoAvaliarVenceu(j)?PTS_NAO_AVALIOU:0;
+}
 const FECHA_PALPITE_MIN=5;          // palpites fecham 5 min antes da bola rolar
 const DURACAO_JOGO_MIN=110;         // tempo estimado até o apito final (45+15 intervalo+45+~5 acréscimos)
 const SYNC_INTERVALO_MS=5*60000;    // busca placar a cada 5 min durante o jogo
@@ -911,6 +934,7 @@ function tooltipPontuacao(){
     [PTS_UMTIME_ERROU,'🤏 errou o resultado, mas cravou o placar de um time'],
     ['+0 a +3','📈 aproximação do placar (quanto mais perto do resultado real)'],
     [0,'❌ errou tudo'],
+    [PTS_NAO_AVALIOU,'🚫 não avaliou os jogadores em 24h'],
   ];
   const linhasHtml=linhas.map(([p,t])=>'<tr><td>'+p+' pts</td><td>'+t+'</td></tr>').join('');
   return '<span class="info-pontuacao"><a onclick="event.stopPropagation();togglePont(this)">Pontuação:</a>'+
@@ -1089,11 +1113,9 @@ function pontuacaoLiberada(j){
   if(!j.resultado)return false;
   const palpitantes=Object.keys(j.palpites||{});
   if(!palpitantes.length)return true;
-  const votantes=new Set(Object.keys(j.avaliacoes||{}).filter(u=>Object.keys(j.avaliacoes[u]||{}).length));
-  const todosVotaram=palpitantes.every(u=>votantes.has(u));
+  const todosVotaram=palpitantes.every(u=>avaliou(j,u));
   if(todosVotaram)return true;
-  const desde=j.resultadoEm||0;
-  return desde?(Date.now()-desde>12*3600000):true;
+  return prazoAvaliarVenceu(j);
 }
 function premiacaoJogo(j){
   if(!j.resultado)return null;
@@ -1101,7 +1123,7 @@ function premiacaoJogo(j){
   const chaveJ=fqChaveJogo(j);
   const linhas=Object.entries(j.palpites).map(([u,p])=>({
     u,
-    pts:pontosPalpite(p,j).total+(ESTADO_QUIZ.porJogo[u+'|'+chaveJ]||0)
+    pts:pontosPalpite(p,j).total+(ESTADO_QUIZ.porJogo[u+'|'+chaveJ]||0)+penalidadeNaoAvaliou(j,u)
   }));
   if(!linhas.length)return null;
   const max=Math.max(...linhas.map(l=>l.pts));
@@ -1425,7 +1447,7 @@ function renderCastigos(){
 function tabelaRodada(j){
   const chaveJ=fqChaveJogo(j);
   return Object.entries(j.palpites)
-    .map(([u,p])=>({u,pts:(pontosPalpite(p,j,true)||{total:0}).total+(ESTADO_QUIZ.porJogo[u+'|'+chaveJ]||0)}))
+    .map(([u,p])=>({u,pts:(pontosPalpite(p,j,true)||{total:0}).total+(ESTADO_QUIZ.porJogo[u+'|'+chaveJ]||0)+penalidadeNaoAvaliou(j,u)}))
     .sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
 }
 function agruparPorPontos(tabela){
@@ -1987,9 +2009,9 @@ function entrarNoApp(){
     await carregarDados();await fqSincronizarEstado();render();
   },40000);
   if(timerSync)clearInterval(timerSync);
-  timerSync=setInterval(sincronizarJogos,30000);
+  timerSync=setInterval(()=>{sincronizarJogos();atualizarLembreteAvaliar();},30000);
   if(timerCrono)clearInterval(timerCrono);
-  timerCrono=setInterval(atualizarCronometro,1000);
+  timerCrono=setInterval(()=>{atualizarCronometro();atualizarCronometroAvaliar();},1000);
 }
 async function sair(){
   eu=null;jogoAberto=null;
@@ -2011,7 +2033,7 @@ function mudarAba(a){
   });
   render();
 }
-function abrirJogo(id){jogoAberto=id;render();window.scrollTo({top:0});}
+function abrirJogo(id){jogoAberto=id;mostrarAvaliacaoDetalhe=false;render();window.scrollTo({top:0});}
 function voltarLista(){jogoAberto=null;render();}
 
 function render(){
@@ -2035,6 +2057,7 @@ function render(){
   if(aba==='elenco'&&souAdmin())renderElenco();
   if(aba==='admin'&&souAdmin())renderAdmin();
   desenharPreviasRoleta();
+  atualizarLembreteAvaliar();
 }
 
 /* =================== DESTAQUE E LISTA =================== */
@@ -2068,6 +2091,29 @@ function jogoDaRodada(){
     if(s==='encerrado'||s==='avaliar')ultimo=[id,j];
   }
   return ultimo;
+}
+function atualizarLembreteAvaliar(){
+  const el=document.getElementById('lembreteAvaliar');
+  if(!el||!eu)return;
+  const rd=jogoDaRodada();
+  if(!rd){el.classList.add('oculto');return;}
+  const [rid,rj]=rd;
+  const pendente=rj.resultado&&rj.palpites&&rj.palpites[eu]&&!avaliou(rj,eu);
+  if(!pendente){el.classList.add('oculto');return;}
+  document.getElementById('lembreteAvaliarTexto').innerHTML='<b>Você ainda não avaliou a SELEVASCO</b><br>'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+'. Clique.';
+  el.onclick=()=>abrirJogoNaAvaliacao(rid);
+  el.classList.remove('oculto');
+}
+function atualizarCronometroAvaliar(){
+  const el=document.getElementById('cronoAvaliar');
+  if(!el)return;
+  const prazo=+el.dataset.prazo;
+  let diff=prazo-Date.now();
+  if(diff<=0){el.innerHTML='PRAZO ESGOTADO ⏰<small>-2 pts aplicado</small>';return;}
+  const h=String(Math.floor(diff/3600000)).padStart(2,'0');diff%=3600000;
+  const m=String(Math.floor(diff/60000)).padStart(2,'0');diff%=60000;
+  const s=String(Math.floor(diff/1000)).padStart(2,'0');
+  el.innerHTML=h+':'+m+':'+s+'<small>pra avaliar sem perder pontos</small>';
 }
 function atualizarCronometro(){
   const el=document.getElementById('cronoDest');
@@ -2111,12 +2157,24 @@ function htmlRodadaBox(){
     const aoVivo=statusJogo(rj)==='andamento';
     const tabela=tabelaRodada(rj);
     let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+'</h3>'+
-      '<div onclick="abrirJogo(\''+rid+'\')" style="cursor:pointer;font-size:1.22rem;font-weight:800;color:var(--vermelho);text-decoration:underline;text-underline-offset:3px;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;text-transform:uppercase">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' <span style="font-size:.7em">→</span></div>'+
+      '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer;font-size:1.22rem;font-weight:800;color:var(--vermelho);text-decoration:underline;text-underline-offset:3px;margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;text-transform:uppercase">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' <span style="font-size:.7em">→</span></div>'+
       '<div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
     if(rj.resultado&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
       html+='<button class="jogo-item" style="background:rgba(192,18,27,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
         '<span><span class="jogo-nome" style="color:var(--vermelho);text-transform:uppercase;white-space:nowrap;font-size:.92rem">VOCÊ AINDA NÃO AVALIOU A SELEVASCO</span>'+
         '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada.</div></span></button>';
+    }
+    if(rj.resultado&&!pontuacaoLiberada(rj)){
+      html+='<p class="nota-rodape" style="margin:0 0 8px"><b>⏳ Aguardo todos avaliarem para liberar o ranking da rodada.</b></p>';
+      html+=Object.keys(rj.palpites).sort().map(u=>{
+        const ok=avaliou(rj,u);
+        return '<div class="mini-linha"><span>'+(ok?'✅':'⏳')+' <b class="rank-nome">'+esc(cap(u))+'</b>'+(u===eu?' (você)':'')+'</span><span class="pt" style="'+(ok?'':'color:var(--vermelho)')+'">'+(ok?'avaliou':'não avaliou')+'</span></div>';
+      }).join('');
+      if(!avaliou(rj,eu)&&rj.resultadoEm){
+        html+='<div class="cronometro" style="font-size:1rem;margin-top:10px" id="cronoAvaliar" data-prazo="'+(rj.resultadoEm+PRAZO_AVALIAR_MS)+'">…</div>';
+      }
+      html+='</div>';
+      return html;
     }
     if(!tabela.length){
       html+='<p class="nota-rodape" style="margin:0">Ninguém palpitou neste jogo. Rodada sem rei nem bobo.</p>';
@@ -2136,9 +2194,6 @@ function htmlRodadaBox(){
           '<div class="premio-nome">'+prem.ribas.map(esc).join(' & ')+'</div>'+
           '<div class="premio-sub">'+prem.min+' pt'+(prem.min===1?'':'s')+' — errou até o hino. Agora a roleta do castigo te espera.</div>':'')+'</div>';
       }else if(tabela.length){
-        if(rj.resultado&&!pontuacaoLiberada(rj)){
-          html+='<p class="nota-rodape" style="margin-top:8px">🕐 <b>Pontuação provisória</b> — o MVP ainda pode mudar. A coroa fecha quando todo mundo que palpitou também votar nos jogadores, ou em até 12h depois do resultado.</p>';
-        }
         const lider=tabela[0], ultimo=tabela[tabela.length-1];
         const empatados=lider.pts===ultimo.pts;
         html+='<div class="chips-coroa" style="margin-top:10px"><span class="chip-coroa">'+esc(cap(lider.u))+' '+ICON_REI+'</span>'+
@@ -2233,6 +2288,7 @@ function renderListaJogos(){
   }
   sec.innerHTML=html;
   atualizarCronometro();
+  atualizarCronometroAvaliar();
 }
 
 /* =================== DETALHE DO JOGO =================== */
@@ -2248,7 +2304,8 @@ function renderDetalhe(){
   const ne=r?(casa?r.v:r.a):'–', nd=r?(casa?r.a:r.v):'–';
 
   let html='<button class="btn" onclick="voltarLista()" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;width:auto">← Voltar à Tela Principal</button>'+
-  '<div class="card"><div class="meta" style="font-size:.86rem">'+fmtData(j)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>'+
+  '<div class="card"><div class="jogo-nome" style="font-size:1.25rem;margin-bottom:6px">'+(r?(pe+' '+ne+' <span class="x">×</span> '+nd+' '+pd):(pe+' <span class="x">×</span> '+pd))+'</div>'+
+  '<div class="meta" style="font-size:.86rem">'+fmtData(j)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>'+
   (j.ondeAssistir?'<div style="margin-top:6px">'+badgeTransmissao(j,true)+'</div>':'');
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
@@ -2363,6 +2420,8 @@ function jogadoresParaAvaliar(j){
   }
   return modoTeste()?jogadoresAtivos():[];
 }
+let mostrarAvaliacaoDetalhe=false;
+function toggleAvaliacaoDetalhe(){ mostrarAvaliacaoDetalhe=!mostrarAvaliacaoDetalhe; render(); }
 function renderAvaliacaoCard(j,s){
   let html='<div class="card"><h2>Notas dos jogadores</h2>';
   if(!tempoDeAvaliar(j)){
@@ -2378,6 +2437,11 @@ function renderAvaliacaoCard(j,s){
   }
   html+='<p class="nota-rodape" style="margin-top:0">Dê a nota (0 a 10) e deixe seu comentário sobre cada jogador. <b>Tudo salva automaticamente.</b>'+(j.emCampoInfo&&souAdmin()?' Lista de quem jogou registrada automaticamente (fonte: '+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span>':'')+(modoTeste()&&(!j.emCampo||!j.emCampo.length)?' <b style="color:var(--ouro)">(elenco completo liberado pelo modo teste)</b>':'')+'</p>';
   const minhas=(j.avaliacoes||{})[eu]||{};
+  const jaAvaliou=Object.keys(minhas).length>0;
+  if(jaAvaliou&&!mostrarAvaliacaoDetalhe){
+    html+='<button class="jogo-item" style="width:100%" onclick="toggleAvaliacaoDetalhe()"><span><span class="jogo-nome" style="color:var(--vermelho)">✅ Você já avaliou. Quer alterar algo? Clique</span></span></button></div>';
+    return html;
+  }
   lista.forEach(p=>{
     const minha=minhas[p.id]||{};
     const media=mediaJogadorNoJogo(j,p.id);
@@ -2926,7 +2990,7 @@ function toggleRankingGeral(){ mostrarRankingGeral=!mostrarRankingGeral; renderR
 function renderRank(){
   const sec=document.getElementById('secRank');
   const placar={};
-  const zeraLinha=()=>({pts:0,exato:0,resultado:0,umtimeErrou:0,zero:0,bonus:0,palpites:0,reis:0,ribas:0,quiz:0});
+  const zeraLinha=()=>({pts:0,exato:0,resultado:0,umtimeErrou:0,zero:0,bonus:0,palpites:0,reis:0,ribas:0,quiz:0,naoAvaliou:0});
   Object.keys(dados.usuarios).forEach(u=>placar[u]=zeraLinha());
   Object.values(dados.jogos).forEach(j=>{
     Object.entries(j.palpites).forEach(([u,p])=>{
@@ -2941,6 +3005,8 @@ function renderRank(){
         else placar[u].zero++;
         placar[u].bonus+=pts.bonusGol+pts.bonusMvp;
       }
+      const pen=penalidadeNaoAvaliou(j,u);
+      if(pen){ placar[u].pts+=pen; placar[u].naoAvaliou++; }
     });
     const prem=premiacaoJogo(j);
     if(prem){
@@ -2968,6 +3034,7 @@ function renderRank(){
       if(x.umtimeErrou)partes.push(x.umtimeErrou+' c/ 1 time (errou o vencedor)');
       if(x.quiz)partes.push('+'+x.quiz+' do quiz ⚽');
       if(x.bonus)partes.push('+'+x.bonus+' bônus');
+      if(x.naoAvaliou)partes.push(x.naoAvaliou+'x não avaliou (-'+(x.naoAvaliou*2)+')');
       const resumo=partes.length?partes.join(' · '):'ainda sem pontos';
       return '<div class="rank-linha '+(i===0&&x.pts>0?'lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span>'+
       '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+
@@ -2995,6 +3062,7 @@ function renderRank(){
 
   html+=htmlRankingQuizTotal()+'</div>';
   sec.innerHTML=html;
+  atualizarCronometroAvaliar();
 }
 
 /* =================== ABA JOGADORES: dicionário da resenha =================== */
@@ -3058,7 +3126,7 @@ function renderJogadores(){
 
 /* =================== PERFIL PSICÓTICO: resenha mensal do zap =================== */
 const RX_USERNAME={'Leandro Novaes':'novaes','Daniel':'daniel','Douglas Muniz':'douglas','Antônio Nerd':'nerd','Alexsander Rodrigues':'alex','André':'andre','Fabrício Veras':'fabricio','Luiz Cerqueira':'luiz','Nico':'nico','Otair Senna':'otair','Pedro Fernandes':'pedro','Thiago Azevedo':'azevedo','Thiago Velloso':'velloso','Wallace Nascimento':'wallace','Juan Melo':'juan','João Sousa':'joao','Felippo Leodoro':'leodoro','Leonardo':'leonardo','Jorge Anjos':'jorge','William Cosme':'william','Vítor RTM':'vitor'};
-const RAIOX_JULHO_2026=[{"nome": "Leandro Novaes", "cargo": "Presença Mais Constante da Ala", "bio": "Das mensagens enviadas, a maioria é sobre técnico — já entrevistou uns 12 candidatos só na cabeça. Das coisas que mandou normalmente é palavrão, em dose industrial. Surta com regularidade suspeita às 19h, hora da pré-análise pré-jogo — capaz de ter alarme configurado só pra isso.", "frase": "A parada que fizeram com o Pedrinho é bem séria.", "diags": [{"diag": "Síndrome do Técnico de Sofá", "receita": "Escalar menos o time durante o banho. Parar de substituir jogador que nem entrou em campo. Aceitar que não tem licença da CBF."}, {"diag": "Vascaínite Aguda Reincidente", "receita": "7 dias sem abrir o grupo depois de derrota. 2 almoços em família por semana. Proibido assistir coletiva do técnico sem testemunha."}, {"diag": "Febre de Estatística", "receita": "Nem toda porcentagem muda o placar. Reduzir consultas ao SofaScore. Conversar com seres humanos de vez em quando."}], "prognostico": "Evolui bem quando o Vasco ganha. Regride em clássicos.", "b": {"Atividade": 100, "Cornetagem": 100, "Caps": 29, "Exclamação": 100}}, {"nome": "Daniel", "cargo": "Ministro da Caixa Alta", "bio": "Das mensagens enviadas, boa parte pede a saída do Pedrinho — \"Fora Pedrinho\" já virou bordão pessoal, repetido com convicção de quem tem certificado. Bateu recorde da ala em CAIXA ALTA no mês. Um dos que mais aparece no grupo, sempre com o dedo mais rápido que o próprio Wi-Fi.", "frase": "Foda que eu nem sei quem devo gritar fora agora kkkk", "diags": [{"diag": "Oposição Compulsiva à Diretoria", "receita": "Máximo de 3 \"Fora Pedrinho\" por dia. Escrever uma carta educada pra variar, só pra ver como é. Lembrar que ele também não escolhe os resultados em campo."}, {"diag": "Inflamação do Dedo no Enviar", "receita": "Contar até cinco antes de apertar enviar. Revisar a mensagem uma vez. Apagar pelo menos uma ideia ruim por dia."}, {"diag": "Hiperatividade no WhatsApp", "receita": "Ficar 20 minutos sem olhar o grupo. Se conseguir, comemorar discretamente. Se não conseguir, procurar ajuda — ou Wi-Fi de outra pessoa."}], "prognostico": "Alto risco de surtar na próxima reunião de conselho.", "b": {"Atividade": 56, "Cornetagem": 22, "Caps": 100, "Exclamação": 34}}, {"nome": "Douglas Muniz", "cargo": "Ministro da Cornetagem", "bio": "Das coisas que mandou normalmente é escalação alheia — vive montando time dos outros. Já não aguenta mais ouvir falar de Brenner, mas segue comentando mesmo assim. Defende o Daniel até quando sabe que ele acabou de falar besteira — amizade de grupo de zap é assim mesmo.", "frase": "Irmãos, a zaga dos caras é Maicon, Rodrigo Moledo, Jacy e o Thiago Santos que era volante kkk", "diags": [{"diag": "Overdose de Análise Tática Amadora", "receita": "Um curso de escalação com aproveitamento sobre o próprio time primeiro. Reduzir o uso de setinhas imaginárias no meio da conversa."}, {"diag": "Saturação Aguda de Brenner", "receita": "Trocar o assunto por 48h. Se não der, assistir só os gols dele, sem o resto do jogo."}, {"diag": "Lealdade Cega Crônica", "receita": "Defender o amigo é saudável. Fazer isso mesmo quando ele erra feio, nem tanto. Dose recomendada: só nas primeiras 24h após a besteira."}], "prognostico": "Estável, porém monitorado pelo Ministério da Corneta.", "b": {"Atividade": 37, "Cornetagem": 25, "Caps": 20, "Exclamação": 3}}, {"nome": "Jorge Anjos", "cargo": "Secretário de Relações Exteriores da Copa do Brasil", "bio": "Das mensagens enviadas, a maioria gira em torno de gol, Copa e Brasil. Surta pontualmente às 18h — chega antes do horário, coisa que o time nunca conseguiu fazer numa escalação sequer.", "frase": "Já discutiram por Vasco alguma coisa, Franklin Martins, Jorge Jesus, Ancelotti rsrsrs", "diags": [{"diag": "Vício em Polêmica de Horário Nobre", "receita": "Trocar o grupo por um podcast — lá pelo menos ninguém rebate na hora."}, {"diag": "Hipertensão por Arbitragem", "receita": "Evitar replay em câmera lenta. Não assistir programa esportivo depois de derrota."}, {"diag": "Pontualidade Fora de Contexto", "receita": "Chegar um pouco atrasado, só pra variar. O time também devia experimentar."}], "prognostico": "Contagioso. Recomenda-se manter distância durante derrotas.", "b": {"Atividade": 29, "Cornetagem": 12, "Caps": 5, "Exclamação": 15}}, {"nome": "Vítor RTM", "cargo": "Fiscal Oficial do Lateral", "bio": "Das coisas que mandou normalmente é sobre uma única obsessão do mês: o Rayan. Palavrão frequente, algumas mensagens em caps — a paciência tem limite, e ele encontrou o dele em julho.", "frase": "Tem que quebrar a perna desse anão.", "diags": [{"diag": "Fixação Seletiva em Jogador Específico", "receita": "Assistir ao jogo com o som mudo. Escolher um novo alvo pro próximo mês, dá mais variedade."}, {"diag": "Compulsão por Marcar Amigos", "receita": "Parar de citar o mesmo jogador em toda conversa. Diversificar as perseguições."}], "prognostico": "Quadro estável, mas o Rayan que se cuide.", "b": {"Atividade": 9, "Cornetagem": 5, "Caps": 15, "Exclamação": 0}}, {"nome": "Thiago Azevedo", "cargo": "Coordenador Noturno de Reclamações", "bio": "Surta de madrugada — enquanto a ala inteira dorme, ele ainda tá processando o jogo. Das mensagens enviadas, a maioria sai depois do expediente, direto pro plantão noturno de reclamação.", "frase": "Essa liminar tem que cair logo.", "diags": [{"diag": "Insônia Induzida por Má Gestão Vascaína", "receita": "Desligar o wi-fi às 22h30. Trocar o replay da derrota por um copo de leite morno."}, {"diag": "Fadiga de Grupo", "receita": "Ler antes de responder. Responder antes de esquecer. Esquecer antes de discutir."}], "prognostico": "Sem previsão de alta enquanto existir futebol às 23h.", "b": {"Atividade": 9, "Cornetagem": 4, "Caps": 0, "Exclamação": 1}}, {"nome": "Thiago Velloso", "cargo": "Analista-Chefe da Janela de Transferências", "bio": "\"Pedrinho\" e \"contratações\" dominam o vocabulário — das coisas que mandou normalmente é sobre quem vem e quem sai. O parceiro oficial de qualquer debate sobre mercado da bola.", "frase": "Só que a convocação foi uma merda.", "diags": [{"diag": "Ansiedade Crônica Pré-Janela de Transferências", "receita": "Desativar notificação do ge até agosto. Respirar fundo antes de cada rumor sem fonte."}, {"diag": "Síndrome do Influenciador do Grupo", "receita": "Permitir que outra pessoa mande a notícia primeiro, de vez em quando. Conferir a fonte antes da fama."}], "prognostico": "Alto risco de recaída a cada boato de contratação.", "b": {"Atividade": 7, "Cornetagem": 2, "Caps": 0, "Exclamação": 6}}, {"nome": "Antônio Nerd", "cargo": "Embaixador do Silêncio Estratégico", "bio": "Fala pouco pros padrões da ala, mas quando fala, fala grosso — \"porra\" e \"caralho\" dividem o pódio das palavras favoritas do mês.", "frase": "Porra, tu já pensou?", "diags": [{"diag": "Economia de Palavras, Não de Palavrão", "receita": "Falar mais vezes, xingar as mesmas vezes — ao menos assim dilui a média por mensagem."}, {"diag": "Ausência Crônica com Picos de Fúria", "receita": "Dar um sinal de vida entre as explosões. Uma figurinha já ajuda a aliviar a saudade da ala."}], "prognostico": "Caso raro. Nem a família consegue explicar.", "b": {"Atividade": 6, "Cornetagem": 5, "Caps": 0, "Exclamação": 0}}, {"nome": "Alexsander Rodrigues", "cargo": "Consultor de Assuntos Contratuais", "bio": "Das mensagens enviadas, a maioria é sobre renovação e valor de plano — parece mais preocupado com a própria carteira de sócio do que com o time em campo.", "frase": "Aí renovam mais caro do que tava antes.", "diags": [{"diag": "Trauma Financeiro Recorrente", "receita": "Ler o contrato duas vezes antes de reclamar uma. Guardar print do preço antigo, só pra sofrer com estilo."}, {"diag": "Hiperfoco em Boleto", "receita": "Separar 10 minutos do dia só pra reclamar do plano. O resto do dia fica livre pra torcer."}], "prognostico": "Estável, mas sensível a qualquer reajuste de mensalidade.", "b": {"Atividade": 4, "Cornetagem": 1, "Caps": 4, "Exclamação": 3}}, {"nome": "André", "cargo": "Editor-Chefe de Mensagens Editadas", "bio": "Das coisas que mandou normalmente é no fim do dia, surtando por volta das 21h. Um dos poucos internos que edita a própria mensagem antes de mandar — cuidado que ninguém mais na ala costuma ter.", "frase": "Quer ganhar sozinho??", "diags": [{"diag": "Perfeccionismo Tardio", "receita": "Confiar mais no primeiro instinto. Editar só quando for erro de digitação de verdade."}, {"diag": "Síndrome do \"Eu Avisei\"", "receita": "Máximo de dois \"eu falei\" por rodada. Comemorar em silêncio quando acertar o palpite."}], "prognostico": "Melhora visivelmente após uma boa noite de sono.", "b": {"Atividade": 4, "Cornetagem": 3, "Caps": 0, "Exclamação": 0}}, {"nome": "Wallace Nascimento", "cargo": "Correspondente Internacional (Sem Tempo pro Vasco)", "bio": "Das mensagens enviadas, a maioria nem é sobre o Vasco — foi tomado pela Espanha, Brasil e França no meio do Mundial. Palavrão quase zero, o interno mais educado do corredor.", "frase": "Sou contra venda mesmo, e vou continuar sendo sempre.", "diags": [{"diag": "Distração Internacional Aguda", "receita": "Voltar a acompanhar o campeonato local antes que seja tarde demais. Um jogo do Vasco por semana, no mínimo."}, {"diag": "Educação Excessiva pros Padrões da Ala", "receita": "Nenhuma — caso raro de bom comportamento, mantido em observação apenas por curiosidade científica."}], "prognostico": "Deve voltar ao normal assim que a Copa do Mundo acabar.", "b": {"Atividade": 3, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "Felippo Leodoro", "cargo": "Perito em Substituições Questionáveis", "bio": "Das coisas que mandou normalmente é crítica tática fina — \"não era pra ter tirado o Rayan\" é o tipo de frase que resume o mês inteiro dele.", "frase": "Não era pra ter tirado o Rayan, perdeu o controle de bola na frente.", "diags": [{"diag": "Perito Não-Contratado em Substituições", "receita": "Mandar currículo pro departamento de futebol, já que tem opinião formada. Aceitar que ninguém vai responder o e-mail."}, {"diag": "Abreviador Compulsivo", "receita": "Escrever \"caralho\" por extenso pelo menos uma vez por semana, só pra não perder o costume."}], "prognostico": "Caso estável, sujeito a piora em dia de escalação.", "b": {"Atividade": 3, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "Juan Melo", "cargo": "Juiz Supremo de Quem Entende de Futebol", "bio": "Quase nenhum palavrão — prefere debater com ironia fina. Das mensagens enviadas, boa parte é comparando craque com craque, sempre com o verbo afiado.", "frase": "Silêncio que você não é entendedor de futebol kkkkkkkk", "diags": [{"diag": "Sarcasmo em Nível Competitivo", "receita": "Nenhuma — funcionando bem pra ele. Recomenda-se só paciência de quem recebe as farpas."}, {"diag": "Ego de Comentarista", "receita": "Aceitar que errar previsão não é crime. Não apagar palpite antigo depois que der errado."}], "prognostico": "A medicina ainda estuda o caso. O grupo já desistiu de rebater.", "b": {"Atividade": 3, "Cornetagem": 0, "Caps": 0, "Exclamação": 3}}, {"nome": "Luiz Cerqueira", "cargo": "Ministro do Churrasco Adiado", "bio": "Pouco presente, mas com uma obsessão clara: a cobrança eterna pelo churrasco que a ala inteira promete e nunca marca.", "frase": "Quando vamos fazer um churras nesse caralho?", "diags": [{"diag": "Frustração Social Crônica", "receita": "Marcar a data e cobrar todo santo dia até acontecer de verdade. Comprar a carne antes de perguntar quem topa."}, {"diag": "Carência de Presença", "receita": "Aparecer mais vezes no grupo. O churrasco também depende disso, óbvio."}], "prognostico": "Prognóstico reservado até o churrasco sair do papel.", "b": {"Atividade": 1, "Cornetagem": 1, "Caps": 0, "Exclamação": 9}}, {"nome": "Leonardo", "cargo": "Recém-Chegado que Já Entendeu Tudo", "bio": "Recém-internado, mas já entrou com a senha certa — \"salve, salve, sofredores\" resume o espírito do lugar em uma frase só.", "frase": "Opa! Salve, salve, sofredores.", "diags": [{"diag": "Adaptação Cultural Instantânea", "receita": "Continuar assim — pegou o jeito rápido demais pra ser coincidência."}, {"diag": "Novato Promissor", "receita": "Aumentar gradualmente a participação. A ala recebe bem quem chega com estilo."}], "prognostico": "Tende a virar veterano rapidinho.", "b": {"Atividade": 1, "Cornetagem": 0, "Caps": 0, "Exclamação": 3}}, {"nome": "Pedro Fernandes", "cargo": "Convidado Ocasional de Honra", "bio": "Aparece pouco no plantão, mas direto ao ponto: cobrar taça é o único assunto que realmente importa.", "frase": "Entrega a taça, pô.", "diags": [{"diag": "Presença Rara, Mas Objetiva", "receita": "Aparecer mais — sentimos falta quando some."}, {"diag": "Fixação em Troféu Inexistente", "receita": "Rever a tabela antes de cobrar taça. Ajuda a calibrar a expectativa."}], "prognostico": "Estável, aparece só em ocasiões especiais.", "b": {"Atividade": 1, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "João Sousa", "cargo": "Filósofo Reserva do Grupo", "bio": "Poucas visitas na ala esse mês, mas cada uma parece uma pílula de sabedoria vascaína encapsulada.", "frase": "Tudo se resolve se o Vasco ganhar.", "diags": [{"diag": "Otimismo Condicional", "receita": "Continuar torcendo, é tudo que resta mesmo. Trocar a condicional por afirmação de vez em quando."}, {"diag": "Sabedoria em Doses Homeopáticas", "receita": "Falar mais vezes — as pílulas de sabedoria merecem plateia maior."}], "prognostico": "Melhora com mais participação.", "b": {"Atividade": 1, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}, {"nome": "William Cosme", "cargo": "Visitante Ilustre (Modo Fantasma)", "bio": "Passou rapidinho pela ala esse mês, mas deixou o recado: desligou a TV e foi embora. Direto, sem neurose.", "frase": "Jogo ruim da porra. Vou desligar a TV.", "diags": [{"diag": "Sabedoria em Dose Mínima", "receita": "Nenhuma — ele já resolveu sozinho antes de qualquer um perceber o problema."}, {"diag": "Alta Voluntária Precoce", "receita": "Voltar depois que a TV esfriar. A ala aceita reincidência sem julgamento."}], "prognostico": "Retorna quando o próximo jogo for bom o suficiente.", "b": {"Atividade": 0, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}, {"nome": "Fabrício Veras", "cargo": "Lenda Urbana do Grupo", "bio": "Apareceu uma única vez na ala em julho inteiro. Existe? Ninguém sabe ao certo, mas o crachá dele ainda está pendurado no corredor.", "frase": "Fala comigo.", "diags": [{"diag": "Presença Quântica", "receita": "Aparecer de novo antes que vire piada oficial da ala."}, {"diag": "Caso Mais Raro do Prontuário", "receita": "Nenhum tratamento sugerido — o paciente sequer confirmou existir."}], "prognostico": "A medicina não confirma o caso, apenas o registro na ficha.", "b": {"Atividade": 0, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}];
+const RAIOX_JULHO_2026=[{"nome": "Leandro Novaes", "cargo": "Presença Mais Constante da Ala", "bio": "Das mensagens enviadas, a maioria é sobre técnico — já entrevistou uns 12 candidatos só na cabeça. Das coisas que mandou normalmente é palavrão, em dose industrial. Surta com regularidade suspeita às 19h, hora da pré-análise pré-jogo — capaz de ter alarme configurado só pra isso.", "frase": "A parada que fizeram com o Pedrinho é bem séria.", "diags": [{"diag": "Síndrome do Técnico de Sofá", "receita": "Escalar menos o time durante o banho. Parar de substituir jogador que nem entrou em campo. Aceitar que não tem licença da CBF."}, {"diag": "Vascaínite Aguda Reincidente", "receita": "7 dias sem abrir o grupo depois de derrota. 2 almoços em família por semana. Proibido assistir coletiva do técnico sem testemunha."}, {"diag": "Febre de Estatística", "receita": "Nem toda porcentagem muda o placar. Reduzir consultas ao SofaScore. Conversar com seres humanos de vez em quando."}], "prognostico": "Evolui bem quando o Vasco ganha. Regride em clássicos.", "b": {"Atividade": 100, "Cornetagem": 100, "Caps": 29, "Exclamação": 100}}, {"nome": "Daniel", "cargo": "Ministro da Caixa Alta", "bio": "Das mensagens enviadas, boa parte pede a saída do Pedrinho — \"Fora Pedrinho\" já virou bordão pessoal, repetido com convicção de quem tem certificado. Bateu recorde da ala em CAIXA ALTA no mês. Um dos que mais aparece no grupo, sempre com o dedo mais rápido que o próprio Wi-Fi.", "frase": "Foda que eu nem sei quem devo gritar fora agora kkkk", "diags": [{"diag": "Oposição Compulsiva à Diretoria", "receita": "Máximo de 3 \"Fora Pedrinho\" por dia. Escrever uma carta educada pra variar, só pra ver como é. Lembrar que ele também não escolhe os resultados em campo."}, {"diag": "Inflamação do Dedo no Enviar", "receita": "Contar até cinco antes de apertar enviar. Revisar a mensagem uma vez. Apagar pelo menos uma ideia ruim por dia."}, {"diag": "Hiperatividade no WhatsApp", "receita": "Ficar 20 minutos sem olhar o grupo. Se conseguir, comemorar discretamente. Se não conseguir, procurar ajuda — ou Wi-Fi de outra pessoa."}], "prognostico": "Alto risco de surtar na próxima reunião de conselho.", "b": {"Atividade": 56, "Cornetagem": 22, "Caps": 100, "Exclamação": 34}}, {"nome": "Douglas Muniz", "cargo": "Ministro da Cornetagem", "bio": "Das coisas que mandou normalmente é link do Vasconet — vive compartilhando notícia antes de qualquer um perguntar. Já não aguenta mais o Daniel, e não esconde isso: critica cada opinião dele com o mesmo entusiasmo de quem nunca vai desistir.", "frase": "Irmãos, a zaga dos caras é Maicon, Rodrigo Moledo, Jacy e o Thiago Santos que era volante kkk", "diags": [{"diag": "Overdose de Notícia Não Confirmada", "receita": "Confirmar a fonte antes de mandar o link. Nem todo Vasconet é oficial."}, {"diag": "Implicância Crônica com o Daniel", "receita": "Contar até dez antes de rebater. Aceitar que discordar também é uma forma de amizade — só não fica óbvio que é."}], "prognostico": "Estável, porém monitorado pelo Ministério da Corneta.", "b": {"Atividade": 37, "Cornetagem": 25, "Caps": 20, "Exclamação": 3}}, {"nome": "Jorge Anjos", "cargo": "Secretário de Relações Exteriores da Copa do Brasil", "bio": "Das mensagens enviadas, a maioria gira em torno de gol, Copa e Brasil. Surta pontualmente às 18h — chega antes do horário, coisa que o time nunca conseguiu fazer numa escalação sequer.", "frase": "Já discutiram por Vasco alguma coisa, Franklin Martins, Jorge Jesus, Ancelotti rsrsrs", "diags": [{"diag": "Vício em Polêmica de Horário Nobre", "receita": "Trocar o grupo por um podcast — lá pelo menos ninguém rebate na hora."}, {"diag": "Hipertensão por Arbitragem", "receita": "Evitar replay em câmera lenta. Não assistir programa esportivo depois de derrota."}, {"diag": "Pontualidade Fora de Contexto", "receita": "Chegar um pouco atrasado, só pra variar. O time também devia experimentar."}], "prognostico": "Contagioso. Recomenda-se manter distância durante derrotas.", "b": {"Atividade": 29, "Cornetagem": 12, "Caps": 5, "Exclamação": 15}}, {"nome": "Vítor RTM", "cargo": "Fiscal Oficial do Lateral", "bio": "Das coisas que mandou normalmente é sobre uma única obsessão do mês: o Rayan. Palavrão frequente, algumas mensagens em caps — a paciência tem limite, e ele encontrou o dele em julho.", "frase": "Tem que quebrar a perna desse anão.", "diags": [{"diag": "Fixação Seletiva em Jogador Específico", "receita": "Assistir ao jogo com o som mudo. Escolher um novo alvo pro próximo mês, dá mais variedade."}, {"diag": "Compulsão por Marcar Amigos", "receita": "Parar de citar o mesmo jogador em toda conversa. Diversificar as perseguições."}], "prognostico": "Quadro estável, mas o Rayan que se cuide.", "b": {"Atividade": 9, "Cornetagem": 5, "Caps": 15, "Exclamação": 0}}, {"nome": "Thiago Azevedo", "cargo": "Coordenador Noturno de Reclamações", "bio": "Surta de madrugada — enquanto a ala inteira dorme, ele ainda tá processando o jogo. Das mensagens enviadas, a maioria sai depois do expediente, direto pro plantão noturno de reclamação.", "frase": "Essa liminar tem que cair logo.", "diags": [{"diag": "Insônia Induzida por Má Gestão Vascaína", "receita": "Desligar o wi-fi às 22h30. Trocar o replay da derrota por um copo de leite morno."}, {"diag": "Fadiga de Grupo", "receita": "Ler antes de responder. Responder antes de esquecer. Esquecer antes de discutir."}], "prognostico": "Sem previsão de alta enquanto existir futebol às 23h.", "b": {"Atividade": 9, "Cornetagem": 4, "Caps": 0, "Exclamação": 1}}, {"nome": "Thiago Velloso", "cargo": "Analista-Chefe da Janela de Transferências", "bio": "\"Pedrinho\" e \"contratações\" dominam o vocabulário — das coisas que mandou normalmente é sobre quem vem e quem sai. O parceiro oficial de qualquer debate sobre mercado da bola.", "frase": "Só que a convocação foi uma merda.", "diags": [{"diag": "Ansiedade Crônica Pré-Janela de Transferências", "receita": "Desativar notificação do ge até agosto. Respirar fundo antes de cada rumor sem fonte."}, {"diag": "Síndrome do Influenciador do Grupo", "receita": "Permitir que outra pessoa mande a notícia primeiro, de vez em quando. Conferir a fonte antes da fama."}], "prognostico": "Alto risco de recaída a cada boato de contratação.", "b": {"Atividade": 7, "Cornetagem": 2, "Caps": 0, "Exclamação": 6}}, {"nome": "Antônio Nerd", "cargo": "Embaixador do Silêncio Estratégico", "bio": "Fala pouco pros padrões da ala, mas quando fala, fala grosso — \"porra\" e \"caralho\" dividem o pódio das palavras favoritas do mês.", "frase": "Porra, tu já pensou?", "diags": [{"diag": "Economia de Palavras, Não de Palavrão", "receita": "Falar mais vezes, xingar as mesmas vezes — ao menos assim dilui a média por mensagem."}, {"diag": "Ausência Crônica com Picos de Fúria", "receita": "Dar um sinal de vida entre as explosões. Uma figurinha já ajuda a aliviar a saudade da ala."}], "prognostico": "Caso raro. Nem a família consegue explicar.", "b": {"Atividade": 6, "Cornetagem": 5, "Caps": 0, "Exclamação": 0}}, {"nome": "Alexsander Rodrigues", "cargo": "Consultor de Assuntos Contratuais", "bio": "Das mensagens enviadas, a maioria é sobre renovação e valor de plano — parece mais preocupado com a própria carteira de sócio do que com o time em campo.", "frase": "Aí renovam mais caro do que tava antes.", "diags": [{"diag": "Trauma Financeiro Recorrente", "receita": "Ler o contrato duas vezes antes de reclamar uma. Guardar print do preço antigo, só pra sofrer com estilo."}, {"diag": "Hiperfoco em Boleto", "receita": "Separar 10 minutos do dia só pra reclamar do plano. O resto do dia fica livre pra torcer."}], "prognostico": "Estável, mas sensível a qualquer reajuste de mensalidade.", "b": {"Atividade": 4, "Cornetagem": 1, "Caps": 4, "Exclamação": 3}}, {"nome": "André", "cargo": "Editor-Chefe de Mensagens Editadas", "bio": "Das coisas que mandou normalmente é no fim do dia, surtando por volta das 21h. Um dos poucos internos que edita a própria mensagem antes de mandar — cuidado que ninguém mais na ala costuma ter.", "frase": "Quer ganhar sozinho??", "diags": [{"diag": "Perfeccionismo Tardio", "receita": "Confiar mais no primeiro instinto. Editar só quando for erro de digitação de verdade."}, {"diag": "Síndrome do \"Eu Avisei\"", "receita": "Máximo de dois \"eu falei\" por rodada. Comemorar em silêncio quando acertar o palpite."}], "prognostico": "Melhora visivelmente após uma boa noite de sono.", "b": {"Atividade": 4, "Cornetagem": 3, "Caps": 0, "Exclamação": 0}}, {"nome": "Wallace Nascimento", "cargo": "Correspondente Internacional (Sem Tempo pro Vasco)", "bio": "Das mensagens enviadas, a maioria nem é sobre o Vasco — foi tomado pela Espanha, Brasil e França no meio do Mundial. Palavrão quase zero, o interno mais educado do corredor.", "frase": "Sou contra venda mesmo, e vou continuar sendo sempre.", "diags": [{"diag": "Distração Internacional Aguda", "receita": "Voltar a acompanhar o campeonato local antes que seja tarde demais. Um jogo do Vasco por semana, no mínimo."}, {"diag": "Educação Excessiva pros Padrões da Ala", "receita": "Nenhuma — caso raro de bom comportamento, mantido em observação apenas por curiosidade científica."}], "prognostico": "Deve voltar ao normal assim que a Copa do Mundo acabar.", "b": {"Atividade": 3, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "Felippo Leodoro", "cargo": "Perito em Substituições Questionáveis", "bio": "Das coisas que mandou normalmente é crítica tática fina — \"não era pra ter tirado o Rayan\" é o tipo de frase que resume o mês inteiro dele.", "frase": "Não era pra ter tirado o Rayan, perdeu o controle de bola na frente.", "diags": [{"diag": "Perito Não-Contratado em Substituições", "receita": "Mandar currículo pro departamento de futebol, já que tem opinião formada. Aceitar que ninguém vai responder o e-mail."}, {"diag": "Abreviador Compulsivo", "receita": "Escrever \"caralho\" por extenso pelo menos uma vez por semana, só pra não perder o costume."}], "prognostico": "Caso estável, sujeito a piora em dia de escalação.", "b": {"Atividade": 3, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "Juan Melo", "cargo": "Juiz Supremo de Quem Entende de Futebol", "bio": "Quase nenhum palavrão — prefere debater com ironia fina. Das mensagens enviadas, boa parte é comparando craque com craque, sempre com o verbo afiado.", "frase": "Silêncio que você não é entendedor de futebol kkkkkkkk", "diags": [{"diag": "Sarcasmo em Nível Competitivo", "receita": "Nenhuma — funcionando bem pra ele. Recomenda-se só paciência de quem recebe as farpas."}, {"diag": "Ego de Comentarista", "receita": "Aceitar que errar previsão não é crime. Não apagar palpite antigo depois que der errado."}], "prognostico": "A medicina ainda estuda o caso. O grupo já desistiu de rebater.", "b": {"Atividade": 3, "Cornetagem": 0, "Caps": 0, "Exclamação": 3}}, {"nome": "Luiz Cerqueira", "cargo": "Ministro do Churrasco Adiado", "bio": "Pouco presente, mas com uma obsessão clara: a cobrança eterna pelo churrasco que a ala inteira promete e nunca marca.", "frase": "Quando vamos fazer um churras nesse caralho?", "diags": [{"diag": "Frustração Social Crônica", "receita": "Marcar a data e cobrar todo santo dia até acontecer de verdade. Comprar a carne antes de perguntar quem topa."}, {"diag": "Carência de Presença", "receita": "Aparecer mais vezes no grupo. O churrasco também depende disso, óbvio."}], "prognostico": "Prognóstico reservado até o churrasco sair do papel.", "b": {"Atividade": 1, "Cornetagem": 1, "Caps": 0, "Exclamação": 9}}, {"nome": "Leonardo", "cargo": "Recém-Chegado que Já Entendeu Tudo", "bio": "Recém-internado, mas já entrou com a senha certa — \"salve, salve, sofredores\" resume o espírito do lugar em uma frase só.", "frase": "Opa! Salve, salve, sofredores.", "diags": [{"diag": "Adaptação Cultural Instantânea", "receita": "Continuar assim — pegou o jeito rápido demais pra ser coincidência."}, {"diag": "Novato Promissor", "receita": "Aumentar gradualmente a participação. A ala recebe bem quem chega com estilo."}], "prognostico": "Tende a virar veterano rapidinho.", "b": {"Atividade": 1, "Cornetagem": 0, "Caps": 0, "Exclamação": 3}}, {"nome": "Pedro Fernandes", "cargo": "Convidado Ocasional de Honra", "bio": "Aparece pouco no plantão, mas direto ao ponto: cobrar taça é o único assunto que realmente importa.", "frase": "Entrega a taça, pô.", "diags": [{"diag": "Presença Rara, Mas Objetiva", "receita": "Aparecer mais — sentimos falta quando some."}, {"diag": "Fixação em Troféu Inexistente", "receita": "Rever a tabela antes de cobrar taça. Ajuda a calibrar a expectativa."}], "prognostico": "Estável, aparece só em ocasiões especiais.", "b": {"Atividade": 1, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "João Sousa", "cargo": "Filósofo Reserva do Grupo", "bio": "Poucas visitas na ala esse mês, mas cada uma parece uma pílula de sabedoria vascaína encapsulada.", "frase": "Tudo se resolve se o Vasco ganhar.", "diags": [{"diag": "Otimismo Condicional", "receita": "Continuar torcendo, é tudo que resta mesmo. Trocar a condicional por afirmação de vez em quando."}, {"diag": "Sabedoria em Doses Homeopáticas", "receita": "Falar mais vezes — as pílulas de sabedoria merecem plateia maior."}], "prognostico": "Melhora com mais participação.", "b": {"Atividade": 1, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}, {"nome": "William Cosme", "cargo": "Visitante Ilustre (Modo Fantasma)", "bio": "Passou rapidinho pela ala esse mês, mas deixou o recado: desligou a TV e foi embora. Direto, sem neurose.", "frase": "Jogo ruim da porra. Vou desligar a TV.", "diags": [{"diag": "Sabedoria em Dose Mínima", "receita": "Nenhuma — ele já resolveu sozinho antes de qualquer um perceber o problema."}, {"diag": "Alta Voluntária Precoce", "receita": "Voltar depois que a TV esfriar. A ala aceita reincidência sem julgamento."}], "prognostico": "Retorna quando o próximo jogo for bom o suficiente.", "b": {"Atividade": 0, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}, {"nome": "Fabrício Veras", "cargo": "Lenda Urbana do Grupo", "bio": "Apareceu uma única vez na ala em julho inteiro. Existe? Ninguém sabe ao certo, mas o crachá dele ainda está pendurado no corredor.", "frase": "Fala comigo.", "diags": [{"diag": "Presença Quântica", "receita": "Aparecer de novo antes que vire piada oficial da ala."}, {"diag": "Caso Mais Raro do Prontuário", "receita": "Nenhum tratamento sugerido — o paciente sequer confirmou existir."}], "prognostico": "A medicina não confirma o caso, apenas o registro na ficha.", "b": {"Atividade": 0, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}];
 const RAIOX_SUMIDOS_JULHO_2026=['Nico','Otair Senna'];
 
 function renderRaioX(){
@@ -3075,7 +3143,7 @@ function renderRaioX(){
       '<div class="rx-bio">'+esc(p.bio)+'</div>'+
       '<div class="rx-barras">'+Object.entries(p.b).map(([l,v])=>'<div class="rx-barra"><span class="rx-barra-l">'+l+'</span><div class="rx-barra-t"><div class="rx-barra-f" style="width:'+v+'%"></div></div><span style="font-size:.68rem;color:#6B6248;width:28px;text-align:right">'+v+'%</span></div>').join('')+'</div>'+
       '<div class="rx-frase">💬 "'+esc(p.frase)+'"</div>'+
-      p.diags.map(d=>'<div class="rx-diag" style="margin-bottom:8px"><b>🩺 Diagnóstico:</b> '+esc(d.diag)+'<br><b>💊 Receita Médica:</b> '+esc(d.receita)+'</div>').join('')+
+      '<div class="rx-diag"><b>🩺 Diagnóstico:</b> '+p.diags.map(d=>esc(d.diag)).join('; ')+'.<br><b>💊 Receita Médica:</b> '+p.diags.map(d=>esc(d.receita)).join(' ')+'</div>'+
       '<p style="font-size:.74rem;color:#8A7F5E;font-style:italic;margin-top:6px">📋 Prognóstico: '+esc(p.prognostico)+'</p>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'+
       '<button class="btn fantasma" style="flex:1" onclick="rxCompartilhar(\''+pid+'\')">📲 Compartilhar</button>'+
