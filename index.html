@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vasbobo</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#C0121B">
+<meta name="theme-color" content="#17171B">
 <link rel="icon" href="/icons/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Vasbobo">
+<meta name="apple-mobile-web-app-title" content="VASBOBO">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -92,8 +92,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .oculto{display:none!important}
 
   header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
-  .header-inner{max-width:1320px;margin:0 auto;padding:26px 20px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .header-who-row{max-width:1320px;margin:0 auto;padding:0 20px 16px;display:flex;justify-content:flex-end}
+  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 8px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .header-who-row{max-width:1320px;margin:0 auto;padding:0 20px 10px;display:flex;justify-content:flex-end}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
   .logo-row{display:flex;align-items:center;gap:14px}
@@ -107,8 +107,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
-  nav{max-width:1320px;margin:0 auto;padding:14px 20px 0;display:flex;gap:8px;flex-wrap:wrap}
-  .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.05em;font-size:.88rem;padding:10px 15px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:10px 10px 0 0;cursor:pointer;backdrop-filter:blur(6px)}
+  nav{max-width:1320px;margin:0 auto;padding:10px 20px 0;display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:.8rem;padding:9px 13px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:10px 10px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap;flex:none}
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
   main{max-width:1320px;margin:0 auto;padding:20px 20px 60px}
@@ -356,23 +357,22 @@ console.log('Firebase conectado ao Vasbobo ✓');
     box-shadow:0 8px 26px rgba(23,23,27,.35);z-index:45;display:none;align-items:center;justify-content:center}
   .topo-btn.on{display:flex}
 
-/* ===== O Que Mais Entende de Futebol — selo no cabeçalho, espelhado ao mascote (mesmo tamanho) ===== */
-.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-.fq-mini-row{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
-.fq-mini-row.oculto{display:none}
-.fq-mini-img{width:96px;height:144px;border-radius:14px;overflow:hidden;object-fit:cover;object-position:top;
-  border:2px solid var(--branco);box-shadow:0 4px 14px rgba(0,0,0,.4);flex:none;display:block;background:#000}
-.fq-mini-legenda{text-align:center}
-.fq-mini-titulo{display:block;font-family:'Anton',sans-serif;font-size:.85rem;letter-spacing:.04em;
-  text-transform:uppercase;color:var(--branco);text-shadow:0 1px 3px rgba(0,0,0,.6)}
-.fq-mini-sub{display:block;font-size:.7rem;color:var(--branco);opacity:.85;margin-top:2px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-@media(max-width:480px){.fq-mini-img{width:66px;height:99px}.fq-mini-titulo{font-size:.66rem}.fq-mini-sub{font-size:.58rem}}
-@media(max-width:400px){
-  .bobo{width:60px;height:60px;border-radius:10px}
+/* ===== O Que Mais Entende de Futebol — aba lateral discreta (edge tab) ===== */
+.fq-edge{position:fixed;right:0;top:42%;transform:translateY(-50%);z-index:400;cursor:pointer;
+  background:var(--carvao);border:1px solid var(--linha);border-right:none;border-radius:12px 0 0 12px;
+  padding:8px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
+.fq-edge.oculto{display:none}
+.fq-edge img{width:34px;height:51px;border-radius:7px;object-fit:cover;object-position:top;display:block}
+.fq-edge-seta{color:var(--vermelho);font-size:1rem;font-weight:900;line-height:1}
+@media(max-width:480px){.fq-edge img{width:28px;height:42px}}
+@media(max-width:480px){
+  .bobo{width:56px;height:56px;border-radius:10px}
   .header-inner{gap:8px}
   .logo-row{gap:8px}
-  h1{font-size:1.4rem}
-  .eyebrow{font-size:.6rem;letter-spacing:.14em}
+  h1{font-size:1.3rem}
+  .eyebrow{font-size:.58rem;letter-spacing:.12em}
+  .who{padding:6px 10px;font-size:.76rem;gap:6px}
+  #btnInstalarApp{padding:6px 9px!important;font-size:.7rem!important;margin-right:6px!important}
 }
 .fq-veu{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000}
 .fq-veu.oculto{display:none}
@@ -550,40 +550,40 @@ console.log('Firebase conectado ao Vasbobo ✓');
           <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
         </div>
       </div>
-      <div class="header-right">
-        <div class="fq-mini-row oculto" id="fqFixo" onclick="fqAbrirQuiz()" title="O Que Mais Entende de Futebol">
-          <img class="fq-mini-img" src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
-          <div class="fq-mini-legenda">
-            <span class="fq-mini-titulo">Vasbobo Sabedoria</span>
-            <span class="fq-mini-sub" id="fqFixoStatus">Toque para responder</span>
-          </div>
-        </div>
-      </div>
     </div>
   <div class="header-who-row">
-          <button id="btnInstalarApp" onclick="instalarApp()" class="oculto" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700;margin-right:10px">📲 Instalar app</button>
+          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700;margin-right:10px">📲 App VASBOBO</button>
           <div class="who">
             <span>Fala, <b id="whoNome"></b>!</span>
             <span class="adm oculto" id="whoAdm">admin</span>
             <button onclick="pedirConfirmacaoSair()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
           </div>
   </div>
+  <div class="fq-edge oculto" id="fqFixo" onclick="fqAbrirQuiz()" title="O Que Mais Entende de Futebol">
+    <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
+    <span class="fq-edge-seta">‹</span>
+  </div>
   </header>
+  <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
+    <div class="fq-modal" style="max-width:420px">
+      <h3 style="text-align:left;margin-bottom:14px">📲 App VASBOBO</h3>
+      <p style="font-size:.86rem;line-height:1.6;margin-bottom:14px">Instala o Vasbobo no seu celular e usa igual um app de verdade — ícone na tela, sem barra de navegador.</p>
+      <p style="font-size:.82rem;line-height:1.6;margin-bottom:10px"><b>📱 Android:</b> abre o menu do navegador (⋮ no canto superior direito) e toca em <b>"Instalar app"</b> ou <b>"Adicionar à tela inicial"</b>.</p>
+      <p style="font-size:.82rem;line-height:1.6;margin-bottom:14px"><b>🍎 iPhone:</b> toca no botão de compartilhar (□ com uma seta pra cima, embaixo da tela no Safari) e escolhe <b>"Adicionar à Tela de Início"</b>. É só isso — arrastou pra tela inicial, já tem o app do Vasbobo!</p>
+      <button class="btn" style="width:100%" onclick="document.getElementById('modalInstalar').classList.add('oculto')">Entendi</button>
+    </div>
+  </div>
   <script>
     let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', (e)=>{
-      e.preventDefault();
-      deferredPrompt = e;
-      const btn = document.getElementById('btnInstalarApp');
-      if (btn) btn.classList.remove('oculto');
-    });
+    window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; });
     async function instalarApp(){
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      const btn = document.getElementById('btnInstalarApp');
-      if (btn) btn.classList.add('oculto');
+      if (deferredPrompt){
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+      } else {
+        document.getElementById('modalInstalar').classList.remove('oculto');
+      }
     }
     window.addEventListener('appinstalled', ()=>{
       const btn = document.getElementById('btnInstalarApp');
@@ -592,15 +592,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </script>
 
   <nav>
-    <button class="tab ativa" id="tabJogos" onclick="mudarAba('jogos')">Jogos</button>
-    <button class="tab" id="tabRank" onclick="mudarAba('rank')">Ranking</button>
-    <button class="tab" id="tabCastigos" onclick="mudarAba('castigos')">🎡 Castigos</button>
-    <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">Jogadores</button>
-    <a href="/ogrupo.html" class="tab" style="text-decoration:none">O Grupo 🔥</a>
+    <button class="tab ativa" id="tabJogos" onclick="mudarAba('jogos')">✅ Bolão</button>
+    <button class="tab" id="tabRank" onclick="mudarAba('rank')">🏆 Ranking</button>
+    <button class="tab" id="tabCastigos" onclick="mudarAba('castigos')">🟥 Castigos</button>
+    <a href="/hoje.html" class="tab" style="text-decoration:none">📅 Quem joga hoje</a>
+    <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">✠ Jogos e Calendário CRVG</button>
+    <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
+    <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
     <a href="/galeria.html" class="tab" style="text-decoration:none">🎨 Obras-Primas</a>
-    <a href="/hoje.html" class="tab" style="text-decoration:none">📅 Hoje</a>
-    <a href="/futebol.html" class="tab" style="text-decoration:none">⚽ O Que Mais Entende</a>
-    <button class="tab oculto" id="tabPartidas" onclick="mudarAba('partidas')">Partidas</button>
+    <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">Jogadores</button>
     <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
   </nav>
@@ -1313,7 +1313,7 @@ function renderCastigos(){
   const sec=document.getElementById('secCastigos');
   dados.castigos=dados.castigos||{};
   const lista=Object.values(dados.castigos).sort((a,b)=>b.quando-a.quando);
-  let html='<div class="card"><h2>🎡 Castigos</h2><p class="nota-rodape" style="margin:0">Quem terminou a rodada em último gira a roleta — e o resultado fica guardado pra sempre, sem chance de girar de novo.</p></div>';
+  let html='<div class="card"><h2>🟥 Castigos</h2><p class="nota-rodape" style="margin:0">Quem terminou a rodada em último gira a roleta — e o resultado fica guardado pra sempre, sem chance de girar de novo.</p></div>';
   if(!lista.length){
     html+='<div class="vazio">Ninguém pagou castigo ainda. Vai que essa rodada é a sua vez de escapar. 😏</div>';
   }else{
@@ -1997,7 +1997,7 @@ function atualizarCronometro(){
 }
 
 function htmlCastigoRodadaBox(){
-  return '<div class="rodada-box"><h3><span>🎡 Castigo da Rodada</span></h3>'+
+  return '<div class="rodada-box"><h3><span>🟥 Castigo da Rodada</span></h3>'+
     '<p class="nota-rodape" style="margin:0 0 10px">No apito final, quem fechar em último (ou empatado em último) gira essa roleta:</p>'+
     '<div class="roleta-wrap-mini"><div class="roleta-ponteiro-mini">▼</div>'+
     '<svg class="roleta-svg-mini" viewBox="0 0 300 300"></svg>'+

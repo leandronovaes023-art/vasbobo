@@ -43,12 +43,12 @@ async function chamarClaude(prompt,maxTokens){
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jogos de Hoje — Vasbobo</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#C0121B">
+<meta name="theme-color" content="#17171B">
 <link rel="icon" href="/icons/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Vasbobo">
+<meta name="apple-mobile-web-app-title" content="VASBOBO">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}</script>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -197,14 +197,14 @@ main{max-width:820px;margin:0 auto;padding:30px 20px}
   </header>
 
   <nav>
-    <a href="/" class="tab" data-tab="jogos">Jogos</a>
-    <a href="/#rank" class="tab" data-tab="rank">Ranking</a>
-    <a href="/#castigos" class="tab" data-tab="castigos">🎡 Castigos</a>
-    <a href="/ogrupo.html" class="tab" style="text-decoration:none" data-tab="ogrupo">O Grupo 🔥</a>
+    <a href="/" class="tab" data-tab="jogos">✅ Bolão</a>
+    <a href="/#rank" class="tab" data-tab="rank">🏆 Ranking</a>
+    <a href="/#castigos" class="tab" data-tab="castigos">🟥 Castigos</a>
+    <a href="/hoje.html" class="tab ativa" style="text-decoration:none" data-tab="hoje">📅 Quem joga hoje</a>
+    <a href="/#partidas" class="tab" data-tab="partidas">✠ Jogos e Calendário CRVG</a>
+    <a href="/futebol.html" class="tab" style="text-decoration:none" data-tab="futebol">🎯 O Que Mais Entende</a>
+    <a href="/ogrupo.html" class="tab" style="text-decoration:none" data-tab="ogrupo">🍻 O Grupo</a>
     <a href="/galeria.html" class="tab" style="text-decoration:none" data-tab="galeria">🎨 Obras-Primas</a>
-    <a href="/hoje.html" class="tab ativa" style="text-decoration:none" data-tab="hoje">📅 Hoje</a>
-    <a href="/futebol.html" class="tab" style="text-decoration:none" data-tab="futebol">⚽ O Que Mais Entende</a>
-    <a href="/#partidas" class="tab" data-tab="partidas">Partidas</a>
     <a href="/#elenco" class="tab oculto" data-tab="elenco">Elenco</a>
     <a href="/#admin" class="tab oculto" data-tab="admin">Configurações</a>
   </nav>
@@ -241,7 +241,7 @@ function sairSatelite(){
 
 <main>
   <div class="page-title">
-    <h1>📅 Jogos de <span style="color:var(--vermelho)">Hoje</span></h1>
+    <h1>📅 Quem joga <span style="color:var(--vermelho)">hoje?</span></h1>
   </div>
 
   <div class="card" style="padding-bottom:6px">
@@ -252,7 +252,8 @@ function sairSatelite(){
       <button class="comp-tab" onclick="mudarCompeticao('libertadores')">Libertadores</button>
       <button class="comp-tab" onclick="mudarCompeticao('sulamericana')">Sul-Americana</button>
     </div>
-    <p class="nota-rodape" style="margin:8px 0 12px">Dados ao vivo fornecidos por 365Scores — jogos de hoje e os próximos, atualizados sozinhos.</p>
+    <p class="nota-rodape" style="margin:8px 0 4px">Dados ao vivo fornecidos por 365Scores — jogos de hoje e os próximos, atualizados sozinhos.</p>
+    <p class="nota-rodape" style="margin:0 0 12px">Sem jogo do Brasileirão, Copa do Brasil, Libertadores ou Sul-Americana hoje? Dá uma olhada nos próximos jogos de cada competição logo abaixo.</p>
     <div class="admin-aba-toggle oculto" data-tab="admin" id="adminAbaToggle" style="margin-bottom:12px;padding:10px;background:rgba(255,255,255,.05);border:1px dashed var(--linha);border-radius:8px">
       <label style="font-size:.75rem;color:var(--cinza);display:block;margin-bottom:6px">⚙️ Admin: aba que abre por padrão nos widgets</label>
       <select id="selectAbaPadrao" onchange="mudarAbaPadrao(this.value)" style="background:#111;color:#fff;border:1px solid var(--linha);border-radius:6px;padding:6px 10px;font-size:.82rem">
