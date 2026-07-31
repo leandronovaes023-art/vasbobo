@@ -372,14 +372,19 @@ console.log('Firebase conectado ao Vasbobo ✓');
     box-shadow:0 8px 26px rgba(23,23,27,.35);z-index:45;display:none;align-items:center;justify-content:center}
   .topo-btn.on{display:flex}
 
-/* ===== O Que Mais Entende de Futebol — aba lateral discreta (edge tab) ===== */
-.fq-edge{position:fixed;right:0;top:42%;transform:translateY(-50%);z-index:400;cursor:pointer;
+/* ===== O Que Mais Entende de Futebol — barra lateral tipo "edge panel" (expande/recolhe) ===== */
+.fq-edge{position:fixed;right:0;top:42%;transform:translateY(-50%);z-index:400;
   background:var(--carvao);border:1px solid var(--linha);border-right:none;border-radius:12px 0 0 12px;
-  padding:8px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
+  display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
-.fq-edge img{width:34px;height:51px;border-radius:7px;object-fit:cover;object-position:top;display:block}
-.fq-edge-seta{color:var(--vermelho);font-size:1rem;font-weight:900;line-height:1}
-@media(max-width:480px){.fq-edge img{width:28px;height:42px}}
+.fq-edge-corpo{cursor:pointer;padding:8px 4px 8px 8px;max-width:60px;overflow:hidden;
+  transition:max-width .25s ease,padding .25s ease}
+.fq-edge-corpo img{width:34px;height:51px;border-radius:7px;object-fit:cover;object-position:top;display:block}
+.fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
+.fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
+  cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease}
+.fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
+@media(max-width:480px){.fq-edge-corpo img{width:28px;height:42px}}
 @media(max-width:480px){
   .bobo{width:56px;height:56px;border-radius:10px}
   .header-inner{gap:8px}
@@ -575,9 +580,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
             <button onclick="pedirConfirmacaoSair()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
           </div>
   </div>
-  <div class="fq-edge oculto" id="fqFixo" onclick="fqAbrirQuiz()" title="O Que Mais Entende de Futebol">
-    <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
-    <span class="fq-edge-seta">‹</span>
+  <div class="fq-edge oculto" id="fqFixo" title="O Que Mais Entende de Futebol">
+    <div class="fq-edge-corpo" onclick="fqAbrirQuiz()">
+      <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
+    </div>
+    <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">‹</button>
   </div>
   </header>
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
@@ -1571,6 +1578,11 @@ async function fqRegistrarResposta(usuario,acertou){
 }
 let fqTimerInterval=null, fqPerguntaAtual=null, fqRespondida=false;
 const FQ_SEGUNDOS=10;
+function toggleFqEdge(e){
+  if(e)e.stopPropagation();
+  const el=document.getElementById('fqFixo');
+  if(el)el.classList.toggle('recolhida');
+}
 async function fqAbrirQuiz(){
   const usuario=fqUsuario();
   if(!usuario){avisar('Faça login para responder.');return;}
