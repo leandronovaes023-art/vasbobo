@@ -85,7 +85,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
-  body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative}
+  body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5}
   body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.jpg") center top / cover no-repeat;z-index:-2}
   body::after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(244,242,237,.24) 0%,rgba(244,242,237,.34) 45%,rgba(244,242,237,.52) 100%);z-index:-1}
   .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
@@ -101,7 +101,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
   .tela-login{position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:rgba(20,20,24,.15)}
   .bobo-login{display:block;margin:0 auto 6px;width:150px;height:auto;border-radius:16px;filter:drop-shadow(0 14px 18px rgba(0,0,0,.35))}
-  .eyebrow{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
+  .eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
   .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px)}
   .who b{text-transform:capitalize}
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
@@ -112,14 +112,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.04em;font-size:.8rem;padding:9px 13px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:10px 10px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap;flex:none}
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
-  main{max-width:1320px;margin:0 auto;padding:20px 20px 60px}
+  main{max-width:1320px;margin:0 auto;padding:16px 20px 60px}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
 
-  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:14px;padding:18px;margin-bottom:16px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-  .card h2{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;font-size:1.02rem;letter-spacing:.09em;margin-bottom:12px;text-shadow:none}
-  .vazio{color:var(--cinza);text-align:center;padding:30px 16px;border:1px dashed var(--linha);border-radius:12px;line-height:1.6}
-  .nota-rodape{color:var(--cinza);font-size:.76rem;line-height:1.55;margin-top:8px}
+  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;padding:16px 18px;margin-bottom:14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 1px 3px rgba(23,23,27,.04)}
+  .card h2{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;font-size:.96rem;letter-spacing:.05em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--linha);text-shadow:none}
+  .vazio{color:var(--cinza);text-align:center;padding:26px 16px;border:1px dashed var(--linha);border-radius:12px;line-height:1.6}
+  .nota-rodape{color:var(--cinza);font-size:.76rem;line-height:1.6;margin-top:8px}
   .aviso{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2a1113;border:1px solid var(--vermelho);color:#f2cfd1;border-radius:10px;padding:11px 18px;font-size:.87rem;display:none;z-index:90;max-width:92vw;text-align:center}
   .aviso.ok{background:#0f231a;border-color:var(--verde);color:#cfe9db}
 
@@ -205,9 +205,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
     .cal-data{order:1}.cal-jogo{order:2}.cal-hora{order:3;text-align:left}.cal-comp{order:4;text-align:left}
   }
   .jogo-item:hover{border-color:var(--cinza)}
-  .jogo-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:1.02rem;text-transform:uppercase;letter-spacing:.02em}
+  .jogo-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:.01em}
   .jogo-nome .x{color:var(--cinza)}
-  .meta{font-size:.72rem;color:var(--cinza);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+  .meta{font-size:.72rem;color:var(--cinza);letter-spacing:.03em;text-transform:uppercase;margin-top:3px;line-height:1.5}
   .selo{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid var(--linha);white-space:nowrap}
   .s-aberto{color:var(--verde);border-color:var(--verde)}
   .s-andamento{color:var(--ouro);border-color:var(--ouro)}
