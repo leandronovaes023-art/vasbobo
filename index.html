@@ -399,7 +399,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   border:1px solid var(--vermelho)}
 .lembrete-avaliar.oculto{display:none}
 .lembrete-avaliar b{color:#FF6B6B}
-.lembrete-linha1,.lembrete-linha2{display:block;white-space:nowrap}
+.lembrete-linha1,.lembrete-linha2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .lembrete-linha2{margin-top:1px}
 .lembrete-corpo{cursor:pointer}
 .lembrete-fechar{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#17171B;
@@ -764,6 +764,7 @@ const SYNC_POS_LIMITE_MIN=30;       // ...por até 30 min depois do fim esperado
 const SYNC_FALLBACK_MS=15*60000;    // passado esse prazo (jogo esticou: prorrogação/atraso), espaça as buscas
 const SEM_GOL='__semgol__';
 const ORDEM_POS=['Goleiro','Lateral','Zagueiro','Meio-campista','Atacante'];
+function posIndex(pos){const i=ORDEM_POS.indexOf(pos);return i===-1?999:i;}
 
 const JOGADORES_INICIAIS=[
  ['p_leojardim','1','Léo Jardim','Goleiro'],
@@ -1040,7 +1041,7 @@ function nomeJogador(id){
 }
 function jogadoresAtivos(){
   return [...dados.jogadores].filter(p=>p.ativo!==false)
-    .sort((a,b)=>ORDEM_POS.indexOf(a.pos)-ORDEM_POS.indexOf(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+    .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
 }
 function souAdmin(){return eu&&dados.usuarios[eu]&&dados.usuarios[eu].admin;}
 function jogosOrdenados(){
@@ -2234,7 +2235,12 @@ function htmlRodadaBox(){
     pts:(ESTADO_QUIZ.porJogo&&ESTADO_QUIZ.porJogo[u+'|'+chaveJQuiz])||0
   })).filter(x=>x.confirmado||x.pts>0)
     .sort((a,b)=>b.pts-a.pts||(b.confirmado-a.confirmado)||a.u.localeCompare(b.u));
-  let html='<div class="rodada-box" style="cursor:pointer" onclick="abrirJogo(\''+did+'\')"><h3><span>Ranking da Rodada</span></h3><div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
+  let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span></h3>'+
+    '<div onclick="abrirJogo(\''+did+'\')" style="cursor:pointer;margin-bottom:8px">'+
+    '<div style="font-size:1.15rem;font-weight:800;color:var(--vermelho);text-transform:uppercase;line-height:1.3">'+nomeJogo(dj)+'</div>'+
+    '<div class="meta" style="margin-top:2px">'+fmtData(dj)+' · '+esc(dj.competicao)+(dj.fase?' ('+esc(dj.fase)+')':'')+' · '+(dj.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--vermelho);color:#fff;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
+    '</div><div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
   if(linhasRodada.length){
     html+=linhasRodada.map((l,i)=>'<div class="mini-linha"><span>'+(i+1)+'º '+(l.confirmado?'<span class="palp-ok">✓</span> ':'')+'<b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+'</span><span class="pt'+(l.pts?'':' palp-ok')+'">'+(l.pts?l.pts+' pt'+(l.pts===1?'':'s')+' no quiz':'confirmado')+'</span></div>').join('');
     html+='<p class="nota-rodape" style="margin:8px 0 0">Os pontos do quiz "O Que Mais Entende de Futebol" já contam aqui e somam ao placar quando o jogo rolar.</p>';
@@ -2435,7 +2441,7 @@ function classeNota(n){return n>=7?'n-alta':n>=5?'n-media':'n-baixa';}
 function jogadoresParaAvaliar(j){
   if(j.emCampo&&j.emCampo.length){
     return j.emCampo.map(id=>jogadorPorId(id)).filter(Boolean)
-      .sort((a,b)=>ORDEM_POS.indexOf(a.pos)-ORDEM_POS.indexOf(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+      .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
   }
   return modoTeste()?jogadoresAtivos():[];
 }
@@ -2665,7 +2671,7 @@ function renderAdminJogo(j,s){
   }
   const marcados=j.emCampo||[];
   const listaCampo=[...dados.jogadores].filter(p=>p.ativo!==false||marcados.includes(p.id))
-    .sort((a,b)=>ORDEM_POS.indexOf(a.pos)-ORDEM_POS.indexOf(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+    .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
   let chkCampo='',posAtualCampo='';
   listaCampo.forEach(p=>{
     if(p.pos!==posAtualCampo){posAtualCampo=p.pos;chkCampo+='</div><div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div><div class="grid g3" style="margin-top:6px">';}
@@ -3149,7 +3155,7 @@ function renderJogadores(){
   jogosComAval.forEach(([id,j],i)=>{
     const idsAvaliados=[...new Set(Object.values(j.avaliacoes||{}).flatMap(porJog=>Object.keys(porJog||{})))];
     const jogadoresDoJogo=idsAvaliados.map(pid=>jogadorPorId(pid)).filter(Boolean)
-      .sort((a,b)=>ORDEM_POS.indexOf(a.pos)-ORDEM_POS.indexOf(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+      .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
     html+='<div class="card" style="padding:0"><details'+(i===0?' open':'')+' class="jogo-resenha"><summary>'+nomeJogo(j)+' <small style="font-weight:400;color:var(--cinza)">— '+fmtData(j)+'</small></summary>'+
       '<div style="padding:0 16px 14px">';
     jogadoresDoJogo.forEach(p=>{
