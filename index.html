@@ -211,16 +211,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .cal-filtro.ativa{background:var(--vermelho);border-color:var(--vermelho);color:#fff}
   .cal-mes{color:#6C6C74;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;border-bottom:1px solid var(--linha);padding-bottom:5px}
   .cal-mes:first-child{margin-top:0}
-  .cal-linha{display:grid;grid-template-columns:66px 1fr 50px 1fr;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--linha);font-size:.72rem;color:#17171B}
+  .cal-linha{display:flex;flex-direction:column;gap:1px;padding:8px 0;border-bottom:1px solid var(--linha);font-size:.76rem;color:#17171B}
   .cal-linha:last-child{border-bottom:none}
-  .cal-data{color:#6C6C74;font-size:.68rem;white-space:nowrap}
-  .cal-jogo{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .cal-hora{color:#6C6C74;font-size:.68rem;text-align:center;white-space:nowrap}
-  .cal-comp{color:#6C6C74;font-size:.66rem;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  @media(max-width:480px){
-    .cal-linha{grid-template-columns:56px 1fr 42px;font-size:.68rem}
-    .cal-comp{display:none}
-  }
+  .cal-linha-txt{font-weight:700;line-height:1.35}
+  .cal-comp{color:#6C6C74;font-size:.66rem}
   .jogo-item:hover{border-color:var(--cinza)}
   .jogo-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:.01em}
   .jogo-nome .x{color:var(--cinza)}
@@ -1411,7 +1405,7 @@ function renderCastigos(){
   const sec=document.getElementById('secCastigos');
   dados.castigos=dados.castigos||{};
   const lista=Object.values(dados.castigos).sort((a,b)=>b.quando-a.quando);
-  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Quem terminou a rodada em último gira a roleta — e o resultado fica guardado pra sempre, sem chance de girar de novo.</p></div>';
+  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira a roleta.</p></div>';
   if(!lista.length){
     html+='<div class="vazio">Ninguém pagou castigo ainda. Vai que essa rodada é a sua vez de escapar. 😏</div>';
   }else{
@@ -2141,7 +2135,7 @@ function atualizarCronometro(){
 
 function htmlCastigoRodadaBox(){
   return '<div class="rodada-box"><h3><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span></h3>'+
-    '<p class="nota-rodape" style="margin:0 0 10px">No apito final, quem fechar em último (ou empatado em último) gira essa roleta:</p>'+
+    '<p class="nota-rodape" style="margin:0 0 10px">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira essa roleta:</p>'+
     '<div class="roleta-wrap-mini"><div class="roleta-ponteiro-mini">▼</div>'+
     '<svg class="roleta-svg-mini" viewBox="0 0 300 300"></svg>'+
     '</div><div style="text-align:center"><div class="badge-audio">🎙️ Áudio mínimo de 30 segundos</div></div></div>';
@@ -2162,8 +2156,9 @@ function htmlRodadaBox(){
     const tabela=tabelaRodada(rj);
     let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+'</h3>'+
       '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer;margin-bottom:8px">'+
-      '<div style="font-size:1.22rem;font-weight:800;color:var(--vermelho);text-transform:uppercase;line-height:1.3">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+'</div>'+
-      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--vermelho);color:#fff;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:4px">👆 Toque para abrir</span>'+
+      '<div style="font-size:1.15rem;font-weight:800;color:var(--vermelho);text-transform:uppercase;line-height:1.3">'+nomeJogo(rj)+'</div>'+
+      '<div class="meta" style="margin-top:2px">'+fmtData(rj)+' · '+esc(rj.competicao)+(rj.fase?' ('+esc(rj.fase)+')':'')+'</div>'+
+      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--vermelho);color:#fff;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">👆 Toque para abrir</span>'+
       '</div>'+
       '<div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
     if(rj.resultado&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
@@ -2225,7 +2220,7 @@ function htmlRodadaBox(){
   let html='<div class="rodada-box" style="cursor:pointer" onclick="abrirJogo(\''+did+'\')"><h3><span>Ranking da Rodada</span></h3><div style="text-align:right;margin:-4px 0 8px">'+tooltipPontuacao()+'</div>';
   if(linhasRodada.length){
     html+=linhasRodada.map((l,i)=>'<div class="mini-linha"><span>'+(i+1)+'º '+(l.confirmado?'<span class="palp-ok">✓</span> ':'')+'<b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+'</span><span class="pt'+(l.pts?'':' palp-ok')+'">'+(l.pts?l.pts+' pt'+(l.pts===1?'':'s')+' no quiz':'confirmado')+'</span></div>').join('');
-    html+='<p class="nota-rodape" style="margin:8px 0 0">✓ = já confirmou o palpite. Os pontos do quiz "O Que Mais Entende de Futebol" já contam aqui e somam ao placar quando o jogo rolar.</p>';
+    html+='<p class="nota-rodape" style="margin:8px 0 0">Os pontos do quiz "O Que Mais Entende de Futebol" já contam aqui e somam ao placar quando o jogo rolar.</p>';
   }else{
     html+='<p class="nota-rodape" style="margin:0 0 6px">Ninguém palpitou nem pontuou no quiz ainda. Chega na frente e pressiona a galera!</p>';
   }
@@ -2777,14 +2772,14 @@ function renderPartidas(){
   const adm=souAdmin();
   let html='';
   if(adm){
-    html+='<div class="card"><h2>Gestão de partidas <span class="adm">admin</span></h2><p class="nota-rodape" style="margin:0 0 12px">Adicione ou remova jogos. Alterações refletem na hora para todos.</p>'+
+    html+='<div class="card"><details><summary>Gestão de partidas <span class="adm">admin</span></summary><div style="margin-top:12px"><p class="nota-rodape" style="margin:0 0 12px">Adicione ou remova jogos. Alterações refletem na hora para todos.</p>'+
     '<div class="grid g3"><div><label for="njAdv">Adversário</label><input id="njAdv" placeholder="Ex.: Flamengo"></div>'+
     '<div><label for="njData">Data</label><input id="njData" type="date"></div>'+
     '<div><label for="njHora">Hora (vazio = a definir)</label><input id="njHora" type="time"></div></div>'+
     '<div class="grid g3" style="margin-top:12px"><div><label for="njComp">Competição</label><input id="njComp" placeholder="Campeonato Brasileiro"></div>'+
     '<div><label for="njFase">Fase (opcional)</label><input id="njFase" placeholder="Ida, Volta, Semifinal…"></div>'+
     '<div><label for="njLocal">Mando</label><select id="njLocal"><option value="casa">Vasco em casa</option><option value="fora">Vasco fora</option></select></div></div>'+
-    '<button class="btn" style="margin-top:12px" onclick="criarJogo()">Adicionar jogo</button></div>';
+    '<button class="btn" style="margin-top:12px" onclick="criarJogo()">Adicionar jogo</button></div></details></div>';
   }
   const lista=jogosOrdenados();
   const encerrados=lista.filter(([i,j])=>j.resultado).reverse();
@@ -2829,9 +2824,7 @@ function renderPartidas(){
     filtrados.forEach(([id,j])=>{
       const mes=nomeMes(j.data);
       if(mes!==mesAtual){mesAtual=mes;linhasCal+='<div class="cal-mes">'+mesAtual+'</div>';}
-      linhasCal+='<div class="cal-linha"><span class="cal-data">'+fmtDataCal(j)+'</span>'+
-        '<span class="cal-jogo">'+nomeJogo(j)+'</span>'+
-        '<span class="cal-hora">'+(j.hora||'A definir')+'</span>'+
+      linhasCal+='<div class="cal-linha"><span class="cal-linha-txt">'+fmtDataCal(j)+' · '+(j.hora||'horário a definir')+' · '+nomeJogo(j)+'</span>'+
         '<span class="cal-comp">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</span></div>';
     });
   }
@@ -3214,26 +3207,21 @@ async function limparMinhasAvaliacoes(){
 }
 function renderAdmin(){
   const sec=document.getElementById('secAdmin');
-  let html='<div class="card"><h2>Geral</h2>'+
-  '<label style="display:flex;align-items:center;gap:10px;font-size:.9rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" style="width:auto" '+(modoTeste()?'checked':'')+' onchange="alternarModoTeste(this.checked)"> <span><b>Modo teste</b> — libera palpites e avaliações fora de hora, para experimentar o app. Desligue antes do uso valendo.</span></label></div>';
-  html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧹 Limpar minhas avaliações de teste</h2>'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Apaga suas notas/comentários/áudios em todos os jogos (só os seus — de "'+esc(eu)+'"). Não mexe em ninguém mais nem no placar dos jogos.</p>'+
-  '<button class="btn" style="background:var(--vermelho)" onclick="limparMinhasAvaliacoes()">Apagar minhas avaliações</button></div>';
-  html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧹 Limpar dados de um usuário</h2>'+
+  let html='<div class="card"><details><summary>🧹 Limpar dados de um usuário</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Apaga palpites, notas, comentários e áudios de um usuário específico (ex.: uma conta de teste) em todos os jogos.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><input id="limparUsuarioNome" placeholder="nome de login exato (ex.: teste)" style="flex:1;min-width:180px">'+
-  '<button class="btn" style="background:var(--vermelho)" onclick="limparDadosDeUsuario()">Apagar dados dele</button></div></div>';
-  html+='<div class="card" style="border-color:var(--vermelho)"><h2>🧪 Testar roleta e mensagens da rodada</h2>'+
+  '<button class="btn" style="background:var(--vermelho)" onclick="limparDadosDeUsuario()">Apagar dados dele</button></div></div></details></div>';
+  html+='<div class="card"><details><summary>🧪 Testar roleta e mensagens da rodada</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Simula as 3 telas sem gravar nada real — nada disso mexe no histórico de castigos do grupo. Só você (admin) vê este painel.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
   '<button class="btn" style="background:var(--ouro)" onclick="testeVencedor()">👑 Simular Vencedor</button>'+
   '<button class="btn" style="background:var(--cinza)" onclick="testeMeioTermo()">⚽ Simular Meio-Termo</button>'+
   '<button class="btn" onclick="testePerdedor()">🎡 Simular Perdedor (roleta)</button>'+
-  '</div></div>';
-  html+='<div class="card"><h2>📸 Fotos (salvas no Firebase, nunca mais se perdem)</h2>'+
+  '</div></div></details></div>';
+  html+='<div class="card"><details><summary>📸 Fotos (salvas no Firebase, nunca mais se perdem)</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Antes essas fotos eram arquivos soltos que dependiam de estar no zip a cada deploy — se esquecesse de incluir a pasta <code>rostos/</code>, sumiam. Agora ficam salvas direto no Firebase: troque aqui embaixo quando quiser, sem precisar mexer em código ou fazer deploy de novo.</p>'+
   '<button class="btn" style="background:var(--verde);margin-bottom:16px" onclick="migrarFotosEstaticasParaFirebase()">💾 Salvar as fotos atuais da pasta rostos/ no Firebase agora</button>'+
-  '<p class="nota-rodape" style="margin:0 0 12px;color:var(--vermelho)">⚠️ Se aparecer aqui algum login que você não reconhece ou que já não usa mais (ex: contas de teste), não é sobre fotos — é uma conta de verdade cadastrada no app. Remova-a na seção "Usuários" acima, aqui não mexe nisso.</p>'+
+  '<p class="nota-rodape" style="margin:0 0 12px;color:var(--vermelho)">⚠️ Se aparecer aqui algum login que você não reconhece ou que já não usa mais (ex: contas de teste), não é sobre fotos — é uma conta de verdade cadastrada no app. Remova-a na seção "Usuários" abaixo, aqui não mexe nisso.</p>'+
   '<h3 style="font-family:\'Anton\',sans-serif;font-size:.95rem;letter-spacing:.03em;text-transform:uppercase;margin:14px 0 10px">Fotos de perfil</h3>'+
   '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">'+
   (()=>{
@@ -3259,8 +3247,8 @@ function renderAdmin(){
       '<div style="font-size:.78rem;margin:6px 0 4px">'+esc(cap(nome))+'</div>'+
       '<input type="file" accept="image/*" id="fc_'+nome+'" style="font-size:.7rem;width:100%" onchange="uploadFotoCastigo(\''+nome+'\',this)"></div>';
   }).join('')+
-  '</div></div>';
-  html+='<div class="card"><h2>Usuários</h2>'+
+  '</div></div></details></div>';
+  html+='<div class="card"><details><summary>Usuários</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Cadastre os amigos do grupo. Todo usuário novo entra com a senha padrão <b>'+SENHA_PADRAO+'</b> e troca no primeiro acesso.</p>'+
   '<div class="grid g3"><div><label for="nuLogin">Novo login (sem espaços)</label><input id="nuLogin" placeholder="ex.: carlinhos"></div>'+
   '<div style="display:flex;align-items:flex-end"><label style="display:flex;align-items:center;gap:8px;margin:0;font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" id="nuAdmin" style="width:auto"> também é admin</label></div>'+
@@ -3270,7 +3258,7 @@ function renderAdmin(){
     html+='<div class="linha-tabela"><span class="rank-nome">'+esc(u)+' '+(x.admin?'<span class="adm" style="margin-left:6px">admin</span>':'')+' '+(x.senhaPadrao?'<small style="color:var(--cinza)">· ainda não trocou a senha</small>':'')+'</span>'+
       '<span style="display:flex;gap:8px"><button class="btn fantasma" onclick="resetarSenha(\''+u+'\')">Resetar senha</button>'+(u!==eu?'<button class="btn-x" onclick="removerUsuario(\''+u+'\')">remover</button>':'')+'</span></div>';
   });
-  html+='</div></div>'+
+  html+='</div></div></details></div>'+
   '<div class="card"><h2>Backup</h2><p class="nota-rodape" style="margin:0 0 12px">Baixe de tempos em tempos um arquivo com tudo: usuários, jogos, palpites, notas e comentários. <b>Antes de qualquer republicação do app, baixe o backup</b> — se os dados aparecerem zerados na versão nova, é só restaurar aqui e tudo volta.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn claro" onclick="exportarDados()">Baixar backup (.json)</button>'+
   '<button class="btn fantasma" onclick="document.getElementById(\'arqImport\').click()">Restaurar de um backup</button>'+
