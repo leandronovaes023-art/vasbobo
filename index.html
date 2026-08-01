@@ -394,14 +394,16 @@ console.log('Firebase conectado ao Vasbobo ✓');
   background:var(--carvao);border:1px solid var(--linha);border-right:none;border-radius:12px 0 0 12px;
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
-.lembrete-avaliar{position:fixed;left:10px;bottom:10px;z-index:400;max-width:220px;background:#17171B;color:#fff;
-  border-radius:12px;padding:8px 10px;font-size:.72rem;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.35);
+.lembrete-avaliar{position:fixed;left:8px;bottom:8px;z-index:400;width:max-content;max-width:min(92vw,340px);background:#17171B;color:#fff;
+  border-radius:9px;padding:5px 9px;font-size:.66rem;line-height:1.3;box-shadow:0 8px 24px rgba(0,0,0,.35);
   border:1px solid var(--vermelho)}
 .lembrete-avaliar.oculto{display:none}
 .lembrete-avaliar b{color:#FF6B6B}
+.lembrete-linha1,.lembrete-linha2{display:block;white-space:nowrap}
+.lembrete-linha2{margin-top:1px}
 .lembrete-corpo{cursor:pointer}
-.lembrete-fechar{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:#17171B;
-  border:1px solid var(--vermelho);color:#fff;font-size:.62rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.lembrete-fechar{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#17171B;
+  border:1px solid var(--vermelho);color:#fff;font-size:.56rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .lembrete-avaliar.recolhido{width:38px;height:38px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
   animation:lembreteFlutua 2.4s ease-in-out infinite}
 .lembrete-avaliar.recolhido .lembrete-corpo,.lembrete-avaliar.recolhido .lembrete-fechar{display:none}
@@ -761,7 +763,7 @@ const SYNC_POS_MS=30*1000;          // logo após o fim esperado: busca a cada 3
 const SYNC_POS_LIMITE_MIN=30;       // ...por até 30 min depois do fim esperado
 const SYNC_FALLBACK_MS=15*60000;    // passado esse prazo (jogo esticou: prorrogação/atraso), espaça as buscas
 const SEM_GOL='__semgol__';
-const ORDEM_POS=['Goleiro','Lateral','Zagueiro','Meio-Campo','Atacante'];
+const ORDEM_POS=['Goleiro','Lateral','Zagueiro','Meio-campista','Atacante'];
 
 const JOGADORES_INICIAIS=[
  ['p_leojardim','1','Léo Jardim','Goleiro'],
@@ -2109,7 +2111,7 @@ function atualizarLembreteAvaliar(){
   const pendente=rj.resultado&&rj.palpites&&rj.palpites[eu]&&!avaliou(rj,eu);
   if(!pendente){el.classList.add('oculto');el.classList.remove('recolhido');lembreteJogoId=null;return;}
   lembreteJogoId=rid;
-  document.getElementById('lembreteAvaliarTexto').innerHTML='<b>Você ainda não avaliou a SELEVASCO</b><br>'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+'. Clique.';
+  document.getElementById('lembreteAvaliarTexto').innerHTML='<span class="lembrete-linha1">Pendente avaliar os jogadores. Penalidade (-2 pontos)</span><b class="lembrete-linha2">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' - CLIQUE.</b>';
   el.classList.remove('oculto');
 }
 function toggleLembreteRecolhido(e){
@@ -2662,12 +2664,17 @@ function renderAdminJogo(j,s){
     html+='<button class="btn fantasma" onclick="reabrirResultado()">Corrigir resultado / reabrir</button>';
   }
   const marcados=j.emCampo||[];
-  const chkCampo=[...dados.jogadores].filter(p=>p.ativo!==false||marcados.includes(p.id))
-    .sort((a,b)=>ORDEM_POS.indexOf(a.pos)-ORDEM_POS.indexOf(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'))
-    .map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0"><input type="checkbox" style="width:auto" value="'+p.id+'" class="chkCampo" '+(marcados.includes(p.id)?'checked':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>').join('');
+  const listaCampo=[...dados.jogadores].filter(p=>p.ativo!==false||marcados.includes(p.id))
+    .sort((a,b)=>ORDEM_POS.indexOf(a.pos)-ORDEM_POS.indexOf(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+  let chkCampo='',posAtualCampo='';
+  listaCampo.forEach(p=>{
+    if(p.pos!==posAtualCampo){posAtualCampo=p.pos;chkCampo+='</div><div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div><div class="grid g3" style="margin-top:6px">';}
+    chkCampo+='<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0"><input type="checkbox" style="width:auto" value="'+p.id+'" class="chkCampo" '+(marcados.includes(p.id)?'checked':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>';
+  });
+  chkCampo=chkCampo.replace('</div><div class="pos-titulo"','<div class="pos-titulo"')+'</div>';
   html+='<details style="margin-top:14px"><summary>Quem entrou em campo ('+marcados.length+' registrados) — libera as notas</summary>'+
     '<p class="nota-rodape">A lista é buscada automaticamente após o jogo. Use aqui para forçar ou corrigir.</p>'+
-    '<div class="grid g3" style="margin-top:8px">'+chkCampo+'</div>'+
+    chkCampo+
     '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:flex-end">'+
     '<div style="flex:1;min-width:140px"><label for="npRapidoNome">Jogador não está na lista?</label><input id="npRapidoNome" placeholder="Nome do jogador"></div>'+
     '<button class="btn fantasma" onclick="addJogadorRapido()">+ Adicionar à lista</button></div>'+
@@ -2936,7 +2943,7 @@ const ELENCO_OFICIAL=[
   ['Goleiro',['Léo Jardim','Daniel Fuzato']],
   ['Lateral',['Puma Rodríguez','Paulo Henrique','Lucas Piton','Cuiabano','Paulinho']],
   ['Zagueiro',['Robert Renan','Carlos Cuesta','Alan Saldivia','Lucas Freitas','Walace Fernandes']],
-  ['Meio-Campo',['Thiago Mendes','Cauan Barros','Ramon Rique','Tchê Tchê','Johan Rojas','Jair','JP - João Pedro','Mateus Carvalho']],
+  ['Meio-campista',['Thiago Mendes','Cauan Barros','Ramon Rique','Tchê Tchê','Johan Rojas','Jair','JP (João Pedro)','Mateus Carvalho']],
   ['Atacante',['Andrés Gómez','Nuno Moreira','Adson','David','Brenner','Claudio Spinelli','Marino Hinestroza']],
 ];
 async function sincronizarElencoOficial(){
