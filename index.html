@@ -270,6 +270,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .pos-titulo{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.82rem;color:#4A4A52;margin:16px 2px 8px;text-shadow:0 1px 3px #000}
   .jog-linha{display:grid;grid-template-columns:40px 1fr auto auto auto;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--linha);border-radius:10px;margin-bottom:6px;background:var(--carvao2);font-size:.9rem}
   @media(max-width:600px){.jog-linha{grid-template-columns:34px 1fr auto auto auto;font-size:.82rem}}
+  .jogo-resenha>summary{padding:14px 16px;font-weight:800;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.02em;font-size:.95rem;cursor:pointer}
+  .jogador-resenha{border-top:1px solid var(--linha);padding:10px 0}
+  .jogador-resenha>summary{cursor:pointer;font-weight:700;font-size:.86rem}
   .jog-num{font-family:'Anton',sans-serif;color:var(--cinza)}
   .jog-media{font-family:'Anton',sans-serif;font-size:1.05rem;text-align:right}
   .jog-media small{display:block;font-family:'Inter';font-size:.58rem;color:var(--cinza);letter-spacing:.08em;text-transform:uppercase}
@@ -676,7 +679,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
     <button class="tab" id="tabRaioX" onclick="mudarAba('perfilpsicotico')">🧠 Perfil Psicótico</button>
     <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
-    <button class="tab oculto" id="tabElenco" onclick="mudarAba('elenco')">Elenco</button>
     <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
   </nav>
   <div class="bar-teste oculto" id="barTeste"><div>⚠️ <b>Modo teste ativo:</b> palpites e avaliações liberados fora de hora para você experimentar. Desligue em Configurações antes do uso valendo.</div></div>
@@ -689,7 +691,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <section id="secRaioX" class="oculto"></section>
     <section id="secPartidas" class="oculto"></section>
     <section id="secCastigos" class="oculto"></section>
-    <section id="secElenco" class="oculto"></section>
     <section id="secAdmin" class="oculto"></section>
   </main>
   <button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
@@ -1999,7 +2000,6 @@ function entrarNoApp(){
   const adm=souAdmin();
   document.getElementById('whoAdm').classList.toggle('oculto',!adm);
   document.getElementById('tabPartidas').classList.remove('oculto');
-  document.getElementById('tabElenco').classList.toggle('oculto',!adm);
   document.getElementById('tabJogadores').classList.toggle('oculto',!adm);
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
@@ -2035,7 +2035,7 @@ function mudarAba(a){
     const novoHash=a==='jogos'?'':('#'+a);
     if(location.hash!==novoHash)history.replaceState(null,'',location.pathname+novoHash);
   }catch(e){}
-  const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',jogoscalendario:'tabPartidas',castigos:'tabCastigos',elenco:'tabElenco',admin:'tabAdmin',perfilpsicotico:'tabRaioX'};
+  const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',jogoscalendario:'tabPartidas',castigos:'tabCastigos',admin:'tabAdmin',perfilpsicotico:'tabRaioX'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
     if(t)t.classList.toggle('ativa',k===a);
@@ -2054,7 +2054,6 @@ function render(){
   document.getElementById('secRaioX').classList.toggle('oculto',aba!=='perfilpsicotico');
   document.getElementById('secPartidas').classList.toggle('oculto',aba!=='jogoscalendario');
   document.getElementById('secCastigos').classList.toggle('oculto',aba!=='castigos');
-  document.getElementById('secElenco').classList.toggle('oculto',aba!=='elenco');
   document.getElementById('secAdmin').classList.toggle('oculto',aba!=='admin');
   if(aba==='jogos'&&!jogoAberto)renderListaJogos();
   if(aba==='jogos'&&jogoAberto)renderDetalhe();
@@ -2063,7 +2062,6 @@ function render(){
   if(aba==='perfilpsicotico')renderRaioX();
   if(aba==='jogoscalendario')renderPartidas();
   if(aba==='castigos')renderCastigos();
-  if(aba==='elenco'&&souAdmin())renderElenco();
   if(aba==='admin'&&souAdmin())renderAdmin();
   desenharPreviasRoleta();
   atualizarLembreteAvaliar();
@@ -2934,33 +2932,6 @@ function mediasJogador(pid){
   });
   return {geral:nT?sT/nT:null,nGeral:nT,minha:nM?sM/nM:null,nMinha:nM};
 }
-function renderElenco(){
-  const sec=document.getElementById('secElenco');
-  let html='<div class="card"><h2>Elenco cruzmaltino</h2><p class="nota-rodape" style="margin:0">Gestão do elenco (só admins veem esta aba). Remover um jogador <b>não apaga nada</b>: palpites, notas e bônus antigos ligados a ele continuam valendo em todos os jogos — ele só some das listas de escolha dos próximos.</p></div>'+
-  '<div class="card" style="border-color:var(--vermelho)"><h2>🔄 Sincronizar com a lista oficial</h2>'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Atualiza posições, adiciona quem falta e desativa quem não está mais na lista — sem apagar histórico de ninguém.</p>'+
-  '<button class="btn" onclick="sincronizarElencoOficial()">Sincronizar agora</button></div>'+
-  '<div class="card"><details open><summary>+ Cadastrar jogador</summary><div class="grid g3" style="margin-top:12px">'+
-  '<div><label for="npNum">Número (opcional)</label><input id="npNum" placeholder="Ex.: 45" maxlength="3"></div>'+
-  '<div><label for="npNome">Nome</label><input id="npNome" placeholder="Nome do jogador"></div>'+
-  '<div><label for="npPos">Posição</label><select id="npPos">'+ORDEM_POS.map(p=>'<option>'+p+'</option>').join('')+'</select></div></div>'+
-  '<button class="btn" style="margin-top:12px" onclick="addJogador()">Cadastrar</button></details></div>';
-  let posAtual='';
-  jogadoresAtivos().forEach(p=>{
-    if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo">'+esc(p.pos)+'s</div>';}
-    const m=mediasJogador(p.id);
-    html+='<div class="jog-linha"><span class="jog-num">'+(p.num||'–')+'</span><span><b>'+esc(p.nome)+'</b></span>'+
-      '<span class="jog-media '+(m.geral!==null?classeNota(m.geral):'')+'">'+(m.geral!==null?m.geral.toFixed(1).replace('.',','):'–')+'<small>galera ('+m.nGeral+')</small></span>'+
-      '<span class="jog-media" style="color:var(--branco)">'+(m.minha!==null?m.minha.toFixed(1).replace('.',','):'–')+'<small>você ('+m.nMinha+')</small></span>'+
-      '<button class="btn-x" onclick="removerJogador(\''+p.id+'\')">remover</button></div>';
-  });
-  const inativos=dados.jogadores.filter(p=>p.ativo===false);
-  if(inativos.length){
-    html+='<div class="card" style="margin-top:16px"><details><summary>Jogadores removidos ('+inativos.length+') — histórico preservado</summary>'+
-      inativos.map(p=>'<div class="linha-tabela"><span>'+(p.num?p.num+' · ':'')+esc(p.nome)+' <small style="color:var(--cinza)">'+esc(p.pos)+'</small></span><button class="btn fantasma" onclick="reativarJogador(\''+p.id+'\')">Reativar</button></div>').join('')+'</details></div>';
-  }
-  sec.innerHTML=html;
-}
 const ELENCO_OFICIAL=[
   ['Goleiro',['Léo Jardim','Daniel Fuzato']],
   ['Lateral',['Puma Rodríguez','Paulo Henrique','Lucas Piton','Cuiabano','Paulinho']],
@@ -3134,27 +3105,82 @@ function audiosDoJogador(pid){
 }
 function renderJogadores(){
   const sec=document.getElementById('secJogadores');
-  let html='<div class="card"><h2>💬 Dicionário da resenha</h2><p class="nota-rodape" style="margin:0">As palavras que a galera mais usa nos comentários de cada jogador, somando todas as partidas. Atualiza sozinho ao fim de cada jogo — os comentários ficam guardados para sempre.</p></div>';
-  const jogadores=[...dados.jogadores]
-    .map(p=>({p,info:palavrasDoJogador(p.id),m:mediasJogador(p.id)}))
-    .filter(x=>x.p.ativo!==false||x.info.nCom>0)
-    .sort((a,b)=>b.info.nCom-a.info.nCom||(b.m.geral||0)-(a.m.geral||0)||a.p.nome.localeCompare(b.p.nome,'pt-BR'));
-  const comAlgo=jogadores.some(x=>x.info.nCom>0);
-  if(!comAlgo){
-    html+='<div class="vazio">Ainda não tem comentários. Depois da primeira partida avaliada, este espaço vira o dicionário oficial do Vasbobo — cada elogio e cada bronca contam!</div>';
+  let html='';
+
+  if(souAdmin()){
+    html+='<div class="card"><details><summary>⚙️ Gestão de elenco</summary><div style="margin-top:12px">'+
+    '<p class="nota-rodape" style="margin:0 0 12px">Remover um jogador <b>não apaga nada</b>: palpites, notas, comentários e áudios antigos ligados a ele continuam valendo — ele só some das listas de escolha dos próximos jogos.</p>'+
+    '<button class="btn fantasma" style="margin-bottom:14px" onclick="sincronizarElencoOficial()">🔄 Sincronizar com a lista oficial</button>'+
+    '<details style="margin-bottom:10px"><summary>+ Cadastrar jogador</summary><div class="grid g3" style="margin-top:10px">'+
+    '<div><label for="npNum">Número (opcional)</label><input id="npNum" placeholder="Ex.: 45" maxlength="3"></div>'+
+    '<div><label for="npNome">Nome</label><input id="npNome" placeholder="Nome do jogador"></div>'+
+    '<div><label for="npPos">Posição</label><select id="npPos">'+ORDEM_POS.map(p=>'<option>'+p+'</option>').join('')+'</select></div></div>'+
+    '<button class="btn" style="margin-top:12px" onclick="addJogador()">Cadastrar</button></details>';
+    let posAtual='';
+    jogadoresAtivos().forEach(p=>{
+      if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo">'+esc(p.pos)+'s</div>';}
+      const m=mediasJogador(p.id);
+      html+='<div class="jog-linha"><span class="jog-num">'+(p.num||'–')+'</span><span><b>'+esc(p.nome)+'</b></span>'+
+        '<span class="jog-media '+(m.geral!==null?classeNota(m.geral):'')+'">'+(m.geral!==null?m.geral.toFixed(1).replace('.',','):'–')+'<small>galera ('+m.nGeral+')</small></span>'+
+        '<button class="btn-x" onclick="removerJogador(\''+p.id+'\')">remover</button></div>';
+    });
+    const inativos=dados.jogadores.filter(p=>p.ativo===false);
+    if(inativos.length){
+      html+='<details style="margin-top:14px"><summary>Jogadores removidos ('+inativos.length+') — histórico preservado</summary>'+
+        inativos.map(p=>'<div class="linha-tabela"><span>'+(p.num?p.num+' · ':'')+esc(p.nome)+' <small style="color:var(--cinza)">'+esc(p.pos)+'</small></span><button class="btn fantasma" onclick="reativarJogador(\''+p.id+'\')">Reativar</button></div>').join('')+'</details>';
+    }
+    html+='</div></details></div>';
+  }
+
+  html+='<div class="card"><h2>💬 Dicionário da Resenha</h2><p class="nota-rodape" style="margin:0">Toque num jogo pra ver o que a galera falou (texto ou áudio) sobre cada jogador — o mais recente aparece já aberto.</p></div>';
+
+  const jogosComAval=jogosOrdenados().filter(([id,j])=>j.avaliacoes&&Object.keys(j.avaliacoes).some(u=>Object.keys(j.avaliacoes[u]||{}).length)).reverse();
+  if(!jogosComAval.length){
+    html+='<div class="vazio">Ainda não tem avaliações. Depois da primeira partida avaliada, este espaço vira o dicionário oficial do Vasbobo!</div>';
     sec.innerHTML=html;return;
   }
-  jogadores.forEach(({p,info,m})=>{
-    html+='<div class="card" style="padding:14px 18px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">'+
-      '<span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+(p.ativo===false?' · fora do elenco':'')+'</small></span>'+
-      '<span style="display:flex;gap:16px;align-items:center">'+
-      '<span class="media-chip '+(m.geral!==null?classeNota(m.geral):'')+'">'+(m.geral!==null?m.geral.toFixed(1).replace('.',','):'–')+'<small>média geral</small></span>'+
-      '<span class="media-chip" style="color:var(--branco)">'+info.nCom+'<small>comentário'+(info.nCom===1?'':'s')+'</small></span></span></div>'+
-      (info.top.length?'<div style="margin-top:4px">'+info.top.map(([w,n])=>'<span class="chip">'+esc(w)+' <b>×'+n+'</b></span>').join('')+'</div>':'<p class="nota-rodape" style="margin-top:6px">Sem comentários ainda — esse aí tá passando batido na resenha.</p>')+
-      audiosDoJogador(p.id)+
-      '</div>';
+  jogosComAval.forEach(([id,j],i)=>{
+    const idsAvaliados=[...new Set(Object.values(j.avaliacoes||{}).flatMap(porJog=>Object.keys(porJog||{})))];
+    const jogadoresDoJogo=idsAvaliados.map(pid=>jogadorPorId(pid)).filter(Boolean)
+      .sort((a,b)=>ORDEM_POS.indexOf(a.pos)-ORDEM_POS.indexOf(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+    html+='<div class="card" style="padding:0"><details'+(i===0?' open':'')+' class="jogo-resenha"><summary>'+nomeJogo(j)+' <small style="font-weight:400;color:var(--cinza)">— '+fmtData(j)+'</small></summary>'+
+      '<div style="padding:0 16px 14px">';
+    jogadoresDoJogo.forEach(p=>{
+      const comentarios=coletarComentarios(j,p.id);
+      const info=palavrasDoJogador(p.id);
+      html+='<details class="jogador-resenha"><summary>'+(p.num?p.num+' · ':'')+esc(p.nome)+' <small style="font-weight:400;color:var(--cinza)">'+esc(p.pos)+' · '+comentarios.length+' avaliação(ões)</small></summary>'+
+        '<div style="padding:8px 0 4px">'+
+        comentarios.map(c=>{
+          const temAudio=(c.com||'').indexOf('🎙️')!==-1;
+          const audioId=('au'+id+p.id+c.user).replace(/[^a-zA-Z0-9]/g,'');
+          return '<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span>'+
+            '<span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+(+c.nota).toLocaleString('pt-BR')+'</span>'+
+            '<span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com.replace('🎙️','').trim()):'<i style="color:var(--cinza)">sem comentário</i>')+
+            (temAudio?' <button type="button" id="'+audioId+'" class="btn fantasma" style="padding:3px 10px;font-size:.68rem" onclick="tocarAudioComentario(\''+id+'\',\''+p.id+'\',\''+c.user.replace(/'/g,"\\'")+'\',\''+audioId+'\')">🔊 Tocar áudio</button>':'')+
+            '</span></div>';
+        }).join('')+
+        (info.top.length?'<div style="margin-top:8px">'+info.top.map(([w,n])=>'<span class="chip">'+esc(w)+' <b>×'+n+'</b></span>').join('')+'</div>':'')+
+        '</div></details>';
+    });
+    html+='</div></details></div>';
   });
   sec.innerHTML=html;
+}
+async function tocarAudioComentario(jogoId,pid,user,btnId){
+  const btn=document.getElementById(btnId);
+  if(btn)btn.textContent='⏳ carregando…';
+  try{
+    const snap=await db.collection('audios').where('jogo','==',jogoId).where('jogador','==',pid).where('usuario','==',user).get();
+    if(snap.empty){avisar('Áudio não encontrado (pode ter sido só texto).');if(btn)btn.textContent='🔊 Tocar áudio';return;}
+    let docs=[];snap.forEach(d=>docs.push(d.data()));
+    docs.sort((a,b)=>(b.quando||0)-(a.quando||0));
+    const audioDoc=docs[0];
+    const audio=new Audio('data:'+(audioDoc.mime||'audio/webm')+';base64,'+audioDoc.data);
+    if(btn)btn.textContent='🔊 Tocando…';
+    audio.onended=()=>{if(btn)btn.textContent='🔊 Tocar áudio';};
+    audio.onerror=()=>{if(btn)btn.textContent='⚠️ erro ao tocar';};
+    await audio.play();
+  }catch(e){avisar('Não consegui carregar esse áudio.');if(btn)btn.textContent='🔊 Tocar áudio';}
 }
 
 /* =================== PERFIL PSICÓTICO: resenha mensal do zap =================== */
@@ -3416,7 +3442,7 @@ function iniciarMidiaJanela(){
     eu=sessao;
     entrarNoApp();
     const h=location.hash.replace('#','');
-    const validas=['rank','castigos','jogoscalendario','elenco','admin','jogadores','perfilpsicotico'];
+    const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico'];
     if(validas.includes(h)){
       mudarAba(h);
     }else{
