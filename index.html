@@ -245,10 +245,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .aval-nome{font-weight:700}
   .aval-nome small{color:var(--cinza);font-weight:400;margin-left:6px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
   .aval-controles-v{display:flex;flex-direction:column;gap:10px;margin-top:10px}
-  .btn-mic{background:var(--carvao2);color:var(--vermelho);border:1.5px solid var(--vermelho);border-radius:22px;padding:10px 16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;align-self:flex-start}
-  .btn-ok-comentario{background:var(--vermelho);color:#fff;border:none;border-radius:8px;padding:0 18px;height:44px;font-weight:800;font-size:.8rem;cursor:pointer;flex:none}
-  .notas-botoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-  .btn-nota{width:34px;height:34px;border-radius:8px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif}
+  .btn-mic{background:#1E8A4C;color:#fff;border:1.5px solid #1E8A4C;border-radius:20px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;align-self:flex-start}
+  .btn-ok-comentario{background:#fff;color:#17171B;border:1.5px solid #17171B;border-radius:8px;padding:0 14px;height:36px;font-weight:800;font-size:.76rem;cursor:pointer;flex:none}
+  .notas-botoes{display:flex;flex-wrap:nowrap;gap:4px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+  .btn-nota{width:28px;height:28px;min-width:28px;border-radius:7px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;font-size:.78rem;flex:none}
   .btn-nota:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
   .nota-escolhida{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:.92rem}
   .btn-mic.gravando{background:var(--vermelho);color:#fff;border-color:var(--vermelho);animation:micPulso 1s ease-in-out infinite}
@@ -305,14 +305,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .veu-castigo{position:fixed;inset:0;background:rgba(23,23,27,.85);display:none;align-items:center;
     justify-content:center;padding:20px;z-index:90}
   .veu-castigo.on{display:flex}
-  .modal-castigo{background:#FFFFFF;border-radius:20px;padding:34px 30px;max-width:540px;width:100%;
-    max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  .modal-castigo{background:#FFFFFF;border-radius:20px;padding:20px 18px;max-width:420px;width:100%;
+    max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
     text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.5)}
-  .modal-castigo .tag-castigo{font-size:1.05rem;letter-spacing:.14em;text-transform:uppercase;color:var(--vermelho);
-    font-weight:800;margin-bottom:10px}
-  .modal-castigo h2{font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase;margin-bottom:6px}
-  .modal-castigo p{color:var(--cinza);font-size:.88rem;line-height:1.5;margin-bottom:18px}
-  .roleta-wrap{position:relative;width:400px;height:400px;margin:6px auto 14px;max-width:92vw;max-height:92vw}
+  .modal-castigo .tag-castigo{font-size:.92rem;letter-spacing:.1em;text-transform:uppercase;color:var(--vermelho);
+    font-weight:800;margin-bottom:6px}
+  .modal-castigo h2{font-family:'Anton',sans-serif;font-size:1.25rem;text-transform:uppercase;margin-bottom:4px}
+  .modal-castigo p{color:var(--cinza);font-size:.8rem;line-height:1.4;margin-bottom:10px}
+  .roleta-wrap{position:relative;width:260px;height:260px;margin:4px auto 10px;max-width:78vw;max-height:78vw}
   .roleta-svg{width:100%;height:100%;filter:drop-shadow(0 8px 20px rgba(0,0,0,.28));
     transition:transform 4.2s cubic-bezier(.17,.89,.32,1.1)}
   .roleta-ponteiro{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:1.6rem;
@@ -391,11 +391,19 @@ console.log('Firebase conectado ao Vasbobo ✓');
   background:var(--carvao);border:1px solid var(--linha);border-right:none;border-radius:12px 0 0 12px;
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
-.lembrete-avaliar{position:fixed;left:12px;bottom:12px;z-index:400;max-width:260px;background:#17171B;color:#fff;
-  border-radius:14px;padding:10px 14px;font-size:.76rem;line-height:1.4;box-shadow:0 8px 24px rgba(0,0,0,.35);
-  cursor:pointer;border:1px solid var(--vermelho);animation:lembreteFlutua 2.4s ease-in-out infinite}
+.lembrete-avaliar{position:fixed;left:10px;bottom:10px;z-index:400;max-width:220px;background:#17171B;color:#fff;
+  border-radius:12px;padding:8px 10px;font-size:.72rem;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.35);
+  border:1px solid var(--vermelho)}
 .lembrete-avaliar.oculto{display:none}
 .lembrete-avaliar b{color:#FF6B6B}
+.lembrete-corpo{cursor:pointer}
+.lembrete-fechar{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:#17171B;
+  border:1px solid var(--vermelho);color:#fff;font-size:.62rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.lembrete-avaliar.recolhido{width:38px;height:38px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  animation:lembreteFlutua 2.4s ease-in-out infinite}
+.lembrete-avaliar.recolhido .lembrete-corpo,.lembrete-avaliar.recolhido .lembrete-fechar{display:none}
+.lembrete-avaliar.recolhido::after{content:"🔔";font-size:1.1rem}
+.lembrete-avaliar:not(.recolhido){animation:lembreteFlutua 2.4s ease-in-out infinite}
 @keyframes lembreteFlutua{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .fq-edge-corpo{cursor:pointer;padding:8px 4px 8px 8px;max-width:60px;overflow:hidden;
   transition:max-width .25s ease,padding .25s ease}
@@ -607,8 +615,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
     </div>
     <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
   </div>
-  <div class="lembrete-avaliar oculto" id="lembreteAvaliar">
-    <span id="lembreteAvaliarTexto"></span>
+  <div class="lembrete-avaliar oculto" id="lembreteAvaliar" style="position:fixed" onclick="if(this.classList.contains('recolhido'))toggleLembreteRecolhido(event)">
+    <div class="lembrete-corpo" id="lembreteAvaliarCorpo" onclick="if(!lembreteJogoId)return;abrirJogoNaAvaliacao(lembreteJogoId)">
+      <span id="lembreteAvaliarTexto"></span>
+    </div>
+    <button class="lembrete-fechar" onclick="toggleLembreteRecolhido(event)" aria-label="Ocultar">✕</button>
   </div>
   </header>
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
@@ -1280,7 +1291,7 @@ function abrirProximoCastigoPendente(){
   castigoAtualTexto=null;
   const zoacao=FRASES_ZOACAO_PERDEDOR[Math.floor(Math.random()*FRASES_ZOACAO_PERDEDOR.length)];
   const fecho=FRASES_RIBAMAR_ORGULHO[Math.floor(Math.random()*FRASES_RIBAMAR_ORGULHO.length)].replace('{jogo}',j?nomeJogo(j):'esse jogo');
-  document.getElementById('castigoFotoUsuario').innerHTML=iconRiba(220);
+  document.getElementById('castigoFotoUsuario').innerHTML=iconRiba(130);
   document.getElementById('castigoJogoRef').innerHTML=zoacao+' '+fecho;
   document.getElementById('roletaResultado').textContent='';
   document.getElementById('btnGirarCastigo').style.display='block';
@@ -1354,7 +1365,7 @@ function testePerdedor(){
   const j=null;
   const zoacao=FRASES_ZOACAO_PERDEDOR[Math.floor(Math.random()*FRASES_ZOACAO_PERDEDOR.length)];
   const fecho=FRASES_RIBAMAR_ORGULHO[Math.floor(Math.random()*FRASES_RIBAMAR_ORGULHO.length)].replace('{jogo}','esse jogo');
-  document.getElementById('castigoFotoUsuario').innerHTML=iconRiba(220);
+  document.getElementById('castigoFotoUsuario').innerHTML=iconRiba(130);
   document.getElementById('castigoJogoRef').innerHTML=zoacao+' '+fecho;
   document.getElementById('roletaResultado').textContent='';
   document.getElementById('btnGirarCastigo').style.display='block';
@@ -2031,7 +2042,7 @@ function mudarAba(a){
   });
   render();
 }
-function abrirJogo(id){jogoAberto=id;mostrarAvaliacaoDetalhe=false;render();window.scrollTo({top:0});}
+function abrirJogo(id){jogoAberto=id;mostrarAvaliacaoDetalhe=false;jogadoresExpandidos.clear();render();window.scrollTo({top:0});}
 function voltarLista(){jogoAberto=null;render();}
 
 function render(){
@@ -2090,17 +2101,23 @@ function jogoDaRodada(){
   }
   return ultimo;
 }
+let lembreteJogoId=null;
 function atualizarLembreteAvaliar(){
   const el=document.getElementById('lembreteAvaliar');
   if(!el||!eu)return;
   const rd=jogoDaRodada();
-  if(!rd){el.classList.add('oculto');return;}
+  if(!rd){el.classList.add('oculto');lembreteJogoId=null;return;}
   const [rid,rj]=rd;
   const pendente=rj.resultado&&rj.palpites&&rj.palpites[eu]&&!avaliou(rj,eu);
-  if(!pendente){el.classList.add('oculto');return;}
+  if(!pendente){el.classList.add('oculto');el.classList.remove('recolhido');lembreteJogoId=null;return;}
+  lembreteJogoId=rid;
   document.getElementById('lembreteAvaliarTexto').innerHTML='<b>Você ainda não avaliou a SELEVASCO</b><br>'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+'. Clique.';
-  el.onclick=()=>abrirJogoNaAvaliacao(rid);
   el.classList.remove('oculto');
+}
+function toggleLembreteRecolhido(e){
+  if(e){e.stopPropagation();}
+  const el=document.getElementById('lembreteAvaliar');
+  if(el)el.classList.toggle('recolhido');
 }
 function atualizarCronometroAvaliar(){
   const el=document.getElementById('cronoAvaliar');
@@ -2448,6 +2465,12 @@ function renderAvaliacaoCard(j,s){
     const minha=minhas[p.id]||{};
     const media=mediaJogadorNoJogo(j,p.id);
     const temNota=minha.nota!==undefined&&minha.nota!==null&&minha.nota!=='';
+    if(temNota&&!jogadoresExpandidos.has(p.id)){
+      html+='<div class="aval-bloco" style="padding:10px 14px;cursor:pointer" onclick="toggleJogadorExpandido(\''+p.id+'\')">'+
+        '<div class="aval-topo"><span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span>'+
+        '<span style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--cinza)"><b style="color:var(--branco)">Nota '+(+minha.nota)+'</b>'+((minha.com||'').length?' · registrado ✓':'')+'</span></div></div>';
+      return;
+    }
     const botoesNota=temNota?
       '<div class="nota-escolhida">Sua nota: <b>'+(+minha.nota)+'</b> <button type="button" class="btn fantasma" style="padding:4px 12px;font-size:.72rem" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'\')">↺ Desfazer</button></div>':
       '<div class="notas-botoes">'+Array.from({length:10},(_,i)=>i+1).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+'</div>';
@@ -2531,21 +2554,25 @@ async function enviarAudioGravado(pid){
   if(!GRAV_CHUNKS.length){ if(btn){btn.textContent='🎙️';} return; }
   const blob=new Blob(GRAV_CHUNKS,{type:'audio/webm'});
   const chave=jogoAberto+'|'+pid+'|'+eu+'|'+Date.now();
+  const FILLERS_INUTEIS=new Set(['e ai','eai','oi','ola','olá','alo','allo','tchau','hum','hmm','ah','uh','oh','teste','testando']);
   try{
     const b64=await blobParaBase64(blob);
     await db.collection('audios').doc(chave).set({data:b64,mime:'audio/webm',quando:Date.now(),status:'pendente',jogo:jogoAberto,jogador:pid,usuario:eu});
     if(btn)btn.textContent='🔄';
     const r=await fetch('/.netlify/functions/transcrever',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mime:'audio/webm'})});
     const info=await r.json();
-    if(info.texto){
+    const textoLimpo=(info.texto||'').trim();
+    const textoNormalizado=textoLimpo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z ]/g,'').trim();
+    const inutil=!textoLimpo||textoLimpo.length<4||FILLERS_INUTEIS.has(textoNormalizado);
+    if(info.texto&&!inutil){
       await db.collection('audios').doc(chave).update({status:'transcrito',texto:info.texto});
       await fundirTranscricaoNoComentario(pid,info.texto);
       if(btn)btn.textContent='✅';
       avisar('Ok, mensagem gravada ✓',true,1500);
     }else{
-      await db.collection('audios').doc(chave).update({status:'erro'});
+      await db.collection('audios').doc(chave).update({status:'erro',texto:info.texto||''});
       if(btn)btn.textContent='⚠️';
-      avisar('Áudio salvo, mas não consegui transcrever agora. Tenta de novo mais tarde.');
+      avisar('Não entendi o que você falou (ou o áudio veio vazio). Tenta gravar de novo, mais perto do microfone.');
     }
   }catch(e){
     if(btn)btn.textContent='⚠️';
@@ -2573,6 +2600,12 @@ function coletarComentarios(j,pid){
     if(av&&av.nota!==undefined&&av.nota!==null&&av.nota!=='')out.push({user,nota:av.nota,com:av.com||''});
   });
   return out;
+}
+let jogadoresExpandidos=new Set();
+function toggleJogadorExpandido(pid){
+  if(jogadoresExpandidos.has(pid))jogadoresExpandidos.delete(pid);
+  else jogadoresExpandidos.add(pid);
+  render();
 }
 async function confirmarComentario(pid){
   const input=document.getElementById('comInput_'+pid);
