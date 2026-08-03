@@ -348,14 +348,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .veu-castigo{position:fixed;inset:0;background:rgba(23,23,27,.85);display:none;align-items:center;
     justify-content:center;padding:20px;z-index:90}
   .veu-castigo.on{display:flex}
-  .modal-castigo{background:#FFFFFF;border-radius:20px;padding:20px 18px;max-width:420px;width:100%;
-    max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  .modal-castigo{background:#FFFFFF;border-radius:20px;padding:16px 16px;max-width:400px;width:100%;
+    max-height:94vh;max-height:94dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
     text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.5)}
-  .modal-castigo .tag-castigo{font-size:.92rem;letter-spacing:.1em;text-transform:uppercase;color:var(--vermelho);
-    font-weight:800;margin-bottom:6px}
-  .modal-castigo h2{font-family:'Anton',sans-serif;font-size:1.25rem;text-transform:uppercase;margin-bottom:4px}
-  .modal-castigo p{color:var(--cinza);font-size:.8rem;line-height:1.4;margin-bottom:10px}
-  .roleta-wrap{position:relative;width:260px;height:260px;margin:4px auto 10px;max-width:78vw;max-height:78vw}
+  .modal-castigo .tag-castigo{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--vermelho);
+    font-weight:800;margin-bottom:2px}
+  .modal-castigo h2{font-family:'Anton',sans-serif;font-size:1.05rem;text-transform:uppercase;margin-bottom:3px}
+  .modal-castigo p{color:var(--cinza);font-size:.72rem;line-height:1.3;margin-bottom:6px}
+  .roleta-wrap{position:relative;width:210px;height:210px;margin:2px auto 6px;max-width:66vw;max-height:66vw}
   .roleta-svg{width:100%;height:100%;filter:drop-shadow(0 8px 20px rgba(0,0,0,.28));
     transition:transform 4.2s cubic-bezier(.17,.89,.32,1.1)}
   .roleta-ponteiro{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:1.6rem;
@@ -394,14 +394,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .roleta-centro-mini{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;
     border-radius:50%;background:#FFFFFF;border:2px solid var(--preto);display:flex;align-items:center;
     justify-content:center;font-size:.95rem;color:var(--vermelho);z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.22)}
-  .roleta-resultado{font-family:'Anton',sans-serif;font-size:1.05rem;line-height:1.35;margin-bottom:14px;
+  .roleta-resultado{font-family:'Anton',sans-serif;font-size:.92rem;line-height:1.3;margin-bottom:8px;
     min-height:30px;text-transform:none;color:var(--branco)}
-  .btn-girar{width:100%;background:var(--vermelho);color:#FFF;border:none;border-radius:11px;padding:15px;
-    font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+  .btn-girar{width:100%;background:var(--vermelho);color:#FFF;border:none;border-radius:10px;padding:11px;
+    font-family:'Anton',sans-serif;font-size:.88rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
   .btn-girar:disabled{opacity:.5;cursor:wait}
-  .btn-confirmar-castigo{width:100%;background:var(--preto);color:#FFF;border:none;border-radius:11px;padding:14px;
-    font-family:'Inter',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.04em;text-transform:uppercase;
-    cursor:pointer;margin-top:10px;display:none}
+  .btn-confirmar-castigo{width:100%;background:var(--preto);color:#FFF;border:none;border-radius:10px;padding:10px;
+    font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.03em;text-transform:uppercase;
+    cursor:pointer;margin-top:8px;display:none}
   .btn-confirmar-castigo.on{display:block}
 
   .veu-banner{position:fixed;inset:0;background:rgba(23,23,27,.7);display:none;align-items:center;
@@ -2161,6 +2161,7 @@ async function ativarNotificacoes(){
         await db.collection('push_tokens').doc(eu).set({token,atualizadoEm:Date.now(),usuario:eu},{merge:true});
         avisar('Notificações ativadas! 🔔',true);
         atualizarBotaoNotificacao();
+        fetch('/.netlify/functions/enviar-boas-vindas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:eu})}).catch(()=>{});
       }
     }
   }catch(e){
