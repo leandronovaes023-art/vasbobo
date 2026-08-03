@@ -160,7 +160,11 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
-  .logo-row{display:flex;align-items:center;gap:14px}
+  .logo-row{display:flex;align-items:center;gap:14px;cursor:pointer;padding:6px 10px;border-radius:14px;
+    background:linear-gradient(145deg,rgba(255,255,255,.55),rgba(255,255,255,.15));
+    box-shadow:5px 5px 10px rgba(23,23,27,.12),-4px -4px 8px rgba(255,255,255,.7),inset 0 0 0 1px rgba(255,255,255,.3);
+    transition:transform .12s,box-shadow .12s}
+  .logo-row:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.14),-2px -2px 4px rgba(255,255,255,.6),inset 1px 1px 3px rgba(23,23,27,.15)}
   .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--branco);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
   .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
   .eyebrow{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
@@ -211,7 +215,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 <body>
   <header>
     <div class="header-inner">
-      <div class="logo-row">
+      <div class="logo-row" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');}else{location.href='/';}" title="Ir para a tela inicial">
         <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
         <div>
           <div class="eyebrow">Direto do Bar da Tia</div>
@@ -831,11 +835,11 @@ window.addEventListener('scroll',()=>{
 </script>
 <button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome"><span class="mf-icone">🏠</span>Home</a>
+    <a href="/" id="mfHome"><span class="mf-icone"><img src="img/menu/icone-home.png" alt=""></span>Home</a>
     <a href="/#rank" id="mfRank"><span class="mf-icone">🏆</span>Ranking</a>
-    <a href="/hoje.html" id="mfHoje" class="ativo"><span class="mf-icone">📅</span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario"><span class="mf-icone">✠</span>Calendário CRVG</a>
-    <a href="/futebol.html" id="mfFutebol"><span class="mf-icone"><img src="img/embed/asset2.png" alt=""></span>O que mais entende</a>
+    <a href="/hoje.html" id="mfHoje" class="ativo"><span class="mf-icone">🗓️</span>Quem joga hoje</a>
+    <a href="/#jogoscalendario" id="mfCalendario"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg.png" alt=""></span>Calendário CRVG</a>
+    <a href="/futebol.html" id="mfFutebol" onclick="if(typeof fqAbrirQuiz==='function'){fqAbrirQuiz();return false;}"><span class="mf-icone"><img src="img/embed/asset2.png" alt=""></span>O que mais entende</a>
   </nav>
 </body>
 </html>

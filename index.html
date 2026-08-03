@@ -96,7 +96,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
-  .logo-row{display:flex;align-items:center;gap:14px}
+  .logo-row{display:flex;align-items:center;gap:14px;cursor:pointer;padding:6px 10px;border-radius:14px;
+    background:linear-gradient(145deg,rgba(255,255,255,.55),rgba(255,255,255,.15));
+    box-shadow:5px 5px 10px rgba(23,23,27,.12),-4px -4px 8px rgba(255,255,255,.7),inset 0 0 0 1px rgba(255,255,255,.3);
+    transition:transform .12s,box-shadow .12s}
+  .logo-row:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.14),-2px -2px 4px rgba(255,255,255,.6),inset 1px 1px 3px rgba(23,23,27,.15)}
   .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--branco);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
   .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
   .tela-login{position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:rgba(20,20,24,.15)}
@@ -107,21 +111,30 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
-  nav{max-width:1320px;margin:0 auto;padding:10px 20px 0;display:flex;gap:6px;flex-wrap:wrap}
+  .btn-hamburger{position:fixed;top:14px;left:14px;z-index:410;width:42px;height:42px;border-radius:11px;
+    background:rgba(23,23,27,.9);color:#fff;border:1px solid rgba(255,255,255,.15);font-size:1.2rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center}
+  .menu-secundario{position:fixed;top:62px;left:14px;z-index:410;background:#17171B;border-radius:12px;
+    padding:8px;box-shadow:0 12px 34px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:2px;min-width:200px}
+  .menu-secundario.oculto{display:none}
+  .menu-secundario .tab{background:none;border:none;color:#fff;text-align:left;padding:11px 12px;border-radius:8px;
+    font-size:.82rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif}
+  .menu-secundario .tab:hover{background:rgba(255,255,255,.08)}
   nav::-webkit-scrollbar{display:none}
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
   main{max-width:1320px;margin:0 auto;padding:16px 20px 84px}
-  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:#FFFFFF;border-top:1px solid var(--linha);
-    display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 16px rgba(0,0,0,.08);
+  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:rgba(17,17,20,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.1);
+    display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
-  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    padding:8px 2px 6px;text-decoration:none;color:var(--cinza);font-size:.62rem;font-weight:700;
-    text-transform:uppercase;letter-spacing:.02em;font-family:'Inter',sans-serif}
-  .menu-fixo a .mf-icone{font-size:1.25rem;line-height:1}
-  .menu-fixo a .mf-icone img{width:24px;height:24px;object-fit:cover;border-radius:6px;display:block}
-  .menu-fixo a.ativo{color:var(--vermelho)}
+  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;
+    padding:9px 2px 7px;text-decoration:none;color:rgba(255,255,255,.68);font-size:.6rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
+  .menu-fixo a .mf-icone{font-size:1.25rem;line-height:1;display:flex;align-items:center;justify-content:center;height:22px}
+  .menu-fixo a .mf-icone img{width:24px;height:24px;object-fit:contain;display:block}
+  .menu-fixo a.ativo{color:#fff}
+  .menu-fixo a .mf-sinal{position:absolute;top:5px;right:calc(50% - 20px);width:8px;height:8px;border-radius:50%;background:var(--vermelho);border:1.5px solid #17171B}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
 
@@ -295,9 +308,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
 
   /* janela de mídia flutuante */
-  .midia-janela{position:fixed;right:6px;bottom:6px;width:min(115px,32vw);height:18vh;max-height:165px;
+  .midia-janela{position:fixed;right:6px;bottom:70px;width:min(115px,32vw);height:18vh;max-height:165px;
     background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;overflow:hidden;
-    box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:40;display:flex;flex-direction:column}
+    box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:395;display:flex;flex-direction:column}
   .midia-top{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;
     font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);
     border-bottom:1px solid var(--linha);background:rgba(255,255,255,.95);flex:none}
@@ -404,7 +417,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   background:var(--carvao);border:1px solid var(--linha);border-right:none;border-radius:12px 0 0 12px;
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
-.lembrete-avaliar{position:fixed;left:8px;bottom:8px;z-index:400;width:max-content;max-width:min(92vw,340px);background:#17171B;color:#fff;
+.lembrete-avaliar{position:fixed;left:8px;bottom:74px;z-index:400;width:max-content;max-width:min(92vw,340px);background:#17171B;color:#fff;
   border-radius:9px;padding:5px 9px;font-size:.66rem;line-height:1.3;box-shadow:0 8px 24px rgba(0,0,0,.35);
   border:1px solid var(--vermelho)}
 .lembrete-avaliar.oculto{display:none}
@@ -608,7 +621,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 <div id="vApp" class="oculto">
   <header>
     <div class="header-inner">
-      <div class="logo-row">
+      <div class="logo-row" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');}else{location.href='/';}" title="Ir para a tela inicial">
         <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
         <div>
           <div class="eyebrow">Direto do Bar da Tia</div>
@@ -681,18 +694,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
     });
   </script>
 
-  <nav>
-    <button class="tab ativa" id="tabJogos" onclick="mudarAba('jogos')">✅ Bolão</button>
-    <button class="tab" id="tabRank" onclick="mudarAba('rank')">🏆 Ranking</button>
-    <button class="tab" id="tabCastigos" onclick="mudarAba('castigos')"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
-    <a href="/hoje.html" class="tab" style="text-decoration:none">📅 Quem joga hoje?</a>
-    <button class="tab oculto" id="tabPartidas" onclick="mudarAba('jogoscalendario')">✠ Jogos/Calendário CRVG</button>
-    <a href="/futebol.html" class="tab" style="text-decoration:none">🎯 O Que Mais Entende</a>
+  <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções">☰</button>
+  <div class="menu-secundario oculto" id="menuSecundario">
+    <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
     <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab" id="tabRaioX" onclick="mudarAba('perfilpsicotico')">🧠 Perfil Psicótico</button>
-    <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores')">🗣️ Jogadores</button>
-    <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin')">Configurações</button>
-  </nav>
+    <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
+    <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
+    <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin');toggleMenuSecundario()">⚙️ Configurações</button>
+  </div>
   <div class="bar-teste oculto" id="barTeste"><div>⚠️ <b>Modo teste ativo:</b> palpites e avaliações liberados fora de hora para você experimentar. Desligue em Configurações antes do uso valendo.</div></div>
 
   <main>
@@ -1787,6 +1796,13 @@ async function fqAtualizarBarra(){
   const feito=status.respondidas>=3;
   if(elFixo)elFixo.title=feito?'O Que Mais Entende de Futebol — você já respondeu hoje':'O Que Mais Entende de Futebol — toque para responder ('+status.respondidas+'/3 hoje)';
   if(elSub)elSub.textContent=feito?'Você já respondeu hoje ✓':(status.respondidas+'/3 hoje · toque para responder');
+  const mfFut=document.getElementById('mfFutebol');
+  if(mfFut){
+    let sinal=mfFut.querySelector('.mf-sinal');
+    if(!feito){
+      if(!sinal){sinal=document.createElement('span');sinal.className='mf-sinal';mfFut.appendChild(sinal);}
+    }else if(sinal){sinal.remove();}
+  }
   render();
 }
 
@@ -2014,7 +2030,6 @@ function entrarNoApp(){
   document.getElementById('whoNome').textContent=cap(eu);
   const adm=souAdmin();
   document.getElementById('whoAdm').classList.toggle('oculto',!adm);
-  document.getElementById('tabPartidas').classList.remove('oculto');
   document.getElementById('tabJogadores').classList.remove('oculto');
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
@@ -2044,6 +2059,16 @@ async function sair(){
 }
 
 /* =================== NAVEGAÇÃO =================== */
+function toggleMenuSecundario(e){
+  if(e)e.stopPropagation();
+  const el=document.getElementById('menuSecundario');
+  if(el)el.classList.toggle('oculto');
+}
+document.addEventListener('click',(e)=>{
+  const el=document.getElementById('menuSecundario');
+  const btn=document.getElementById('btnMenuSec');
+  if(el&&!el.classList.contains('oculto')&&!el.contains(e.target)&&e.target!==btn)el.classList.add('oculto');
+});
 function mudarAba(a){
   aba=a;jogoAberto=null;
   try{sessionStorage.setItem('vasbobo:aba',a);}catch(e){}
@@ -2051,7 +2076,7 @@ function mudarAba(a){
     const novoHash=a==='jogos'?'':('#'+a);
     if(location.hash!==novoHash)history.replaceState(null,'',location.pathname+novoHash);
   }catch(e){}
-  const mapa={jogos:'tabJogos',rank:'tabRank',jogadores:'tabJogadores',jogoscalendario:'tabPartidas',castigos:'tabCastigos',admin:'tabAdmin',perfilpsicotico:'tabRaioX'};
+  const mapa={jogadores:'tabJogadores',castigos:'tabCastigos',admin:'tabAdmin',perfilpsicotico:'tabRaioX'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
     if(t)t.classList.toggle('ativa',k===a);
@@ -2968,7 +2993,7 @@ function renderPartidas(){
   }
   sec.innerHTML=html;
 }
-function mudarAbaDetalhe(){aba='jogos';document.getElementById('tabJogos').classList.add('ativa');document.getElementById('tabPartidas').classList.remove('ativa');render();}
+function mudarAbaDetalhe(){aba='jogos';render();}
 async function criarJogo(){
   const adv=document.getElementById('njAdv').value.trim();
   const data=document.getElementById('njData').value;
@@ -3580,11 +3605,11 @@ function iniciarMidiaJanela(){
 })();
 </script>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('jogos');return false;}"><span class="mf-icone">🏠</span>Home</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home.png" alt=""></span>Home</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
-    <a href="/hoje.html" id="mfHoje"><span class="mf-icone">📅</span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('jogoscalendario');return false;}"><span class="mf-icone">✠</span>Calendário CRVG</a>
-    <a href="/futebol.html" id="mfFutebol"><span class="mf-icone"><img src="img/embed/asset2.png" alt=""></span>O que mais entende</a>
+    <a href="/hoje.html" id="mfHoje"><span class="mf-icone">🗓️</span>Quem joga hoje</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg.png" alt=""></span>Calendário CRVG</a>
+    <a href="/futebol.html" id="mfFutebol" onclick="if(typeof fqAbrirQuiz==='function'){fqAbrirQuiz();return false;}"><span class="mf-icone"><img src="img/embed/asset2.png" alt=""></span>O que mais entende</a>
   </nav>
 </body>
 </html>
