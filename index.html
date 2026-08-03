@@ -3161,6 +3161,40 @@ function audiosDoJogador(pid){
     linhas.map(l=>'<div class="linha-tabela"><span class="rank-nome">'+esc(l.user)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">"'+esc(l.texto)+'"</span></div>').join('')+
     '</div></details>';
 }
+function renderRankingGeralJogadores(){
+  const mvpCount={},worstCount={};
+  jogosOrdenados().forEach(([id,j])=>{
+    if(!j.avaliacoes||!Object.keys(j.avaliacoes).length)return;
+    const idsAvaliados=[...new Set(Object.values(j.avaliacoes).flatMap(porJog=>Object.keys(porJog||{})))];
+    const comMedia=idsAvaliados.map(pid=>({pid,media:mediaJogadorNoJogo(j,pid)}))
+      .filter(x=>x.media&&x.media.media!==null);
+    if(!comMedia.length)return;
+    const max=Math.max(...comMedia.map(x=>x.media.media));
+    const min=Math.min(...comMedia.map(x=>x.media.media));
+    comMedia.forEach(x=>{
+      if(x.media.media===max)mvpCount[x.pid]=(mvpCount[x.pid]||0)+1;
+      if(x.media.media===min&&max!==min)worstCount[x.pid]=(worstCount[x.pid]||0)+1;
+    });
+  });
+  const todos=dados.jogadores.map(p=>({p,m:mediasJogador(p.id),info:palavrasDoJogador(p.id),mvp:mvpCount[p.id]||0,pior:worstCount[p.id]||0}))
+    .filter(x=>x.m.nGeral>0||x.info.nCom>0);
+  if(!todos.length)return '';
+  const porMedia=[...todos].filter(x=>x.m.geral!==null).sort((a,b)=>b.m.geral-a.m.geral);
+  const porPior=[...todos].filter(x=>x.m.geral!==null).sort((a,b)=>a.m.geral-b.m.geral);
+  const porComentario=[...todos].sort((a,b)=>b.info.nCom-a.info.nCom).filter(x=>x.info.nCom>0);
+  const linha=(x,extra)=>'<div class="linha-tabela"><span class="rank-nome">'+(x.p.num?x.p.num+' · ':'')+esc(x.p.nome)+'</span>'+
+    '<span class="pontos '+classeNota(x.m.geral)+'" style="font-size:.9rem">'+x.m.geral.toFixed(1).replace('.',',')+'</span>'+
+    (extra||'')+'</div>';
+  return '<div class="card"><details><summary>🏆 Ranking Geral e Comentários</summary><div style="margin-top:12px">'+
+    '<div class="pos-titulo">👑 Melhores médias (e quantas vezes foi o melhor em campo)</div>'+
+    porMedia.slice(0,15).map(x=>linha(x,x.mvp?' <span style="color:var(--ouro);font-size:.78rem;margin-left:8px">👑 ×'+x.mvp+'</span>':'')).join('')+
+    '<div class="pos-titulo" style="margin-top:16px">🥶 Piores médias (e quantas vezes foi o pior em campo)</div>'+
+    porPior.slice(0,15).map(x=>linha(x,x.pior?' <span style="color:var(--vermelho);font-size:.78rem;margin-left:8px">🥶 ×'+x.pior+'</span>':'')).join('')+
+    '<div class="pos-titulo" style="margin-top:16px">💬 Mais comentados</div>'+
+    porComentario.slice(0,15).map(x=>'<div style="padding:8px 0;border-bottom:1px solid var(--linha)"><div class="linha-tabela" style="border:none;padding:0"><span class="rank-nome">'+(x.p.num?x.p.num+' · ':'')+esc(x.p.nome)+'</span><span style="font-size:.85rem;color:var(--cinza)">'+x.info.nCom+' comentário'+(x.info.nCom===1?'':'s')+'</span></div>'+
+      (x.info.top.length?'<div style="margin-top:6px">'+x.info.top.map(([w,n])=>'<span class="chip">'+esc(w)+' <b>×'+n+'</b></span>').join('')+'</div>':'')+'</div>').join('')+
+    '</div></details></div>';
+}
 function renderJogadores(){
   const sec=document.getElementById('secJogadores');
   let html='';
@@ -3191,6 +3225,8 @@ function renderJogadores(){
   }
 
   html+='<div class="card"><h2>💬 Dicionário da Resenha</h2><p class="nota-rodape" style="margin:0">Toque num jogo pra ver o que a galera falou (texto ou áudio) sobre cada jogador — o mais recente aparece já aberto.</p></div>';
+
+  html+=renderRankingGeralJogadores();
 
   const jogosComAval=jogosOrdenados().filter(([id,j])=>j.avaliacoes&&Object.keys(j.avaliacoes).some(u=>Object.keys(j.avaliacoes[u]||{}).length)).reverse();
   if(!jogosComAval.length){
