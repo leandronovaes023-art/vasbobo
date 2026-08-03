@@ -249,13 +249,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-ok-comentario{background:#fff;color:#17171B;border:1.5px solid #17171B;border-radius:8px;padding:0 14px;height:36px;font-weight:800;font-size:.76rem;cursor:pointer;flex:none}
   .notas-botoes{display:flex;flex-wrap:nowrap;gap:4px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
   .btn-nota{width:28px;height:28px;min-width:28px;border-radius:7px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;font-size:.78rem;flex:none}
+  .btn-nota.btn-na{width:auto;padding:0 8px;color:var(--cinza);border-style:dashed;margin-left:4px}
   .btn-nota:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
   .nota-escolhida{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:.92rem}
   .btn-mic.gravando{background:var(--vermelho);color:#fff;border-color:var(--vermelho);animation:micPulso 1s ease-in-out infinite}
   @keyframes micPulso{0%,100%{opacity:1}50%{opacity:.6}}
   .media-chip{font-family:'Anton',sans-serif;font-size:1.15rem;text-align:right;min-width:60px}
   .media-chip small{display:block;font-family:'Inter';font-size:.6rem;color:var(--cinza);letter-spacing:.1em;text-transform:uppercase}
-  .n-alta{color:var(--verde)} .n-media{color:var(--ouro)} .n-baixa{color:var(--vermelho)}
+  .n-alta{color:var(--verde)} .n-media{color:var(--ouro)} .n-baixa{color:var(--vermelho)} .n-na{color:var(--cinza)}
   .salvo-tick{font-size:.7rem;color:var(--verde);letter-spacing:.1em;text-transform:uppercase;opacity:0;transition:opacity .3s}
   .salvo-tick.on{opacity:1}
 
@@ -1107,12 +1108,14 @@ function mvpDaGalera(j){
   return melhor;
 }
 function mediaJogadorNoJogo(j,pid){
-  let s=0,n=0;
+  let s=0,n=0,na=0;
   Object.values(j.avaliacoes||{}).forEach(porJog=>{
     const av=porJog[pid];
-    if(av&&av.nota!==undefined&&av.nota!==null&&av.nota!==''){s+=+av.nota;n++;}
+    if(!av||av.nota===undefined||av.nota===null||av.nota==='')return;
+    if(av.nota==='NA'){na++;return;}
+    s+=+av.nota;n++;
   });
-  return n?{media:s/n,n}:null;
+  return n||na?{media:n?s/n:null,n,na}:null;
 }
 /* Reizinho e Ribamar de um jogo encerrado */
 /* pontuação só "fecha" de verdade (coroa/ranking final) quando todo mundo que palpitou já votou
@@ -2003,7 +2006,7 @@ function entrarNoApp(){
   const adm=souAdmin();
   document.getElementById('whoAdm').classList.toggle('oculto',!adm);
   document.getElementById('tabPartidas').classList.remove('oculto');
-  document.getElementById('tabJogadores').classList.toggle('oculto',!adm);
+  document.getElementById('tabJogadores').classList.remove('oculto');
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
   render();
@@ -2437,7 +2440,8 @@ async function enviarPalpite(){
 }
 
 /* =================== AVALIAÇÃO =================== */
-function classeNota(n){return n>=7?'n-alta':n>=5?'n-media':'n-baixa';}
+function classeNota(n){return n==='NA'?'n-na':n>=7?'n-alta':n>=5?'n-media':'n-baixa';}
+function fmtNota(n){return n==='NA'?'N/A':(+n).toLocaleString('pt-BR');}
 function jogadoresParaAvaliar(j){
   if(j.emCampo&&j.emCampo.length){
     return j.emCampo.map(id=>jogadorPorId(id)).filter(Boolean)
@@ -2462,29 +2466,40 @@ function renderAvaliacaoCard(j,s){
   }
   html+='<p class="nota-rodape" style="margin-top:0">Dê a nota (0 a 10) e deixe seu comentário sobre cada jogador. <b>Tudo salva automaticamente.</b>'+(j.emCampoInfo&&souAdmin()?' Lista de quem jogou registrada automaticamente (fonte: '+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span>':'')+(modoTeste()&&(!j.emCampo||!j.emCampo.length)?' <b style="color:var(--ouro)">(elenco completo liberado pelo modo teste)</b>':'')+'</p>';
   const minhas=(j.avaliacoes||{})[eu]||{};
-  const jaAvaliou=Object.keys(minhas).length>0;
-  if(jaAvaliou&&!mostrarAvaliacaoDetalhe){
+  const jaAvaliouTudo=lista.every(p=>{
+    const m=minhas[p.id]||{};
+    return m.nota!==undefined&&m.nota!==null&&m.nota!=='';
+  });
+  if(jaAvaliouTudo&&!mostrarAvaliacaoDetalhe){
     html+='<button class="jogo-item" style="width:100%" onclick="toggleAvaliacaoDetalhe()"><span><span class="jogo-nome" style="color:var(--vermelho)">✅ Você já avaliou. Quer alterar algo? Clique</span></span></button></div>';
     return html;
+  }
+  const pendentes=lista.filter(p=>{
+    const m=minhas[p.id]||{};
+    return !(m.nota!==undefined&&m.nota!==null&&m.nota!=='');
+  }).map(p=>p.nome);
+  if(pendentes.length){
+    html+='<p class="nota-rodape" style="margin:0 0 12px;color:var(--vermelho)">⏳ Faltam '+pendentes.length+': '+pendentes.slice(0,4).map(esc).join(', ')+(pendentes.length>4?'…':'')+'</p>';
   }
   lista.forEach(p=>{
     const minha=minhas[p.id]||{};
     const media=mediaJogadorNoJogo(j,p.id);
     const temNota=minha.nota!==undefined&&minha.nota!==null&&minha.nota!=='';
     if(temNota&&!jogadoresExpandidos.has(p.id)){
-      html+='<div class="aval-bloco" style="padding:10px 14px;cursor:pointer" onclick="toggleJogadorExpandido(\''+p.id+'\')">'+
+      html+='<div class="aval-bloco" style="padding:10px 14px;cursor:pointer" onclick="toggleJogadorExpandido(\''+p.id+'\')" id="jogb_'+p.id+'">'+
         '<div class="aval-topo"><span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span>'+
-        '<span style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--cinza)"><b style="color:var(--branco)">Nota '+(+minha.nota)+'</b>'+((minha.com||'').length?' · registrado ✓':'')+'</span></div></div>';
+        '<span style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--cinza)"><b style="color:var(--branco)">Nota '+fmtNota(minha.nota)+'</b>'+((minha.com||'').length?' · registrado ✓':'')+'</span></div></div>';
       return;
     }
     const botoesNota=temNota?
-      '<div class="nota-escolhida">Sua nota: <b>'+(+minha.nota)+'</b> <button type="button" class="btn fantasma" style="padding:4px 12px;font-size:.72rem" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'\')">↺ Desfazer</button></div>':
-      '<div class="notas-botoes">'+Array.from({length:10},(_,i)=>i+1).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+'</div>';
+      '<div class="nota-escolhida">Sua nota: <b>'+fmtNota(minha.nota)+'</b> <button type="button" class="btn fantasma" style="padding:4px 12px;font-size:.72rem" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'\')">↺ Desfazer</button></div>':
+      '<div class="notas-botoes">'+Array.from({length:10},(_,i)=>i+1).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+
+      '<button type="button" class="btn-nota btn-na" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'NA\')" title="Jogou pouco / sem nota definida">N/A</button></div>';
     const comentarios=coletarComentarios(j,p.id);
-    html+='<div class="aval-bloco"><div class="aval-topo">'+
+    html+='<div class="aval-bloco" id="jogb_'+p.id+'"><div class="aval-topo">'+
       '<span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span>'+
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
-      '<span class="media-chip '+(media?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media?media.media.toFixed(1).replace('.',','):'–')+'<small id="votos_'+p.id+'">'+(media?media.n+' voto'+(media.n===1?'':'s'):'sem votos')+'</small></span></span></div>'+
+      '<span class="media-chip '+(media&&media.media!==null?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'<small id="votos_'+p.id+'">'+(media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos')+'</small></span></span></div>'+
       botoesNota+
       '<div class="aval-controles-v">'+
       '<div style="display:flex;gap:8px;align-items:center" id="comWrap_'+p.id+'"'+((minha.com||'')?' style="display:none"':'')+'>'+
@@ -2496,7 +2511,7 @@ function renderAvaliacaoCard(j,s){
       ' <button type="button" onclick="reabrirComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--vermelho);text-decoration:underline;cursor:pointer;font-size:.78rem">editar</button></div>'+
       '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+' <span style="font-size:.72rem;font-weight:700">Gravar áudio</span></button>'+
       '</div>'+
-      (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+(+c.nota).toLocaleString('pt-BR')+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
+      (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
       '</div>';
   });
   html+='<button class="btn" style="width:100%;margin-top:6px" onclick="finalizarAvaliacao()">✠ Finalizar avaliação</button>';
@@ -2504,8 +2519,23 @@ function renderAvaliacaoCard(j,s){
   return html;
 }
 function finalizarAvaliacao(){
+  const j=dados.jogos[jogoAberto];
+  if(j){
+    const lista=jogadoresParaAvaliar(j);
+    const minhas=(j.avaliacoes||{})[eu]||{};
+    const pendentes=lista.filter(p=>{
+      const m=minhas[p.id]||{};
+      return !(m.nota!==undefined&&m.nota!==null&&m.nota!=='');
+    }).map(p=>p.nome);
+    if(pendentes.length){
+      avisar('Ainda falta avaliar: '+pendentes.join(', ')+'. Pode dar N/A se não tiver certeza da nota.');
+      return;
+    }
+  }
+  mostrarAvaliacaoDetalhe=false;
   avisar('Valeu por votar! Suas notas já estão salvas.',true);
   window.scrollTo({top:0,behavior:'smooth'});
+  render();
 }
 /* =================== ÁUDIO DAS NOTAS (grava, salva, transcreve) =================== */
 let GRAV_MEDIA=null, GRAV_CHUNKS=[], GRAV_TIMER=null, GRAV_PID=null;
@@ -2638,17 +2668,32 @@ async function salvarAvaliacao(pid,campo,valor){
     if(!j.avaliacoes)j.avaliacoes={};
     if(!j.avaliacoes[eu])j.avaliacoes[eu]={};
     if(!j.avaliacoes[eu][pid])j.avaliacoes[eu][pid]={};
-    if(campo==='nota')j.avaliacoes[eu][pid].nota=valor===''?null:+valor;
+    if(campo==='nota')j.avaliacoes[eu][pid].nota=valor===''?null:(valor==='NA'?'NA':+valor);
     else j.avaliacoes[eu][pid].com=valor.trim();
   });
   if(!ok)return;
   const j=dados.jogos[id];
   const media=mediaJogadorNoJogo(j,pid);
   const elM=document.getElementById('media_'+pid),elV=document.getElementById('votos_'+pid),tick=document.getElementById('tick_'+pid);
-  if(elM){elM.className='media-chip '+(media?classeNota(media.media):'');elM.childNodes[0].nodeValue=media?media.media.toFixed(1).replace('.',','):'–';}
-  if(elV)elV.textContent=media?media.n+' voto'+(media.n===1?'':'s'):'sem votos';
+  if(elM){elM.className='media-chip '+(media&&media.media!==null?classeNota(media.media):'');elM.childNodes[0].nodeValue=media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–');}
+  if(elV)elV.textContent=media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos';
   if(tick){tick.classList.add('on');setTimeout(()=>tick.classList.remove('on'),1600);}
-  if(campo==='nota')render();
+  if(campo==='nota'&&valor!==''){
+    render();
+    setTimeout(()=>{
+      const lista=jogadoresParaAvaliar(j);
+      const minhas=(j.avaliacoes||{})[eu]||{};
+      const proximo=lista.find(p2=>{
+        if(p2.id===pid)return false;
+        const m=minhas[p2.id]||{};
+        return !(m.nota!==undefined&&m.nota!==null&&m.nota!=='');
+      });
+      const alvo=proximo?document.getElementById('jogb_'+proximo.id):null;
+      if(alvo)alvo.scrollIntoView({behavior:'smooth',block:'center'});
+    },80);
+  }else if(campo==='nota'){
+    render();
+  }
 }
 
 /* =================== ADMIN DO JOGO (correção manual) =================== */
@@ -2937,7 +2982,7 @@ function mediasJogador(pid){
   Object.values(dados.jogos).forEach(j=>{
     Object.entries(j.avaliacoes||{}).forEach(([user,porJog])=>{
       const av=porJog[pid];
-      if(av&&av.nota!==undefined&&av.nota!==null&&av.nota!==''){
+      if(av&&av.nota!==undefined&&av.nota!==null&&av.nota!==''&&av.nota!=='NA'){
         sT+=+av.nota;nT++;
         if(user===eu){sM+=+av.nota;nM++;}
       }
@@ -3156,8 +3201,18 @@ function renderJogadores(){
     const idsAvaliados=[...new Set(Object.values(j.avaliacoes||{}).flatMap(porJog=>Object.keys(porJog||{})))];
     const jogadoresDoJogo=idsAvaliados.map(pid=>jogadorPorId(pid)).filter(Boolean)
       .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+    const resumo=jogadoresDoJogo.map(p=>({p,media:mediaJogadorNoJogo(j,p.id)}))
+      .sort((a,b)=>(b.media&&b.media.media!==null?b.media.media:-1)-(a.media&&a.media.media!==null?a.media.media:-1));
+    const mvpMedia=resumo.length&&resumo[0].media&&resumo[0].media.media!==null?resumo[0].media.media:null;
     html+='<div class="card" style="padding:0"><details'+(i===0?' open':'')+' class="jogo-resenha"><summary>'+nomeJogo(j)+' <small style="font-weight:400;color:var(--cinza)">— '+fmtData(j)+'</small></summary>'+
-      '<div style="padding:0 16px 14px">';
+      '<div style="padding:0 16px 14px">'+
+      '<div style="margin-bottom:10px"><div class="pos-titulo" style="margin-bottom:6px">Médias e MVP até agora</div>'+
+      resumo.map(({p,media})=>{
+        const ehMvp=mvpMedia!==null&&media&&media.media===mvpMedia;
+        return '<div class="linha-tabela"><span class="rank-nome">'+(ehMvp?'👑 ':'')+(p.num?p.num+' · ':'')+esc(p.nome)+'</span>'+
+          '<span class="pontos '+(media&&media.media!==null?classeNota(media.media):'')+'" style="font-size:.9rem">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'</span></div>';
+      }).join('')+
+      '</div>';
     jogadoresDoJogo.forEach(p=>{
       const comentarios=coletarComentarios(j,p.id);
       const info=palavrasDoJogador(p.id);
@@ -3167,7 +3222,7 @@ function renderJogadores(){
           const temAudio=(c.com||'').indexOf('🎙️')!==-1;
           const audioId=('au'+id+p.id+c.user).replace(/[^a-zA-Z0-9]/g,'');
           return '<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span>'+
-            '<span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+(+c.nota).toLocaleString('pt-BR')+'</span>'+
+            '<span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span>'+
             '<span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com.replace('🎙️','').trim()):'<i style="color:var(--cinza)">sem comentário</i>')+
             (temAudio?' <button type="button" id="'+audioId+'" class="btn fantasma" style="padding:3px 10px;font-size:.68rem" onclick="tocarAudioComentario(\''+id+'\',\''+p.id+'\',\''+c.user.replace(/'/g,"\\'")+'\',\''+audioId+'\')">🔊 Tocar áudio</button>':'')+
             '</span></div>';
