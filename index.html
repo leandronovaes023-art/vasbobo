@@ -536,6 +536,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
         <tr><td>📈</td><td>Aproximação do placar — diferença de 3 gols</td><td><b>+1 pt</b></td></tr>
         <tr><td>❌</td><td>Errou tudo</td><td><b>0 pts</b></td></tr>
         <tr><td>🚫</td><td>Não avaliou os jogadores em até 24h após o resultado</td><td><b>-2 pts</b></td></tr>
+        <tr><td>🎡</td><td>Perdeu a rodada e não girou a roleta (ou girou e não pagou o castigo) em até 24h</td><td><b>-2 pts</b></td></tr>
       </table>
 
       <h4>🎯 Placar exato — 15 pts</h4>
@@ -807,7 +808,19 @@ console.log('Firebase conectado ao Vasbobo ✓');
 const CHAVE='vasbobo:v2';
 const CHAVE_SESSAO='vasbobo:sessao';
 const SENHA_PADRAO='vasco123';
-const PTS_EXATO=15, PTS_RESULTADO=8, PTS_UMTIME_ERROU=3, PTS_GOL=6, PTS_MVP=6, PTS_NAO_AVALIOU=-2;
+const PTS_EXATO=15, PTS_RESULTADO=8, PTS_UMTIME_ERROU=3, PTS_GOL=6, PTS_MVP=6, PTS_NAO_AVALIOU=-2, PTS_CASTIGO=-2;
+function penalidadeCastigo(id,j,usuario){
+  if(j.isentoPenalidade)return 0;
+  if(!j.resultado||!j.resultadoEm)return 0;
+  if(Date.now()-j.resultadoEm<PRAZO_AVALIAR_MS)return 0; // 24h de prazo
+  const prem=premiacaoJogo(j);
+  if(!prem||!prem.ribas.includes(usuario))return 0;
+  dados.castigos=dados.castigos||{};
+  const c=dados.castigos[id+'__'+usuario];
+  if(!c)return PTS_CASTIGO; // nunca girou
+  if(c.pago===false)return PTS_CASTIGO; // admin confirmou que não pagou
+  return 0; // girou e pagou (ou ainda não foi revisado pelo admin)
+}
 const PRAZO_AVALIAR_MS=24*3600000; // 24h após o resultado sair pra avaliar, senão perde PTS_NAO_AVALIOU
 function avaliou(j,usuario){
   return !!(j.avaliacoes&&j.avaliacoes[usuario]&&Object.keys(j.avaliacoes[usuario]).length);
@@ -1010,6 +1023,7 @@ function tooltipPontuacao(){
     ['+0 a +3','📈 aproximação do placar (quanto mais perto do resultado real)'],
     [0,'❌ errou tudo'],
     [PTS_NAO_AVALIOU,'🚫 não avaliou os jogadores em 24h'],
+    [PTS_CASTIGO,'🎡 perdeu a rodada e não girou (ou não pagou) o castigo em 24h'],
   ];
   const linhasHtml=linhas.map(([p,t])=>'<tr><td>'+p+' pts</td><td>'+t+'</td></tr>').join('');
   return '<span class="info-pontuacao"><a onclick="event.stopPropagation();togglePont(this)">🏆 Pontuação · toque para expandir</a>'+
@@ -1487,44 +1501,63 @@ async function excluirCastigoAdmin(chave){
 function renderCastigos(){
   const sec=document.getElementById('secCastigos');
   dados.castigos=dados.castigos||{};
-  const lista=Object.values(dados.castigos).sort((a,b)=>b.quando-a.quando);
-  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira a roleta.</p></div>';
-  if(!lista.length){
+  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira a roleta. Quem não girar ou não pagar o castigo em até 24h perde 2 pontos no ranking.</p></div>';
+  const jogosComPerdedor=jogosComPremiacaoRecentes().filter(([id,j,prem])=>prem.ribas.length).reverse();
+  if(!jogosComPerdedor.length){
     html+='<div class="vazio">Ninguém pagou castigo ainda. Vai que essa rodada é a sua vez de escapar. 😏</div>';
-  }else{
-    lista.forEach(c=>{
-      const j=dados.jogos[c.jogoId];
-      const chaveC=c.jogoId+'__'+c.usuario;
-      html+='<div class="castigo-item"><div class="ci-topo"><span class="ci-nome" style="display:flex;align-items:center;gap:8px">'+fotoUsuario(c.usuario,32)+esc(cap(c.usuario))+'</span>'+
-        '<span class="ci-data">'+new Date(c.quando).toLocaleDateString('pt-BR')+' · '+(j?nomeJogo(j):'')+'</span>'+
-        (souAdmin()?'<button class="btn-x" onclick="excluirCastigoAdmin(\''+chaveC+'\')">excluir</button>':'')+'</div>'+
-        '<div class="ci-texto" style="display:flex;align-items:center;gap:10px">'+fotoAlvoCastigo(c.texto,36)+'<span>🎯 '+esc(c.texto)+'</span></div></div>';
-    });
+    sec.innerHTML=html;return;
   }
-  // pendências visíveis (transparência pro grupo cobrar)
-  const pendentesGeral=[];
-  jogosComPremiacaoRecentes().forEach(([id,j,prem])=>{
+  jogosComPerdedor.forEach(([id,j,prem],i)=>{
+    const prazoOk=j.resultadoEm&&(Date.now()-j.resultadoEm<PRAZO_AVALIAR_MS);
+    html+='<div class="card" style="padding:0"><details'+(i===0?' open':'')+' class="jogo-resenha"><summary>'+nomeJogo(j)+' <small style="font-weight:400;color:var(--cinza)">— '+fmtData(j)+'</small></summary><div style="padding:0 16px 14px">';
     prem.ribas.forEach(u=>{
       const chave=id+'__'+u;
-      if(!dados.castigos[chave]) pendentesGeral.push({usuario:u,jogo:j});
+      const c=dados.castigos[chave];
+      const girou=!!c;
+      const pago=c&&c.pago===true;
+      const naoPago=c&&c.pago===false;
+      html+='<div class="linha-tabela" style="align-items:flex-start"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,32)+'<b class="rank-nome">'+esc(cap(u))+'</b></span>'+
+        '<span style="flex-basis:100%;margin-top:6px">';
+      if(!girou){
+        html+='<span style="color:var(--vermelho);font-weight:700">🎡 Ainda não girou a roleta'+(prazoOk?' (dentro do prazo de 24h)':' — prazo estourado, -2 pts aplicado')+'</span>';
+      }else{
+        html+='<span style="display:flex;align-items:center;gap:8px">'+fotoAlvoCastigo(c.texto,28)+'<span>🎯 '+esc(c.texto)+'</span></span>'+
+          '<div style="margin-top:6px">'+
+          (pago?'<span style="color:var(--verde);font-weight:700">✅ Pagou o castigo</span>':
+           naoPago?'<span style="color:var(--vermelho);font-weight:700">❌ Não pagou — -2 pts aplicado</span>':
+           '<span style="color:var(--cinza)">⏳ Aguardando confirmação'+(prazoOk?' (ainda dentro das 24h)':' — prazo estourado')+'</span>')+
+          '</div>';
+        if(souAdmin()&&!pago&&!naoPago){
+          html+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn fantasma" style="padding:6px 14px;font-size:.76rem" onclick="confirmarPagamentoCastigo(\''+chave+'\',true)">✅ Pagou</button>'+
+            '<button class="btn fantasma" style="padding:6px 14px;font-size:.76rem" onclick="confirmarPagamentoCastigo(\''+chave+'\',false)">❌ Não pagou</button></div>';
+        }else if(souAdmin()&&(pago||naoPago)){
+          html+='<button class="btn fantasma" style="padding:4px 12px;font-size:.7rem;margin-top:6px" onclick="confirmarPagamentoCastigo(\''+chave+'\',null)">↺ Desfazer confirmação</button>';
+        }
+      }
+      html+='</span></div>';
     });
+    html+='</div></details></div>';
   });
-  if(pendentesGeral.length){
-    html+='<div class="card"><h2 style="font-size:1rem">⏳ Aguardando girar</h2>';
-    pendentesGeral.forEach(p=>{
-      html+='<div class="castigo-item pendente"><div class="ci-topo"><span class="ci-nome">'+esc(cap(p.usuario))+'</span>'+
-        '<span class="ci-data">'+nomeJogo(p.jogo)+'</span></div><div class="ci-texto">ainda não girou a roleta</div></div>';
-    });
-    html+='</div>';
-  }
   sec.innerHTML=html;
+}
+async function confirmarPagamentoCastigo(chave,pago){
+  const ok=await mutar(()=>{
+    dados.castigos=dados.castigos||{};
+    if(dados.castigos[chave]){
+      if(pago===null)delete dados.castigos[chave].pago;
+      else dados.castigos[chave].pago=pago;
+    }
+  });
+  if(ok){avisar(pago===null?'Confirmação desfeita.':pago?'Marcado como pago ✓':'Marcado como não pago.',true);render();}
+  else avisar('Erro ao salvar. Tenta de novo.');
 }
 
 /* tabela da rodada (um jogo), com pontos parciais ao vivo */
 function tabelaRodada(j){
   const chaveJ=fqChaveJogo(j);
+  const idJ=Object.keys(dados.jogos).find(k=>dados.jogos[k]===j);
   return Object.entries(j.palpites)
-    .map(([u,p])=>({u,pts:(pontosPalpite(p,j,true)||{total:0}).total+(ESTADO_QUIZ.porJogo[u+'|'+chaveJ]||0)+penalidadeNaoAvaliou(j,u)}))
+    .map(([u,p])=>({u,pts:(pontosPalpite(p,j,true)||{total:0}).total+(ESTADO_QUIZ.porJogo[u+'|'+chaveJ]||0)+penalidadeNaoAvaliou(j,u)+(idJ?penalidadeCastigo(idJ,j,u):0)}))
     .sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
 }
 function agruparPorPontos(tabela){
@@ -3177,9 +3210,9 @@ function toggleRankingGeral(){ mostrarRankingGeral=!mostrarRankingGeral; renderR
 function renderRank(){
   const sec=document.getElementById('secRank');
   const placar={};
-  const zeraLinha=()=>({pts:0,exato:0,resultado:0,umtimeErrou:0,zero:0,bonus:0,palpites:0,reis:0,ribas:0,quiz:0,naoAvaliou:0});
+  const zeraLinha=()=>({pts:0,exato:0,resultado:0,umtimeErrou:0,zero:0,bonus:0,palpites:0,reis:0,ribas:0,quiz:0,naoAvaliou:0,naoCastigo:0});
   Object.keys(dados.usuarios).forEach(u=>placar[u]=zeraLinha());
-  Object.values(dados.jogos).forEach(j=>{
+  Object.entries(dados.jogos).forEach(([idJ,j])=>{
     Object.entries(j.palpites).forEach(([u,p])=>{
       if(!placar[u])placar[u]=zeraLinha();
       placar[u].palpites++;
@@ -3194,6 +3227,8 @@ function renderRank(){
       }
       const pen=penalidadeNaoAvaliou(j,u);
       if(pen){ placar[u].pts+=pen; placar[u].naoAvaliou++; }
+      const penC=penalidadeCastigo(idJ,j,u);
+      if(penC){ placar[u].pts+=penC; placar[u].naoCastigo++; }
     });
     const prem=premiacaoJogo(j);
     if(prem){
@@ -3222,6 +3257,7 @@ function renderRank(){
       if(x.quiz)partes.push('+'+x.quiz+' do quiz ⚽');
       if(x.bonus)partes.push('+'+x.bonus+' bônus');
       if(x.naoAvaliou)partes.push(x.naoAvaliou+'x não avaliou (-'+(x.naoAvaliou*2)+')');
+      if(x.naoCastigo)partes.push(x.naoCastigo+'x não girou/pagou o castigo (-'+(x.naoCastigo*2)+')');
       const resumo=partes.length?partes.join(' · '):'ainda sem pontos';
       const idSeguro=('rk_'+u).replace(/[^a-zA-Z0-9_]/g,'');
       return '<div class="rank-linha '+(i===0&&x.pts>0?'lider':'')+'" style="cursor:pointer" onclick="document.getElementById(\''+idSeguro+'\').classList.toggle(\'oculto\')"><span class="rank-pos">'+(i+1)+'º</span>'+
