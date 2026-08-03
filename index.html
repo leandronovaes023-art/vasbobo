@@ -839,6 +839,7 @@ function penalidadeCastigo(id,j,usuario){
   if(!prem||!prem.ribas.includes(usuario))return 0;
   dados.castigos=dados.castigos||{};
   const c=dados.castigos[id+'__'+usuario];
+  if(c&&c.isento)return 0; // admin isentou — nunca conta penalidade
   if(!c)return PTS_CASTIGO; // nunca girou
   if(c.pago===false)return PTS_CASTIGO; // admin confirmou que não pagou
   return 0; // girou e pagou (ou ainda não foi revisado pelo admin)
@@ -1538,9 +1539,13 @@ function renderCastigos(){
       const girou=!!c;
       const pago=c&&c.pago===true;
       const naoPago=c&&c.pago===false;
+      const isento=c&&c.isento===true;
       html+='<div class="linha-tabela" style="align-items:flex-start"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,32)+'<b class="rank-nome">'+esc(cap(u))+'</b></span>'+
         '<span style="flex-basis:100%;margin-top:6px">';
-      if(!girou){
+      if(isento){
+        html+='<span style="color:var(--cinza)">🚫 Isento desse castigo (removido pelo admin)</span>';
+        if(souAdmin())html+='<div><button class="btn fantasma" style="padding:4px 12px;font-size:.7rem;margin-top:6px" onclick="isentarCastigo(\''+chave+'\',false)">↺ Desfazer isenção</button></div>';
+      }else if(!girou){
         html+='<span style="color:var(--vermelho);font-weight:700">🎡 Ainda não girou a roleta'+(prazoOk?' (dentro do prazo de 36h)':' — prazo estourado, -2 pts aplicado')+'</span>';
       }else{
         html+='<span style="display:flex;align-items:center;gap:8px">'+fotoAlvoCastigo(c.texto,28)+'<span>🎯 '+esc(c.texto)+'</span></span>'+
@@ -1555,6 +1560,9 @@ function renderCastigos(){
         }else if(souAdmin()&&(pago||naoPago)){
           html+='<button class="btn fantasma" style="padding:4px 12px;font-size:.7rem;margin-top:6px" onclick="confirmarPagamentoCastigo(\''+chave+'\',null)">↺ Desfazer confirmação</button>';
         }
+      }
+      if(souAdmin()&&!isento){
+        html+='<div><button class="btn fantasma" style="padding:4px 12px;font-size:.68rem;margin-top:6px;color:var(--cinza)" onclick="isentarCastigo(\''+chave+'\',true)">🚫 Isentar (retirar castigo, como se não tivesse acontecido)</button></div>';
       }
       html+='</span></div>';
     });
@@ -1571,6 +1579,16 @@ async function confirmarPagamentoCastigo(chave,pago){
     }
   });
   if(ok){avisar(pago===null?'Confirmação desfeita.':pago?'Marcado como pago ✓':'Marcado como não pago.',true);render();}
+  else avisar('Erro ao salvar. Tenta de novo.');
+}
+async function isentarCastigo(chave,isentar){
+  if(isentar&&!(await confirmar('Isso remove o castigo desse usuário como se ele nunca tivesse acontecido — sem roleta, sem penalidade. Continuar?')))return;
+  const ok=await mutar(()=>{
+    dados.castigos=dados.castigos||{};
+    if(!dados.castigos[chave])dados.castigos[chave]={quando:Date.now()};
+    dados.castigos[chave].isento=isentar;
+  });
+  if(ok){avisar(isentar?'Usuário isento desse castigo ✓':'Isenção desfeita.',true);render();}
   else avisar('Erro ao salvar. Tenta de novo.');
 }
 
