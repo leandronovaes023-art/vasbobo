@@ -99,7 +99,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .logo-row{display:flex;align-items:center;gap:14px;cursor:pointer;padding:6px 10px;border-radius:14px;
     background:linear-gradient(145deg,rgba(255,255,255,.55),rgba(255,255,255,.15));
     box-shadow:5px 5px 10px rgba(23,23,27,.12),-4px -4px 8px rgba(255,255,255,.7),inset 0 0 0 1px rgba(255,255,255,.3);
-    transition:transform .12s,box-shadow .12s}
+    transition:transform .12s,box-shadow .12s;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
   .logo-row:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.14),-2px -2px 4px rgba(255,255,255,.6),inset 1px 1px 3px rgba(23,23,27,.15)}
   .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--branco);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
   .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
@@ -111,10 +112,13 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
-  .btn-hamburger{position:fixed;top:14px;left:14px;z-index:410;width:42px;height:42px;border-radius:11px;
-    background:rgba(23,23,27,.9);color:#fff;border:1px solid rgba(255,255,255,.15);font-size:1.2rem;cursor:pointer;
-    display:flex;align-items:center;justify-content:center}
-  .menu-secundario{position:fixed;top:62px;left:14px;z-index:410;background:#17171B;border-radius:12px;
+  .linha-menu-topo{max-width:1320px;margin:0 auto;padding:10px 20px 6px;position:relative}
+  .btn-hamburger{width:56px;height:32px;border-radius:10px;cursor:pointer;border:none;display:block;
+    background:linear-gradient(145deg,rgba(255,255,255,.6),rgba(255,255,255,.18));
+    box-shadow:4px 4px 8px rgba(23,23,27,.12),-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35);
+    transition:transform .12s,box-shadow .12s}
+  .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
+  .menu-secundario{position:absolute;top:44px;left:20px;z-index:410;background:#17171B;border-radius:12px;
     padding:8px;box-shadow:0 12px 34px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:2px;min-width:200px}
   .menu-secundario.oculto{display:none}
   .menu-secundario .tab{background:none;border:none;color:#fff;text-align:left;padding:11px 12px;border-radius:8px;
@@ -672,12 +676,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 
   <div class="fq-edge fq-edge-esq oculto" id="fmFixo" title="Frases Vasbobo Motivacionais">
-    <div class="fq-edge-corpo" onclick="fmAbrir()">💪</div>
+    <div class="fq-edge-corpo" onclick="fmAbrir()">📣</div>
     <button class="fq-edge-seta fq-edge-seta-esq" onclick="toggleFmEdge(event)" aria-label="Recolher ou expandir">‹</button>
   </div>
   <div class="fq-veu oculto" id="modalFraseMotiv" onclick="if(event.target===this)fmFechar()">
     <div class="fq-modal" style="max-width:420px">
-      <h3 style="text-align:left;margin-bottom:14px">💪 Frases Vasbobo Motivacionais</h3>
+      <h3 style="text-align:left;margin-bottom:14px">📣 Frases Vasbobo Motivacionais</h3>
       <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque para uma frase motivacional</button></div>
     </div>
   </div>
@@ -724,13 +728,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
     });
   </script>
 
-  <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções">☰</button>
-  <div class="menu-secundario oculto" id="menuSecundario">
-    <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
-    <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-    <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
-    <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
-    <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin');toggleMenuSecundario()">⚙️ Configurações</button>
+  <div class="linha-menu-topo">
+    <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"></button>
+    <div class="menu-secundario oculto" id="menuSecundario">
+      <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
+      <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
+      <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
+      <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
+      <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin');toggleMenuSecundario()">⚙️ Configurações</button>
+    </div>
   </div>
   <div class="bar-teste oculto" id="barTeste"><div>⚠️ <b>Modo teste ativo:</b> palpites e avaliações liberados fora de hora para você experimentar. Desligue em Configurações antes do uso valendo.</div></div>
 
