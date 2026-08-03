@@ -204,10 +204,10 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .fq-edge.oculto{display:none}
 .fq-edge-esq{right:auto;left:0;top:auto;bottom:150px;transform:none;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
 .fq-edge-esq .fq-edge-corpo{font-size:1.4rem!important;padding:1px 0 1px 1px!important;max-width:76px!important}
-.fq-edge-seta-esq{transform:scaleX(1)}
+.fq-edge-seta-esq{transform:scaleX(-1)}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
 .fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(-1)}
-.fq-edge-corpo{cursor:pointer;padding:8px 4px 8px 8px;max-width:80px;overflow:hidden;
+.fq-edge-corpo{cursor:pointer;padding:6px 4px 6px 6px;max-width:90px;overflow:hidden;
   transition:max-width .25s ease,padding .25s ease}
 .fq-edge-corpo img{width:74px;height:111px;border-radius:9px;object-fit:cover;object-position:top;display:block}
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
@@ -235,7 +235,7 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
         <div class="who">
           <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
           <span class="adm oculto" id="whoAdm">admin</span>
-          <button onclick="sairSatelite()" style="background:none;border:none;color:var(--cinza);padding:4px 6px;cursor:pointer;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+          <button onclick="sairSatelite()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
         </div>
         <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">📲 App VASBOBO</button>
       </div>

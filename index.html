@@ -439,7 +439,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .fq-edge-esq{right:auto;left:0;top:auto;bottom:150px;transform:none;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
 .fq-edge-esq .fq-edge-corpo{font-size:1.4rem!important;padding:1px 0 1px 1px!important;max-width:76px!important}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
-.fq-edge-seta-esq{transform:scaleX(1);padding:12px 6px!important}
+.fq-edge-seta-esq{transform:scaleX(-1);padding:12px 6px!important}
 .fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(1)}
 .lembrete-avaliar{position:fixed;left:8px;bottom:92px;z-index:850;width:max-content;max-width:min(92vw,340px);background:#17171B;color:#fff;
   border-radius:9px;padding:5px 9px;font-size:.66rem;line-height:1.3;box-shadow:0 8px 24px rgba(0,0,0,.35);
@@ -457,14 +457,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .lembrete-avaliar.recolhido::after{content:"🔔";font-size:1.1rem}
 .lembrete-avaliar:not(.recolhido){animation:lembreteFlutua 2.4s ease-in-out infinite}
 @keyframes lembreteFlutua{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-.fq-edge-corpo{cursor:pointer;padding:8px 4px 8px 8px;max-width:60px;overflow:hidden;
+.fq-edge-corpo{cursor:pointer;padding:6px 4px 6px 6px;max-width:90px;overflow:hidden;
   transition:max-width .25s ease,padding .25s ease}
 .fq-edge-corpo img{width:74px;height:111px;border-radius:9px;object-fit:cover;object-position:top;display:block}
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
 .fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
 .fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
-@media(max-width:480px){.fq-edge-corpo img{width:52px;height:78px}}
+@media(max-width:480px){.fq-edge-corpo img{width:58px;height:87px}.fq-edge-corpo{max-width:74px}}
 @media(max-width:480px){
   .bobo{width:56px;height:56px;border-radius:10px}
   .header-inner{gap:8px}
@@ -657,7 +657,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
         <div class="who">
           <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
           <span class="adm oculto" id="whoAdm">admin</span>
-          <button onclick="pedirConfirmacaoSair()" style="background:none;border:none;color:var(--cinza);padding:4px 6px;cursor:pointer;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+          <button onclick="pedirConfirmacaoSair()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
         </div>
         <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
           <button id="btnNotificacao" onclick="pedirPermissaoNotificacao()" class="sino-notif" aria-label="Ativar notificações" title="Ativar notificações">🔔</button>
@@ -787,7 +787,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
   <!-- Roleta do castigo (bloqueante, só pra quem é Ribamar da rodada e ainda não girou) -->
   <div class="veu-castigo" id="veuCastigoRoleta">
     <div class="modal-castigo">
-      <button class="btn-fechar-castigo" onclick="document.getElementById('veuCastigoRoleta').classList.remove('on')" aria-label="Fechar por agora">✕</button>
       <div class="tag-castigo">Ribamar da rodada</div>
       <div id="castigoFotoUsuario" style="margin:10px 0"></div>
       <h2>QUE ORGULHO DE VOCÊ</h2>
