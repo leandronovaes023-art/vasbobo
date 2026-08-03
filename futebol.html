@@ -183,22 +183,22 @@ body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.
   .who{padding:6px 10px;font-size:.76rem;gap:6px}
   #btnInstalarApp{padding:6px 9px!important;font-size:.7rem!important;margin-right:6px!important}
 }
-.fq-edge{position:fixed;right:0;top:42%;transform:translateY(-50%);z-index:400;
+.fq-edge{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:400;
   background:var(--carvao);border:1px solid var(--linha);border-right:none;border-radius:12px 0 0 12px;
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
-.fq-edge-esq{right:auto;left:0;top:58%;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
-.fq-edge-esq .fq-edge-corpo{font-size:1.4rem;padding:10px 12px}
-.fq-edge-seta-esq{transform:scaleX(-1)}
+.fq-edge-esq{right:auto;left:0;top:66%;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
+.fq-edge-esq .fq-edge-corpo{font-size:1.4rem;padding:8px;max-width:100px}
+.fq-edge-seta-esq{transform:scaleX(1)}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
-.fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(1)}
+.fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(-1)}
 .fq-edge-corpo{cursor:pointer;padding:8px 4px 8px 8px;max-width:80px;overflow:hidden;
   transition:max-width .25s ease,padding .25s ease}
-.fq-edge-corpo img{width:66px;height:99px;border-radius:9px;object-fit:cover;object-position:top;display:block}
+.fq-edge-corpo img{width:74px;height:111px;border-radius:9px;object-fit:cover;object-position:top;display:block}
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
 .fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
-  cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(-1)}
-.fq-edge.recolhida .fq-edge-seta{transform:scaleX(1)}
+  cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
+.fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
 </style>
 <script>
 function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
@@ -280,9 +280,9 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz3.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <a href="/#castigos" class="tab"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</a>
-      <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
-      <a href="/#perfilpsicotico" class="tab">🧠 Perfil Psicótico</a>
       <a href="/#jogadores" class="tab">🗣️ Jogadores</a>
+      <a href="/#perfilpsicotico" class="tab">🧠 Perfil Psicótico</a>
+      <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
       <a href="/#motivacional" class="tab oculto" data-tab="admin">📣 Motivacional</a>
       <a href="/#admin" class="tab oculto" data-tab="admin">⚙️ Configurações</a>
     </div>
