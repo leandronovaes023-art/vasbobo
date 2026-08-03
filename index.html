@@ -121,7 +121,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-hamburger img{width:60px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
   .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
   .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;
-    background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,255,255,.8));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
+    background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
     padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.5);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
     height:46px;overflow-x:auto;max-width:calc(100vw - 90px);-webkit-overflow-scrolling:touch}
   .menu-secundario.oculto{display:none}
@@ -134,7 +134,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
   main{max-width:1320px;margin:0 auto;padding:6px 20px 84px}
-  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:rgba(17,17,20,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.1);
+  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:#0A0A0C;border-top:1px solid rgba(255,255,255,.1);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
   .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;
@@ -449,12 +449,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
 @keyframes lembreteFlutua{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 .fq-edge-corpo{cursor:pointer;padding:8px 4px 8px 8px;max-width:60px;overflow:hidden;
   transition:max-width .25s ease,padding .25s ease}
-.fq-edge-corpo img{width:58px;height:87px;border-radius:9px;object-fit:cover;object-position:top;display:block}
+.fq-edge-corpo img{width:66px;height:99px;border-radius:9px;object-fit:cover;object-position:top;display:block}
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
 .fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
-  cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease}
-.fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
-@media(max-width:480px){.fq-edge-corpo img{width:48px;height:72px}}
+  cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(-1)}
+.fq-edge.recolhida .fq-edge-seta{transform:scaleX(1)}
+@media(max-width:480px){.fq-edge-corpo img{width:52px;height:78px}}
 @media(max-width:480px){
   .bobo{width:56px;height:56px;border-radius:10px}
   .header-inner{gap:8px}
@@ -681,27 +681,27 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 
   <div class="fq-edge fq-edge-esq oculto" id="fmFixo" title="O Vasbobo tem uma Mensagem motivacional!">
-    <div class="fq-edge-corpo" onclick="fmAbrir()"><img src="img/embed/motivacional-capa.jpg" alt="" style="width:58px;height:58px;border-radius:9px;object-fit:cover;display:block"></div>
+    <div class="fq-edge-corpo" onclick="fmAbrir()"><img src="img/embed/motivacional-capa.jpg" alt="" style="width:74px;height:74px;border-radius:9px;object-fit:contain;background:#17171B;display:block"></div>
     <button class="fq-edge-seta fq-edge-seta-esq" onclick="toggleFmEdge(event)" aria-label="Recolher ou expandir">‹</button>
   </div>
   <div class="fq-veu oculto" id="modalFraseMotiv" onclick="if(event.target===this)fmFechar()">
-    <div class="fq-modal" style="max-width:440px;position:relative">
-      <button onclick="fmFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px">✕</button>
-      <h3 style="text-align:left;margin-bottom:14px;padding-right:26px">📣 O Vasbobo tem uma Mensagem motivacional!</h3>
+    <div class="fq-modal" style="max-width:460px;position:relative">
+      <button onclick="fmFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px;z-index:2">✕</button>
+      <img src="img/embed/motivacional-capa.jpg" alt="" style="width:100%;max-width:220px;display:block;margin:0 auto 14px;border-radius:12px">
+      <h3 style="text-align:center;margin-bottom:14px;padding-right:0">O Vasbobo tem uma mensagem Motivacional para você</h3>
       <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque e veja a frase para renovar sua esperança</button></div>
     </div>
   </div>
 
   <div class="fq-veu oculto" id="modalFraseResultado" onclick="if(event.target===this)frFechar()">
-    <div class="fq-modal" style="max-width:420px">
-      <div id="frCard" style="background:#17171B;color:#fff;border-radius:14px;padding:24px 18px;text-align:center">
-        <div class="eyebrow" style="text-align:center"><span id="frRotulo">Vitória escolhida</span></div>
-        <div id="frTexto" style="font-family:'Anton',sans-serif;font-size:1.05rem;text-transform:uppercase;line-height:1.5;margin-top:8px"></div>
+    <div class="fq-modal" style="max-width:440px;position:relative">
+      <button onclick="frFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px;z-index:2">✕</button>
+      <div id="frCard" style="background:#17171B;color:#fff;border-radius:14px;padding:32px 20px;text-align:center">
+        <div id="frTexto" style="font-family:'Anton',sans-serif;font-size:1.35rem;text-transform:uppercase;line-height:1.5"></div>
       </div>
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-        <button class="btn fantasma" style="flex:1" onclick="frCompartilhar()">📲 Compartilhar</button>
-        <button class="btn fantasma" style="flex:1" onclick="frCopiar()">📋 Copiar imagem</button>
-        <button class="btn fantasma" style="flex:1" onclick="frFechar()">Fechar</button>
+        <button class="btn fantasma" style="flex:1" onclick="frPrintTela()">📸 Print a toda Tela</button>
+        <button class="btn" style="flex:1;background:#25D366" onclick="frCompartilharWhats()">💬 Compartilhe a mensagem</button>
       </div>
     </div>
   </div>
@@ -738,7 +738,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz3.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
-      <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
+      <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
+      <button class="tab" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
       <button class="tab oculto" id="tabMotivacional" onclick="mudarAba('motivacional');toggleMenuSecundario()">📣 Motivacional</button>
       <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin');toggleMenuSecundario()">⚙️ Configurações</button>
@@ -2081,7 +2082,6 @@ function entrarNoApp(){
   const adm=souAdmin();
   document.getElementById('whoAdm').classList.toggle('oculto',!adm);
   document.getElementById('tabJogadores').classList.remove('oculto');
-  document.getElementById('tabRaioX').classList.toggle('oculto',!adm);
   document.getElementById('tabMotivacional').classList.toggle('oculto',!adm);
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
@@ -3520,15 +3520,11 @@ async function mostrarFraseResultado(v,a){
   const banco=FRASES_RESULTADO[tipo]||[];
   if(!banco.length)return;
   const frase=banco[Math.floor(Math.random()*banco.length)];
-  const cor=tipo==='vitoria'?'var(--verde)':tipo==='empate'?'var(--ouro)':'var(--vermelho)';
-  const rotulo=tipo==='vitoria'?'Vitória escolhida':tipo==='empate'?'Empate escolhido':'Derrota escolhida';
-  document.getElementById('frRotulo').style.color=cor;
-  document.getElementById('frRotulo').textContent=rotulo;
   document.getElementById('frTexto').textContent=frase;
   document.getElementById('modalFraseResultado').classList.remove('oculto');
 }
 function frFechar(){document.getElementById('modalFraseResultado').classList.add('oculto');}
-async function frCompartilhar(){
+async function frPrintTela(){
   const el=document.getElementById('frCard');
   if(!el||typeof html2canvas==='undefined')return;
   const canvas=await html2canvas(el,{backgroundColor:'#17171B',scale:2});
@@ -3538,29 +3534,36 @@ async function frCompartilhar(){
     else{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='palpite-vasbobo.png'; a.click(); }
   },'image/png');
 }
-async function frCopiar(){
-  const el=document.getElementById('frCard');
-  if(!el||typeof html2canvas==='undefined')return;
-  const canvas=await html2canvas(el,{backgroundColor:'#17171B',scale:2});
-  canvas.toBlob(async blob=>{
-    try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); avisar('Imagem copiada!',true); }
-    catch(e){ avisar('Não consegui copiar nesse navegador.'); }
-  },'image/png');
+function frCompartilharWhats(){
+  const texto=document.getElementById('frTexto').textContent||'';
+  window.open('https://wa.me/?text='+encodeURIComponent(texto+' — via Vasbobo'),'_blank');
 }
 
 /* =================== CONFIGURAÇÕES (só admin) =================== */
-async function limparDadosDeUsuario(){
+async function limparDadosSeletivo(){
   const nome=(document.getElementById('limparUsuarioNome').value||'').trim();
   if(!nome){avisar('Digita o nome de login exato.');return;}
-  if(!(await confirmar('Isso vai apagar TODOS os palpites, notas, comentários e áudios de "'+nome+'" em todos os jogos. Não dá pra desfazer. Continuar?')))return;
+  const tipos=[...document.querySelectorAll('.chkLimparTipo:checked')].map(c=>c.value);
+  if(!tipos.length){avisar('Marca pelo menos um tipo pra apagar.');return;}
+  if(!(await confirmar('Isso vai apagar ('+tipos.join(', ')+') de "'+nome+'". Não dá pra desfazer. Continuar?')))return;
   let achou=false;
   await mutar(()=>{
-    Object.values(dados.jogos).forEach(j=>{
-      if(j.palpites&&j.palpites[nome]){delete j.palpites[nome];achou=true;}
-      if(j.avaliacoes&&j.avaliacoes[nome]){delete j.avaliacoes[nome];achou=true;}
+    Object.entries(dados.jogos).forEach(([id,j])=>{
+      if(tipos.includes('palpites')&&j.palpites&&j.palpites[nome]){delete j.palpites[nome];achou=true;}
+      if(tipos.includes('notas')&&j.avaliacoes&&j.avaliacoes[nome]){delete j.avaliacoes[nome];achou=true;}
+      if(tipos.includes('castigo')&&dados.castigos&&dados.castigos[id+'__'+nome]){delete dados.castigos[id+'__'+nome];achou=true;}
     });
   });
-  avisar(achou?'Dados de "'+nome+'" apagados!':'Não achei nada de "'+nome+'".',achou);
+  if(tipos.includes('quiz')){
+    let mudou=false;
+    Object.keys(ESTADO_QUIZ.porJogo||{}).forEach(k=>{ if(k.startsWith(nome+'|')){delete ESTADO_QUIZ.porJogo[k];mudou=true;} });
+    Object.keys(ESTADO_QUIZ.diario||{}).forEach(k=>{ if(k.startsWith(nome+'|')){delete ESTADO_QUIZ.diario[k];mudou=true;} });
+    if(mudou){ await fqSalvarEstado(ESTADO_QUIZ); achou=true; }
+  }
+  if(tipos.includes('motivacional')){
+    try{ await db.collection('frases_uso').doc(nome).delete(); achou=true; }catch(e){}
+  }
+  avisar(achou?'Dados selecionados de "'+nome+'" apagados!':'Não achei nada pra apagar.',achou);
   render();
 }
 async function limparMinhasAvaliacoes(){
@@ -3576,9 +3579,16 @@ async function limparMinhasAvaliacoes(){
 function renderAdmin(){
   const sec=document.getElementById('secAdmin');
   let html='<div class="card"><details><summary>🧹 Limpar dados de um usuário</summary><div style="margin-top:12px">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Apaga palpites, notas, comentários e áudios de um usuário específico (ex.: uma conta de teste) em todos os jogos.</p>'+
-  '<div style="display:flex;gap:10px;flex-wrap:wrap"><input id="limparUsuarioNome" placeholder="nome de login exato (ex.: teste)" style="flex:1;min-width:180px">'+
-  '<button class="btn" style="background:var(--vermelho)" onclick="limparDadosDeUsuario()">Apagar dados dele</button></div></div></details></div>';
+  '<p class="nota-rodape" style="margin:0 0 12px">Escolha o que quer apagar de um usuário específico (ex.: uma conta de teste).</p>'+
+  '<input id="limparUsuarioNome" placeholder="nome de login exato (ex.: teste)" style="width:100%;margin-bottom:10px">'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" class="chkLimparTipo" value="palpites" style="width:auto"> Palpites</label>'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" class="chkLimparTipo" value="notas" style="width:auto"> Notas dos jogadores</label>'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" class="chkLimparTipo" value="castigo" style="width:auto"> Castigo/roleta</label>'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" class="chkLimparTipo" value="quiz" style="width:auto"> O Que Mais Entende</label>'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:.8rem;text-transform:none;letter-spacing:0;color:var(--branco)"><input type="checkbox" class="chkLimparTipo" value="motivacional" style="width:auto"> Vasbobo Acredita</label>'+
+  '</div>'+
+  '<button class="btn" style="background:var(--vermelho)" onclick="limparDadosSeletivo()">Apagar o que marquei</button></div></details></div>';
   html+='<div class="card"><details><summary>🧪 Testar roleta e mensagens da rodada</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Simula as 3 telas sem gravar nada real — nada disso mexe no histórico de castigos do grupo. Só você (admin) vê este painel.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
@@ -3769,7 +3779,7 @@ function iniciarMidiaJanela(){
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg2.png" alt=""></span>Calendário CRVG</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg2.png" alt=""></span>Calendário</a>
   </nav>
 </body>
 </html>

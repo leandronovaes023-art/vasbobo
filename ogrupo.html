@@ -60,13 +60,13 @@ body::after{content:"";position:fixed;inset:0;opacity:.05;
   cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
 .voltar:hover{border-color:var(--branco);color:var(--branco)}
 
-.page-title{max-width:1100px;margin:40px auto 8px;padding:18px 22px;background:rgba(244,242,237,.92);
-  border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.page-title{max-width:1320px;margin:0 auto 14px;padding:16px 20px;background:var(--carvao);border:1px solid var(--linha);
+  border-radius:16px;box-shadow:0 1px 3px rgba(23,23,27,.04);backdrop-filter:blur(8px);box-sizing:border-box}
 .page-title h1{font-family:'Anton',sans-serif;font-size:clamp(2rem,6vw,3.5rem);text-transform:uppercase;line-height:1}
 .page-title p{color:var(--cinza);font-size:.9rem;margin-top:8px;line-height:1.6}
 
 /* Placar geral */
-.placar-geral{max-width:1100px;margin:24px auto;padding:0 20px;
+.placar-geral{max-width:1320px;margin:14px auto;padding:0 20px;
   display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .stat-geral{background:var(--card);border:1px solid var(--linha);border-radius:12px;
   padding:14px 16px;text-align:center;backdrop-filter:blur(6px)}
@@ -196,7 +196,7 @@ body::after{content:"";position:fixed;inset:0;opacity:.05;
   .btn-hamburger img{width:60px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
   .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
   .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;
-    background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,255,255,.8));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
+    background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
     padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.5);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
     height:46px;overflow-x:auto;max-width:calc(100vw - 90px);-webkit-overflow-scrolling:touch}
   .menu-secundario.oculto{display:none}
@@ -208,7 +208,7 @@ body::after{content:"";position:fixed;inset:0;opacity:.05;
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
   main{max-width:1320px;margin:0 auto;padding:6px 20px 84px}
-  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:rgba(17,17,20,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.1);
+  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:#0A0A0C;border-top:1px solid rgba(255,255,255,.1);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
   .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;
@@ -298,7 +298,8 @@ body::after{content:"";position:fixed;inset:0;opacity:.05;
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz3.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <a href="/#castigos" class="tab"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</a>
-      <a href="/#perfilpsicotico" class="tab oculto" data-tab="admin">🧠 Perfil Psicótico</a>
+      <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
+      <a href="/#perfilpsicotico" class="tab">🧠 Perfil Psicótico</a>
       <a href="/#jogadores" class="tab">🗣️ Jogadores</a>
       <a href="/#motivacional" class="tab oculto" data-tab="admin">📣 Motivacional</a>
       <a href="/#admin" class="tab oculto" data-tab="admin">⚙️ Configurações</a>
@@ -1268,7 +1269,7 @@ window.addEventListener('scroll',()=>{
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo" class="ativo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg2.png" alt=""></span>Calendário CRVG</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg2.png" alt=""></span>Calendário</a>
   </nav>
 </body>
 </html>
