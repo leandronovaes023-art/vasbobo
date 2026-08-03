@@ -18,12 +18,22 @@ async function mandarPush(usuario, titulo, texto, url) {
   if (!tokDoc.exists) return { ok: false, motivo: 'usuário sem token registrado (não ativou notificações ainda)' };
   const { token } = tokDoc.data();
   if (!token) return { ok: false, motivo: 'token vazio' };
-  await admin.messaging().send({
-    token,
-    notification: { title: titulo || 'VASBOBO', body: texto },
-    data: { url: url || '/' },
-  });
-  return { ok: true };
+  try {
+    await admin.messaging().send({
+      token,
+      notification: { title: titulo || 'VASBOBO', body: texto },
+      data: { url: url || '/' },
+    });
+    return { ok: true };
+  } catch (e) {
+    const codigo = e.code || '';
+    if (codigo.includes('registration-token-not-registered') || codigo.includes('invalid-argument')) {
+      // token velho/inválido (comum depois de trocar o service worker, reinstalar o app, etc.)
+      await db.collection('push_tokens').doc(usuario).delete().catch(() => {});
+      return { ok: false, motivo: 'token antigo/inválido (apagado) — a pessoa precisa clicar no sino de novo pra gerar um token novo' };
+    }
+    return { ok: false, motivo: 'erro do Firebase: ' + (e.message || codigo || 'desconhecido') };
+  }
 }
 
 module.exports = { garantirFirebase, mandarPush, admin };
