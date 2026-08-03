@@ -2174,6 +2174,7 @@ async function pedirPermissaoNotificacao(){
       if(doc.exists&&doc.data().token){
         avisar('Notificações já estão ativadas ✓',true);
         atualizarBotaoNotificacao();
+        ativarOuvintePrimeiroPlano();
         return;
       }
     }catch(e){ console.error('erro ao checar token existente',e); }
@@ -2191,6 +2192,24 @@ function ehIOS(){
 }
 function ehStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+let ouvindoMensagensPrimeiroPlano=false;
+function ativarOuvintePrimeiroPlano(){
+  if(ouvindoMensagensPrimeiroPlano)return;
+  try{
+    const messaging=firebase.messaging();
+    messaging.onMessage((payload)=>{
+      const titulo=payload.notification?.title||'VASBOBO';
+      const corpo=payload.notification?.body||'';
+      avisar('🔔 '+titulo+': '+corpo,true,6000);
+      if(Notification.permission==='granted'&&navigator.serviceWorker){
+        navigator.serviceWorker.getRegistration().then(reg=>{
+          if(reg)reg.showNotification(titulo,{body:corpo,icon:'/icons/icon-notif-192.png',badge:'/icons/icon-192.png',data:{url:payload.data?.url||'/'}});
+        });
+      }
+    });
+    ouvindoMensagensPrimeiroPlano=true;
+  }catch(e){ console.error('erro ao ativar ouvinte de primeiro plano',e); }
 }
 async function ativarNotificacoes(pulaPedidoDePermissao){
   if(!pulaPedidoDePermissao)fecharModalNotif();
@@ -2212,6 +2231,7 @@ async function ativarNotificacoes(pulaPedidoDePermissao){
     await db.collection('push_tokens').doc(eu).set({token,atualizadoEm:Date.now(),usuario:eu},{merge:true});
     avisar('Notificações ativadas! 🔔',true);
     atualizarBotaoNotificacao();
+    ativarOuvintePrimeiroPlano();
     fetch('/.netlify/functions/enviar-boas-vindas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:eu})}).catch(()=>{});
   }catch(e){
     console.error('erro ao ativar notificações',e);
@@ -2248,6 +2268,7 @@ function entrarNoApp(){
   if(fmEl)fmEl.classList.remove('oculto');
   fqAtualizarBarra();
   atualizarBotaoNotificacao();
+  if('Notification' in window&&Notification.permission==='granted')ativarOuvintePrimeiroPlano();
   timerTick=setInterval(async()=>{
     const el=document.activeElement;
     if(el&&(el.tagName==='TEXTAREA'||el.tagName==='INPUT'||el.tagName==='SELECT'))return;
