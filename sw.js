@@ -24,8 +24,8 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   const dados = payload.data || {};
-  const titulo = payload.notification?.title || 'VASBOBO';
-  const corpo = payload.notification?.body || '';
+  const titulo = dados.title || 'VASBOBO';
+  const corpo = dados.body || '';
   self.registration.showNotification(titulo, {
     body: corpo,
     icon: '/icons/icon-notif-grande.png',

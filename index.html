@@ -2210,12 +2210,13 @@ function ativarOuvintePrimeiroPlano(){
   try{
     const messaging=firebase.messaging();
     messaging.onMessage((payload)=>{
-      const titulo=payload.notification?.title||'VASBOBO';
-      const corpo=payload.notification?.body||'';
+      const dados=payload.data||{};
+      const titulo=dados.title||'VASBOBO';
+      const corpo=dados.body||'';
       avisar('🔔 '+titulo+': '+corpo,true,6000);
       if(Notification.permission==='granted'&&navigator.serviceWorker){
         navigator.serviceWorker.getRegistration().then(reg=>{
-          if(reg)reg.showNotification(titulo,{body:corpo,icon:'/icons/icon-notif-grande.png',badge:'/icons/icon-notif-96.png',data:{url:payload.data?.url||'/'}});
+          if(reg)reg.showNotification(titulo,{body:corpo,icon:'/icons/icon-notif-grande.png',badge:'/icons/icon-notif-96.png',data:{url:dados.url||'/'}});
         });
       }
     });

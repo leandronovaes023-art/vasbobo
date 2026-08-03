@@ -21,8 +21,12 @@ async function mandarPush(usuario, titulo, texto, url) {
   try {
     await admin.messaging().send({
       token,
-      notification: { title: titulo || 'VASBOBO', body: texto },
-      data: { url: url || '/' },
+      // Mensagem "só dados" (sem o campo "notification") — assim ela SEMPRE passa pelo
+      // meu código no service worker (onBackgroundMessage), que define o ícone certo.
+      // Se tivesse "notification" aqui, o navegador mostraria sozinho, com ícone padrão,
+      // ignorando completamente o que configurei — foi exatamente esse o bug.
+      data: { title: titulo || 'VASBOBO', body: texto, url: url || '/' },
+      webpush: { headers: { Urgency: 'high' } },
     });
     return { ok: true };
   } catch (e) {
