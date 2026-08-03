@@ -178,12 +178,12 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
   .linha-menu-topo{position:relative;padding:10px 0 2px 0}
-  .btn-hamburger{width:78px;height:46px;border-radius:0 14px 14px 0;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;padding:0 8px 0 4px;margin-left:0;
-    background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));
-    box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35);
+  .btn-hamburger{width:78px;height:46px;border-radius:0 14px 14px 0;cursor:pointer;border:none;display:flex;align-items:center;justify-content:flex-start;padding:0 8px 0 0;margin-left:0;
+    background:linear-gradient(145deg,rgba(60,60,66,.9),rgba(30,30,34,.75));
+    box-shadow:5px 5px 12px rgba(0,0,0,.5),-2px -2px 6px rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.06);
     transition:transform .12s,box-shadow .12s}
-  .btn-hamburger img{width:60px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
-  .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
+  .btn-hamburger img{width:66px;height:auto;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+  .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 6px rgba(0,0,0,.55),inset 1px 1px 3px rgba(0,0,0,.4)}
   .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;
     background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
     padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.5);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
@@ -235,7 +235,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
 .fq-edge-esq{right:auto;left:0;top:auto;bottom:150px;transform:none;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
-.fq-edge-esq .fq-edge-corpo{font-size:1.4rem;padding:8px;max-width:100px}
+.fq-edge-esq .fq-edge-corpo{font-size:1.4rem;padding:4px 2px 4px 4px;max-width:90px}
 .fq-edge-seta-esq{transform:scaleX(1)}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
 .fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(-1)}
@@ -245,7 +245,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
 .fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
-.fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
+.fq-edge.recolhida .fq-edge-seta{transform:scaleX(1)}
 </style>
 <script>
 function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
@@ -915,7 +915,7 @@ window.addEventListener('scroll',()=>{
 </script>
 <button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt=""></span>Home</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:42px;height:auto"></span>Home</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje" class="ativo"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>

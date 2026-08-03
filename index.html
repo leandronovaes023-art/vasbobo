@@ -120,13 +120,13 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
   .linha-menu-topo{position:relative;padding:10px 0 2px 0}
-  .btn-hamburger{width:78px;height:46px;border-radius:0 14px 14px 0;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;padding:0 8px 0 4px;margin-left:0;
-    background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));
-    box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35);
+  .btn-hamburger{width:78px;height:46px;border-radius:0 14px 14px 0;cursor:pointer;border:none;display:flex;align-items:center;justify-content:flex-start;padding:0 8px 0 0;margin-left:0;
+    background:linear-gradient(145deg,rgba(60,60,66,.9),rgba(30,30,34,.75));
+    box-shadow:5px 5px 12px rgba(0,0,0,.5),-2px -2px 6px rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.06);
     transition:transform .12s,box-shadow .12s}
-  .btn-hamburger img{width:60px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
-  .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
-  .btn-hamburger.aberto{border-radius:0 0 0 14px;box-shadow:-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35)}
+  .btn-hamburger img{width:66px;height:auto;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+  .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 6px rgba(0,0,0,.55),inset 1px 1px 3px rgba(0,0,0,.4)}
+  .btn-hamburger.aberto{border-radius:0 0 0 14px;box-shadow:-2px -2px 6px rgba(255,255,255,.08),inset 0 0 0 1px rgba(255,255,255,.06)}
   .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;
     background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
     padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px 0 0 rgba(255,255,255,0);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
@@ -158,7 +158,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .card h2{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;font-size:.96rem;letter-spacing:.05em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--linha);text-shadow:none}
   .vazio{color:var(--cinza);text-align:center;padding:26px 16px;border:1px dashed var(--linha);border-radius:12px;line-height:1.6}
   .nota-rodape{color:var(--cinza);font-size:.76rem;line-height:1.6;margin-top:8px}
-  .aviso{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2a1113;border:1px solid var(--vermelho);color:#f2cfd1;border-radius:10px;padding:11px 18px;font-size:.87rem;display:none;z-index:90;max-width:92vw;text-align:center}
+  .aviso{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#2a1113;border:1px solid var(--vermelho);color:#f2cfd1;border-radius:10px;padding:11px 18px;font-size:.87rem;display:none;z-index:900;max-width:92vw;text-align:center}
   .aviso.ok{background:#0f231a;border-color:var(--verde);color:#cfe9db}
 
   input,select,textarea{background:rgba(255,255,255,.92);border:1px solid var(--linha);color:var(--branco);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:.95rem;width:100%}
@@ -436,11 +436,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
 .fq-edge-esq{right:auto;left:0;top:auto;bottom:150px;transform:none;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
-.fq-edge-esq .fq-edge-corpo{font-size:1.4rem;padding:8px;max-width:100px}
+.fq-edge-esq .fq-edge-corpo{font-size:1.4rem;padding:4px 2px 4px 4px;max-width:90px}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
 .fq-edge-seta-esq{transform:scaleX(1)}
 .fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(-1)}
-.lembrete-avaliar{position:fixed;left:8px;bottom:74px;z-index:400;width:max-content;max-width:min(92vw,340px);background:#17171B;color:#fff;
+.lembrete-avaliar{position:fixed;left:8px;bottom:92px;z-index:850;width:max-content;max-width:min(92vw,340px);background:#17171B;color:#fff;
   border-radius:9px;padding:5px 9px;font-size:.66rem;line-height:1.3;box-shadow:0 8px 24px rgba(0,0,0,.35);
   border:1px solid var(--vermelho)}
 .lembrete-avaliar.oculto{display:none}
@@ -462,7 +462,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
 .fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
-.fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
+.fq-edge.recolhida .fq-edge-seta{transform:scaleX(1)}
 @media(max-width:480px){.fq-edge-corpo img{width:52px;height:78px}}
 @media(max-width:480px){
   .bobo{width:56px;height:56px;border-radius:10px}
@@ -670,13 +670,13 @@ console.log('Firebase conectado ao Vasbobo ✓');
     </div>
     <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">‹</button>
   </div>
+  </header>
   <div class="lembrete-avaliar oculto" id="lembreteAvaliar" style="position:fixed" onclick="if(this.classList.contains('recolhido'))toggleLembreteRecolhido(event)">
     <div class="lembrete-corpo" id="lembreteAvaliarCorpo" onclick="if(!lembreteJogoId)return;abrirJogoNaAvaliacao(lembreteJogoId)">
       <span id="lembreteAvaliarTexto"></span>
     </div>
     <button class="lembrete-fechar" onclick="toggleLembreteRecolhido(event)" aria-label="Ocultar">✕</button>
   </div>
-  </header>
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
     <div class="fq-modal" style="max-width:420px">
       <h3 style="text-align:left;margin-bottom:14px">📲 App VASBOBO</h3>
@@ -3982,7 +3982,7 @@ function iniciarMidiaJanela(){
 })();
 </script>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt=""></span>Home</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:42px;height:auto"></span>Home</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
