@@ -14,6 +14,7 @@
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 <script>
 // ===== FIREBASE CONFIG =====
 const firebaseConfig = {
@@ -94,6 +95,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
   .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 12px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:nowrap}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
+  .sino-notif{background:rgba(255,255,255,.08);border:1px solid var(--linha);color:var(--branco);border-radius:7px;
+    width:34px;height:34px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+  .sino-notif.ativado{background:rgba(30,138,76,.18);border-color:var(--verde)}
+  .sino-notif.balancando{animation:sinoBalanca 2.4s ease-in-out infinite}
+  @keyframes sinoBalanca{0%,90%,100%{transform:rotate(0)}91%{transform:rotate(-14deg)}93%{transform:rotate(11deg)}95%{transform:rotate(-8deg)}97%{transform:rotate(5deg)}99%{transform:rotate(-2deg)}}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
   .logo-row{display:flex;align-items:center;gap:14px;cursor:pointer;padding:6px 10px;border-radius:14px;
@@ -652,7 +658,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
           <span class="adm oculto" id="whoAdm">admin</span>
           <button onclick="pedirConfirmacaoSair()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
         </div>
-        <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">📲 App VASBOBO</button>
+        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
+          <button id="btnNotificacao" onclick="pedirPermissaoNotificacao()" class="sino-notif" aria-label="Ativar notificações" title="Ativar notificações">🔔</button>
+          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">📲 App VASBOBO</button>
+        </div>
       </div>
     </div>
   <div class="fq-edge oculto" id="fqFixo" title="O Que Mais Entende de Futebol">
@@ -687,6 +696,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   <div class="fq-edge fq-edge-esq oculto" id="fmFixo" title="O Vasbobo tem uma Mensagem motivacional!">
     <div class="fq-edge-corpo" onclick="fmAbrir()"><img src="img/embed/motivacional-capa.jpg" alt="" style="width:74px;height:74px;border-radius:9px;object-fit:contain;background:#17171B;display:block"></div>
     <button class="fq-edge-seta fq-edge-seta-esq" onclick="toggleFmEdge(event)" aria-label="Recolher ou expandir">‹</button>
+  </div>
+  <div class="fq-veu oculto" id="modalNotif" onclick="if(event.target===this)fecharModalNotif()">
+    <div class="fq-modal" style="max-width:420px;position:relative">
+      <button onclick="fecharModalNotif()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px">✕</button>
+      <h3 style="text-align:left;margin-bottom:10px">🔔 Ativar notificações do Vasbobo</h3>
+      <p class="nota-rodape" style="margin:0 0 16px">Mensagens curtas e diretas no seu celular: hora de avaliar os jogadores, frase motivacional do dia, e lembrete do quiz. Sem spam — só o essencial. Você pode desativar quando quiser nas configurações do navegador.</p>
+      <button class="btn" style="width:100%" onclick="ativarNotificacoes()">Permitir notificações</button>
+    </div>
   </div>
   <div class="fq-veu oculto" id="modalFraseMotiv" onclick="if(event.target===this)fmFechar()">
     <div class="fq-modal" style="max-width:460px;position:relative">
@@ -2121,6 +2138,45 @@ async function confirmarNovaSenha(){
   avisar('Senha criada. Bem-vindo ao Vasbobo!',true);
   entrarNoApp();
 }
+/* =================== NOTIFICAÇÕES PUSH =================== */
+// IMPORTANTE: troque essa chave pela VAPID key gerada no Firebase Console
+// (Configurações do projeto → Cloud Messaging → gerar par de chaves).
+// Sem essa chave real, o botão pede permissão mas não consegue gerar o token.
+const VAPID_KEY_PUSH = 'COLE_AQUI_A_VAPID_KEY_DO_FIREBASE';
+function pedirPermissaoNotificacao(){
+  if(!('Notification' in window)){avisar('Seu navegador não suporta notificações.');return;}
+  if(Notification.permission==='granted'){avisar('Notificações já estão ativadas ✓',true);return;}
+  document.getElementById('modalNotif').classList.remove('oculto');
+}
+function fecharModalNotif(){document.getElementById('modalNotif').classList.add('oculto');}
+async function ativarNotificacoes(){
+  fecharModalNotif();
+  try{
+    const permissao=await Notification.requestPermission();
+    if(permissao!=='granted'){avisar('Sem problema — se mudar de ideia, é só clicar no sino de novo.');return;}
+    if(!firebase.messaging||!firebase.messaging.isSupported||firebase.messaging.isSupported()){
+      const messaging=firebase.messaging();
+      const token=await messaging.getToken({vapidKey:VAPID_KEY_PUSH});
+      if(token&&eu){
+        await db.collection('push_tokens').doc(eu).set({token,atualizadoEm:Date.now(),usuario:eu},{merge:true});
+        avisar('Notificações ativadas! 🔔',true);
+        atualizarBotaoNotificacao();
+      }
+    }
+  }catch(e){
+    console.error('erro ao ativar notificações',e);
+    avisar('Não consegui ativar agora. Verifica se o navegador permite notificações pra esse site.');
+  }
+}
+function atualizarBotaoNotificacao(){
+  const btn=document.getElementById('btnNotificacao');
+  if(!btn||!('Notification' in window))return;
+  if(Notification.permission==='granted'){
+    btn.classList.add('ativado');btn.classList.remove('balancando');btn.textContent='🔔';btn.title='Notificações ativadas';
+  }else{
+    btn.classList.remove('ativado');btn.classList.add('balancando');btn.title='Ativar notificações';
+  }
+}
 function entrarNoApp(){
   setTimeout(iniciarMidiaJanela, 300);
   setTimeout(verificarPendenciasRodada, 500);
@@ -2141,7 +2197,7 @@ function entrarNoApp(){
   const fmEl=document.getElementById('fmFixo');
   if(fmEl)fmEl.classList.remove('oculto');
   fqAtualizarBarra();
-  if(timerTick)clearInterval(timerTick);
+  atualizarBotaoNotificacao();
   timerTick=setInterval(async()=>{
     const el=document.activeElement;
     if(el&&(el.tagName==='TEXTAREA'||el.tagName==='INPUT'||el.tagName==='SELECT'))return;
@@ -3885,6 +3941,18 @@ function iniciarMidiaJanela(){
   if(sessao&&dados.usuarios[sessao]&&!dados.usuarios[sessao].senhaPadrao){
     eu=sessao;
     entrarNoApp();
+    try{
+      const params=new URLSearchParams(location.search);
+      if(params.get('abrirVasboboAcredita')==='1'){
+        setTimeout(()=>{ if(typeof fmAbrir==='function')fmAbrir(); },400);
+        history.replaceState(null,'',location.pathname+location.hash);
+      }
+      const idJogoNotif=params.get('avaliarJogo');
+      if(idJogoNotif){
+        setTimeout(()=>{ if(typeof abrirJogoNaAvaliacao==='function')abrirJogoNaAvaliacao(idJogoNotif); },400);
+        history.replaceState(null,'',location.pathname+location.hash);
+      }
+    }catch(e){}
     const h=location.hash.replace('#','');
     const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico','motivacional'];
     if(validas.includes(h)){
