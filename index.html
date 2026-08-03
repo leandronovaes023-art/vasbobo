@@ -113,26 +113,27 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
-  .linha-menu-topo{position:relative;padding:10px 0 8px 0}
+  .linha-menu-topo{position:relative;padding:10px 0 2px 0}
   .btn-hamburger{width:78px;height:46px;border-radius:0 14px 14px 0;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;padding:0 8px 0 4px;margin-left:0;
     background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));
     box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35);
     transition:transform .12s,box-shadow .12s}
   .btn-hamburger img{width:60px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
   .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
-  .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;background:#17171B;border-radius:0 12px 12px 0;
-    padding:6px;box-shadow:6px 6px 20px rgba(0,0,0,.35);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
+  .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;
+    background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,255,255,.8));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
+    padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.5);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
     height:46px;overflow-x:auto;max-width:calc(100vw - 90px);-webkit-overflow-scrolling:touch}
   .menu-secundario.oculto{display:none}
-  .menu-secundario .tab{background:none;border:none;color:#fff;text-align:center;padding:0 13px;border-radius:8px;
+  .menu-secundario .tab{background:none;border:none;color:#17171B;text-align:center;padding:0 13px;border-radius:8px;
     font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
     display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
-  .menu-secundario .tab:hover{background:rgba(255,255,255,.08)}
+  .menu-secundario .tab:hover{background:rgba(23,23,27,.08)}
   nav::-webkit-scrollbar{display:none}
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
-  main{max-width:1320px;margin:0 auto;padding:16px 20px 84px}
+  main{max-width:1320px;margin:0 auto;padding:6px 20px 84px}
   .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:rgba(17,17,20,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.1);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
@@ -679,14 +680,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
     </div>
   </div>
 
-  <div class="fq-edge fq-edge-esq oculto" id="fmFixo" title="Frases Vasbobo Motivacionais">
-    <div class="fq-edge-corpo" onclick="fmAbrir()">📣</div>
+  <div class="fq-edge fq-edge-esq oculto" id="fmFixo" title="O Vasbobo tem uma Mensagem motivacional!">
+    <div class="fq-edge-corpo" onclick="fmAbrir()"><img src="img/embed/motivacional-capa.jpg" alt="" style="width:58px;height:58px;border-radius:9px;object-fit:cover;display:block"></div>
     <button class="fq-edge-seta fq-edge-seta-esq" onclick="toggleFmEdge(event)" aria-label="Recolher ou expandir">‹</button>
   </div>
   <div class="fq-veu oculto" id="modalFraseMotiv" onclick="if(event.target===this)fmFechar()">
-    <div class="fq-modal" style="max-width:420px">
-      <h3 style="text-align:left;margin-bottom:14px">📣 Frases Vasbobo Motivacionais</h3>
-      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque para uma frase motivacional</button></div>
+    <div class="fq-modal" style="max-width:440px;position:relative">
+      <button onclick="fmFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px">✕</button>
+      <h3 style="text-align:left;margin-bottom:14px;padding-right:26px">📣 O Vasbobo tem uma Mensagem motivacional!</h3>
+      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque e veja a frase para renovar sua esperança</button></div>
     </div>
   </div>
 
@@ -733,11 +735,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </script>
 
   <div class="linha-menu-topo">
-    <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz2.png" alt=""></button>
+    <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz3.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
-      <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
+      <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
+      <button class="tab oculto" id="tabMotivacional" onclick="mudarAba('motivacional');toggleMenuSecundario()">📣 Motivacional</button>
       <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin');toggleMenuSecundario()">⚙️ Configurações</button>
     </div>
   </div>
@@ -749,6 +752,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <section id="secRank" class="oculto"></section>
     <section id="secJogadores" class="oculto"></section>
     <section id="secRaioX" class="oculto"></section>
+    <section id="secMotivacional" class="oculto"></section>
     <section id="secPartidas" class="oculto"></section>
     <section id="secCastigos" class="oculto"></section>
     <section id="secAdmin" class="oculto"></section>
@@ -2077,6 +2081,8 @@ function entrarNoApp(){
   const adm=souAdmin();
   document.getElementById('whoAdm').classList.toggle('oculto',!adm);
   document.getElementById('tabJogadores').classList.remove('oculto');
+  document.getElementById('tabRaioX').classList.toggle('oculto',!adm);
+  document.getElementById('tabMotivacional').classList.toggle('oculto',!adm);
   document.getElementById('tabAdmin').classList.toggle('oculto',!adm);
   aba='jogos';jogoAberto=null;
   atualizarMenuFixo('jogos');
@@ -2151,6 +2157,7 @@ function render(){
   document.getElementById('secRank').classList.toggle('oculto',aba!=='rank');
   document.getElementById('secJogadores').classList.toggle('oculto',aba!=='jogadores');
   document.getElementById('secRaioX').classList.toggle('oculto',aba!=='perfilpsicotico');
+  document.getElementById('secMotivacional').classList.toggle('oculto',aba!=='motivacional');
   document.getElementById('secPartidas').classList.toggle('oculto',aba!=='jogoscalendario');
   document.getElementById('secCastigos').classList.toggle('oculto',aba!=='castigos');
   document.getElementById('secAdmin').classList.toggle('oculto',aba!=='admin');
@@ -2159,6 +2166,7 @@ function render(){
   if(aba==='rank')renderRank();
   if(aba==='jogadores')renderJogadores();
   if(aba==='perfilpsicotico')renderRaioX();
+  if(aba==='motivacional'&&souAdmin())renderMotivacional();
   if(aba==='jogoscalendario')renderPartidas();
   if(aba==='castigos')renderCastigos();
   if(aba==='admin'&&souAdmin())renderAdmin();
@@ -3385,6 +3393,26 @@ const RX_USERNAME={'Leandro Novaes':'novaes','Daniel':'daniel','Douglas Muniz':'
 const RAIOX_JULHO_2026=[{"nome": "Leandro Novaes", "cargo": "Presença Mais Constante da Ala", "bio": "Das mensagens enviadas, a maioria é sobre técnico — já entrevistou uns 12 candidatos só na cabeça. Das coisas que mandou normalmente é palavrão, em dose industrial. Surta com regularidade suspeita às 19h, hora da pré-análise pré-jogo — capaz de ter alarme configurado só pra isso.", "frase": "A parada que fizeram com o Pedrinho é bem séria.", "diags": [{"diag": "Síndrome do Técnico de Sofá", "receita": "Escalar menos o time durante o banho. Parar de substituir jogador que nem entrou em campo. Aceitar que não tem licença da CBF."}, {"diag": "Vascaínite Aguda Reincidente", "receita": "7 dias sem abrir o grupo depois de derrota. 2 almoços em família por semana. Proibido assistir coletiva do técnico sem testemunha."}, {"diag": "Febre de Estatística", "receita": "Nem toda porcentagem muda o placar. Reduzir consultas ao SofaScore. Conversar com seres humanos de vez em quando."}], "prognostico": "Evolui bem quando o Vasco ganha. Regride em clássicos.", "b": {"Atividade": 100, "Cornetagem": 100, "Caps": 29, "Exclamação": 100}}, {"nome": "Daniel", "cargo": "Ministro da Caixa Alta", "bio": "Das mensagens enviadas, boa parte pede a saída do Pedrinho — \"Fora Pedrinho\" já virou bordão pessoal, repetido com convicção de quem tem certificado. Bateu recorde da ala em CAIXA ALTA no mês. Um dos que mais aparece no grupo, sempre com o dedo mais rápido que o próprio Wi-Fi.", "frase": "Foda que eu nem sei quem devo gritar fora agora kkkk", "diags": [{"diag": "Oposição Compulsiva à Diretoria", "receita": "Máximo de 3 \"Fora Pedrinho\" por dia. Escrever uma carta educada pra variar, só pra ver como é. Lembrar que ele também não escolhe os resultados em campo."}, {"diag": "Inflamação do Dedo no Enviar", "receita": "Contar até cinco antes de apertar enviar. Revisar a mensagem uma vez. Apagar pelo menos uma ideia ruim por dia."}, {"diag": "Hiperatividade no WhatsApp", "receita": "Ficar 20 minutos sem olhar o grupo. Se conseguir, comemorar discretamente. Se não conseguir, procurar ajuda — ou Wi-Fi de outra pessoa."}], "prognostico": "Alto risco de surtar na próxima reunião de conselho.", "b": {"Atividade": 56, "Cornetagem": 22, "Caps": 100, "Exclamação": 34}}, {"nome": "Douglas Muniz", "cargo": "Ministro da Cornetagem", "bio": "Das coisas que mandou normalmente é link do Vasconet — vive compartilhando notícia antes de qualquer um perguntar. Já não aguenta mais o Daniel, e não esconde isso: critica cada opinião dele com o mesmo entusiasmo de quem nunca vai desistir.", "frase": "Irmãos, a zaga dos caras é Maicon, Rodrigo Moledo, Jacy e o Thiago Santos que era volante kkk", "diags": [{"diag": "Overdose de Notícia Não Confirmada", "receita": "Confirmar a fonte antes de mandar o link. Nem todo Vasconet é oficial."}, {"diag": "Implicância Crônica com o Daniel", "receita": "Contar até dez antes de rebater. Aceitar que discordar também é uma forma de amizade — só não fica óbvio que é."}], "prognostico": "Estável, porém monitorado pelo Ministério da Corneta.", "b": {"Atividade": 37, "Cornetagem": 25, "Caps": 20, "Exclamação": 3}}, {"nome": "Jorge Anjos", "cargo": "Secretário de Relações Exteriores da Copa do Brasil", "bio": "Das mensagens enviadas, a maioria gira em torno de gol, Copa e Brasil. Surta pontualmente às 18h — chega antes do horário, coisa que o time nunca conseguiu fazer numa escalação sequer.", "frase": "Já discutiram por Vasco alguma coisa, Franklin Martins, Jorge Jesus, Ancelotti rsrsrs", "diags": [{"diag": "Vício em Polêmica de Horário Nobre", "receita": "Trocar o grupo por um podcast — lá pelo menos ninguém rebate na hora."}, {"diag": "Hipertensão por Arbitragem", "receita": "Evitar replay em câmera lenta. Não assistir programa esportivo depois de derrota."}, {"diag": "Pontualidade Fora de Contexto", "receita": "Chegar um pouco atrasado, só pra variar. O time também devia experimentar."}], "prognostico": "Contagioso. Recomenda-se manter distância durante derrotas.", "b": {"Atividade": 29, "Cornetagem": 12, "Caps": 5, "Exclamação": 15}}, {"nome": "Vítor RTM", "cargo": "Fiscal Oficial do Lateral", "bio": "Das coisas que mandou normalmente é sobre uma única obsessão do mês: o Rayan. Palavrão frequente, algumas mensagens em caps — a paciência tem limite, e ele encontrou o dele em julho.", "frase": "Tem que quebrar a perna desse anão.", "diags": [{"diag": "Fixação Seletiva em Jogador Específico", "receita": "Assistir ao jogo com o som mudo. Escolher um novo alvo pro próximo mês, dá mais variedade."}, {"diag": "Compulsão por Marcar Amigos", "receita": "Parar de citar o mesmo jogador em toda conversa. Diversificar as perseguições."}], "prognostico": "Quadro estável, mas o Rayan que se cuide.", "b": {"Atividade": 9, "Cornetagem": 5, "Caps": 15, "Exclamação": 0}}, {"nome": "Thiago Azevedo", "cargo": "Coordenador Noturno de Reclamações", "bio": "Surta de madrugada — enquanto a ala inteira dorme, ele ainda tá processando o jogo. Das mensagens enviadas, a maioria sai depois do expediente, direto pro plantão noturno de reclamação.", "frase": "Essa liminar tem que cair logo.", "diags": [{"diag": "Insônia Induzida por Má Gestão Vascaína", "receita": "Desligar o wi-fi às 22h30. Trocar o replay da derrota por um copo de leite morno."}, {"diag": "Fadiga de Grupo", "receita": "Ler antes de responder. Responder antes de esquecer. Esquecer antes de discutir."}], "prognostico": "Sem previsão de alta enquanto existir futebol às 23h.", "b": {"Atividade": 9, "Cornetagem": 4, "Caps": 0, "Exclamação": 1}}, {"nome": "Thiago Velloso", "cargo": "Analista-Chefe da Janela de Transferências", "bio": "\"Pedrinho\" e \"contratações\" dominam o vocabulário — das coisas que mandou normalmente é sobre quem vem e quem sai. O parceiro oficial de qualquer debate sobre mercado da bola.", "frase": "Só que a convocação foi uma merda.", "diags": [{"diag": "Ansiedade Crônica Pré-Janela de Transferências", "receita": "Desativar notificação do ge até agosto. Respirar fundo antes de cada rumor sem fonte."}, {"diag": "Síndrome do Influenciador do Grupo", "receita": "Permitir que outra pessoa mande a notícia primeiro, de vez em quando. Conferir a fonte antes da fama."}], "prognostico": "Alto risco de recaída a cada boato de contratação.", "b": {"Atividade": 7, "Cornetagem": 2, "Caps": 0, "Exclamação": 6}}, {"nome": "Antônio Nerd", "cargo": "Embaixador do Silêncio Estratégico", "bio": "Fala pouco pros padrões da ala, mas quando fala, fala grosso — \"porra\" e \"caralho\" dividem o pódio das palavras favoritas do mês.", "frase": "Porra, tu já pensou?", "diags": [{"diag": "Economia de Palavras, Não de Palavrão", "receita": "Falar mais vezes, xingar as mesmas vezes — ao menos assim dilui a média por mensagem."}, {"diag": "Ausência Crônica com Picos de Fúria", "receita": "Dar um sinal de vida entre as explosões. Uma figurinha já ajuda a aliviar a saudade da ala."}], "prognostico": "Caso raro. Nem a família consegue explicar.", "b": {"Atividade": 6, "Cornetagem": 5, "Caps": 0, "Exclamação": 0}}, {"nome": "Alexsander Rodrigues", "cargo": "Consultor de Assuntos Contratuais", "bio": "Das mensagens enviadas, a maioria é sobre renovação e valor de plano — parece mais preocupado com a própria carteira de sócio do que com o time em campo.", "frase": "Aí renovam mais caro do que tava antes.", "diags": [{"diag": "Trauma Financeiro Recorrente", "receita": "Ler o contrato duas vezes antes de reclamar uma. Guardar print do preço antigo, só pra sofrer com estilo."}, {"diag": "Hiperfoco em Boleto", "receita": "Separar 10 minutos do dia só pra reclamar do plano. O resto do dia fica livre pra torcer."}], "prognostico": "Estável, mas sensível a qualquer reajuste de mensalidade.", "b": {"Atividade": 4, "Cornetagem": 1, "Caps": 4, "Exclamação": 3}}, {"nome": "André", "cargo": "Editor-Chefe de Mensagens Editadas", "bio": "Das coisas que mandou normalmente é no fim do dia, surtando por volta das 21h. Um dos poucos internos que edita a própria mensagem antes de mandar — cuidado que ninguém mais na ala costuma ter.", "frase": "Quer ganhar sozinho??", "diags": [{"diag": "Perfeccionismo Tardio", "receita": "Confiar mais no primeiro instinto. Editar só quando for erro de digitação de verdade."}, {"diag": "Síndrome do \"Eu Avisei\"", "receita": "Máximo de dois \"eu falei\" por rodada. Comemorar em silêncio quando acertar o palpite."}], "prognostico": "Melhora visivelmente após uma boa noite de sono.", "b": {"Atividade": 4, "Cornetagem": 3, "Caps": 0, "Exclamação": 0}}, {"nome": "Wallace Nascimento", "cargo": "Correspondente Internacional (Sem Tempo pro Vasco)", "bio": "Das mensagens enviadas, a maioria nem é sobre o Vasco — foi tomado pela Espanha, Brasil e França no meio do Mundial. Palavrão quase zero, o interno mais educado do corredor.", "frase": "Sou contra venda mesmo, e vou continuar sendo sempre.", "diags": [{"diag": "Distração Internacional Aguda", "receita": "Voltar a acompanhar o campeonato local antes que seja tarde demais. Um jogo do Vasco por semana, no mínimo."}, {"diag": "Educação Excessiva pros Padrões da Ala", "receita": "Nenhuma — caso raro de bom comportamento, mantido em observação apenas por curiosidade científica."}], "prognostico": "Deve voltar ao normal assim que a Copa do Mundo acabar.", "b": {"Atividade": 3, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "Felippo Leodoro", "cargo": "Perito em Substituições Questionáveis", "bio": "Das coisas que mandou normalmente é crítica tática fina — \"não era pra ter tirado o Rayan\" é o tipo de frase que resume o mês inteiro dele.", "frase": "Não era pra ter tirado o Rayan, perdeu o controle de bola na frente.", "diags": [{"diag": "Perito Não-Contratado em Substituições", "receita": "Mandar currículo pro departamento de futebol, já que tem opinião formada. Aceitar que ninguém vai responder o e-mail."}, {"diag": "Abreviador Compulsivo", "receita": "Escrever \"caralho\" por extenso pelo menos uma vez por semana, só pra não perder o costume."}], "prognostico": "Caso estável, sujeito a piora em dia de escalação.", "b": {"Atividade": 3, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "Juan Melo", "cargo": "Juiz Supremo de Quem Entende de Futebol", "bio": "Quase nenhum palavrão — prefere debater com ironia fina. Das mensagens enviadas, boa parte é comparando craque com craque, sempre com o verbo afiado.", "frase": "Silêncio que você não é entendedor de futebol kkkkkkkk", "diags": [{"diag": "Sarcasmo em Nível Competitivo", "receita": "Nenhuma — funcionando bem pra ele. Recomenda-se só paciência de quem recebe as farpas."}, {"diag": "Ego de Comentarista", "receita": "Aceitar que errar previsão não é crime. Não apagar palpite antigo depois que der errado."}], "prognostico": "A medicina ainda estuda o caso. O grupo já desistiu de rebater.", "b": {"Atividade": 3, "Cornetagem": 0, "Caps": 0, "Exclamação": 3}}, {"nome": "Luiz Cerqueira", "cargo": "Ministro do Churrasco Adiado", "bio": "Pouco presente, mas com uma obsessão clara: a cobrança eterna pelo churrasco que a ala inteira promete e nunca marca.", "frase": "Quando vamos fazer um churras nesse caralho?", "diags": [{"diag": "Frustração Social Crônica", "receita": "Marcar a data e cobrar todo santo dia até acontecer de verdade. Comprar a carne antes de perguntar quem topa."}, {"diag": "Carência de Presença", "receita": "Aparecer mais vezes no grupo. O churrasco também depende disso, óbvio."}], "prognostico": "Prognóstico reservado até o churrasco sair do papel.", "b": {"Atividade": 1, "Cornetagem": 1, "Caps": 0, "Exclamação": 9}}, {"nome": "Leonardo", "cargo": "Recém-Chegado que Já Entendeu Tudo", "bio": "Recém-internado, mas já entrou com a senha certa — \"salve, salve, sofredores\" resume o espírito do lugar em uma frase só.", "frase": "Opa! Salve, salve, sofredores.", "diags": [{"diag": "Adaptação Cultural Instantânea", "receita": "Continuar assim — pegou o jeito rápido demais pra ser coincidência."}, {"diag": "Novato Promissor", "receita": "Aumentar gradualmente a participação. A ala recebe bem quem chega com estilo."}], "prognostico": "Tende a virar veterano rapidinho.", "b": {"Atividade": 1, "Cornetagem": 0, "Caps": 0, "Exclamação": 3}}, {"nome": "Pedro Fernandes", "cargo": "Convidado Ocasional de Honra", "bio": "Aparece pouco no plantão, mas direto ao ponto: cobrar taça é o único assunto que realmente importa.", "frase": "Entrega a taça, pô.", "diags": [{"diag": "Presença Rara, Mas Objetiva", "receita": "Aparecer mais — sentimos falta quando some."}, {"diag": "Fixação em Troféu Inexistente", "receita": "Rever a tabela antes de cobrar taça. Ajuda a calibrar a expectativa."}], "prognostico": "Estável, aparece só em ocasiões especiais.", "b": {"Atividade": 1, "Cornetagem": 1, "Caps": 0, "Exclamação": 0}}, {"nome": "João Sousa", "cargo": "Filósofo Reserva do Grupo", "bio": "Poucas visitas na ala esse mês, mas cada uma parece uma pílula de sabedoria vascaína encapsulada.", "frase": "Tudo se resolve se o Vasco ganhar.", "diags": [{"diag": "Otimismo Condicional", "receita": "Continuar torcendo, é tudo que resta mesmo. Trocar a condicional por afirmação de vez em quando."}, {"diag": "Sabedoria em Doses Homeopáticas", "receita": "Falar mais vezes — as pílulas de sabedoria merecem plateia maior."}], "prognostico": "Melhora com mais participação.", "b": {"Atividade": 1, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}, {"nome": "William Cosme", "cargo": "Visitante Ilustre (Modo Fantasma)", "bio": "Passou rapidinho pela ala esse mês, mas deixou o recado: desligou a TV e foi embora. Direto, sem neurose.", "frase": "Jogo ruim da porra. Vou desligar a TV.", "diags": [{"diag": "Sabedoria em Dose Mínima", "receita": "Nenhuma — ele já resolveu sozinho antes de qualquer um perceber o problema."}, {"diag": "Alta Voluntária Precoce", "receita": "Voltar depois que a TV esfriar. A ala aceita reincidência sem julgamento."}], "prognostico": "Retorna quando o próximo jogo for bom o suficiente.", "b": {"Atividade": 0, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}, {"nome": "Fabrício Veras", "cargo": "Lenda Urbana do Grupo", "bio": "Apareceu uma única vez na ala em julho inteiro. Existe? Ninguém sabe ao certo, mas o crachá dele ainda está pendurado no corredor.", "frase": "Fala comigo.", "diags": [{"diag": "Presença Quântica", "receita": "Aparecer de novo antes que vire piada oficial da ala."}, {"diag": "Caso Mais Raro do Prontuário", "receita": "Nenhum tratamento sugerido — o paciente sequer confirmou existir."}], "prognostico": "A medicina não confirma o caso, apenas o registro na ficha.", "b": {"Atividade": 0, "Cornetagem": 0, "Caps": 0, "Exclamação": 0}}];
 const RAIOX_SUMIDOS_JULHO_2026=['Nico','Otair Senna'];
 
+async function renderMotivacional(){
+  const sec=document.getElementById('secMotivacional');
+  sec.innerHTML='<div class="card"><h2>📣 Motivacional — Histórico</h2><p class="nota-rodape" style="margin:0">Quem recebeu qual frase, e quando. Só admin vê esta aba.</p></div><div class="vazio" id="motivHistLoading">Carregando…</div>';
+  try{
+    const snap=await db.collection('frases_uso_historico').orderBy('quando','desc').limit(200).get();
+    if(snap.empty){ document.getElementById('motivHistLoading').textContent='Ninguém pegou uma frase ainda.'; return; }
+    let html='<div class="card">';
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const data=new Date(d.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      html+='<div class="linha-tabela"><span class="rank-nome">'+esc(cap(d.usuario||'?'))+'</span>'+
+        '<span style="flex-basis:100%;font-size:.82rem;color:#3A3A40;margin-top:2px">'+esc(d.frase||'')+'</span>'+
+        '<span class="nota-rodape" style="margin:2px 0 0">'+data+'</span></div>';
+    });
+    html+='</div>';
+    document.getElementById('secMotivacional').innerHTML='<div class="card"><h2>📣 Motivacional — Histórico</h2><p class="nota-rodape" style="margin:0">Quem recebeu qual frase, e quando. Só admin vê esta aba.</p></div>'+html;
+  }catch(e){
+    document.getElementById('motivHistLoading').textContent='Erro ao carregar o histórico.';
+  }
+}
 function renderRaioX(){
   const sec=document.getElementById('secRaioX');
   let html='<div class="card"><h2>🧠 Perfil Psicótico — Julho de 2026</h2>'+
@@ -3457,23 +3485,22 @@ async function fmSortear(){
     const doc=await db.collection('frases_uso').doc(eu).get();
     const dados_=doc.exists?doc.data():{};
     if(dados_.data===chave){
-      el.innerHTML='<div id="fmCard" style="background:#17171B;color:#fff;border-radius:14px;padding:24px 18px;text-align:center">'+
-        '<div style="font-family:\'Anton\',sans-serif;font-size:1.1rem;text-transform:uppercase;color:var(--vermelho);line-height:1.4">SUA MOTIVAÇÃO DO DIA FOI ESGOTADA, SEU OTÁRIO</div></div>'+
-        '<button class="btn fantasma" style="width:100%;margin-top:12px" onclick="fmFechar()">Fechar</button>';
+      el.innerHTML='<div id="fmCard" style="background:#17171B;color:#fff;border-radius:14px;padding:32px 20px;text-align:center">'+
+        '<div style="font-family:\'Anton\',sans-serif;font-size:1.45rem;text-transform:uppercase;color:var(--vermelho);line-height:1.4">SUA MOTIVAÇÃO DO DIA FOI ESGOTADA, SEU OTÁRIO</div></div>';
       return;
     }
     const frase=FRASES_MOTIVACIONAIS[Math.floor(Math.random()*FRASES_MOTIVACIONAIS.length)];
     await db.collection('frases_uso').doc(eu).set({data:chave,frase});
-    el.innerHTML='<div id="fmCard" style="background:#17171B;color:#fff;border-radius:14px;padding:24px 18px;text-align:center">'+
+    try{ await db.collection('frases_uso_historico').add({usuario:eu,frase,quando:Date.now()}); }catch(e){}
+    el.innerHTML='<div id="fmCard" style="background:#17171B;color:#fff;border-radius:14px;padding:28px 20px;text-align:center">'+
       '<div class="eyebrow" style="color:var(--vermelho);text-align:center">Frase Vasbobo Motivacional</div>'+
-      '<div style="font-family:\'Anton\',sans-serif;font-size:1.05rem;text-transform:uppercase;line-height:1.5;margin-top:8px">'+esc(frase)+'</div></div>'+
+      '<div style="font-family:\'Anton\',sans-serif;font-size:1.35rem;text-transform:uppercase;line-height:1.5;margin-top:10px">'+esc(frase)+'</div></div>'+
       '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">'+
-      '<button class="btn fantasma" style="flex:1" onclick="fmCompartilhar()">📲 Compartilhar</button>'+
-      '<button class="btn fantasma" style="flex:1" onclick="fmCopiar()">📋 Copiar imagem</button>'+
-      '<button class="btn fantasma" style="flex:1" onclick="fmFechar()">Fechar</button></div>';
+      '<button class="btn fantasma" style="flex:1" onclick="fmPrintTela()">📸 Print a toda Tela</button>'+
+      '<button class="btn" style="flex:1;background:#25D366" onclick="fmCompartilharWhats(\''+esc(frase).replace(/'/g,"\\'")+'\')">💬 Compartilhe a mensagem</button></div>';
   }catch(e){ el.innerHTML='<p class="nota-rodape">Erro ao carregar. Tenta de novo.</p>'; }
 }
-async function fmCompartilhar(){
+async function fmPrintTela(){
   const el=document.getElementById('fmCard');
   if(!el||typeof html2canvas==='undefined')return;
   const canvas=await html2canvas(el,{backgroundColor:'#17171B',scale:2});
@@ -3483,14 +3510,8 @@ async function fmCompartilhar(){
     else{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='frase-vasbobo.png'; a.click(); }
   },'image/png');
 }
-async function fmCopiar(){
-  const el=document.getElementById('fmCard');
-  if(!el||typeof html2canvas==='undefined')return;
-  const canvas=await html2canvas(el,{backgroundColor:'#17171B',scale:2});
-  canvas.toBlob(async blob=>{
-    try{ await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]); avisar('Imagem copiada!',true); }
-    catch(e){ avisar('Não consegui copiar nesse navegador.'); }
-  },'image/png');
+function fmCompartilharWhats(frase){
+  window.open('https://wa.me/?text='+encodeURIComponent(frase+' — via Vasbobo'),'_blank');
 }
 
 /* =================== FRASE DE RESULTADO (ao salvar palpite) =================== */
@@ -3730,7 +3751,7 @@ function iniciarMidiaJanela(){
     eu=sessao;
     entrarNoApp();
     const h=location.hash.replace('#','');
-    const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico'];
+    const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico','motivacional'];
     if(validas.includes(h)){
       mudarAba(h);
     }else{
