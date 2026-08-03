@@ -818,6 +818,7 @@ function prazoAvaliarVenceu(j){
 }
 function penalidadeNaoAvaliou(j,usuario){
   if(!j.resultado||!j.palpites[usuario])return 0; // só quem palpitou pode ser penalizado
+  if(j.isentoPenalidade)return 0; // jogo antigo, de antes dessa regra existir — não penaliza retroativamente
   if(avaliou(j,usuario))return 0;
   return prazoAvaliarVenceu(j)?PTS_NAO_AVALIOU:0;
 }
@@ -1591,6 +1592,17 @@ function migrar(){
     if(!j.avaliacoes)j.avaliacoes={};
     if(!j.goleadores)j.goleadores=[];
   });
+  /* jogos antigos tinham resultado mas nunca ganharam resultadoEm (campo criado depois) —
+     sem isso, pontuacaoLiberada() nunca libera o jogo pro histórico de Coroa do Rei/Ribamar
+     se nem todo mundo avaliou os jogadores. Preenchemos com uma data bem no passado pra
+     destravar o histórico sem mexer no resultado real do jogo. */
+  if((dados.patchResultadoEm||0)<1){
+    Object.values(dados.jogos).forEach(j=>{
+      if(j.resultado&&!j.resultadoEm){j.resultadoEm=Date.parse(j.data||'')||(Date.now()-30*24*3600000);j.isentoPenalidade=true;}
+    });
+    dados.patchResultadoEm=1;
+    mudou=true;
+  }
   if(!dados.config.castigoAtivoDesde){dados.config.castigoAtivoDesde=new Date().toISOString().slice(0,10);mudou=true;}
   /* patch do elenco: aplica 1x em dados já existentes, preservando todo o histórico */
   if((dados.patchElenco||0)<PATCH_ELENCO_V){
@@ -3211,10 +3223,14 @@ function renderRank(){
       if(x.bonus)partes.push('+'+x.bonus+' bônus');
       if(x.naoAvaliou)partes.push(x.naoAvaliou+'x não avaliou (-'+(x.naoAvaliou*2)+')');
       const resumo=partes.length?partes.join(' · '):'ainda sem pontos';
-      return '<div class="rank-linha '+(i===0&&x.pts>0?'lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span>'+
-      '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+
-      '<div class="rank-detalhe">'+x.palpites+' palpites · '+resumo+(x.reis?' · Reizinho '+iconRei(20)+'×'+x.reis:'')+(x.ribas?' · Ribamar '+iconRiba(20)+'×'+x.ribas:'')+'</div></span>'+
-      '<span class="rank-pts">'+x.pts+' pts</span></div>';
+      const idSeguro=('rk_'+u).replace(/[^a-zA-Z0-9_]/g,'');
+      return '<div class="rank-linha '+(i===0&&x.pts>0?'lider':'')+'" style="cursor:pointer" onclick="document.getElementById(\''+idSeguro+'\').classList.toggle(\'oculto\')"><span class="rank-pos">'+(i+1)+'º</span>'+
+      '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+' <small style="color:var(--cinza)">▾ toque pra ver</small></span>'+
+      '<span class="rank-pts">'+x.pts+' pts</span>'+
+      '<div id="'+idSeguro+'" class="oculto" style="grid-column:1/-1;margin-top:6px;padding-top:8px;border-top:1px solid var(--linha)">'+
+      '<div class="rank-detalhe">'+x.palpites+' palpites · '+resumo+'</div>'+
+      '<div style="display:flex;gap:14px;margin-top:6px;font-size:.85rem"><span>'+iconRei(20)+' Coroa do Rei: <b>'+(x.reis||0)+'</b></span><span>'+iconRiba(20)+' Hall do Ribamar: <b>'+(x.ribas||0)+'</b></span></div>'+
+      '</div></div>';
     }).join('')+'</div>';
   }
   html+='</div>';
