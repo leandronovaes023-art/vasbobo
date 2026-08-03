@@ -960,7 +960,7 @@ async function fmSortear(){
     }
     const frase=FRASES_MOTIVACIONAIS[Math.floor(Math.random()*FRASES_MOTIVACIONAIS.length)];
     await db.collection('frases_uso').doc(eu).set({data:chave,frase});
-    try{ await db.collection('frases_uso_historico').add({usuario:eu,frase,quando:Date.now()}); }catch(e){}
+    try{ const ref=await db.collection('frases_uso_historico').add({usuario:eu,frase,quando:Date.now()}); ultimoHistoricoMotivId=ref.id; }catch(e){ ultimoHistoricoMotivId=null; }
     el.innerHTML='<div id="fmCard" style="background:#17171B;color:#fff;border-radius:14px;padding:28px 20px;text-align:center">'+
       '<div class="eyebrow" style="color:var(--vermelho);text-align:center">Frase Vasbobo Motivacional</div>'+
       '<div style="font-family:\'Anton\',sans-serif;font-size:1.35rem;text-transform:uppercase;line-height:1.5;margin-top:10px">'+esc(frase)+'</div></div>'+
@@ -969,14 +969,44 @@ async function fmSortear(){
       '<button class="btn" style="flex:1;background:#25D366" onclick="fmCompartilharWhats(\''+esc(frase).replace(/'/g,"\\'")+'\')">💬 Compartilhe a mensagem</button></div>';
   }catch(e){ el.innerHTML='<p class="nota-rodape">Erro ao carregar. Tenta de novo.</p>'; }
 }
+let ultimoHistoricoMotivId=null;
+async function capturarTelaCompleta(nomeArquivo){
+  if(typeof html2canvas==='undefined'){avisar('Print não disponível nesse navegador.');return null;}
+  // backdrop-filter derruba o html2canvas em alguns navegadores: removemos temporariamente
+  const comBlur=[...document.querySelectorAll('*')].filter(el=>{
+    const cs=getComputedStyle(el);
+    return cs.backdropFilter&&cs.backdropFilter!=='none';
+  });
+  const originais=comBlur.map(el=>el.style.backdropFilter);
+  comBlur.forEach(el=>el.style.backdropFilter='none');
+  try{
+    // captura só o que está visível na tela (viewport), não a página inteira rolada —
+    // isso evita a imagem esticada/zoom estranho e mantém boa resolução
+    const canvas=await html2canvas(document.body,{backgroundColor:'#17171B',scale:Math.max(2,window.devicePixelRatio||2),useCORS:true,logging:false,
+      x:window.scrollX,y:window.scrollY,width:window.innerWidth,height:window.innerHeight,
+      windowWidth:window.innerWidth,windowHeight:window.innerHeight});
+    return canvas;
+  }catch(e){
+    console.error('erro no print da tela',e);
+    avisar('Não consegui tirar o print agora. Tenta de novo.');
+    return null;
+  }finally{
+    comBlur.forEach((el,i)=>el.style.backdropFilter=originais[i]);
+  }
+}
 async function fmPrintTela(){
-  const el=document.getElementById('fmCard');
-  if(!el||typeof html2canvas==='undefined')return;
-  const canvas=await html2canvas(el,{backgroundColor:'#17171B',scale:2});
+  const canvas=await capturarTelaCompleta();
+  if(!canvas)return;
+  if(ultimoHistoricoMotivId){
+    try{
+      const dataUrl=canvas.toDataURL('image/jpeg',.72);
+      await db.collection('frases_uso_historico').doc(ultimoHistoricoMotivId).update({print:dataUrl});
+    }catch(e){ console.error('erro ao salvar print no historico',e); }
+  }
   canvas.toBlob(async blob=>{
-    const file=new File([blob],'frase-vasbobo.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){ try{await navigator.share({files:[file],title:'Frase Vasbobo'});}catch(e){} }
-    else{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='frase-vasbobo.png'; a.click(); }
+    const file=new File([blob],'vasbobo-motivacional.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){ try{await navigator.share({files:[file],title:'Vasbobo'});}catch(e){} }
+    else{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='vasbobo-motivacional.png'; a.click(); }
   },'image/png');
 }
 function fmCompartilharWhats(frase){

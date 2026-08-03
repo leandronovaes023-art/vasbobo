@@ -536,8 +536,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
         <tr><td>📈</td><td>Aproximação do placar — diferença de 2 gols</td><td><b>+2 pts</b></td></tr>
         <tr><td>📈</td><td>Aproximação do placar — diferença de 3 gols</td><td><b>+1 pt</b></td></tr>
         <tr><td>❌</td><td>Errou tudo</td><td><b>0 pts</b></td></tr>
-        <tr><td>🚫</td><td>Não avaliou os jogadores em até 40h após o resultado</td><td><b>-2 pts</b></td></tr>
-        <tr><td>🎡</td><td>Perdeu a rodada e não girou a roleta (ou girou e não pagou o castigo) em até 40h</td><td><b>-2 pts</b></td></tr>
+        <tr><td>🚫</td><td>Não avaliou os jogadores em até 36h após o resultado</td><td><b>-2 pts</b></td></tr>
+        <tr><td>🎡</td><td>Perdeu a rodada e não girou a roleta (ou girou e não pagou o castigo) em até 36h</td><td><b>-2 pts</b></td></tr>
       </table>
 
       <h4>🎯 Placar exato — 15 pts</h4>
@@ -702,6 +702,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       <button onclick="frFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px;z-index:2">✕</button>
       <div id="frCard" style="background:#17171B;color:#fff;border-radius:14px;padding:32px 20px;text-align:center">
         <div id="frTexto" style="font-family:'Anton',sans-serif;font-size:1.35rem;text-transform:uppercase;line-height:1.5"></div>
+        <p style="color:var(--verde);font-size:.8rem;margin-top:14px">✓ Palpite salvo com sucesso</p>
       </div>
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
         <button class="btn fantasma" style="flex:1" onclick="frPrintTela()">📸 Print a toda Tela</button>
@@ -822,7 +823,7 @@ function penalidadeCastigo(id,j,usuario){
   if(c.pago===false)return PTS_CASTIGO; // admin confirmou que não pagou
   return 0; // girou e pagou (ou ainda não foi revisado pelo admin)
 }
-const PRAZO_AVALIAR_MS=40*3600000; // 40h após o resultado sair pra avaliar, senão perde PTS_NAO_AVALIOU
+const PRAZO_AVALIAR_MS=36*3600000; // 36h após o resultado sair pra avaliar, senão perde PTS_NAO_AVALIOU
 function avaliou(j,usuario){
   return !!(j.avaliacoes&&j.avaliacoes[usuario]&&Object.keys(j.avaliacoes[usuario]).length);
 }
@@ -1023,8 +1024,8 @@ function tooltipPontuacao(){
     [PTS_UMTIME_ERROU,'🤏 errou o resultado, mas cravou o placar de um time'],
     ['+0 a +3','📈 aproximação do placar (quanto mais perto do resultado real)'],
     [0,'❌ errou tudo'],
-    [PTS_NAO_AVALIOU,'🚫 não avaliou os jogadores em 40h'],
-    [PTS_CASTIGO,'🎡 perdeu a rodada e não girou (ou não pagou) o castigo em 40h'],
+    [PTS_NAO_AVALIOU,'🚫 não avaliou os jogadores em 36h'],
+    [PTS_CASTIGO,'🎡 perdeu a rodada e não girou (ou não pagou) o castigo em 36h'],
   ];
   const linhasHtml=linhas.map(([p,t])=>'<tr><td>'+p+' pts</td><td>'+t+'</td></tr>').join('');
   return '<span class="info-pontuacao"><a onclick="event.stopPropagation();togglePont(this)">🏆 Tabela da Pontuação · Toque para expandir</a>'+
@@ -1502,7 +1503,7 @@ async function excluirCastigoAdmin(chave){
 function renderCastigos(){
   const sec=document.getElementById('secCastigos');
   dados.castigos=dados.castigos||{};
-  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira a roleta. Quem não girar ou não pagar o castigo em até 40h perde 2 pontos no ranking.</p></div>';
+  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira a roleta. Quem não girar ou não pagar o castigo em até 36h perde 2 pontos no ranking.</p></div>';
   const jogosComPerdedor=jogosComPremiacaoRecentes().filter(([id,j,prem])=>prem.ribas.length).reverse();
   if(!jogosComPerdedor.length){
     html+='<div class="vazio">Ninguém pagou castigo ainda. Vai que essa rodada é a sua vez de escapar. 😏</div>';
@@ -1520,13 +1521,13 @@ function renderCastigos(){
       html+='<div class="linha-tabela" style="align-items:flex-start"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,32)+'<b class="rank-nome">'+esc(cap(u))+'</b></span>'+
         '<span style="flex-basis:100%;margin-top:6px">';
       if(!girou){
-        html+='<span style="color:var(--vermelho);font-weight:700">🎡 Ainda não girou a roleta'+(prazoOk?' (dentro do prazo de 40h)':' — prazo estourado, -2 pts aplicado')+'</span>';
+        html+='<span style="color:var(--vermelho);font-weight:700">🎡 Ainda não girou a roleta'+(prazoOk?' (dentro do prazo de 36h)':' — prazo estourado, -2 pts aplicado')+'</span>';
       }else{
         html+='<span style="display:flex;align-items:center;gap:8px">'+fotoAlvoCastigo(c.texto,28)+'<span>🎯 '+esc(c.texto)+'</span></span>'+
           '<div style="margin-top:6px">'+
           (pago?'<span style="color:var(--verde);font-weight:700">✅ Pagou o castigo</span>':
            naoPago?'<span style="color:var(--vermelho);font-weight:700">❌ Não pagou — -2 pts aplicado</span>':
-           '<span style="color:var(--cinza)">⏳ Aguardando confirmação'+(prazoOk?' (ainda dentro das 40h)':' — prazo estourado')+'</span>')+
+           '<span style="color:var(--cinza)">⏳ Aguardando confirmação'+(prazoOk?' (ainda dentro das 36h)':' — prazo estourado')+'</span>')+
           '</div>';
         if(souAdmin()&&!pago&&!naoPago){
           html+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn fantasma" style="padding:6px 14px;font-size:.76rem" onclick="confirmarPagamentoCastigo(\''+chave+'\',true)">✅ Pagou</button>'+
@@ -2343,7 +2344,7 @@ function htmlRodadaBox(){
     if(rj.resultado&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
       html+='<button class="jogo-item" style="background:rgba(192,18,27,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
         '<span><span class="jogo-nome" style="color:var(--vermelho);text-transform:uppercase;white-space:nowrap;font-size:.92rem">VOCÊ AINDA NÃO AVALIOU A SELEVASCO</span>'+
-        '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada.</div></span></button>';
+        '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada. <b style="color:var(--vermelho)">Penalidade -2 pontos</b></div></span></button>';
     }
     if(rj.resultado&&!pontuacaoLiberada(rj)){
       html+='<p class="nota-rodape" style="margin:0 0 8px"><b>⏳ Aguardo todos avaliarem para liberar o ranking da rodada.</b></p>';
@@ -2545,7 +2546,8 @@ function renderPalpiteCard(j,s){
       '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false)+'</div>'+
       '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+selectJogadores('ppGol',meu?meu.gol:'',true)+'</div></div>'+
       '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()">✠ '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
-      '<p class="nota-rodape" style="margin-bottom:6px">Palpites fecham '+FECHA_PALPITE_MIN+' minutos antes da bola rolar.</p>'+
+      (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
+      '<p class="nota-rodape" style="margin-bottom:6px">Palpites fecham '+FECHA_PALPITE_MIN+' minutos antes da bola rolar. Placar, MVP e gol são obrigatórios pra salvar.</p>'+
       tooltipPontuacao();
   }else if(meu){
     html+='<p style="font-size:.92rem">Seu palpite: <b class="display">Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>';
@@ -2583,15 +2585,25 @@ function togglePalpitesTodos(){ mostrarTodosPalpites=!mostrarTodosPalpites; rend
 
 async function enviarPalpite(){
   const v=document.getElementById('ppV').value,a=document.getElementById('ppA').value;
-  if(v===''||a===''){avisar('Preencha o placar completo.');return;}
-  const mvp=document.getElementById('ppMvp').value||null;
-  const gol=document.getElementById('ppGol').value||null;
+  const mvp=document.getElementById('ppMvp').value||'';
+  const gol=document.getElementById('ppGol').value||'';
+  const faltando=[];
+  if(v===''||a==='')faltando.push('placar');
+  if(!mvp)faltando.push('MVP');
+  if(!gol)faltando.push('quem faz gol');
+  if(faltando.length){avisar('Falta preencher: '+faltando.join(', ')+'. Preenche tudo antes de salvar.');return;}
   const id=jogoAberto;
+  const j0=dados.jogos[id];
+  const meu0=j0&&j0.palpites[eu];
+  const edicoesAtuais=(meu0&&meu0.edicoes)||0;
+  if(meu0&&edicoesAtuais>=3){avisar('Você já alterou esse palpite 3 vezes — esse é o limite pra esse jogo.');return;}
   let travou=false;
   const ok=await mutar(()=>{
     const j=dados.jogos[id];
-    if(j&&podePalpitar(j))j.palpites[eu]={v:+v,a:+a,mvp,gol,ts:Date.now()};
-    else travou=true;
+    if(j&&podePalpitar(j)){
+      const antes=j.palpites[eu];
+      j.palpites[eu]={v:+v,a:+a,mvp,gol,ts:Date.now(),edicoes:antes?(antes.edicoes||0)+1:0};
+    }else travou=true;
   });
   if(travou){avisar('Os palpites deste jogo já fecharam.');render();return;}
   if(ok){avisar('Palpite salvo! Boa sorte. 🍀',true);mostrarFraseResultado(+v,+a);}
@@ -3578,8 +3590,11 @@ async function capturarTelaCompleta(nomeArquivo){
   const originais=comBlur.map(el=>el.style.backdropFilter);
   comBlur.forEach(el=>el.style.backdropFilter='none');
   try{
-    const canvas=await html2canvas(document.body,{backgroundColor:'#17171B',scale:1.3,useCORS:true,logging:false,
-      windowWidth:document.documentElement.scrollWidth,windowHeight:document.documentElement.scrollHeight});
+    // captura só o que está visível na tela (viewport), não a página inteira rolada —
+    // isso evita a imagem esticada/zoom estranho e mantém boa resolução
+    const canvas=await html2canvas(document.body,{backgroundColor:'#17171B',scale:Math.max(2,window.devicePixelRatio||2),useCORS:true,logging:false,
+      x:window.scrollX,y:window.scrollY,width:window.innerWidth,height:window.innerHeight,
+      windowWidth:window.innerWidth,windowHeight:window.innerHeight});
     return canvas;
   }catch(e){
     console.error('erro no print da tela',e);
