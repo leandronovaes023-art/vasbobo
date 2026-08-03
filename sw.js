@@ -28,7 +28,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(titulo, {
     body: corpo,
     icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    badge: '/icons/icon-notif-96.png',
     data: { url: dados.url || '/' }
   });
 });
