@@ -2144,9 +2144,24 @@ async function confirmarNovaSenha(){
 // (Configurações do projeto → Cloud Messaging → gerar par de chaves).
 // Sem essa chave real, o botão pede permissão mas não consegue gerar o token.
 const VAPID_KEY_PUSH = 'BLODFSvTc8Pkl9nppIBEDQOFQSs46mNAuc94TOSdJyYl8oF2gcFJbniHzoQN6NgX7BAPjVr8wUaGHRyLXKmmdDQ';
-function pedirPermissaoNotificacao(){
+async function pedirPermissaoNotificacao(){
   if(!('Notification' in window)){avisar('Seu navegador não suporta notificações.');return;}
-  if(Notification.permission==='granted'){avisar('Notificações já estão ativadas ✓',true);return;}
+  if(Notification.permission==='granted'){
+    // permissão do navegador já foi dada antes, mas isso não garante que o token
+    // chegou a ser salvo no Firebase — confere de verdade antes de dizer que está tudo certo
+    avisar('Verificando seu cadastro de notificações…',true,2000);
+    try{
+      const doc=await db.collection('push_tokens').doc(eu).get();
+      if(doc.exists&&doc.data().token){
+        avisar('Notificações já estão ativadas ✓',true);
+        atualizarBotaoNotificacao();
+        return;
+      }
+    }catch(e){ console.error('erro ao checar token existente',e); }
+    // não tem token salvo — tenta registrar de novo, sem precisar pedir permissão de novo
+    await ativarNotificacoes(true);
+    return;
+  }
   const aviso=document.getElementById('avisoIosNotif');
   if(aviso)aviso.style.display=(ehIOS()&&!ehStandalone())?'block':'none';
   document.getElementById('modalNotif').classList.remove('oculto');
@@ -2158,28 +2173,30 @@ function ehIOS(){
 function ehStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
 }
-async function ativarNotificacoes(){
-  fecharModalNotif();
+async function ativarNotificacoes(pulaPedidoDePermissao){
+  if(!pulaPedidoDePermissao)fecharModalNotif();
   if(ehIOS()&&!ehStandalone()){
     avisar('No iPhone, notificação só funciona depois de instalar o app na tela inicial (não dá em aba do Safari). Clica em "📲 App VASBOBO" primeiro, instala, abre o app instalado, e aí ativa o sino de lá.');
     return;
   }
   try{
-    const permissao=await Notification.requestPermission();
+    let permissao=Notification.permission;
+    if(!pulaPedidoDePermissao)permissao=await Notification.requestPermission();
     if(permissao!=='granted'){avisar('Sem problema — se mudar de ideia, é só clicar no sino de novo.');return;}
-    if(!firebase.messaging||!firebase.messaging.isSupported||firebase.messaging.isSupported()){
-      const messaging=firebase.messaging();
-      const token=await messaging.getToken({vapidKey:VAPID_KEY_PUSH});
-      if(token&&eu){
-        await db.collection('push_tokens').doc(eu).set({token,atualizadoEm:Date.now(),usuario:eu},{merge:true});
-        avisar('Notificações ativadas! 🔔',true);
-        atualizarBotaoNotificacao();
-        fetch('/.netlify/functions/enviar-boas-vindas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:eu})}).catch(()=>{});
-      }
-    }
+    if(typeof firebase.messaging!=='function'){avisar('Esse navegador não conseguiu carregar o sistema de notificações. Tenta atualizar o app/navegador.');return;}
+    if(firebase.messaging.isSupported&&!firebase.messaging.isSupported()){avisar('Esse navegador não suporta notificações push.');return;}
+    const messaging=firebase.messaging();
+    const swReg=await navigator.serviceWorker.ready.catch(()=>null);
+    const token=await messaging.getToken(swReg?{vapidKey:VAPID_KEY_PUSH,serviceWorkerRegistration:swReg}:{vapidKey:VAPID_KEY_PUSH});
+    if(!token){avisar('Não consegui gerar o registro de notificação agora. Tenta de novo em alguns segundos.');return;}
+    if(!eu){avisar('Faça login antes de ativar notificações.');return;}
+    await db.collection('push_tokens').doc(eu).set({token,atualizadoEm:Date.now(),usuario:eu},{merge:true});
+    avisar('Notificações ativadas! 🔔',true);
+    atualizarBotaoNotificacao();
+    fetch('/.netlify/functions/enviar-boas-vindas',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario:eu})}).catch(()=>{});
   }catch(e){
     console.error('erro ao ativar notificações',e);
-    avisar('Não consegui ativar agora. Verifica se o navegador permite notificações pra esse site.');
+    avisar('Erro ao ativar: '+(e&&e.message?e.message:'desconhecido')+'. Se persistir, me avisa com essa mensagem.');
   }
 }
 function atualizarBotaoNotificacao(){
