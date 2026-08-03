@@ -2142,7 +2142,7 @@ async function confirmarNovaSenha(){
 // IMPORTANTE: troque essa chave pela VAPID key gerada no Firebase Console
 // (Configurações do projeto → Cloud Messaging → gerar par de chaves).
 // Sem essa chave real, o botão pede permissão mas não consegue gerar o token.
-const VAPID_KEY_PUSH = 'COLE_AQUI_A_VAPID_KEY_DO_FIREBASE';
+const VAPID_KEY_PUSH = 'BLODFSvTc8Pkl9nppIBEDQOFQSs46mNAuc94TOSdJyYl8oF2gcFJbniHzoQN6NgX7BAPjVr8wUaGHRyLXKmmdDQ';
 function pedirPermissaoNotificacao(){
   if(!('Notification' in window)){avisar('Seu navegador não suporta notificações.');return;}
   if(Notification.permission==='granted'){avisar('Notificações já estão ativadas ✓',true);return;}
