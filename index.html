@@ -279,9 +279,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .aval-controles-v{display:flex;flex-direction:column;gap:10px;margin-top:10px}
   .btn-mic{background:#1E8A4C;color:#fff;border:1.5px solid #1E8A4C;border-radius:20px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;align-self:flex-start}
   .btn-ok-comentario{background:#fff;color:#17171B;border:1.5px solid #17171B;border-radius:8px;padding:0 14px;height:36px;font-weight:800;font-size:.76rem;cursor:pointer;flex:none}
-  .notas-botoes{display:flex;flex-wrap:nowrap;gap:4px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+  .notas-botoes{display:flex;flex-wrap:nowrap;gap:4px;margin-top:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
+  .notas-botoes::-webkit-scrollbar{display:none}
   .btn-nota{width:28px;height:28px;min-width:28px;border-radius:7px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;font-size:.78rem;flex:none}
-  .btn-nota.btn-na{width:auto;padding:0 8px;color:var(--cinza);border-style:dashed;margin-left:4px}
+  .btn-nota.btn-na{width:auto;padding:0 8px}
   .btn-nota:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
   .nota-escolhida{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:.92rem}
   .btn-mic.gravando{background:var(--vermelho);color:#fff;border-color:var(--vermelho);animation:micPulso 1s ease-in-out infinite}
@@ -535,8 +536,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
         <tr><td>📈</td><td>Aproximação do placar — diferença de 2 gols</td><td><b>+2 pts</b></td></tr>
         <tr><td>📈</td><td>Aproximação do placar — diferença de 3 gols</td><td><b>+1 pt</b></td></tr>
         <tr><td>❌</td><td>Errou tudo</td><td><b>0 pts</b></td></tr>
-        <tr><td>🚫</td><td>Não avaliou os jogadores em até 24h após o resultado</td><td><b>-2 pts</b></td></tr>
-        <tr><td>🎡</td><td>Perdeu a rodada e não girou a roleta (ou girou e não pagou o castigo) em até 24h</td><td><b>-2 pts</b></td></tr>
+        <tr><td>🚫</td><td>Não avaliou os jogadores em até 40h após o resultado</td><td><b>-2 pts</b></td></tr>
+        <tr><td>🎡</td><td>Perdeu a rodada e não girou a roleta (ou girou e não pagou o castigo) em até 40h</td><td><b>-2 pts</b></td></tr>
       </table>
 
       <h4>🎯 Placar exato — 15 pts</h4>
@@ -821,7 +822,7 @@ function penalidadeCastigo(id,j,usuario){
   if(c.pago===false)return PTS_CASTIGO; // admin confirmou que não pagou
   return 0; // girou e pagou (ou ainda não foi revisado pelo admin)
 }
-const PRAZO_AVALIAR_MS=24*3600000; // 24h após o resultado sair pra avaliar, senão perde PTS_NAO_AVALIOU
+const PRAZO_AVALIAR_MS=40*3600000; // 40h após o resultado sair pra avaliar, senão perde PTS_NAO_AVALIOU
 function avaliou(j,usuario){
   return !!(j.avaliacoes&&j.avaliacoes[usuario]&&Object.keys(j.avaliacoes[usuario]).length);
 }
@@ -1022,8 +1023,8 @@ function tooltipPontuacao(){
     [PTS_UMTIME_ERROU,'🤏 errou o resultado, mas cravou o placar de um time'],
     ['+0 a +3','📈 aproximação do placar (quanto mais perto do resultado real)'],
     [0,'❌ errou tudo'],
-    [PTS_NAO_AVALIOU,'🚫 não avaliou os jogadores em 24h'],
-    [PTS_CASTIGO,'🎡 perdeu a rodada e não girou (ou não pagou) o castigo em 24h'],
+    [PTS_NAO_AVALIOU,'🚫 não avaliou os jogadores em 40h'],
+    [PTS_CASTIGO,'🎡 perdeu a rodada e não girou (ou não pagou) o castigo em 40h'],
   ];
   const linhasHtml=linhas.map(([p,t])=>'<tr><td>'+p+' pts</td><td>'+t+'</td></tr>').join('');
   return '<span class="info-pontuacao"><a onclick="event.stopPropagation();togglePont(this)">🏆 Tabela da Pontuação · Toque para expandir</a>'+
@@ -1501,7 +1502,7 @@ async function excluirCastigoAdmin(chave){
 function renderCastigos(){
   const sec=document.getElementById('secCastigos');
   dados.castigos=dados.castigos||{};
-  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira a roleta. Quem não girar ou não pagar o castigo em até 24h perde 2 pontos no ranking.</p></div>';
+  let html='<div class="card"><h2><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</h2><p class="nota-rodape" style="margin:0">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira a roleta. Quem não girar ou não pagar o castigo em até 40h perde 2 pontos no ranking.</p></div>';
   const jogosComPerdedor=jogosComPremiacaoRecentes().filter(([id,j,prem])=>prem.ribas.length).reverse();
   if(!jogosComPerdedor.length){
     html+='<div class="vazio">Ninguém pagou castigo ainda. Vai que essa rodada é a sua vez de escapar. 😏</div>';
@@ -1519,13 +1520,13 @@ function renderCastigos(){
       html+='<div class="linha-tabela" style="align-items:flex-start"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,32)+'<b class="rank-nome">'+esc(cap(u))+'</b></span>'+
         '<span style="flex-basis:100%;margin-top:6px">';
       if(!girou){
-        html+='<span style="color:var(--vermelho);font-weight:700">🎡 Ainda não girou a roleta'+(prazoOk?' (dentro do prazo de 24h)':' — prazo estourado, -2 pts aplicado')+'</span>';
+        html+='<span style="color:var(--vermelho);font-weight:700">🎡 Ainda não girou a roleta'+(prazoOk?' (dentro do prazo de 40h)':' — prazo estourado, -2 pts aplicado')+'</span>';
       }else{
         html+='<span style="display:flex;align-items:center;gap:8px">'+fotoAlvoCastigo(c.texto,28)+'<span>🎯 '+esc(c.texto)+'</span></span>'+
           '<div style="margin-top:6px">'+
           (pago?'<span style="color:var(--verde);font-weight:700">✅ Pagou o castigo</span>':
            naoPago?'<span style="color:var(--vermelho);font-weight:700">❌ Não pagou — -2 pts aplicado</span>':
-           '<span style="color:var(--cinza)">⏳ Aguardando confirmação'+(prazoOk?' (ainda dentro das 24h)':' — prazo estourado')+'</span>')+
+           '<span style="color:var(--cinza)">⏳ Aguardando confirmação'+(prazoOk?' (ainda dentro das 40h)':' — prazo estourado')+'</span>')+
           '</div>';
         if(souAdmin()&&!pago&&!naoPago){
           html+='<div style="display:flex;gap:8px;margin-top:8px"><button class="btn fantasma" style="padding:6px 14px;font-size:.76rem" onclick="confirmarPagamentoCastigo(\''+chave+'\',true)">✅ Pagou</button>'+
@@ -2325,9 +2326,9 @@ function htmlRodadaBox(){
   let usarRodada=false,rid=null,rj=null;
   if(rod){
     [rid,rj]=rod;
-    const ini=rj.hora?inicioJogo(rj).getTime():null;
-    const ref=ini||(rj.fonteAuto?rj.fonteAuto.quando:null);
-    usarRodada=statusJogo(rj)==='andamento'||(ref&&agora-ref<=48*3600000);
+    if(statusJogo(rj)==='andamento')usarRodada=true;
+    else if(rj.resultadoEm)usarRodada=(Date.now()-rj.resultadoEm)<PRAZO_AVALIAR_MS;
+    else usarRodada=true; // resultado ainda sem timestamp formal — mantém a rodada visível
   }
   /* --- jogo rolando ou recém-terminado: ranking em tempo real --- */
   if(usarRodada){
