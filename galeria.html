@@ -203,7 +203,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
 .fq-edge-esq{right:auto;left:0;top:auto;bottom:150px;transform:none;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
-.fq-edge-esq .fq-edge-corpo{font-size:1.4rem!important;padding:2px 0 2px 2px!important;max-width:80px!important}
+.fq-edge-esq .fq-edge-corpo{font-size:1.4rem!important;padding:1px 0 1px 1px!important;max-width:76px!important}
 .fq-edge-seta-esq{transform:scaleX(1)}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
 .fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(-1)}
@@ -213,7 +213,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
 .fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
-.fq-edge.recolhida .fq-edge-seta{transform:scaleX(1)}
+.fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
 </style>
 <script>
 function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
@@ -235,17 +235,17 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
         <div class="who">
           <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
           <span class="adm oculto" id="whoAdm">admin</span>
-          <button onclick="sairSatelite()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+          <button onclick="sairSatelite()" style="background:none;border:none;color:var(--cinza);padding:4px 6px;cursor:pointer;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
         </div>
         <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">📲 App VASBOBO</button>
       </div>
     </div>
   </header>
   <div class="fq-edge oculto" id="fqFixo" title="O Que Mais Entende de Futebol">
+    <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
     <div class="fq-edge-corpo" onclick="location.href='/futebol.html'">
       <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
     </div>
-    <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
   </div>
   <div class="fq-edge fq-edge-esq oculto" id="fmFixo" title="O Vasbobo tem uma Mensagem motivacional!">
     <div class="fq-edge-corpo" onclick="fmAbrir()"><img src="img/embed/motivacional-capa.jpg" alt="" style="width:74px;height:74px;border-radius:9px;object-fit:contain;background:#17171B;display:block"></div>
@@ -680,7 +680,7 @@ window.addEventListener('scroll',()=>{
 </script>
 <button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:52px;height:auto"></span>Home</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:60px;height:auto"></span>Home</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>

@@ -346,9 +346,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .tv-badge svg{flex:none}
   .tv-badge.mini{font-size:.68rem;padding:2px 8px;border-width:1px;gap:4px}
   .veu-castigo{position:fixed;inset:0;background:rgba(23,23,27,.85);display:none;align-items:center;
-    justify-content:center;padding:20px;z-index:90}
+    justify-content:center;padding:20px;z-index:950}
   .veu-castigo.on{display:flex}
-  .modal-castigo{background:#FFFFFF;border-radius:20px;padding:16px 16px;max-width:400px;width:100%;
+  .btn-fechar-castigo{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--cinza);font-size:1.2rem;cursor:pointer;padding:6px;line-height:1;z-index:2}
+  .modal-castigo{background:#FFFFFF;border-radius:20px;padding:16px 16px;max-width:400px;width:100%;position:relative;
     max-height:94vh;max-height:94dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
     text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.5)}
   .modal-castigo .tag-castigo{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--vermelho);
@@ -436,7 +437,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   display:flex;align-items:center;box-shadow:-3px 0 12px rgba(0,0,0,.35)}
 .fq-edge.oculto{display:none}
 .fq-edge-esq{right:auto;left:0;top:auto;bottom:150px;transform:none;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
-.fq-edge-esq .fq-edge-corpo{font-size:1.4rem!important;padding:2px 0 2px 2px!important;max-width:80px!important}
+.fq-edge-esq .fq-edge-corpo{font-size:1.4rem!important;padding:1px 0 1px 1px!important;max-width:76px!important}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
 .fq-edge-seta-esq{transform:scaleX(1);padding:12px 6px!important}
 .fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(1)}
@@ -462,7 +463,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
 .fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
-.fq-edge.recolhida .fq-edge-seta{transform:scaleX(1)}
+.fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
 @media(max-width:480px){.fq-edge-corpo img{width:52px;height:78px}}
 @media(max-width:480px){
   .bobo{width:56px;height:56px;border-radius:10px}
@@ -656,7 +657,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
         <div class="who">
           <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
           <span class="adm oculto" id="whoAdm">admin</span>
-          <button onclick="pedirConfirmacaoSair()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
+          <button onclick="pedirConfirmacaoSair()" style="background:none;border:none;color:var(--cinza);padding:4px 6px;cursor:pointer;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
         </div>
         <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
           <button id="btnNotificacao" onclick="pedirPermissaoNotificacao()" class="sino-notif" aria-label="Ativar notificações" title="Ativar notificações">🔔</button>
@@ -665,10 +666,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
       </div>
     </div>
   <div class="fq-edge oculto" id="fqFixo" title="O Que Mais Entende de Futebol">
+    <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
     <div class="fq-edge-corpo" onclick="fqAbrirQuiz()">
       <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
     </div>
-    <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
   </div>
   </header>
   <div class="lembrete-avaliar oculto" id="lembreteAvaliar" style="position:fixed" onclick="if(this.classList.contains('recolhido'))toggleLembreteRecolhido(event)">
@@ -786,6 +787,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   <!-- Roleta do castigo (bloqueante, só pra quem é Ribamar da rodada e ainda não girou) -->
   <div class="veu-castigo" id="veuCastigoRoleta">
     <div class="modal-castigo">
+      <button class="btn-fechar-castigo" onclick="document.getElementById('veuCastigoRoleta').classList.remove('on')" aria-label="Fechar por agora">✕</button>
       <div class="tag-castigo">Ribamar da rodada</div>
       <div id="castigoFotoUsuario" style="margin:10px 0"></div>
       <h2>QUE ORGULHO DE VOCÊ</h2>
@@ -3999,7 +4001,7 @@ function iniciarMidiaJanela(){
 })();
 </script>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:52px;height:auto"></span>Home</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:60px;height:auto"></span>Home</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
