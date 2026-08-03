@@ -113,10 +113,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
   .linha-menu-topo{max-width:1320px;margin:0 auto;padding:10px 20px 6px;position:relative}
-  .btn-hamburger{width:56px;height:32px;border-radius:10px;cursor:pointer;border:none;display:block;
+  .btn-hamburger{width:60px;height:36px;border-radius:10px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;padding:0;
     background:linear-gradient(145deg,rgba(255,255,255,.6),rgba(255,255,255,.18));
     box-shadow:4px 4px 8px rgba(23,23,27,.12),-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35);
     transition:transform .12s,box-shadow .12s}
+  .btn-hamburger img{width:44px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
   .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
   .menu-secundario{position:absolute;top:44px;left:20px;z-index:410;background:#17171B;border-radius:12px;
     padding:8px;box-shadow:0 12px 34px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:2px;min-width:200px}
@@ -729,7 +730,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </script>
 
   <div class="linha-menu-topo">
-    <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"></button>
+    <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
       <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
