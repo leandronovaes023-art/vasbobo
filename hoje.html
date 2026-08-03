@@ -273,6 +273,12 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
       </div>
     </div>
   </header>
+  <div class="fq-edge oculto" id="fqFixo" title="O Que Mais Entende de Futebol">
+    <div class="fq-edge-corpo" onclick="location.href='/futebol.html'">
+      <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
+    </div>
+    <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">‹</button>
+  </div>
   <div class="fq-edge fq-edge-esq oculto" id="fmFixo" title="O Vasbobo tem uma Mensagem motivacional!">
     <div class="fq-edge-corpo" onclick="fmAbrir()"><img src="img/embed/motivacional-capa.jpg" alt="" style="width:74px;height:74px;border-radius:9px;object-fit:contain;background:#17171B;display:block"></div>
     <button class="fq-edge-seta fq-edge-seta-esq" onclick="toggleFmEdge(event)" aria-label="Recolher ou expandir">‹</button>
@@ -363,6 +369,8 @@ function sairSatelite(){
   eu=nome;
   const fmEl=document.getElementById('fmFixo');
   if(fmEl)fmEl.classList.remove('oculto');
+  const fqEl=document.getElementById('fqFixo');
+  if(fqEl)fqEl.classList.remove('oculto');
   const elNome=document.getElementById('whoNome');
   if(elNome)elNome.textContent=nome.charAt(0).toUpperCase()+nome.slice(1);
   const elFoto=document.getElementById('whoFoto');
@@ -914,6 +922,11 @@ window.addEventListener('scroll',()=>{
     <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg2.png" alt=""></span>Calendário</a>
   </nav>
 <script>
+function toggleFqEdge(e){
+  if(e)e.stopPropagation();
+  const el=document.getElementById('fqFixo');
+  if(el)el.classList.toggle('recolhida');
+}
 function toggleFmEdge(e){
   if(e)e.stopPropagation();
   const el=document.getElementById('fmFixo');

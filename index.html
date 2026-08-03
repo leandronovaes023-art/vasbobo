@@ -120,10 +120,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
     transition:transform .12s,box-shadow .12s}
   .btn-hamburger img{width:60px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
   .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
+  .btn-hamburger.aberto{border-radius:0 0 0 14px;box-shadow:-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35)}
   .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;
     background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
-    padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.5);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
-    height:46px;overflow-x:auto;max-width:calc(100vw - 90px);-webkit-overflow-scrolling:touch}
+    padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px 0 0 rgba(255,255,255,0);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
+    height:46px;overflow-x:auto;max-width:calc(100vw - 90px);-webkit-overflow-scrolling:touch;margin-left:-1px}
   .menu-secundario.oculto{display:none}
   .menu-secundario .tab{background:none;border:none;color:#17171B;text-align:center;padding:0 13px;border-radius:8px;
     font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
@@ -317,7 +318,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
 
   /* janela de mídia flutuante */
-  .midia-janela{position:fixed;right:6px;bottom:70px;width:min(115px,32vw);height:18vh;max-height:165px;
+  .midia-janela{position:fixed;right:6px;bottom:56px;width:min(115px,32vw);height:18vh;max-height:165px;
     background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;overflow:hidden;
     box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:395;display:flex;flex-direction:column}
   .midia-top{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;
@@ -355,10 +356,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .roleta-centro{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;
     border-radius:50%;background:#FFFFFF;border:3px solid var(--preto);display:flex;align-items:center;
     justify-content:center;font-size:1.3rem;color:var(--vermelho);z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.25)}
-  .info-pontuacao{position:relative;display:inline-block}
-  .info-pontuacao > a{color:var(--vermelho);font-size:.82rem;font-weight:700;text-decoration:none;
-    border-bottom:1px dashed var(--vermelho);cursor:pointer}
-  .info-pontuacao > a:hover{border-bottom-style:solid}
+  .info-pontuacao{position:relative;display:block}
+  .info-pontuacao > a{display:inline-flex;align-items:center;gap:6px;color:#17171B;font-size:.86rem;font-weight:800;text-decoration:none;
+    background:var(--carvao);border:1px solid var(--linha);border-radius:10px;padding:9px 14px;cursor:pointer}
+  .info-pontuacao > a:hover{border-color:var(--vermelho)}
+  .info-pontuacao > a::after{content:"▾";font-size:.75em;color:var(--vermelho)}
   .info-pontuacao .tooltip-pont{display:none;width:100%;max-width:100%;background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;
     padding:14px 16px;box-shadow:0 6px 20px rgba(0,0,0,.14);margin-top:8px;box-sizing:border-box}
   .info-pontuacao .tooltip-pont.aberto{display:block}
@@ -1009,7 +1011,7 @@ function tooltipPontuacao(){
     [PTS_NAO_AVALIOU,'🚫 não avaliou os jogadores em 24h'],
   ];
   const linhasHtml=linhas.map(([p,t])=>'<tr><td>'+p+' pts</td><td>'+t+'</td></tr>').join('');
-  return '<span class="info-pontuacao"><a onclick="event.stopPropagation();togglePont(this)">Pontuação:</a>'+
+  return '<span class="info-pontuacao"><a onclick="event.stopPropagation();togglePont(this)">🏆 Pontuação · toque para expandir</a>'+
     '<div class="tooltip-pont"><table class="tabela-pont">'+linhasHtml+'</table>'+
     '<a class="tp-link" style="font-size:1.05em" onclick="event.stopPropagation();abrirSistemaPontuacao()">📊 Clique e Entenda o sistema completo →</a></div></span>';
 }
@@ -2116,12 +2118,14 @@ async function sair(){
 function toggleMenuSecundario(e){
   if(e)e.stopPropagation();
   const el=document.getElementById('menuSecundario');
+  const btn=document.getElementById('btnMenuSec');
   if(el)el.classList.toggle('oculto');
+  if(btn)btn.classList.toggle('aberto',el&&!el.classList.contains('oculto'));
 }
 document.addEventListener('click',(e)=>{
   const el=document.getElementById('menuSecundario');
   const btn=document.getElementById('btnMenuSec');
-  if(el&&!el.classList.contains('oculto')&&!el.contains(e.target)&&e.target!==btn)el.classList.add('oculto');
+  if(el&&!el.classList.contains('oculto')&&!el.contains(e.target)&&e.target!==btn){el.classList.add('oculto');if(btn)btn.classList.remove('aberto');}
 });
 function mudarAba(a,semHistorico){
   aba=a;jogoAberto=null;
