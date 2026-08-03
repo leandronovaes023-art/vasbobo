@@ -702,6 +702,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       <button onclick="fecharModalNotif()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px">✕</button>
       <h3 style="text-align:left;margin-bottom:10px">🔔 Ativar notificações do Vasbobo</h3>
       <p class="nota-rodape" style="margin:0 0 16px">Mensagens curtas e diretas no seu celular: hora de avaliar os jogadores, frase motivacional do dia, e lembrete do quiz. Sem spam — só o essencial. Você pode desativar quando quiser nas configurações do navegador.</p>
+      <p class="nota-rodape" id="avisoIosNotif" style="margin:0 0 16px;display:none;color:var(--ouro)">📱 No iPhone, isso só funciona com o app instalado na tela inicial (não em aba do Safari). Instala pelo botão "App VASBOBO" antes de ativar.</p>
       <button class="btn" style="width:100%" onclick="ativarNotificacoes()">Permitir notificações</button>
     </div>
   </div>
@@ -2146,11 +2147,23 @@ const VAPID_KEY_PUSH = 'BLODFSvTc8Pkl9nppIBEDQOFQSs46mNAuc94TOSdJyYl8oF2gcFJbniH
 function pedirPermissaoNotificacao(){
   if(!('Notification' in window)){avisar('Seu navegador não suporta notificações.');return;}
   if(Notification.permission==='granted'){avisar('Notificações já estão ativadas ✓',true);return;}
+  const aviso=document.getElementById('avisoIosNotif');
+  if(aviso)aviso.style.display=(ehIOS()&&!ehStandalone())?'block':'none';
   document.getElementById('modalNotif').classList.remove('oculto');
 }
 function fecharModalNotif(){document.getElementById('modalNotif').classList.add('oculto');}
+function ehIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+function ehStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
 async function ativarNotificacoes(){
   fecharModalNotif();
+  if(ehIOS()&&!ehStandalone()){
+    avisar('No iPhone, notificação só funciona depois de instalar o app na tela inicial (não dá em aba do Safari). Clica em "📲 App VASBOBO" primeiro, instala, abre o app instalado, e aí ativa o sino de lá.');
+    return;
+  }
   try{
     const permissao=await Notification.requestPermission();
     if(permissao!=='granted'){avisar('Sem problema — se mudar de ideia, é só clicar no sino de novo.');return;}
