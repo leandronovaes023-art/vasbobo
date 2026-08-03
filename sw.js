@@ -27,7 +27,7 @@ messaging.onBackgroundMessage((payload) => {
   const corpo = payload.notification?.body || '';
   self.registration.showNotification(titulo, {
     body: corpo,
-    icon: '/icons/icon-notif-192.png',
+    icon: '/icons/icon-192.png',
     badge: '/icons/icon-192.png',
     data: { url: dados.url || '/' }
   });
