@@ -186,7 +186,16 @@ body::after{content:"";position:fixed;inset:0;opacity:.05;
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
   .tab.ativa{background:var(--branco);color:#FFFFFF}
   .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
-  main{max-width:1320px;margin:0 auto;padding:16px 20px 60px}
+  main{max-width:1320px;margin:0 auto;padding:16px 20px 84px}
+  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:#FFFFFF;border-top:1px solid var(--linha);
+    display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 16px rgba(0,0,0,.08);
+    padding-bottom:env(safe-area-inset-bottom,0)}
+  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    padding:8px 2px 6px;text-decoration:none;color:var(--cinza);font-size:.62rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.02em;font-family:'Inter',sans-serif}
+  .menu-fixo a .mf-icone{font-size:1.25rem;line-height:1}
+  .menu-fixo a .mf-icone img{width:24px;height:24px;object-fit:cover;border-radius:6px;display:block}
+  .menu-fixo a.ativo{color:var(--vermelho)}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
 .fq-veu{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000}
@@ -1216,5 +1225,12 @@ window.addEventListener('scroll',()=>{
 
 </script>
 <button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
+  <nav class="menu-fixo" id="menuFixo">
+    <a href="/" id="mfHome"><span class="mf-icone">🏠</span>Home</a>
+    <a href="/#rank" id="mfRank"><span class="mf-icone">🏆</span>Ranking</a>
+    <a href="/hoje.html" id="mfHoje"><span class="mf-icone">📅</span>Quem joga hoje</a>
+    <a href="/#jogoscalendario" id="mfCalendario"><span class="mf-icone">✠</span>Calendário CRVG</a>
+    <a href="/futebol.html" id="mfFutebol"><span class="mf-icone"><img src="img/embed/asset2.png" alt=""></span>O que mais entende</a>
+  </nav>
 </body>
 </html>
