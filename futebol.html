@@ -146,7 +146,9 @@ body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.
   .btn-hamburger{width:100px;height:64px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:flex-start;padding:0;margin-left:0;
     background:none;box-shadow:none}
   .btn-hamburger img{width:92px;height:auto;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
-  .btn-hamburger:active{transform:translateY(1px)}
+  .btn-hamburger{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .btn-hamburger:active img{animation:tremerMenu .35s ease}
+  @keyframes tremerMenu{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
   .menu-secundario{position:absolute;top:14px;left:96px;z-index:410;
     background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));backdrop-filter:blur(10px);border-radius:0 14px 14px 0;
     padding:6px;box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.5);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
