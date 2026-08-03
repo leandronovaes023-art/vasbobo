@@ -3,7 +3,7 @@
 const { mandarPush } = require('./_push-helper');
 
 exports.handler = async (event) => {
-  const usuario = (event.queryStringParameters && event.queryStringParameters.usuario || '').trim().toLowerCase();
+  const usuario = (event.queryStringParameters && event.queryStringParameters.usuario || '').trim();
   if (!usuario) {
     return { statusCode: 400, body: 'Passa ?usuario=SEU_LOGIN na URL. Ex: ?usuario=novaes' };
   }
