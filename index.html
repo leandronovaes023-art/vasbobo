@@ -108,22 +108,25 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .bobo-login{display:block;margin:0 auto 6px;width:150px;height:auto;border-radius:16px;filter:drop-shadow(0 14px 18px rgba(0,0,0,.35))}
   .eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
   .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px)}
+  #whoFoto img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--vermelho);display:block;vertical-align:middle}
   .who b{text-transform:capitalize}
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
-  .linha-menu-topo{max-width:1320px;margin:0 auto;padding:10px 20px 6px;position:relative}
-  .btn-hamburger{width:60px;height:36px;border-radius:10px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;padding:0;
-    background:linear-gradient(145deg,rgba(255,255,255,.6),rgba(255,255,255,.18));
-    box-shadow:4px 4px 8px rgba(23,23,27,.12),-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35);
+  .linha-menu-topo{position:relative;padding:10px 0 8px 0}
+  .btn-hamburger{width:78px;height:46px;border-radius:0 14px 14px 0;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;padding:0 8px 0 4px;margin-left:0;
+    background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.2));
+    box-shadow:5px 5px 10px rgba(23,23,27,.14),-3px -3px 7px rgba(255,255,255,.75),inset 0 0 0 1px rgba(255,255,255,.35);
     transition:transform .12s,box-shadow .12s}
-  .btn-hamburger img{width:44px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+  .btn-hamburger img{width:60px;height:auto;display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
   .btn-hamburger:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.16),-2px -2px 4px rgba(255,255,255,.65),inset 1px 1px 3px rgba(23,23,27,.16)}
-  .menu-secundario{position:absolute;top:44px;left:20px;z-index:410;background:#17171B;border-radius:12px;
-    padding:8px;box-shadow:0 12px 34px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:2px;min-width:200px}
+  .menu-secundario{position:absolute;top:10px;left:78px;z-index:410;background:#17171B;border-radius:0 12px 12px 0;
+    padding:6px;box-shadow:6px 6px 20px rgba(0,0,0,.35);display:flex;flex-direction:row;flex-wrap:nowrap;gap:3px;align-items:stretch;
+    height:46px;overflow-x:auto;max-width:calc(100vw - 90px);-webkit-overflow-scrolling:touch}
   .menu-secundario.oculto{display:none}
-  .menu-secundario .tab{background:none;border:none;color:#fff;text-align:left;padding:11px 12px;border-radius:8px;
-    font-size:.82rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif}
+  .menu-secundario .tab{background:none;border:none;color:#fff;text-align:center;padding:0 13px;border-radius:8px;
+    font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
+    display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
   .menu-secundario .tab:hover{background:rgba(255,255,255,.08)}
   nav::-webkit-scrollbar{display:none}
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
@@ -640,7 +643,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       </div>
       <div class="header-right-stack">
         <div class="who">
-          <span>Fala, <b id="whoNome"></b>!</span>
+          <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
           <span class="adm oculto" id="whoAdm">admin</span>
           <button onclick="pedirConfirmacaoSair()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">⏻ Sair</button>
         </div>
@@ -730,11 +733,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </script>
 
   <div class="linha-menu-topo">
-    <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz.png" alt=""></button>
+    <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz2.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
       <a href="/ogrupo.html" class="tab" style="text-decoration:none">🍻 O Grupo</a>
-      <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
       <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin');toggleMenuSecundario()">⚙️ Configurações</button>
     </div>
@@ -2070,6 +2072,8 @@ function entrarNoApp(){
   setTimeout(verificarPendenciasRodada, 500);
   mostrar('app');
   document.getElementById('whoNome').textContent=cap(eu);
+  const elFotoTopo=document.getElementById('whoFoto');
+  if(elFotoTopo)elFotoTopo.innerHTML=fotoUsuario(eu,26);
   const adm=souAdmin();
   document.getElementById('whoAdm').classList.toggle('oculto',!adm);
   document.getElementById('tabJogadores').classList.remove('oculto');
@@ -2120,7 +2124,7 @@ function mudarAba(a){
     const novoHash=a==='jogos'?'':('#'+a);
     if(location.hash!==novoHash)history.replaceState(null,'',location.pathname+novoHash);
   }catch(e){}
-  const mapa={jogadores:'tabJogadores',castigos:'tabCastigos',admin:'tabAdmin',perfilpsicotico:'tabRaioX'};
+  const mapa={jogadores:'tabJogadores',castigos:'tabCastigos',admin:'tabAdmin'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
     if(t)t.classList.toggle('ativa',k===a);
@@ -3740,11 +3744,11 @@ function iniciarMidiaJanela(){
 })();
 </script>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home.png" alt=""></span>Home</a>
-    <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
-    <a href="/hoje.html" id="mfHoje"><span class="mf-icone">🗓️</span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg.png" alt=""></span>Calendário CRVG</a>
-    <a href="/futebol.html" id="mfFutebol" onclick="if(typeof fqAbrirQuiz==='function'){fqAbrirQuiz();return false;}"><span class="mf-icone"><img src="img/embed/asset2.png" alt=""></span>O que mais entende</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt=""></span>Home</a>
+    <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
+    <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
+    <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg2.png" alt=""></span>Calendário CRVG</a>
   </nav>
 </body>
 </html>
