@@ -104,7 +104,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .oculto{display:none!important}
 
   header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
-  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 12px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:nowrap}
+  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 4px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:nowrap}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   .sino-notif{background:rgba(255,255,255,.08);border:1px solid var(--linha);color:var(--branco);border-radius:7px;
     width:34px;height:34px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
@@ -130,7 +130,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
-  .linha-menu-topo{position:relative;padding:12px 0 6px 0}
+  .linha-menu-topo{position:relative;padding:8px 0 2px 0}
   .btn-hamburger{width:100px;height:64px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:flex-start;padding:0;margin-left:0;
     background:none;box-shadow:none}
   .btn-hamburger img{width:92px;height:auto;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
@@ -138,15 +138,17 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-hamburger:active img{animation:tremerMenu .35s ease}
   @keyframes tremerMenu{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
   .btn-hamburger.aberto{}
-  .menu-secundario{position:absolute;top:22px;left:74px;z-index:410;
+  .menu-secundario{position:absolute;top:22px;left:98px;z-index:410;
     background:none;border-radius:0;
     padding:0;box-shadow:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;align-items:center;
-    height:46px;overflow-x:auto;max-width:calc(100vw - 90px);-webkit-overflow-scrolling:touch}
+    height:46px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 110px);-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;-ms-overflow-style:none}
+  .menu-secundario::-webkit-scrollbar{display:none;height:0}
   .menu-secundario.oculto{display:none}
-  .menu-secundario .tab{background:rgba(23,23,27,.85);border:none;color:#fff;text-align:center;padding:8px 14px;border-radius:8px;
+  .menu-secundario .tab{background:rgba(255,255,255,.92);border:none;color:#17171B;text-align:center;padding:8px 14px;border-radius:8px;
     font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
     display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none;box-shadow:0 3px 8px rgba(0,0,0,.25)}
-  .menu-secundario .tab:hover{background:rgba(60,60,66,.95)}
+  .menu-secundario .tab:hover{background:#fff}
   nav::-webkit-scrollbar{display:none}
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
   .tab.ativa{background:var(--branco);color:#FFFFFF}
