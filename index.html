@@ -1733,7 +1733,7 @@ async function mutar(fn){
 }
 
 /* =================== O QUE MAIS ENTENDE DE FUTEBOL (quiz fixo) =================== */
-let ESTADO_QUIZ={diario:{},porJogo:{}};
+let ESTADO_QUIZ={diario:{},porJogo:{},vistas:{}};
 async function fqSincronizarEstado(){
   ESTADO_QUIZ=await fqLerEstado();
 }
@@ -1767,12 +1767,12 @@ function jogoQuizAtual(){
 async function fqLerEstado(){
   try{
     const snap=await db.collection('shared').doc('vasbobo_quiz').get();
-    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}}; }
+    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}, vistas:v.vistas||{}}; }
   }catch(e){}
-  return {diario:{}, porJogo:{}};
+  return {diario:{}, porJogo:{}, vistas:{}};
 }
 async function fqSalvarEstado(estado){
-  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, atualizadoEm:Date.now()}); return true; }
+  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, atualizadoEm:Date.now()}); return true; }
   catch(e){ return false; }
 }
 function fqStatusDia(estado,usuario){
@@ -3928,14 +3928,26 @@ async function carregarMensagensAgendadas(){
   try{
     const snap=await db.collection('mensagens_agendadas').orderBy('hora').get();
     if(snap.empty){alvo.innerHTML='<p class="nota-rodape">Nenhuma mensagem agendada ainda.</p>';return;}
-    let h='';
+    const horaAgora=new Date().getHours();
+    let h='<p class="nota-rodape" style="margin:0 0 10px">Se a hora escolhida já passou hoje, ela só dispara amanhã — a função só olha "que horas são agora" a cada 30min. Use "testar agora" pra confirmar o texto sem esperar.</p>';
     snap.forEach(doc=>{
       const d=doc.data();
-      h+='<div class="linha-tabela"><span><b>'+String(d.hora).padStart(2,'0')+'h</b> — '+esc(d.texto)+'</span>'+
-        '<button class="btn-x" onclick="removerMensagemAgendada(\''+doc.id+'\')">remover</button></div>';
+      const jaPassou=d.hora<=horaAgora;
+      h+='<div class="linha-tabela" style="align-items:flex-start"><span><b>'+String(d.hora).padStart(2,'0')+'h</b> — '+esc(d.texto)+
+        (jaPassou?' <small style="color:var(--cinza)">(hoje já passou — dispara amanhã)</small>':'')+'</span>'+
+        '<span style="display:flex;gap:6px"><button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="testarMensagemAgendada(\''+esc(d.texto).replace(/'/g,"\\'")+'\',this)">testar agora</button>'+
+        '<button class="btn-x" onclick="removerMensagemAgendada(\''+doc.id+'\')">remover</button></span></div>';
     });
     alvo.innerHTML=h;
   }catch(e){ alvo.innerHTML='<p class="nota-rodape">Erro ao carregar.</p>'; console.error(e); }
+}
+async function testarMensagemAgendada(texto,btn){
+  btn.textContent='enviando…';
+  try{
+    const r=await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto,admin:eu})});
+    btn.textContent=r.ok?'enviado ✓':'erro';
+  }catch(e){ btn.textContent='erro'; }
+  setTimeout(()=>{btn.textContent='testar agora';},2500);
 }
 async function criarMensagemAgendada(){
   const texto=(document.getElementById('novaMsgTexto').value||'').trim();
