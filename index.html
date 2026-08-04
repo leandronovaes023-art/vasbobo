@@ -3840,9 +3840,20 @@ async function limparMinhasAvaliacoes(){
   avisar('Suas avaliações de teste foram apagadas.',true);
   render();
 }
-function renderAdmin(){
+async function renderAdmin(){
   const sec=document.getElementById('secAdmin');
-  let html='<div class="card"><details><summary>🧹 Limpar dados de um usuário</summary><div style="margin-top:12px">'+
+  let html='<div class="card"><details><summary>📣 Enviar notificação agora (todo mundo)</summary><div style="margin-top:12px">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Manda uma notificação push imediata pra todo mundo que ativou o sino. Só pra teste/aviso pontual — use com moderação.</p>'+
+  '<textarea id="broadcastTexto" rows="2" placeholder="Escreva a mensagem que vai aparecer na notificação de todo mundo…" style="width:100%;margin-bottom:10px;resize:vertical"></textarea>'+
+  '<button class="btn" style="background:var(--vermelho)" onclick="enviarBroadcastAgora()">📣 Enviar agora para todos</button>'+
+  '<p class="nota-rodape" id="broadcastStatus" style="margin-top:10px"></p></div></details></div>'+
+  '<div class="card"><details><summary>📅 Mensagens agendadas fixas</summary><div style="margin-top:12px" id="listaMsgAgendadas">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Crie mensagens que disparam sozinhas todo dia, no horário escolhido (além das automáticas do sistema).</p>'+
+  '<div class="grid g3" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaMsgTexto">Mensagem</label><input id="novaMsgTexto" placeholder="Ex.: Bora fechar o palpite, VASBOBOS!"></div>'+
+  '<div><label for="novaMsgHora">Hora (0-23)</label><input id="novaMsgHora" type="number" min="0" max="23" placeholder="20"></div></div>'+
+  '<button class="btn fantasma" onclick="criarMensagemAgendada()">+ Adicionar mensagem agendada</button>'+
+  '<div id="listaMsgAgendadasItens" style="margin-top:14px">Carregando…</div></div></details></div>'+
+  '<div class="card"><details><summary>🧹 Limpar dados de um usuário</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Escolha o que quer apagar de um usuário específico (ex.: uma conta de teste).</p>'+
   '<input id="limparUsuarioNome" placeholder="nome de login exato (ex.: teste)" style="width:100%;margin-bottom:10px">'+
   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">'+
@@ -3907,6 +3918,56 @@ function renderAdmin(){
   '<input type="file" id="arqImport" accept=".json,application/json" style="display:none" onchange="importarDados(this)"></div>'+
   '<p class="nota-rodape" id="infoBackup"></p></div>';
   sec.innerHTML=html;
+  carregarMensagensAgendadas();
+}
+async function carregarMensagensAgendadas(){
+  const alvo=document.getElementById('listaMsgAgendadasItens');
+  if(!alvo)return;
+  try{
+    const snap=await db.collection('mensagens_agendadas').orderBy('hora').get();
+    if(snap.empty){alvo.innerHTML='<p class="nota-rodape">Nenhuma mensagem agendada ainda.</p>';return;}
+    let h='';
+    snap.forEach(doc=>{
+      const d=doc.data();
+      h+='<div class="linha-tabela"><span><b>'+String(d.hora).padStart(2,'0')+'h</b> — '+esc(d.texto)+'</span>'+
+        '<button class="btn-x" onclick="removerMensagemAgendada(\''+doc.id+'\')">remover</button></div>';
+    });
+    alvo.innerHTML=h;
+  }catch(e){ alvo.innerHTML='<p class="nota-rodape">Erro ao carregar.</p>'; console.error(e); }
+}
+async function criarMensagemAgendada(){
+  const texto=(document.getElementById('novaMsgTexto').value||'').trim();
+  const hora=parseInt(document.getElementById('novaMsgHora').value,10);
+  if(!texto){avisar('Escreve a mensagem primeiro.');return;}
+  if(isNaN(hora)||hora<0||hora>23){avisar('Hora precisa ser um número de 0 a 23.');return;}
+  try{
+    await db.collection('mensagens_agendadas').add({texto,hora,ativo:true,criadoPor:eu,criadoEm:Date.now()});
+    document.getElementById('novaMsgTexto').value='';
+    document.getElementById('novaMsgHora').value='';
+    avisar('Mensagem agendada criada ✓',true);
+    carregarMensagensAgendadas();
+  }catch(e){ avisar('Erro ao criar: '+e.message); }
+}
+async function removerMensagemAgendada(id){
+  if(!(await confirmar('Remover essa mensagem agendada?')))return;
+  try{
+    await db.collection('mensagens_agendadas').doc(id).delete();
+    avisar('Removida.',true);
+    carregarMensagensAgendadas();
+  }catch(e){ avisar('Erro ao remover: '+e.message); }
+}
+async function enviarBroadcastAgora(){
+  const texto=(document.getElementById('broadcastTexto').value||'').trim();
+  const status=document.getElementById('broadcastStatus');
+  if(!texto){avisar('Escreve a mensagem primeiro.');return;}
+  if(!(await confirmar('Vai mandar essa notificação AGORA pra todo mundo que ativou o sino. Confirma?')))return;
+  status.textContent='Enviando…';
+  try{
+    const r=await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto,admin:eu})});
+    const txt=await r.text();
+    status.textContent=txt;
+    if(r.ok){document.getElementById('broadcastTexto').value='';avisar('Notificação enviada!',true);}
+  }catch(e){ status.textContent='Erro: '+e.message; }
 }
 async function alternarModoTeste(v){
   await mutar(()=>{if(!dados.config)dados.config={};dados.config.modoTeste=!!v;});

@@ -127,6 +127,25 @@ exports.handler = async () => {
     }
   }
 
+  // ---------- 2.5) Mensagens agendadas fixas (criadas pelo admin) ----------
+  try {
+    const agendadasSnap = await db.collection('mensagens_agendadas').where('hora', '==', horaAtual).where('ativo', '==', true).get();
+    if (!agendadasSnap.empty) {
+      const tokensSnap = await db.collection('push_tokens').get();
+      for (const msgDoc of agendadasSnap.docs) {
+        const msg = msgDoc.data();
+        for (const tokDoc of tokensSnap.docs) {
+          const usuario = tokDoc.id;
+          const chave = `agendada_${msgDoc.id}_${usuario}_${chaveDia}_${horaAtual}`;
+          if (await jaEnviou(db, chave)) continue;
+          const ok = await mandarPush(db, usuario, msg.texto, '/');
+          if (ok) enviados++;
+          await marcarEnviado(db, chave);
+        }
+      }
+    }
+  } catch (e) { console.error('erro nas mensagens agendadas', e); }
+
   // ---------- 3) Avaliar jogadores + 4) Próximo palpite ----------
   // lê os jogos direto do documento principal (mesma estrutura usada pelo site)
   const principalDoc = await db.collection('shared').doc('vasbobo_v2').get();
