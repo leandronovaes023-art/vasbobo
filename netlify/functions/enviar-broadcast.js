@@ -14,7 +14,7 @@ exports.handler = async (event) => {
     const db = admin.firestore();
 
     if (usuarioAlvo) {
-      const r = await mandarPush(usuarioAlvo, 'VASBOBO', texto, '/');
+      const r = await mandarPush(usuarioAlvo, 'VASBOBO', texto, '/', false);
       return { statusCode: r.ok ? 200 : 200, body: r.ok ? `Enviado pra "${usuarioAlvo}" ✓` : `Não enviou: ${r.motivo}` };
     }
 
@@ -24,7 +24,7 @@ exports.handler = async (event) => {
     let enviados = 0, falhas = 0;
     for (const doc of tokensSnap.docs) {
       const usuario = doc.id;
-      const r = await mandarPush(usuario, 'VASBOBO', texto, '/');
+      const r = await mandarPush(usuario, 'VASBOBO', texto, '/', false);
       if (r.ok) enviados++; else falhas++;
     }
     return { statusCode: 200, body: `Enviado pra ${enviados} pessoa(s)` + (falhas ? `, ${falhas} falharam (token antigo, provavelmente)` : '') + '.' };

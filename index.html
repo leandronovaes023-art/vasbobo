@@ -879,8 +879,22 @@ const SYNC_POS_MS=30*1000;          // logo após o fim esperado: busca a cada 3
 const SYNC_POS_LIMITE_MIN=30;       // ...por até 30 min depois do fim esperado
 const SYNC_FALLBACK_MS=15*60000;    // passado esse prazo (jogo esticou: prorrogação/atraso), espaça as buscas
 const SEM_GOL='__semgol__';
-const ORDEM_POS=['Goleiro','Lateral','Zagueiro','Meio-campista','Atacante'];
-function posIndex(pos){const i=ORDEM_POS.indexOf(pos);return i===-1?999:i;}
+const ORDEM_POS=['Goleiro','Lateral-direito','Lateral-esquerdo','Zagueiro','Volante','Meia','Ponta/Atacante','Centroavante','Técnico'];
+function posIndex(pos){
+  if(!pos)return 999;
+  const exato=ORDEM_POS.indexOf(pos);
+  if(exato!==-1)return exato;
+  // fallback pra variações antigas de nome (ex.: "Lateral" genérico, "Meio-campista", "Atacante")
+  const p=pos.toLowerCase();
+  if(p.startsWith('gol'))return 0;
+  if(p.startsWith('lateral'))return 1;
+  if(p.startsWith('zag'))return 3;
+  if(p.startsWith('volante')||p==='meio-campista')return 4;
+  if(p.startsWith('meia'))return 5;
+  if(p.startsWith('ponta')||p.startsWith('atacante')||p.startsWith('centroavante'))return 6;
+  if(p.startsWith('técnico')||p.startsWith('tecnico'))return 8;
+  return 999;
+}
 
 const JOGADORES_INICIAIS=[
  ['p_leojardim','1','Léo Jardim','Goleiro'],
@@ -1687,7 +1701,25 @@ function migrar(){
     dados.patchResultadoEm=1;
     mudou=true;
   }
+  /* incidente de perda de dados em 05/08/2026: os jogos até essa data perderam palpites/
+     avaliações. Isenta todos eles da penalidade de "não avaliou" — a cobrança volta a
+     valer normalmente a partir do próximo jogo pra frente. */
+  if((dados.patchIsencaoIncidente||0)<1){
+    Object.values(dados.jogos).forEach(j=>{
+      if(j.resultado&&j.resultadoEm&&j.resultadoEm<1785960000000){j.isentoPenalidade=true;}
+    });
+    dados.patchIsencaoIncidente=1;
+    mudou=true;
+  }
   if(!dados.config.castigoAtivoDesde){dados.config.castigoAtivoDesde=new Date().toISOString().slice(0,10);mudou=true;}
+  /* adiciona o técnico Pedro Emanuel pra poder ser avaliado junto com os jogadores */
+  if((dados.patchTecnico||0)<1){
+    if(!dados.jogadores.find(x=>x.id==='p_pedroemanuel')){
+      dados.jogadores.push({id:'p_pedroemanuel',num:'',nome:'Pedro Emanuel',pos:'Técnico',ativo:true});
+    }
+    dados.patchTecnico=1;
+    mudou=true;
+  }
   /* patch do elenco: aplica 1x em dados já existentes, preservando todo o histórico */
   if((dados.patchElenco||0)<PATCH_ELENCO_V){
     REMOVER_P2.forEach(id=>{const p=dados.jogadores.find(x=>x.id===id);if(p&&p.ativo!==false)p.ativo=false;});
@@ -2676,7 +2708,7 @@ function selectJogadores(idSel,valorAtual,incluirSemGol){
   const opts=['<option value="">— escolher —</option>'];
   if(incluirSemGol)opts.push('<option value="'+SEM_GOL+'" '+(valorAtual===SEM_GOL?'selected':'')+'>Vasco não marca 😢</option>');
   let posAtual='';
-  jogadoresAtivos().forEach(p=>{
+  jogadoresAtivos().filter(p=>p.pos!=='Técnico').forEach(p=>{
     if(p.pos!==posAtual){if(posAtual)opts.push('</optgroup>');opts.push('<optgroup label="'+esc(p.pos)+'">');posAtual=p.pos;}
     opts.push('<option value="'+p.id+'" '+(valorAtual===p.id?'selected':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</option>');
   });
@@ -2766,11 +2798,15 @@ async function enviarPalpite(){
 function classeNota(n){return n==='NA'?'n-na':n>=7?'n-alta':n>=5?'n-media':'n-baixa';}
 function fmtNota(n){return n==='NA'?'N/A':(+n).toLocaleString('pt-BR');}
 function jogadoresParaAvaliar(j){
+  const tecnico=dados.jogadores.find(p=>p.id==='p_pedroemanuel'&&p.ativo!==false);
+  let lista;
   if(j.emCampo&&j.emCampo.length){
-    return j.emCampo.map(id=>jogadorPorId(id)).filter(Boolean)
-      .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+    lista=j.emCampo.map(id=>jogadorPorId(id)).filter(Boolean);
+  }else{
+    lista=modoTeste()?jogadoresAtivos():[];
   }
-  return modoTeste()?jogadoresAtivos():[];
+  if(tecnico&&!lista.find(p=>p.id===tecnico.id))lista=[...lista,tecnico];
+  return lista.sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
 }
 let mostrarAvaliacaoDetalhe=false;
 function toggleAvaliacaoDetalhe(){ mostrarAvaliacaoDetalhe=!mostrarAvaliacaoDetalhe; render(); }

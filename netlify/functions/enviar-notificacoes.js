@@ -108,7 +108,7 @@ exports.handler = async () => {
         for (const usuario of destinatarios) {
           const chave = `agendada_${msgDoc.id}_${usuario}_${chaveDia}_${horaAtual}`;
           if (await jaEnviou(db, chave)) continue;
-          const r = await mandarPush(usuario, 'VASBOBO', msg.texto, '/');
+          const r = await mandarPush(usuario, 'VASBOBO', msg.texto, '/', false);
           if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }

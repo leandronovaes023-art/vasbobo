@@ -55,14 +55,14 @@ function saudacaoPersonalizada(usuario) {
   return escolhida(nome);
 }
 
-async function mandarPush(usuario, titulo, texto, url) {
+async function mandarPush(usuario, titulo, texto, url, comSaudacao = true) {
   garantirFirebase();
   const db = admin.firestore();
   const tokDoc = await db.collection('push_tokens').doc(usuario).get();
   if (!tokDoc.exists) return { ok: false, motivo: 'usuário sem token registrado (não ativou notificações ainda)' };
   const { token } = tokDoc.data();
   if (!token) return { ok: false, motivo: 'token vazio' };
-  const corpoPersonalizado = `${saudacaoPersonalizada(usuario)} ${texto}`;
+  const corpoFinal = comSaudacao ? `${saudacaoPersonalizada(usuario)} ${texto}` : texto;
   try {
     await admin.messaging().send({
       token,
@@ -70,7 +70,7 @@ async function mandarPush(usuario, titulo, texto, url) {
       // meu código no service worker (onBackgroundMessage), que define o ícone certo.
       // Se tivesse "notification" aqui, o navegador mostraria sozinho, com ícone padrão,
       // ignorando completamente o que configurei — foi exatamente esse o bug.
-      data: { title: titulo || 'VASBOBO', body: corpoPersonalizado, url: url || '/' },
+      data: { title: titulo || 'VASBOBO', body: corpoFinal, url: url || '/' },
       webpush: { headers: { Urgency: 'high' } },
     });
     return { ok: true };
