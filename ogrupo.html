@@ -53,11 +53,6 @@ let eu = "";
 html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
 body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px;line-height:1.5}
 
-/* padrão de losango no fundo */
-body::after{content:"";position:fixed;inset:0;opacity:.05;
-  background-image:repeating-linear-gradient(45deg,var(--branco) 0,var(--branco) 1px,transparent 0,transparent 50%);
-  background-size:20px 20px;z-index:-1}
-
 .voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;
   cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
 .voltar:hover{border-color:var(--branco);color:var(--branco)}
@@ -222,6 +217,8 @@ body::after{content:"";position:fixed;inset:0;opacity:.05;
   .menu-fixo a .mf-icone{font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;height:30px}
   .menu-fixo a .mf-icone img{width:32px;height:32px;object-fit:contain;display:block}
   .menu-fixo a.ativo{color:#fff}
+  .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--vermelho)}
+  .menu-fixo a{position:relative}
   .menu-fixo a .mf-sinal{position:absolute;top:9px;right:calc(50% - 24px);width:8px;height:8px;border-radius:50%;background:var(--vermelho);border:1.5px solid #17171B}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
