@@ -2445,6 +2445,7 @@ function jogoDaRodada(){
   let ultimo=null;
   for(const [id,j] of lista){
     const s=statusJogo(j);
+    if(j.isentoPenalidade)continue; // rodada afetada pelo incidente — não conta mais como "atual"
     if(s==='encerrado'||s==='avaliar')ultimo=[id,j];
   }
   return ultimo;
@@ -2588,7 +2589,9 @@ function htmlRodadaBox(){
     '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--vermelho);color:#fff;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
     '</div>';
   if(linhasRodada.length){
-    html+=linhasRodada.map((l,i)=>'<div class="mini-linha"><span>'+(i+1)+'º '+(l.confirmado?'<span class="palp-ok">✓</span> ':'')+'<b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+'</span><span class="pt'+(l.pts?'':' palp-ok')+'">'+(l.pts?l.pts+' pt'+(l.pts===1?'':'s')+' no quiz':'confirmado')+'</span></div>').join('');
+    html+=linhasRodada.map((l,i)=>'<div class="mini-linha"><span>'+(i+1)+'º <b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+
+      (l.confirmado?' <span class="palp-ok" style="font-size:.68rem;font-weight:800;background:rgba(46,138,69,.14);color:var(--verde);border-radius:99px;padding:1px 8px;white-space:nowrap">palpite ✔️</span>':'')+
+      '</span><span class="pt">'+l.pts+' pt'+(l.pts===1?'':'s')+' no quiz</span></div>').join('');
     html+='<p class="nota-rodape" style="margin:8px 0 0">Os pontos do quiz "O Que Mais Entende de Futebol" já contam aqui e somam ao placar quando o jogo rolar.</p>';
   }else{
     html+='<p class="nota-rodape" style="margin:0 0 6px">Ninguém palpitou nem pontuou no quiz ainda. Chega na frente e pressiona a galera!</p>';
