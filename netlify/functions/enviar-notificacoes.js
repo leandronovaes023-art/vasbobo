@@ -103,8 +103,9 @@ exports.handler = async () => {
       const tokensSnap = await db.collection('push_tokens').get();
       for (const msgDoc of agendadasSnap.docs) {
         const msg = msgDoc.data();
-        for (const tokDoc of tokensSnap.docs) {
-          const usuario = tokDoc.id;
+        // se a mensagem tem "usuario" definido, manda só pra essa pessoa; senão, pra todo mundo
+        const destinatarios = msg.usuario ? [msg.usuario] : tokensSnap.docs.map((d) => d.id);
+        for (const usuario of destinatarios) {
           const chave = `agendada_${msgDoc.id}_${usuario}_${chaveDia}_${horaAtual}`;
           if (await jaEnviou(db, chave)) continue;
           const r = await mandarPush(usuario, 'VASBOBO', msg.texto, '/');

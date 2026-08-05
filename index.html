@@ -3849,6 +3849,21 @@ async function renderAdmin(){
   '<textarea id="broadcastTexto" rows="2" placeholder="Escreva a mensagem que vai aparecer na notificação de todo mundo…" style="width:100%;margin-bottom:10px;resize:vertical"></textarea>'+
   '<button class="btn" style="background:var(--vermelho)" onclick="enviarBroadcastAgora()">📣 Enviar agora para todos</button>'+
   '<p class="nota-rodape" id="broadcastStatus" style="margin-top:10px"></p></div></details></div>'+
+  '<div class="card"><details><summary>👤 Mensagem por usuário</summary><div style="margin-top:12px">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Escolhe a pessoa, escolhe uma mensagem pronta ou escreve a sua, e manda na hora ou agenda pra um horário.</p>'+
+  '<div class="grid g2" style="margin-bottom:10px">'+
+  '<div><label for="msgUsuarioSel">Usuário</label><select id="msgUsuarioSel">'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
+  '<div><label for="msgUsuarioTipo">Mensagem</label><select id="msgUsuarioTipo" onchange="document.getElementById(\'msgUsuarioPersonalizada\').style.display=this.value===\'custom\'?\'block\':\'none\'">'+
+  '<option value="Bora fechar o palpite antes que feche!">Bora fechar o palpite antes que feche!</option>'+
+  '<option value="Não esquece de avaliar os jogadores hoje.">Não esquece de avaliar os jogadores hoje.</option>'+
+  '<option value="Cadê você? Faz tempo que não aparece por aqui.">Cadê você? Faz tempo que não aparece por aqui.</option>'+
+  '<option value="O grupo tá te esperando, aparece lá.">O grupo tá te esperando, aparece lá.</option>'+
+  '<option value="Vasco joga hoje. Não sei se você sabe (ou se quer saber).">Vasco joga hoje. Não sei se você sabe.</option>'+
+  '<option value="custom">✏️ Personalizada (escrever agora)</option></select></div></div>'+
+  '<textarea id="msgUsuarioPersonalizada" rows="2" placeholder="Escreva a mensagem personalizada…" style="width:100%;margin-bottom:10px;resize:vertical;display:none"></textarea>'+
+  '<div class="grid g3" style="margin-bottom:10px"><div><label for="msgUsuarioHora">Agendar pra hora (opcional)</label><input id="msgUsuarioHora" type="number" min="0" max="23" placeholder="deixe vazio pra enviar agora"></div></div>'+
+  '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" style="background:var(--vermelho)" onclick="enviarOuAgendarPorUsuario()">Enviar / agendar</button></div>'+
+  '<p class="nota-rodape" id="msgUsuarioStatus" style="margin-top:10px"></p></div></details></div>'+
   '<div class="card"><details><summary>📅 Mensagens agendadas fixas</summary><div style="margin-top:12px" id="listaMsgAgendadas">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Crie mensagens que disparam sozinhas todo dia, no horário escolhido (além das automáticas do sistema).</p>'+
   '<div class="grid g3" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaMsgTexto">Mensagem</label><input id="novaMsgTexto" placeholder="Ex.: Bora fechar o palpite, VASBOBOS!"></div>'+
@@ -3933,7 +3948,9 @@ async function carregarMensagensAgendadas(){
     snap.forEach(doc=>{
       const d=doc.data();
       const jaPassou=d.hora<=horaAgora;
-      h+='<div class="linha-tabela" style="align-items:flex-start"><span><b>'+String(d.hora).padStart(2,'0')+'h</b> — '+esc(d.texto)+
+      h+='<div class="linha-tabela" style="align-items:flex-start"><span><b>'+String(d.hora).padStart(2,'0')+'h</b>'+
+        (d.usuario?' <span class="adm">só '+esc(cap(d.usuario))+'</span>':' <span class="adm" style="background:rgba(255,255,255,.08);color:var(--cinza)">todo mundo</span>')+
+        ' — '+esc(d.texto)+
         (jaPassou?' <small style="color:var(--cinza)">(hoje já passou — dispara amanhã)</small>':'')+'</span>'+
         '<span style="display:flex;gap:6px"><button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="testarMensagemAgendada(\''+esc(d.texto).replace(/'/g,"\\'")+'\',this)">testar agora</button>'+
         '<button class="btn-x" onclick="removerMensagemAgendada(\''+doc.id+'\')">remover</button></span></div>';
@@ -3981,6 +3998,32 @@ async function enviarBroadcastAgora(){
     const txt=await r.text();
     status.textContent=txt;
     if(r.ok){document.getElementById('broadcastTexto').value='';avisar('Notificação enviada!',true);}
+  }catch(e){ status.textContent='Erro: '+e.message; }
+}
+async function enviarOuAgendarPorUsuario(){
+  const usuario=document.getElementById('msgUsuarioSel').value;
+  const tipo=document.getElementById('msgUsuarioTipo').value;
+  const texto=tipo==='custom'?(document.getElementById('msgUsuarioPersonalizada').value||'').trim():tipo;
+  const horaStr=document.getElementById('msgUsuarioHora').value;
+  const status=document.getElementById('msgUsuarioStatus');
+  if(!texto){avisar('Escreve ou escolhe a mensagem primeiro.');return;}
+  if(horaStr!==''){
+    const hora=parseInt(horaStr,10);
+    if(isNaN(hora)||hora<0||hora>23){avisar('Hora precisa ser um número de 0 a 23.');return;}
+    try{
+      await db.collection('mensagens_agendadas').add({texto,hora,usuario,ativo:true,criadoPor:eu,criadoEm:Date.now()});
+      status.textContent='Agendado pra '+cap(usuario)+' às '+hora+'h (todo dia, até você remover).';
+      avisar('Mensagem agendada pra '+cap(usuario)+' ✓',true);
+      carregarMensagensAgendadas();
+    }catch(e){ status.textContent='Erro: '+e.message; }
+    return;
+  }
+  if(!(await confirmar('Vai mandar essa notificação AGORA só pra '+cap(usuario)+'. Confirma?')))return;
+  status.textContent='Enviando…';
+  try{
+    const r=await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto,usuario,admin:eu})});
+    status.textContent=await r.text();
+    if(r.ok)avisar('Enviado pra '+cap(usuario)+' ✓',true);
   }catch(e){ status.textContent='Erro: '+e.message; }
 }
 async function alternarModoTeste(v){
