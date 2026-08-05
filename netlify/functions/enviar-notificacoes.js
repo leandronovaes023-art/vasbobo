@@ -1,22 +1,14 @@
-// Função agendada (roda sozinha a cada X minutos, configurado no netlify.toml).
+// Função agendada (roda sozinha a cada 30 min, configurado no netlify.toml).
 // Verifica as condições de cada tipo de notificação e dispara via Firebase Cloud Messaging.
 //
 // PRECISA das variáveis de ambiente no Netlify:
 //   FIREBASE_SERVICE_ACCOUNT  -> cole o JSON inteiro da chave de conta de serviço (Firebase Console)
 //
-// Nada disso funciona sem essa variável configurada.
-
-const admin = require('firebase-admin');
-
-let appInicializado = false;
-function garantirFirebase() {
-  if (appInicializado) return;
-  const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
-  if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT não configurada nas variáveis de ambiente do Netlify.');
-  const credenciais = JSON.parse(raw);
-  admin.initializeApp({ credential: admin.credential.cert(credenciais) });
-  appInicializado = true;
-}
+// Usa o MESMO helper de envio (_push-helper.js) que o teste manual e o broadcast usam —
+// antes essa função tinha uma cópia própria e desatualizada, que nunca recebeu a correção
+// do formato de mensagem, e por isso as notificações automáticas paravam de chegar
+// mesmo com o teste manual funcionando normalmente.
+const { mandarPush, garantirFirebase, admin } = require('./_push-helper');
 
 const HORA = 3600000;
 
@@ -46,31 +38,12 @@ const LEMBRETES_PALPITE = [
   { apos: 60, texto: 'Dê seu palpite e reze.' },
 ];
 
-// marca (e verifica) se uma notificação específica já foi mandada, pra não repetir
 async function jaEnviou(db, chave) {
   const doc = await db.collection('notif_enviadas').doc(chave).get();
   return doc.exists;
 }
 async function marcarEnviado(db, chave) {
   await db.collection('notif_enviadas').doc(chave).set({ quando: Date.now() });
-}
-
-async function mandarPush(db, usuario, texto, url) {
-  const tokDoc = await db.collection('push_tokens').doc(usuario).get();
-  if (!tokDoc.exists) return false;
-  const { token } = tokDoc.data();
-  if (!token) return false;
-  try {
-    await admin.messaging().send({
-      token,
-      notification: { title: 'VASBOBO', body: texto },
-      data: { url: url || '/' },
-    });
-    return true;
-  } catch (e) {
-    console.error('erro ao enviar push pra', usuario, e.message);
-    return false;
-  }
 }
 
 exports.handler = async () => {
@@ -85,7 +58,6 @@ exports.handler = async () => {
   const chaveDia = agora.toISOString().slice(0, 10);
 
   const usuariosSnap = await db.collection('usuarios').get().catch(() => null);
-  // fallback: se não existir coleção separada, lê do doc principal (ajuste conforme sua estrutura real)
   let usuarios = [];
   if (usuariosSnap && !usuariosSnap.empty) {
     usuarios = usuariosSnap.docs.map((d) => d.id);
@@ -94,9 +66,8 @@ exports.handler = async () => {
     if (principal.exists) usuarios = Object.keys((principal.data().value ? JSON.parse(principal.data().value) : {}).usuarios || {});
   }
 
-  let enviados = 0;
+  let enviados = 0, falhas = 0;
 
-  // ---------- 1) Vasbobo Acredita (motivacional) ----------
   for (const regra of FRASES_MOTIVACIONAL) {
     if (horaAtual !== regra.hora) continue;
     for (const usuario of usuarios) {
@@ -104,14 +75,13 @@ exports.handler = async () => {
       if (await jaEnviou(db, chave)) continue;
       const usoDoc = await db.collection('frases_uso').doc(usuario).get();
       const jaViuHoje = usoDoc.exists && usoDoc.data().data === chaveDia;
-      if (jaViuHoje) { await marcarEnviado(db, chave); continue; } // já viu, não manda
-      const ok = await mandarPush(db, usuario, regra.texto, '/?abrirVasboboAcredita=1');
-      if (ok) enviados++;
+      if (jaViuHoje) { await marcarEnviado(db, chave); continue; }
+      const r = await mandarPush(usuario, 'VASBOBO', regra.texto, '/?abrirVasboboAcredita=1');
+      if (r.ok) enviados++; else falhas++;
       await marcarEnviado(db, chave);
     }
   }
 
-  // ---------- 2) Quiz (O Que Mais Entende) ----------
   for (const regra of FRASES_QUIZ) {
     if (horaAtual !== regra.hora) continue;
     for (const usuario of usuarios) {
@@ -120,14 +90,13 @@ exports.handler = async () => {
       const quizDoc = await db.collection('shared').doc('vasbobo_quiz').get();
       const diario = quizDoc.exists ? (quizDoc.data().diario || {}) : {};
       const status = diario[`${usuario}|${chaveDia}`] || { respondidas: 0 };
-      if (status.respondidas >= 3) { await marcarEnviado(db, chave); continue; } // já completou hoje
-      const ok = await mandarPush(db, usuario, regra.texto, '/futebol.html');
-      if (ok) enviados++;
+      if (status.respondidas >= 3) { await marcarEnviado(db, chave); continue; }
+      const r = await mandarPush(usuario, 'VASBOBO', regra.texto, '/futebol.html');
+      if (r.ok) enviados++; else falhas++;
       await marcarEnviado(db, chave);
     }
   }
 
-  // ---------- 2.5) Mensagens agendadas fixas (criadas pelo admin) ----------
   try {
     const agendadasSnap = await db.collection('mensagens_agendadas').where('hora', '==', horaAtual).where('ativo', '==', true).get();
     if (!agendadasSnap.empty) {
@@ -138,16 +107,14 @@ exports.handler = async () => {
           const usuario = tokDoc.id;
           const chave = `agendada_${msgDoc.id}_${usuario}_${chaveDia}_${horaAtual}`;
           if (await jaEnviou(db, chave)) continue;
-          const ok = await mandarPush(db, usuario, msg.texto, '/');
-          if (ok) enviados++;
+          const r = await mandarPush(usuario, 'VASBOBO', msg.texto, '/');
+          if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
       }
     }
   } catch (e) { console.error('erro nas mensagens agendadas', e); }
 
-  // ---------- 3) Avaliar jogadores + 4) Próximo palpite ----------
-  // lê os jogos direto do documento principal (mesma estrutura usada pelo site)
   const principalDoc = await db.collection('shared').doc('vasbobo_v2').get();
   if (principalDoc.exists) {
     const dados = JSON.parse(principalDoc.data().value || '{}');
@@ -158,7 +125,6 @@ exports.handler = async () => {
       const nomeJogo = `Vasco x ${j.adversario || ''}`;
       const palpitantes = Object.keys(j.palpites || {});
 
-      // 3) lembrete de avaliação — só pra quem apostou e ainda não avaliou
       for (const regra of LEMBRETES_AVALIACAO) {
         let deveMandar = false;
         let idRegra = '';
@@ -175,14 +141,13 @@ exports.handler = async () => {
           if (jaAvaliou) continue;
           const chave = `aval_${usuario}_${id}_${idRegra}_${chaveDia}`;
           if (await jaEnviou(db, chave)) continue;
-          const ok = await mandarPush(db, usuario, regra.texto(nomeJogo), `/?avaliarJogo=${id}`);
-          if (ok) enviados++;
+          const r = await mandarPush(usuario, 'VASBOBO', regra.texto(nomeJogo), `/?avaliarJogo=${id}`);
+          if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
       }
     }
 
-    // 4) lembrete de novo palpite — pro próximo jogo ainda sem resultado
     const proximoJogo = Object.entries(jogos)
       .filter(([, j]) => !j.resultado)
       .sort((a, b) => (a[1].data + (a[1].hora || '23:59')).localeCompare(b[1].data + (b[1].hora || '23:59')))[0];
@@ -196,27 +161,26 @@ exports.handler = async () => {
       for (const regra of LEMBRETES_PALPITE) {
         if (Math.floor(horasDesde) !== regra.apos) continue;
         for (const usuario of usuarios) {
-          if (jProx.palpites && jProx.palpites[usuario]) continue; // já palpitou
+          if (jProx.palpites && jProx.palpites[usuario]) continue;
           const chave = `palp_${usuario}_${idProx}_${regra.apos}`;
           if (await jaEnviou(db, chave)) continue;
-          const ok = await mandarPush(db, usuario, regra.texto, '/');
-          if (ok) enviados++;
+          const r = await mandarPush(usuario, 'VASBOBO', regra.texto, '/');
+          if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
       }
-      // caso especial: 8h da manhã do dia do próximo jogo
       if (horaAtual === 8 && jProx.data === chaveDia) {
         for (const usuario of usuarios) {
           if (jProx.palpites && jProx.palpites[usuario]) continue;
           const chave = `palp_${usuario}_${idProx}_diajogo`;
           if (await jaEnviou(db, chave)) continue;
-          const ok = await mandarPush(db, usuario, 'É dia de Vasco. Faça logo seu palpite.', '/');
-          if (ok) enviados++;
+          const r = await mandarPush(usuario, 'VASBOBO', 'É dia de Vasco. Faça logo seu palpite.', '/');
+          if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
       }
     }
   }
 
-  return { statusCode: 200, body: `OK - ${enviados} notificações enviadas` };
+  return { statusCode: 200, body: `OK - ${enviados} enviadas, ${falhas} falharam` };
 };
