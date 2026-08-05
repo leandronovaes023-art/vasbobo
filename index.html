@@ -3944,8 +3944,11 @@ async function renderAdmin(){
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn claro" onclick="exportarDados()">Baixar backup (.json)</button>'+
   '<button class="btn fantasma" onclick="document.getElementById(\'arqImport\').click()">Restaurar de um backup</button>'+
   '<input type="file" id="arqImport" accept=".json,application/json" style="display:none" onchange="importarDados(this)"></div>'+
-  '<p class="nota-rodape" id="infoBackup"></p></div>';
+  '<p class="nota-rodape" id="infoBackup"></p></div>'+
+  '<div class="card"><h2>🔄 Backups automáticos</h2><p class="nota-rodape" style="margin:0 0 12px">O site agora salva uma cópia sozinho a cada 6 horas, sem precisar lembrar de nada. Guarda os últimos 14 dias.</p>'+
+  '<div id="listaBackupsAuto">Carregando…</div></div>';
   sec.innerHTML=html;
+  carregarBackupsAutomaticos();
   carregarMensagensAgendadas();
 }
 async function carregarMensagensAgendadas(){
@@ -4036,6 +4039,34 @@ async function enviarOuAgendarPorUsuario(){
     status.textContent=await r.text();
     if(r.ok)avisar('Enviado pra '+cap(usuario)+' ✓',true);
   }catch(e){ status.textContent='Erro: '+e.message; }
+}
+async function carregarBackupsAutomaticos(){
+  const alvo=document.getElementById('listaBackupsAuto');
+  if(!alvo)return;
+  try{
+    const snap=await db.collection('backups_automaticos').orderBy('salvoEm','desc').limit(20).get();
+    if(snap.empty){alvo.innerHTML='<p class="nota-rodape">Nenhum backup automático ainda — o primeiro roda dentro de até 6h.</p>';return;}
+    let h='';
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const dt=new Date(d.salvoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      h+='<div class="linha-tabela"><span>'+dt+'</span>'+
+        '<button class="btn fantasma" style="padding:4px 12px;font-size:.72rem" onclick="restaurarBackupAutomatico(\''+doc.id+'\')">restaurar este</button></div>';
+    });
+    alvo.innerHTML=h;
+  }catch(e){ alvo.innerHTML='<p class="nota-rodape">Erro ao carregar backups.</p>'; console.error(e); }
+}
+async function restaurarBackupAutomatico(id){
+  if(!(await confirmar('Isso vai SUBSTITUIR todos os dados atuais pelo backup de '+id+'. Os dados de agora serão perdidos se não tiverem sido salvos em outro backup. Tem certeza?')))return;
+  if(!(await confirmar('Confirma de novo — essa ação não tem como desfazer. Restaurar mesmo?')))return;
+  try{
+    const doc=await db.collection('backups_automaticos').doc(id).get();
+    if(!doc.exists){avisar('Backup não encontrado.');return;}
+    dados=JSON.parse(doc.data().value);
+    const ok=await salvarDados();
+    if(ok){avisar('Restaurado ✓ Recarregando…',true);setTimeout(()=>location.reload(),1500);}
+    else avisar('Erro ao salvar a restauração.');
+  }catch(e){ avisar('Erro: '+e.message); }
 }
 async function alternarModoTeste(v){
   await mutar(()=>{if(!dados.config)dados.config={};dados.config.modoTeste=!!v;});

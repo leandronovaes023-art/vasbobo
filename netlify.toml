@@ -7,3 +7,6 @@
 
 [functions."enviar-notificacoes"]
   schedule = "*/30 * * * *"
+
+[functions."backup-automatico"]
+  schedule = "0 */6 * * *"
