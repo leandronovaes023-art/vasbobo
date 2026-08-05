@@ -64,7 +64,7 @@ window.storage = {
       return { key, deleted: true, shared };
     }catch(e){ return null; }
   },
-  async list(prefix, shared){ return { keys:[], prefix, shared }; }
+  async list(prefix, shared){ /* NUNCA implementado de verdade — sempre retorna vazio. NÃO usar pra checar se uma chave existe. */ return { keys:[], prefix, shared }; }
 };
 console.log('Firebase conectado ao Vasbobo ✓');
 </script>
@@ -1640,19 +1640,16 @@ async function carregarDados(){
       return;
     }
   }catch(e){
-    /* o get falhou: pode ser chave inexistente (1º uso) ou erro de conexão.
-       Só inicializamos do zero se tivermos CERTEZA de que a chave não existe,
-       para nunca sobrescrever dados do grupo por causa de uma falha de rede. */
-    try{
-      const l=await window.storage.list('vasbobo',true);
-      const existe=l&&Array.isArray(l.keys)&&l.keys.includes(CHAVE);
-      if(existe){if(!dados)avisar('Sem conexão com os dados agora. Recarregue a página.');return;}
-    }catch(e2){
-      if(!dados)avisar('Sem conexão com os dados agora. Recarregue a página.');
-      return;
-    }
+    /* QUALQUER falha aqui (rede, Firestore fora do ar, etc.) — NUNCA criamos dados novos
+       automaticamente. Sobrescrever os dados reais do grupo por causa de uma falha
+       passageira é infinitamente pior do que a pessoa esperar e recarregar a página.
+       (Bug real corrigido aqui: antes existia um fallback que criava dados vazios
+       "se a chave não existisse", mas a checagem de existência nunca funcionou de
+       verdade — list() sempre retornava vazio — então qualquer erro de rede no
+       primeiro carregamento podia apagar o banco de dados inteiro.) */
+    console.error('erro ao carregar dados', e);
   }
-  if(!dados){dados=dadosIniciais();await salvarDados();}
+  if(!dados){avisar('Não consegui carregar os dados do grupo agora. NÃO mexa em nada — recarregue a página e tente de novo. Se persistir, me avise antes de continuar usando o site.');}
 }
 const PATCH_ELENCO_V=2;
 const REMOVER_P2=['p_leandrinho','p_victorluis','p_joaovictor','p_lucasoliveira','p_luizgustavo','p_hugomoura','p_sforza','p_paulinho','p_coutinho','p_payet','p_pereyra','p_alexteixeira','p_garre','p_figueiredo','p_gb','p_vegetti'];
@@ -1721,6 +1718,18 @@ function dadosIniciais(){
     jogos
   };
 }
+/* Escape hatch pra uma instalação genuinamente nova (sem dados nenhum ainda).
+   NUNCA é chamada automaticamente — só via console do navegador, digitando exatamente
+   a frase de confirmação, pra ser impossível de disparar sem querer. */
+window.inicializarDadosDoZeroComCuidado=async function(confirmacao){
+  if(confirmacao!=='SIM TENHO CERTEZA ABSOLUTA'){
+    console.warn('Isso vai CRIAR DADOS NOVOS, potencialmente por cima dos existentes. Se você tem certeza absoluta de que quer fazer isso, chame: inicializarDadosDoZeroComCuidado(\'SIM TENHO CERTEZA ABSOLUTA\')');
+    return;
+  }
+  dados=dadosIniciais();
+  await salvarDados();
+  console.log('Dados inicializados do zero.');
+};
 async function salvarDados(){
   try{
     const r=await window.storage.set(CHAVE,JSON.stringify(dados),true);
