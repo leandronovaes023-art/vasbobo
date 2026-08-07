@@ -2544,7 +2544,16 @@ function htmlRodadaBox(){
         '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada. <b style="color:var(--vermelho)">Penalidade -2 pontos</b></div></span></button>';
     }
     if(rj.resultado&&!pontuacaoLiberada(rj)){
-      html+='<p class="nota-rodape" style="margin:0 0 8px"><b>⏳ Aguardo todos avaliarem para liberar o ranking da rodada.</b></p>';
+      html+='<p class="nota-rodape" style="margin:0 0 8px"><b>⏳ Pontuação provisória — falta todo mundo avaliar pra fechar de vez.</b></p>';
+      if(tabela.length){
+        const grupos=agruparPorPontos(tabela);
+        html+=grupos.map((g,i)=>{
+          const ehUltimo=i===grupos.length-1&&grupos.length>1;
+          return g.nomes.map(nome=>'<div class="mini-linha'+(ehUltimo?' mini-linha-ultimo':'')+'"><span>'+(i+1)+'º <b class="rank-nome">'+esc(cap(nome))+'</b>'+(nome===eu?' (você)':'')+'</span><span class="pt">'+g.pts+' pt'+(g.pts===1?'':'s')+' *</span></div>').join('');
+        }).join('');
+        html+='<p class="nota-rodape" style="margin:6px 0 10px">* já soma palpite + quiz dessa rodada — só falta travar em definitivo.</p>';
+      }
+      html+='<div style="border-top:1px solid var(--linha);padding-top:8px;margin-top:4px">';
       html+=Object.keys(rj.palpites).sort().map(u=>{
         const ok=avaliou(rj,u);
         return '<div class="mini-linha"><span>'+(ok?'✅':'⏳')+' <b class="rank-nome">'+esc(cap(u))+'</b>'+(u===eu?' (você)':'')+'</span><span class="pt" style="'+(ok?'':'color:var(--vermelho)')+'">'+(ok?'avaliou':'não avaliou')+'</span></div>';
@@ -2553,7 +2562,7 @@ function htmlRodadaBox(){
         html+='<div class="cronometro" style="font-size:1rem;margin-top:10px" id="cronoAvaliar" data-prazo="'+(rj.resultadoEm+PRAZO_AVALIAR_MS)+'">…</div>';
       }
       html+='</div>';
-      return html;
+      return html+'</div>';
     }
     if(!tabela.length){
       html+='<p class="nota-rodape" style="margin:0">Ninguém palpitou neste jogo. Rodada sem rei nem bobo.</p>';
