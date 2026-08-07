@@ -1159,6 +1159,18 @@ function nomeJogo(j){
   const casa=j.local!=='fora';
   return casa?('Vasco <span class="x">×</span> '+esc(j.adversario)):(esc(j.adversario)+' <span class="x">×</span> Vasco');
 }
+/* "Fluminense 3x1 Vasco" — time da casa primeiro, placar junto, sem "x" solto entre nomes.
+   Padrão único pra usar em notificações e qualquer lugar que precise mostrar jogo+placar juntos. */
+function nomeJogoComPlacar(j){
+  const casa=j.local!=='fora';
+  const timeCasa=casa?'Vasco':j.adversario;
+  const timeFora=casa?j.adversario:'Vasco';
+  const r=j.resultado;
+  if(!r)return timeCasa+' x '+timeFora;
+  const golsCasa=casa?r.v:r.a;
+  const golsFora=casa?r.a:r.v;
+  return timeCasa+' '+golsCasa+'x'+golsFora+' '+timeFora;
+}
 function placarTexto(j,usarParcial){
   const r=j.resultado||(usarParcial?j.parcial:null);
   if(!r)return '';
@@ -2460,7 +2472,7 @@ function atualizarLembreteAvaliar(){
   const pendente=rj.resultado&&rj.palpites&&rj.palpites[eu]&&!avaliou(rj,eu);
   if(!pendente){el.classList.add('oculto');el.classList.remove('recolhido');lembreteJogoId=null;return;}
   lembreteJogoId=rid;
-  document.getElementById('lembreteAvaliarTexto').innerHTML='<span class="lembrete-linha1">Pendente avaliar os jogadores. Penalidade (-2 pontos)</span><b class="lembrete-linha2">'+nomeJogo(rj)+' '+(placarTexto(rj,true)||'')+' - CLIQUE.</b>';
+  document.getElementById('lembreteAvaliarTexto').innerHTML='<span class="lembrete-linha1">Pendente avaliar os jogadores. Penalidade (-2 pontos)</span><b class="lembrete-linha2">'+nomeJogoComPlacar(rj)+' - CLIQUE.</b>';
   el.classList.remove('oculto');
 }
 function toggleLembreteRecolhido(e){
@@ -3914,6 +3926,38 @@ async function renderAdmin(){
   '<div class="grid g3" style="margin-bottom:10px"><div><label for="msgUsuarioHora">Agendar pra hora (opcional)</label><input id="msgUsuarioHora" type="number" min="0" max="23" placeholder="deixe vazio pra enviar agora"></div></div>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" style="background:var(--vermelho)" onclick="enviarOuAgendarPorUsuario()">Enviar / agendar</button></div>'+
   '<p class="nota-rodape" id="msgUsuarioStatus" style="margin-top:10px"></p></div></details></div>'+
+  '<div class="card"><details><summary>📋 Notificações fixas do sistema (referência)</summary><div style="margin-top:12px">'+
+  '<p class="nota-rodape" style="margin:0 0 14px">Essas já rodam sozinhas, sem precisar cadastrar nada. Pra mudar alguma, me avisa que eu ajusto no código.</p>'+
+  '<div style="margin-bottom:14px"><b class="rank-nome">🎯 Vasbobo Acredita</b>'+
+  '<div class="linha-tabela"><span>08h</span><span>Comece o dia com a frase do Vasbobo Acredita.</span></div>'+
+  '<div class="linha-tabela"><span>16h</span><span>Já viu a frase do Vasbobo Acredita motivacional do dia?</span></div>'+
+  '<div class="linha-tabela"><span>21h</span><span>Termine o dia com a frase do Vasbobo Acredita</span></div></div>'+
+  '<div style="margin-bottom:14px"><b class="rank-nome">⚽ Quiz (O Que Mais Entende)</b>'+
+  '<div class="linha-tabela"><span>09h</span><span>O que mais entende de futebol! Você ou DaniGil?</span></div>'+
+  '<div class="linha-tabela"><span>17h</span><span>Sabedoria do Vasbobo. Teste seu conhecimento</span></div>'+
+  '<div class="linha-tabela"><span>22h</span><span>Faça pontos no quiz da Rodada!</span></div></div>'+
+  '<div style="margin-bottom:14px"><b class="rank-nome">🚫 Avaliar jogadores (pós-jogo)</b>'+
+  '<div class="linha-tabela"><span>0-1h</span><span>Vamos finalizar o ranking da rodada</span></div>'+
+  '<div class="linha-tabela"><span>1-2h</span><span>Cuidado com a penalidade</span></div>'+
+  '<div class="linha-tabela"><span>7h</span><span>Corre igual o Velloso que dá tempo</span></div>'+
+  '<div class="linha-tabela"><span>10h</span><span>Ainda dá tempo</span></div>'+
+  '<div class="linha-tabela"><span>16h</span><span>Vai acabar e será penalizado</span></div>'+
+  '<div class="linha-tabela"><span>20h</span><span>Última chance</span></div></div>'+
+  '<div style="margin-bottom:14px"><b class="rank-nome">🗳️ Novo palpite (próximo jogo)</b>'+
+  '<div class="linha-tabela"><span>+36h</span><span>Palpites liberados, se antecipe</span></div>'+
+  '<div class="linha-tabela"><span>+48h</span><span>Tá com medo da derrota? Vota logo</span></div>'+
+  '<div class="linha-tabela"><span>+60h</span><span>Dê seu palpite e reze</span></div>'+
+  '<div class="linha-tabela"><span>8h no dia</span><span>É dia de Vasco. Faça logo seu palpite</span></div></div>'+
+  '<div><b class="rank-nome">📅 Dia de jogo / véspera</b>'+
+  '<div class="linha-tabela"><span>09h e 12h (dia do jogo)</span><span>Mensagem animada de "é dia de Vasco"</span></div>'+
+  '<div class="linha-tabela"><span>2h antes da bola rolar</span><span>Faltam 2 horas pro jogo do Vasco</span></div>'+
+  '<div class="linha-tabela"><span>20h (véspera)</span><span>Amanhã tem jogo do Vasco</span></div></div>'+
+  '</div></details></div>'+
+  '<div class="card"><details><summary>💬 Saudações personalizadas</summary><div style="margin-top:12px" id="listaSaudacoes">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Uma dessas é sorteada e colocada na frente de toda notificação automática/agendada (não vale pra broadcast e mensagem por usuário). Use {nome} onde o nome da pessoa deve entrar.</p>'+
+  '<div class="grid g2" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaSaudacaoTexto">Nova saudação</label><input id="novaSaudacaoTexto" placeholder="Ex.: {nome}, bora que hoje é dia!"></div></div>'+
+  '<button class="btn fantasma" onclick="criarSaudacao()">+ Adicionar saudação</button>'+
+  '<div id="listaSaudacoesItens" style="margin-top:14px">Carregando…</div></div></details></div>'+
   '<div class="card"><details><summary>📅 Mensagens agendadas fixas</summary><div style="margin-top:12px" id="listaMsgAgendadas">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Crie mensagens que disparam sozinhas todo dia, no horário escolhido (além das automáticas do sistema).</p>'+
   '<div class="grid g3" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaMsgTexto">Mensagem</label><input id="novaMsgTexto" placeholder="Ex.: Bora fechar o palpite, VASBOBOS!"></div>'+
@@ -3989,6 +4033,41 @@ async function renderAdmin(){
   sec.innerHTML=html;
   carregarBackupsAutomaticos();
   carregarMensagensAgendadas();
+  carregarSaudacoes();
+}
+async function carregarSaudacoes(){
+  const alvo=document.getElementById('listaSaudacoesItens');
+  if(!alvo)return;
+  try{
+    const snap=await db.collection('saudacoes').orderBy('criadoEm').get();
+    if(snap.empty){alvo.innerHTML='<p class="nota-rodape">Nenhuma saudação customizada ainda — usando só as padrão do sistema (30 frases fixas no código).</p>';return;}
+    let h='<p class="nota-rodape" style="margin:0 0 8px">Essas se somam às 30 já fixas no sistema.</p>';
+    snap.forEach(doc=>{
+      const d=doc.data();
+      h+='<div class="linha-tabela"><span>'+esc(d.texto)+'</span>'+
+        '<button class="btn-x" onclick="removerSaudacao(\''+doc.id+'\')">remover</button></div>';
+    });
+    alvo.innerHTML=h;
+  }catch(e){ alvo.innerHTML='<p class="nota-rodape">Erro ao carregar.</p>'; console.error(e); }
+}
+async function criarSaudacao(){
+  const texto=(document.getElementById('novaSaudacaoTexto').value||'').trim();
+  if(!texto){avisar('Escreve a saudação primeiro.');return;}
+  if(!texto.includes('{nome}')){avisar('Precisa ter {nome} em algum lugar do texto.');return;}
+  try{
+    await db.collection('saudacoes').add({texto,criadoEm:Date.now(),criadoPor:eu});
+    document.getElementById('novaSaudacaoTexto').value='';
+    avisar('Saudação adicionada ✓',true);
+    carregarSaudacoes();
+  }catch(e){ avisar('Erro: '+e.message); }
+}
+async function removerSaudacao(id){
+  if(!(await confirmar('Remover essa saudação?')))return;
+  try{
+    await db.collection('saudacoes').doc(id).delete();
+    avisar('Removida.',true);
+    carregarSaudacoes();
+  }catch(e){ avisar('Erro: '+e.message); }
 }
 async function carregarMensagensAgendadas(){
   const alvo=document.getElementById('listaMsgAgendadasItens');

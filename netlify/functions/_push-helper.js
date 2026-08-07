@@ -49,9 +49,15 @@ const SAUDACOES = [
   (n) => `${n}, guarda esse recado`,
   (n) => `${n}, presta ou perde`,
 ];
-function saudacaoPersonalizada(usuario) {
+async function saudacaoPersonalizada(db, usuario) {
   const nome = capitaliza(usuario);
-  const escolhida = SAUDACOES[Math.floor(Math.random() * SAUDACOES.length)];
+  let extras = [];
+  try {
+    const snap = await db.collection('saudacoes').get();
+    extras = snap.docs.map((d) => (n) => d.data().texto.replace('{nome}', n));
+  } catch (e) { /* se falhar, segue só com as fixas */ }
+  const todas = SAUDACOES.concat(extras);
+  const escolhida = todas[Math.floor(Math.random() * todas.length)];
   return escolhida(nome);
 }
 
@@ -62,7 +68,7 @@ async function mandarPush(usuario, titulo, texto, url, comSaudacao = true) {
   if (!tokDoc.exists) return { ok: false, motivo: 'usuário sem token registrado (não ativou notificações ainda)' };
   const { token } = tokDoc.data();
   if (!token) return { ok: false, motivo: 'token vazio' };
-  const corpoFinal = comSaudacao ? `${saudacaoPersonalizada(usuario)} ${texto}` : texto;
+  const corpoFinal = comSaudacao ? `${await saudacaoPersonalizada(db, usuario)} ${texto}` : texto;
   try {
     await admin.messaging().send({
       token,

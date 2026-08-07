@@ -122,8 +122,14 @@ exports.handler = async () => {
     const jogos = dados.jogos || {};
     for (const [id, j] of Object.entries(jogos)) {
       if (!j.resultado || !j.resultadoEm) continue;
+      if (!j.emCampo || !j.emCampo.length) continue; // só notifica depois que o admin marcar quem entrou em campo
       const horasDesde = (Date.now() - j.resultadoEm) / HORA;
-      const nomeJogo = `Vasco x ${j.adversario || ''}`;
+      const casa = j.local !== 'fora';
+      const timeCasa = casa ? 'Vasco' : (j.adversario || '');
+      const timeFora = casa ? (j.adversario || '') : 'Vasco';
+      const golsCasa = casa ? j.resultado.v : j.resultado.a;
+      const golsFora = casa ? j.resultado.a : j.resultado.v;
+      const nomeJogo = `${timeCasa} ${golsCasa}x${golsFora} ${timeFora}`;
       const palpitantes = Object.keys(j.palpites || {});
 
       for (const regra of LEMBRETES_AVALIACAO) {
@@ -179,6 +185,53 @@ exports.handler = async () => {
           if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
+      }
+    }
+
+    // ---------- Dia de jogo: 2 mensagens de manhã + 1 duas horas antes da bola rolar ----------
+    const jogoHoje = Object.entries(jogos).find(([, j]) => j.data === chaveDia && !j.resultado);
+    if (jogoHoje) {
+      const [idHoje, jHoje] = jogoHoje;
+      const FRASES_DIA_JOGO_MANHA = [
+        { hora: 9, texto: 'É DIA DE VASCO! Bora torcer junto hoje!' },
+        { hora: 12, texto: 'Hoje tem Vasco! Já separou a camisa?' },
+      ];
+      for (const regra of FRASES_DIA_JOGO_MANHA) {
+        if (horaAtual !== regra.hora) continue;
+        for (const usuario of usuarios) {
+          const chave = `diajogo_manha_${usuario}_${idHoje}_${regra.hora}`;
+          if (await jaEnviou(db, chave)) continue;
+          const r = await mandarPush(usuario, 'VASBOBO', regra.texto, '/');
+          if (r.ok) enviados++; else falhas++;
+          await marcarEnviado(db, chave);
+        }
+      }
+      if (jHoje.hora) {
+        const [hh] = jHoje.hora.split(':').map(Number);
+        const horaAlvo = hh - 2;
+        if (horaAlvo >= 0 && horaAtual === horaAlvo) {
+          for (const usuario of usuarios) {
+            const chave = `diajogo_2h_${usuario}_${idHoje}`;
+            if (await jaEnviou(db, chave)) continue;
+            const r = await mandarPush(usuario, 'VASBOBO', 'Faltam 2 horas pro jogo do Vasco! Bora se preparar.', '/');
+            if (r.ok) enviados++; else falhas++;
+            await marcarEnviado(db, chave);
+          }
+        }
+      }
+    }
+
+    // ---------- Véspera: amanhã tem jogo do Vasco ----------
+    const amanha = new Date(agora.getTime() + 24 * HORA).toISOString().slice(0, 10);
+    const jogoAmanha = Object.entries(jogos).find(([, j]) => j.data === amanha && !j.resultado);
+    if (jogoAmanha && horaAtual === 20) {
+      const [idAmanha] = jogoAmanha;
+      for (const usuario of usuarios) {
+        const chave = `vespera_${usuario}_${idAmanha}`;
+        if (await jaEnviou(db, chave)) continue;
+        const r = await mandarPush(usuario, 'VASBOBO', 'Amanhã tem jogo do Vasco! Já vai se programando.', '/');
+        if (r.ok) enviados++; else falhas++;
+        await marcarEnviado(db, chave);
       }
     }
   }
