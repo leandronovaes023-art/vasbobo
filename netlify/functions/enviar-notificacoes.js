@@ -20,12 +20,12 @@ function comPrefixo(lista, frase) { return `${sorteiaTexto(lista)} ${frase}`; }
 const LEMBRETES_AVALIACAO = [
   { desde: 0, ate: 1 },
   { desde: 1, ate: 2 },
-  { horaDoDia: 7, minDesde: 12 },
-  { horaDoDia: 10, minDesde: 12 },
-  { horaDoDia: 16, minDesde: 12 },
-  { horaDoDia: 20, minDesde: 12 },
+  { desde: 8, ate: 9 },
+  { desde: 14, ate: 15 },
+  { desde: 20, ate: 21 },
+  { desde: 23, ate: 24 },
 ];
-const LEMBRETES_PALPITE = [{ apos: 36 }, { apos: 48 }, { apos: 60 }];
+const LEMBRETES_PALPITE = [{ apos: 42 }, { apos: 50 }, { apos: 58 }];
 
 async function jaEnviou(db, chave) {
   const doc = await db.collection('notif_enviadas').doc(chave).get();
