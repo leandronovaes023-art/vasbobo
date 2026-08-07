@@ -96,6 +96,7 @@ exports.handler = async () => {
       const tokensSnap = await db.collection('push_tokens').get();
       for (const msgDoc of agendadasSnap.docs) {
         const msg = msgDoc.data();
+        if (msg.data && msg.data !== chaveDia) continue; // agendada pra um dia específico que não é hoje
         const destinatarios = msg.usuario ? [msg.usuario] : tokensSnap.docs.map((d) => d.id);
         for (const usuario of destinatarios) {
           const chave = `agendada_${msgDoc.id}_${usuario}_${chaveDia}_${horaAtual}`;

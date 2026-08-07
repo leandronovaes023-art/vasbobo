@@ -2546,22 +2546,20 @@ function htmlRodadaBox(){
     if(rj.resultado&&!pontuacaoLiberada(rj)){
       html+='<p class="nota-rodape" style="margin:0 0 8px"><b>⏳ Pontuação provisória — falta todo mundo avaliar pra fechar de vez.</b></p>';
       if(tabela.length){
-        const grupos=agruparPorPontos(tabela);
-        html+=grupos.map((g,i)=>{
-          const ehUltimo=i===grupos.length-1&&grupos.length>1;
-          return g.nomes.map(nome=>'<div class="mini-linha'+(ehUltimo?' mini-linha-ultimo':'')+'"><span>'+(i+1)+'º <b class="rank-nome">'+esc(cap(nome))+'</b>'+(nome===eu?' (você)':'')+'</span><span class="pt">'+g.pts+' pt'+(g.pts===1?'':'s')+' *</span></div>').join('');
+        html+=tabela.slice().sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u)).map(l=>{
+          const ok=avaliou(rj,l.u);
+          const prazoVenceu=rj.resultadoEm&&(Date.now()-rj.resultadoEm)>=PRAZO_AVALIAR_MS;
+          const mostraPenalidade=!ok&&prazoVenceu&&!rj.isentoPenalidade;
+          return '<div class="mini-linha"><span><b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+
+            ' <span style="font-size:.72rem;font-weight:800;white-space:nowrap;color:'+(ok?'var(--verde)':'var(--vermelho)')+'">'+
+            (ok?'✅ avaliou':'❌ não avaliou'+(mostraPenalidade?' -2pts':''))+
+            '</span></span><span class="pt">'+l.pts+' pt'+(l.pts===1?'':'s')+' *</span></div>';
         }).join('');
         html+='<p class="nota-rodape" style="margin:6px 0 10px">* já soma palpite + quiz dessa rodada — só falta travar em definitivo.</p>';
       }
-      html+='<div style="border-top:1px solid var(--linha);padding-top:8px;margin-top:4px">';
-      html+=Object.keys(rj.palpites).sort().map(u=>{
-        const ok=avaliou(rj,u);
-        return '<div class="mini-linha"><span>'+(ok?'✅':'⏳')+' <b class="rank-nome">'+esc(cap(u))+'</b>'+(u===eu?' (você)':'')+'</span><span class="pt" style="'+(ok?'':'color:var(--vermelho)')+'">'+(ok?'avaliou':'não avaliou')+'</span></div>';
-      }).join('');
       if(!avaliou(rj,eu)&&rj.resultadoEm){
-        html+='<div class="cronometro" style="font-size:1rem;margin-top:10px" id="cronoAvaliar" data-prazo="'+(rj.resultadoEm+PRAZO_AVALIAR_MS)+'">…</div>';
+        html+='<div class="cronometro" style="font-size:1rem;margin-top:6px" id="cronoAvaliar" data-prazo="'+(rj.resultadoEm+PRAZO_AVALIAR_MS)+'">…</div>';
       }
-      html+='</div>';
       return html+'</div>';
     }
     if(!tabela.length){
@@ -2728,11 +2726,11 @@ function renderMvpLinha(j){
   return '<p class="nota-rodape" style="margin-top:6px">🏆 MVP da galera até agora: <b style="color:var(--ouro)">'+esc(nomeJogador(mvp.id))+'</b> (média '+mvp.media.toFixed(1).replace('.',',')+' em '+mvp.votos+' voto'+(mvp.votos===1?'':'s')+')</p>';
 }
 
-function selectJogadores(idSel,valorAtual,incluirSemGol){
+function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
   const opts=['<option value="">— escolher —</option>'];
   if(incluirSemGol)opts.push('<option value="'+SEM_GOL+'" '+(valorAtual===SEM_GOL?'selected':'')+'>Vasco não marca 😢</option>');
   let posAtual='';
-  jogadoresAtivos().filter(p=>p.pos!=='Técnico').forEach(p=>{
+  jogadoresAtivos().filter(p=>incluirTecnico||p.pos!=='Técnico').forEach(p=>{
     if(p.pos!==posAtual){if(posAtual)opts.push('</optgroup>');opts.push('<optgroup label="'+esc(p.pos)+'">');posAtual=p.pos;}
     opts.push('<option value="'+p.id+'" '+(valorAtual===p.id?'selected':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</option>');
   });
@@ -2751,9 +2749,10 @@ function renderPalpiteCard(j,s){
       '<input type="number" min="0" max="20" id="ppA" value="'+(meu?meu.a:'')+'" aria-label="Gols do adversário">'+
       '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
       '<div class="grid g2" style="margin-top:12px">'+
-      '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false)+'</div>'+
-      '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+selectJogadores('ppGol',meu?meu.gol:'',true)+'</div></div>'+
+      '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
+      '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
       '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()">✠ '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
+      (meu?'<button class="btn fantasma" style="margin-top:8px;color:var(--vermelho)" onclick="removerMeuPalpite()">🗑️ Remover meu palpite</button>':'')+
       (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
       '<p class="nota-rodape" style="margin-bottom:6px">Palpites fecham '+FECHA_PALPITE_MIN+' minutos antes da bola rolar. Placar, MVP e gol são obrigatórios pra salvar.</p>'+
       tooltipPontuacao();
@@ -2791,6 +2790,19 @@ function renderPalpiteCard(j,s){
 let mostrarTodosPalpites=false;
 function togglePalpitesTodos(){ mostrarTodosPalpites=!mostrarTodosPalpites; render(); }
 
+async function removerMeuPalpite(){
+  const id=jogoAberto;
+  const j0=dados.jogos[id];
+  if(!j0||!j0.palpites[eu]){avisar('Você não tem palpite nesse jogo.');return;}
+  if(!podePalpitar(j0)){avisar('Os palpites deste jogo já fecharam — não dá mais pra remover.');return;}
+  if(!(await confirmar('Remover seu palpite desse jogo? Você pode dar um novo depois, mas isso conta como uma das 3 alterações permitidas.')))return;
+  const ok=await mutar(()=>{
+    const j=dados.jogos[id];
+    if(j&&j.palpites[eu])delete j.palpites[eu];
+  });
+  if(ok){avisar('Palpite removido.',true);render();}
+  else avisar('Erro ao remover. Tenta de novo.');
+}
 async function enviarPalpite(){
   const v=document.getElementById('ppV').value,a=document.getElementById('ppA').value;
   const mvp=document.getElementById('ppMvp').value||'';
@@ -3943,9 +3955,13 @@ async function renderAdmin(){
   '<div id="campoComposerUsuario" style="display:none"><label for="composerUsuario">Usuário</label><select id="composerUsuario">'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
   '</div>'+
   '<div class="grid g2" style="margin-bottom:10px">'+
-  '<div><label for="composerQuando">Quando</label><select id="composerQuando" onchange="document.getElementById(\'campoComposerHora\').style.display=this.value===\'agendar\'?\'block\':\'none\'">'+
-  '<option value="agora">Agora</option><option value="agendar">Agendar (todo dia, numa hora fixa)</option></select></div>'+
-  '<div id="campoComposerHora" style="display:none"><label for="composerHora">Hora (0-23)</label><input id="composerHora" type="number" min="0" max="23"></div>'+
+  '<div><label for="composerQuando">Quando</label><select id="composerQuando" onchange="alternarCamposComposerAgendar(this.value)">'+
+  '<option value="agora">Agora</option><option value="agendar">Agendar</option></select></div>'+
+  '</div>'+
+  '<div id="camposComposerAgendar" class="grid g3" style="display:none;margin-bottom:10px">'+
+  '<div><label for="composerData">Data</label><input id="composerData" type="date"></div>'+
+  '<div><label for="composerHora">Hora (0-23)</label><input id="composerHora" type="number" min="0" max="23"></div>'+
+  '<div style="display:flex;align-items:flex-end;padding-bottom:8px"><label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:400"><input type="checkbox" id="composerRepetir" style="width:auto"> repetir todo dia</label></div>'+
   '</div>'+
   '<button class="btn" style="background:var(--vermelho)" onclick="executarComposer()">Enviar / Agendar</button>'+
   '<p class="nota-rodape" id="composerStatus" style="margin-top:10px"></p>'+
@@ -4163,6 +4179,17 @@ async function removerMensagemAgendada(id){
     carregarMensagensAgendadas();
   }catch(e){ avisar('Erro ao remover: '+e.message); }
 }
+function alternarCamposComposerAgendar(valor){
+  const campos=document.getElementById('camposComposerAgendar');
+  campos.style.display=valor==='agendar'?'grid':'none';
+  if(valor==='agendar'){
+    const agora=new Date();
+    const dataInput=document.getElementById('composerData');
+    const horaInput=document.getElementById('composerHora');
+    if(!dataInput.value)dataInput.value=agora.toISOString().slice(0,10);
+    if(!horaInput.value)horaInput.value=agora.getHours();
+  }
+}
 async function executarComposer(){
   const texto=(document.getElementById('composerTexto').value||'').trim();
   const destino=document.getElementById('composerDestino').value;
@@ -4171,13 +4198,17 @@ async function executarComposer(){
   const status=document.getElementById('composerStatus');
   if(!texto){avisar('Escreve a mensagem primeiro.');return;}
   if(quando==='agendar'){
+    const data=document.getElementById('composerData').value;
     const hora=parseInt(document.getElementById('composerHora').value,10);
+    const repetir=document.getElementById('composerRepetir').checked;
+    if(!data){avisar('Escolhe a data.');return;}
     if(isNaN(hora)||hora<0||hora>23){avisar('Hora precisa ser um número de 0 a 23.');return;}
     const dado={texto,hora,ativo:true,criadoEm:Date.now(),criadoPor:eu};
     if(usuario)dado.usuario=usuario;
+    if(!repetir)dado.data=data; // sem "data" = repete todo dia; com "data" = só naquele dia específico
     try{
       await db.collection('mensagens_agendadas').add(dado);
-      status.textContent='Agendado'+(usuario?' pra '+cap(usuario):' pra todo mundo')+' às '+hora+'h (todo dia, até remover).';
+      status.textContent='Agendado'+(usuario?' pra '+cap(usuario):' pra todo mundo')+(repetir?' às '+hora+'h, todo dia':' pra '+data+' às '+hora+'h')+'.';
       avisar('Agendado ✓',true);
       carregarMensagensAgendadas();
     }catch(e){ status.textContent='Erro: '+e.message; }
