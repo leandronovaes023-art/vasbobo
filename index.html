@@ -3915,64 +3915,49 @@ async function limparMinhasAvaliacoes(){
 }
 async function renderAdmin(){
   const sec=document.getElementById('secAdmin');
-  let html='<div class="card"><details><summary>📣 Enviar notificação agora (todo mundo)</summary><div style="margin-top:12px">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Manda uma notificação push imediata pra todo mundo que ativou o sino. Só pra teste/aviso pontual — use com moderação.</p>'+
-  '<textarea id="broadcastTexto" rows="2" placeholder="Escreva a mensagem que vai aparecer na notificação de todo mundo…" style="width:100%;margin-bottom:10px;resize:vertical"></textarea>'+
-  '<button class="btn" style="background:var(--vermelho)" onclick="enviarBroadcastAgora()">📣 Enviar agora para todos</button>'+
-  '<p class="nota-rodape" id="broadcastStatus" style="margin-top:10px"></p></div></details></div>'+
-  '<div class="card"><details><summary>👤 Mensagem por usuário</summary><div style="margin-top:12px">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Escolhe a pessoa, escolhe uma mensagem pronta ou escreve a sua, e manda na hora ou agenda pra um horário.</p>'+
+  let html='<div class="card"><h2>🔔 Notificações</h2>'+
+  '<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;border-bottom:1px solid var(--linha);padding-bottom:10px">'+
+  '<button class="btn fantasma tab-notif" id="tabNotifBiblioteca" onclick="mudarTabNotif(\'biblioteca\')" style="padding:6px 14px;font-size:.78rem">📚 Biblioteca de frases</button>'+
+  '<button class="btn fantasma tab-notif" id="tabNotifEnviar" onclick="mudarTabNotif(\'enviar\')" style="padding:6px 14px;font-size:.78rem">📣 Enviar / Agendar</button>'+
+  '<button class="btn fantasma tab-notif" id="tabNotifAgendadas" onclick="mudarTabNotif(\'agendadas\')" style="padding:6px 14px;font-size:.78rem">📅 Agendadas específicas</button>'+
+  '</div>'+
+  '<div id="notifTabBiblioteca">'+
+  '<p class="nota-rodape" style="margin:0 0 10px">Todas as frases usadas pelas notificações automáticas — editáveis de verdade (mudou aqui, muda em todo lugar que ela é usada).</p>'+
   '<div class="grid g2" style="margin-bottom:10px">'+
-  '<div><label for="msgUsuarioSel">Usuário</label><select id="msgUsuarioSel">'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
-  '<div><label for="msgUsuarioTipo">Mensagem</label><select id="msgUsuarioTipo" onchange="document.getElementById(\'msgUsuarioPersonalizada\').style.display=this.value===\'custom\'?\'block\':\'none\'">'+
-  '<option value="Bora fechar o palpite antes que feche!">Bora fechar o palpite antes que feche!</option>'+
-  '<option value="Não esquece de avaliar os jogadores hoje.">Não esquece de avaliar os jogadores hoje.</option>'+
-  '<option value="Cadê você? Faz tempo que não aparece por aqui.">Cadê você? Faz tempo que não aparece por aqui.</option>'+
-  '<option value="O grupo tá te esperando, aparece lá.">O grupo tá te esperando, aparece lá.</option>'+
-  '<option value="Vasco joga hoje. Não sei se você sabe (ou se quer saber).">Vasco joga hoje. Não sei se você sabe.</option>'+
-  '<option value="custom">✏️ Personalizada (escrever agora)</option></select></div></div>'+
-  '<textarea id="msgUsuarioPersonalizada" rows="2" placeholder="Escreva a mensagem personalizada…" style="width:100%;margin-bottom:10px;resize:vertical;display:none"></textarea>'+
-  '<div class="grid g3" style="margin-bottom:10px"><div><label for="msgUsuarioHora">Agendar pra hora (opcional)</label><input id="msgUsuarioHora" type="number" min="0" max="23" placeholder="deixe vazio pra enviar agora"></div></div>'+
-  '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" style="background:var(--vermelho)" onclick="enviarOuAgendarPorUsuario()">Enviar / agendar</button></div>'+
-  '<p class="nota-rodape" id="msgUsuarioStatus" style="margin-top:10px"></p></div></details></div>'+
-  '<div class="card"><details><summary>📋 Notificações fixas do sistema (referência)</summary><div style="margin-top:12px">'+
-  '<p class="nota-rodape" style="margin:0 0 14px">Essas já rodam sozinhas, sem precisar cadastrar nada. Pra mudar alguma, me avisa que eu ajusto no código.</p>'+
-  '<div style="margin-bottom:14px"><b class="rank-nome">🎯 Vasbobo Acredita</b>'+
-  '<div class="linha-tabela"><span>08h</span><span>Comece o dia com a frase do Vasbobo Acredita.</span></div>'+
-  '<div class="linha-tabela"><span>16h</span><span>Já viu a frase do Vasbobo Acredita motivacional do dia?</span></div>'+
-  '<div class="linha-tabela"><span>21h</span><span>Termine o dia com a frase do Vasbobo Acredita</span></div></div>'+
-  '<div style="margin-bottom:14px"><b class="rank-nome">⚽ Quiz (O Que Mais Entende)</b>'+
-  '<div class="linha-tabela"><span>09h</span><span>O que mais entende de futebol! Você ou DaniGil?</span></div>'+
-  '<div class="linha-tabela"><span>17h</span><span>Sabedoria do Vasbobo. Teste seu conhecimento</span></div>'+
-  '<div class="linha-tabela"><span>22h</span><span>Faça pontos no quiz da Rodada!</span></div></div>'+
-  '<div style="margin-bottom:14px"><b class="rank-nome">🚫 Avaliar jogadores (pós-jogo)</b>'+
-  '<div class="linha-tabela"><span>0-1h</span><span>Vamos finalizar o ranking da rodada</span></div>'+
-  '<div class="linha-tabela"><span>1-2h</span><span>Cuidado com a penalidade</span></div>'+
-  '<div class="linha-tabela"><span>7h</span><span>Corre igual o Velloso que dá tempo</span></div>'+
-  '<div class="linha-tabela"><span>10h</span><span>Ainda dá tempo</span></div>'+
-  '<div class="linha-tabela"><span>16h</span><span>Vai acabar e será penalizado</span></div>'+
-  '<div class="linha-tabela"><span>20h</span><span>Última chance</span></div></div>'+
-  '<div style="margin-bottom:14px"><b class="rank-nome">🗳️ Novo palpite (próximo jogo)</b>'+
-  '<div class="linha-tabela"><span>+36h</span><span>Palpites liberados, se antecipe</span></div>'+
-  '<div class="linha-tabela"><span>+48h</span><span>Tá com medo da derrota? Vota logo</span></div>'+
-  '<div class="linha-tabela"><span>+60h</span><span>Dê seu palpite e reze</span></div>'+
-  '<div class="linha-tabela"><span>8h no dia</span><span>É dia de Vasco. Faça logo seu palpite</span></div></div>'+
-  '<div><b class="rank-nome">📅 Dia de jogo / véspera</b>'+
-  '<div class="linha-tabela"><span>09h e 12h (dia do jogo)</span><span>Mensagem animada de "é dia de Vasco"</span></div>'+
-  '<div class="linha-tabela"><span>2h antes da bola rolar</span><span>Faltam 2 horas pro jogo do Vasco</span></div>'+
-  '<div class="linha-tabela"><span>20h (véspera)</span><span>Amanhã tem jogo do Vasco</span></div></div>'+
-  '</div></details></div>'+
-  '<div class="card"><details><summary>💬 Saudações personalizadas</summary><div style="margin-top:12px" id="listaSaudacoes">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Uma dessas é sorteada e colocada na frente de toda notificação automática/agendada (não vale pra broadcast e mensagem por usuário). Use {nome} onde o nome da pessoa deve entrar.</p>'+
-  '<div class="grid g2" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaSaudacaoTexto">Nova saudação</label><input id="novaSaudacaoTexto" placeholder="Ex.: {nome}, bora que hoje é dia!"></div></div>'+
-  '<button class="btn fantasma" onclick="criarSaudacao()">+ Adicionar saudação</button>'+
-  '<div id="listaSaudacoesItens" style="margin-top:14px">Carregando…</div></div></details></div>'+
-  '<div class="card"><details><summary>📅 Mensagens agendadas fixas</summary><div style="margin-top:12px" id="listaMsgAgendadas">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Crie mensagens que disparam sozinhas todo dia, no horário escolhido (além das automáticas do sistema).</p>'+
+  '<div><label for="filtroTipoFrase">Filtrar por tipo</label><select id="filtroTipoFrase" onchange="carregarBibliotecaFrases()">'+
+  '<option value="votar">🗳️ Votar palpite</option><option value="avaliar">🚫 Avaliar jogadores</option>'+
+  '<option value="motivacional">🎯 Vasbobo Acredita</option><option value="quiz">⚽ Quiz</option>'+
+  '<option value="saudacao">💬 Saudação (use {nome})</option></select></div>'+
+  '<div id="campoHoraFrase" style="display:none"><label for="novaFraseHora">Hora (0-23)</label><input id="novaFraseHora" type="number" min="0" max="23"></div>'+
+  '</div>'+
+  '<div class="grid g2" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaFraseTexto">Nova frase</label><input id="novaFraseTexto" placeholder="Escreva a frase…"></div></div>'+
+  '<button class="btn fantasma" onclick="criarFraseBiblioteca()">+ Adicionar à biblioteca</button>'+
+  '<div id="listaBibliotecaFrases" style="margin-top:14px">Carregando…</div>'+
+  '</div>'+
+  '<div id="notifTabEnviar" class="oculto">'+
+  '<p class="nota-rodape" style="margin:0 0 10px">Escreve na hora, ou vai na Biblioteca e clica em "usar essa" pra trazer uma frase pronta aqui (e pode editar antes de mandar).</p>'+
+  '<textarea id="composerTexto" rows="3" placeholder="Mensagem que vai ser enviada…" style="width:100%;margin-bottom:10px;resize:vertical"></textarea>'+
+  '<div class="grid g2" style="margin-bottom:10px">'+
+  '<div><label for="composerDestino">Destino</label><select id="composerDestino" onchange="document.getElementById(\'campoComposerUsuario\').style.display=this.value===\'um\'?\'block\':\'none\'">'+
+  '<option value="todos">Todo mundo</option><option value="um">Um usuário específico</option></select></div>'+
+  '<div id="campoComposerUsuario" style="display:none"><label for="composerUsuario">Usuário</label><select id="composerUsuario">'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
+  '</div>'+
+  '<div class="grid g2" style="margin-bottom:10px">'+
+  '<div><label for="composerQuando">Quando</label><select id="composerQuando" onchange="document.getElementById(\'campoComposerHora\').style.display=this.value===\'agendar\'?\'block\':\'none\'">'+
+  '<option value="agora">Agora</option><option value="agendar">Agendar (todo dia, numa hora fixa)</option></select></div>'+
+  '<div id="campoComposerHora" style="display:none"><label for="composerHora">Hora (0-23)</label><input id="composerHora" type="number" min="0" max="23"></div>'+
+  '</div>'+
+  '<button class="btn" style="background:var(--vermelho)" onclick="executarComposer()">Enviar / Agendar</button>'+
+  '<p class="nota-rodape" id="composerStatus" style="margin-top:10px"></p>'+
+  '</div>'+
+  '<div id="notifTabAgendadas" class="oculto">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Lista de tudo que está agendado pra rodar sozinho, todo dia — feitas pela aba "Enviar / Agendar" ou aqui direto.</p>'+
   '<div class="grid g3" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaMsgTexto">Mensagem</label><input id="novaMsgTexto" placeholder="Ex.: Bora fechar o palpite, VASBOBOS!"></div>'+
   '<div><label for="novaMsgHora">Hora (0-23)</label><input id="novaMsgHora" type="number" min="0" max="23" placeholder="20"></div></div>'+
   '<button class="btn fantasma" onclick="criarMensagemAgendada()">+ Adicionar mensagem agendada</button>'+
-  '<div id="listaMsgAgendadasItens" style="margin-top:14px">Carregando…</div></div></details></div>'+
+  '<div id="listaMsgAgendadasItens" style="margin-top:14px">Carregando…</div>'+
+  '</div>'+
+  '</div>'+
   '<div class="card"><details><summary>🧹 Limpar dados de um usuário</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Escolha o que quer apagar de um usuário específico (ex.: uma conta de teste).</p>'+
   '<input id="limparUsuarioNome" placeholder="nome de login exato (ex.: teste)" style="width:100%;margin-bottom:10px">'+
@@ -4042,41 +4027,91 @@ async function renderAdmin(){
   sec.innerHTML=html;
   carregarBackupsAutomaticos();
   carregarMensagensAgendadas();
-  carregarSaudacoes();
+  mudarTabNotif('biblioteca');
 }
-async function carregarSaudacoes(){
-  const alvo=document.getElementById('listaSaudacoesItens');
+function mudarTabNotif(nome){
+  ['biblioteca','enviar','agendadas'].forEach(t=>{
+    const painel=document.getElementById('notifTab'+cap(t));
+    const btn=document.getElementById('tabNotif'+cap(t));
+    if(painel)painel.classList.toggle('oculto',t!==nome);
+    if(btn)btn.classList.toggle('claro',t===nome);
+  });
+  if(nome==='biblioteca')carregarBibliotecaFrases();
+}
+const TIPOS_COM_HORA=['motivacional','quiz'];
+async function carregarBibliotecaFrases(){
+  const tipo=document.getElementById('filtroTipoFrase').value;
+  document.getElementById('campoHoraFrase').style.display=TIPOS_COM_HORA.includes(tipo)?'block':'none';
+  const alvo=document.getElementById('listaBibliotecaFrases');
   if(!alvo)return;
+  alvo.innerHTML='Carregando…';
   try{
-    const snap=await db.collection('saudacoes').orderBy('criadoEm').get();
-    if(snap.empty){alvo.innerHTML='<p class="nota-rodape">Nenhuma saudação customizada ainda — usando só as padrão do sistema (30 frases fixas no código).</p>';return;}
-    let h='<p class="nota-rodape" style="margin:0 0 8px">Essas se somam às 30 já fixas no sistema.</p>';
-    snap.forEach(doc=>{
+    const qualquer=await db.collection('notif_frases').limit(1).get();
+    if(qualquer.empty){
+      alvo.innerHTML='Preparando a biblioteca pela primeira vez…';
+      await fetch('/.netlify/functions/enviar-notificacoes').catch(()=>{});
+      await new Promise(r=>setTimeout(r,1500));
+    }
+    const snap=await db.collection('notif_frases').where('tipo','==',tipo).get();
+    if(snap.empty){alvo.innerHTML='<p class="nota-rodape">Nenhuma frase desse tipo ainda.</p>';return;}
+    const docs=snap.docs.sort((a,b)=>(a.data().hora||0)-(b.data().hora||0));
+    let h='';
+    docs.forEach(doc=>{
       const d=doc.data();
-      h+='<div class="linha-tabela"><span>'+esc(d.texto)+'</span>'+
-        '<button class="btn-x" onclick="removerSaudacao(\''+doc.id+'\')">remover</button></div>';
+      h+='<div class="linha-tabela" style="align-items:flex-start" id="fraseLinha_'+doc.id+'">'+
+        '<span style="flex:1">'+(d.hora!=null?'<b>'+String(d.hora).padStart(2,'0')+'h</b> — ':'')+
+        '<span id="fraseTexto_'+doc.id+'">'+esc(d.texto)+'</span></span>'+
+        '<span style="display:flex;gap:6px;flex-wrap:wrap">'+
+        '<button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="usarFraseNoComposer(\''+esc(d.texto).replace(/'/g,"\\'")+'\')">usar essa</button>'+
+        '<button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="editarFraseBiblioteca(\''+doc.id+'\')">editar</button>'+
+        '<button class="btn-x" onclick="removerFraseBiblioteca(\''+doc.id+'\')">remover</button></span></div>';
     });
     alvo.innerHTML=h;
   }catch(e){ alvo.innerHTML='<p class="nota-rodape">Erro ao carregar.</p>'; console.error(e); }
 }
-async function criarSaudacao(){
-  const texto=(document.getElementById('novaSaudacaoTexto').value||'').trim();
-  if(!texto){avisar('Escreve a saudação primeiro.');return;}
-  if(!texto.includes('{nome}')){avisar('Precisa ter {nome} em algum lugar do texto.');return;}
+async function editarFraseBiblioteca(id){
+  const span=document.getElementById('fraseTexto_'+id);
+  const atual=span.textContent;
+  const novo=prompt('Editar frase:',atual);
+  if(novo===null||novo.trim()===''||novo===atual)return;
   try{
-    await db.collection('saudacoes').add({texto,criadoEm:Date.now(),criadoPor:eu});
-    document.getElementById('novaSaudacaoTexto').value='';
-    avisar('Saudação adicionada ✓',true);
-    carregarSaudacoes();
+    await db.collection('notif_frases').doc(id).update({texto:novo.trim()});
+    avisar('Frase atualizada ✓',true);
+    carregarBibliotecaFrases();
   }catch(e){ avisar('Erro: '+e.message); }
 }
-async function removerSaudacao(id){
-  if(!(await confirmar('Remover essa saudação?')))return;
+async function removerFraseBiblioteca(id){
+  if(!(await confirmar('Remover essa frase da biblioteca?')))return;
   try{
-    await db.collection('saudacoes').doc(id).delete();
+    await db.collection('notif_frases').doc(id).delete();
     avisar('Removida.',true);
-    carregarSaudacoes();
+    carregarBibliotecaFrases();
   }catch(e){ avisar('Erro: '+e.message); }
+}
+async function criarFraseBiblioteca(){
+  const tipo=document.getElementById('filtroTipoFrase').value;
+  const texto=(document.getElementById('novaFraseTexto').value||'').trim();
+  if(!texto){avisar('Escreve a frase primeiro.');return;}
+  if(tipo==='saudacao'&&!texto.includes('{nome}')){avisar('Saudação precisa ter {nome} em algum lugar do texto.');return;}
+  const dado={tipo,texto,ativo:true,criadoEm:Date.now(),criadoPor:eu};
+  if(TIPOS_COM_HORA.includes(tipo)){
+    const hora=parseInt(document.getElementById('novaFraseHora').value,10);
+    if(isNaN(hora)||hora<0||hora>23){avisar('Hora precisa ser um número de 0 a 23.');return;}
+    dado.hora=hora;
+  }else{
+    dado.hora=null;
+  }
+  try{
+    await db.collection('notif_frases').add(dado);
+    document.getElementById('novaFraseTexto').value='';
+    avisar('Frase adicionada à biblioteca ✓',true);
+    carregarBibliotecaFrases();
+  }catch(e){ avisar('Erro: '+e.message); }
+}
+function usarFraseNoComposer(texto){
+  document.getElementById('composerTexto').value=texto;
+  mudarTabNotif('enviar');
+  avisar('Frase trazida — pode editar antes de enviar.',true);
 }
 async function carregarMensagensAgendadas(){
   const alvo=document.getElementById('listaMsgAgendadasItens');
@@ -4128,43 +4163,34 @@ async function removerMensagemAgendada(id){
     carregarMensagensAgendadas();
   }catch(e){ avisar('Erro ao remover: '+e.message); }
 }
-async function enviarBroadcastAgora(){
-  const texto=(document.getElementById('broadcastTexto').value||'').trim();
-  const status=document.getElementById('broadcastStatus');
+async function executarComposer(){
+  const texto=(document.getElementById('composerTexto').value||'').trim();
+  const destino=document.getElementById('composerDestino').value;
+  const usuario=destino==='um'?document.getElementById('composerUsuario').value:null;
+  const quando=document.getElementById('composerQuando').value;
+  const status=document.getElementById('composerStatus');
   if(!texto){avisar('Escreve a mensagem primeiro.');return;}
-  if(!(await confirmar('Vai mandar essa notificação AGORA pra todo mundo que ativou o sino. Confirma?')))return;
-  status.textContent='Enviando…';
-  try{
-    const r=await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto,admin:eu})});
-    const txt=await r.text();
-    status.textContent=txt;
-    if(r.ok){document.getElementById('broadcastTexto').value='';avisar('Notificação enviada!',true);}
-  }catch(e){ status.textContent='Erro: '+e.message; }
-}
-async function enviarOuAgendarPorUsuario(){
-  const usuario=document.getElementById('msgUsuarioSel').value;
-  const tipo=document.getElementById('msgUsuarioTipo').value;
-  const texto=tipo==='custom'?(document.getElementById('msgUsuarioPersonalizada').value||'').trim():tipo;
-  const horaStr=document.getElementById('msgUsuarioHora').value;
-  const status=document.getElementById('msgUsuarioStatus');
-  if(!texto){avisar('Escreve ou escolhe a mensagem primeiro.');return;}
-  if(horaStr!==''){
-    const hora=parseInt(horaStr,10);
+  if(quando==='agendar'){
+    const hora=parseInt(document.getElementById('composerHora').value,10);
     if(isNaN(hora)||hora<0||hora>23){avisar('Hora precisa ser um número de 0 a 23.');return;}
+    const dado={texto,hora,ativo:true,criadoEm:Date.now(),criadoPor:eu};
+    if(usuario)dado.usuario=usuario;
     try{
-      await db.collection('mensagens_agendadas').add({texto,hora,usuario,ativo:true,criadoPor:eu,criadoEm:Date.now()});
-      status.textContent='Agendado pra '+cap(usuario)+' às '+hora+'h (todo dia, até você remover).';
-      avisar('Mensagem agendada pra '+cap(usuario)+' ✓',true);
+      await db.collection('mensagens_agendadas').add(dado);
+      status.textContent='Agendado'+(usuario?' pra '+cap(usuario):' pra todo mundo')+' às '+hora+'h (todo dia, até remover).';
+      avisar('Agendado ✓',true);
       carregarMensagensAgendadas();
     }catch(e){ status.textContent='Erro: '+e.message; }
     return;
   }
-  if(!(await confirmar('Vai mandar essa notificação AGORA só pra '+cap(usuario)+'. Confirma?')))return;
+  if(!(await confirmar('Vai mandar essa notificação AGORA'+(usuario?' só pra '+cap(usuario):' pra todo mundo que ativou o sino')+'. Confirma?')))return;
   status.textContent='Enviando…';
   try{
-    const r=await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texto,usuario,admin:eu})});
+    const body={texto,admin:eu};
+    if(usuario)body.usuario=usuario;
+    const r=await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     status.textContent=await r.text();
-    if(r.ok)avisar('Enviado pra '+cap(usuario)+' ✓',true);
+    if(r.ok){document.getElementById('composerTexto').value='';avisar('Enviado ✓',true);}
   }catch(e){ status.textContent='Erro: '+e.message; }
 }
 async function carregarBackupsAutomaticos(){
