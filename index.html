@@ -3108,7 +3108,8 @@ function renderAdminJogo(j,s){
       '<button class="btn" style="margin-top:14px" onclick="lancarResultado()">Forçar resultado manualmente</button>'+
       '<button class="btn fantasma" style="margin-top:14px;margin-left:10px" onclick="buscarAgora()">🔎 Buscar placar na web agora</button>';
   }else{
-    html+='<button class="btn fantasma" onclick="reabrirResultado()">Corrigir resultado / reabrir</button>';
+    html+='<p class="nota-rodape" style="margin:0 0 8px">Placar registrado em: <b>'+(j.resultadoEm?new Date(j.resultadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'sem data registrada')+'</b>'+(j.fonteAuto?' (via '+esc(j.fonteAuto.fonte||'busca automática')+')':' (lançado manualmente)')+'</p>'+
+    '<button class="btn fantasma" onclick="reabrirResultado()">Corrigir resultado / reabrir</button>';
   }
   const marcados=j.emCampo||[];
   const listaCampo=[...dados.jogadores].filter(p=>p.ativo!==false||marcados.includes(p.id))
@@ -3120,7 +3121,7 @@ function renderAdminJogo(j,s){
   });
   chkCampo=chkCampo.replace('</div><div class="pos-titulo"','<div class="pos-titulo"')+'</div>';
   html+='<details style="margin-top:14px"><summary>Quem entrou em campo ('+marcados.length+' registrados) — libera as notas</summary>'+
-    '<p class="nota-rodape">A lista é buscada automaticamente após o jogo. Use aqui para forçar ou corrigir.</p>'+
+    '<p class="nota-rodape">A lista é buscada automaticamente após o jogo. Use aqui para forçar ou corrigir.'+(j.emCampoInfo&&j.emCampoInfo.quando?' Última atualização: <b>'+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})+'</b> ('+esc(j.emCampoInfo.fonte||'')+').':'')+'</p>'+
     chkCampo+
     '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:flex-end">'+
     '<div style="flex:1;min-width:140px"><label for="npRapidoNome">Jogador não está na lista?</label><input id="npRapidoNome" placeholder="Nome do jogador"></div>'+
