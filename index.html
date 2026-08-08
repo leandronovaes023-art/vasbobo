@@ -2317,6 +2317,62 @@ function atualizarBotaoNotificacao(){
     btn.classList.remove('ativado');btn.classList.add('balancando');btn.title='Ativar notificações';
   }
 }
+/* =================== SAUDAÇÃO AO LOGAR (separado da notificação push) =================== */
+// Frases dos personagens do grupo, sem nenhuma menção a votar/palpite/avaliar/MVP —
+// só a parte engraçada do perfil de cada um, pra saudar quando a pessoa abre o app.
+const FRASES_SAUDACAO_LOGIN=[
+  'Daniel vai dormir feliz com a meia Bob Esponja.',
+  'Se o Novaes sobreviver ao intervalo sem defender o Pedrinho, já é uma vitória.',
+  'O Daniel já cancelou o sócio.',
+  'Se tem Vasco, o Douglas já abriu a Netvasco 83 vezes hoje.',
+  'O Douglas já está preparando a defesa do Pedrinho.',
+  'Vitor já estaria em São Januário 3 horas antes, se ainda fosse aos jogos.',
+  'O Vitor não gosta de ficar atrás do gol porque é ruim pra ver o jogo.',
+  'O Jorge já escolheu o bar e a gordinha de hoje.',
+  'O Juan conseguiu autorização pra sair.',
+  'O Alex já fez um scouting completo do próximo adversário.',
+  'O Azevedo apareceu... aproveita esse fenômeno raro.',
+  'O Novaes já acendeu o segundo cigarro discutindo por causa do Pedrinho.',
+  'O Novaes brigou uma vez em São Januário defendendo o Pedrinho.',
+  'André já xingou o Pedrosa três vezes hoje.',
+  'O André jura que o Sforza ainda vai voltar.',
+  'André avistou uma figurinha do Daniel e já surtou.',
+  'Leodoro apareceu, arrumou uma treta rápida e sumiu de novo.',
+  'Luiz já está pensando em marcar um churrasco no Tropi.',
+  'Pedro apareceu do nada só pra xingar um lateral e sumiu de novo.',
+  'Thiago Azevedo sumiu por semanas e voltou falando sem parar.',
+  'O Velloso já comprou mais um tênis essa semana.',
+  'O Velloso está treinando pra mais uma maratona.',
+  'O Daniel já escolheu o Renato Gaúcho pra ser o próximo técnico.',
+  'O Douglas é apaixonado pelo Diniz e não esconde isso.',
+  'O Douglas e o Novaes viraram guardiões oficiais do Pedrinho.',
+  'A voz aveludada do Antônio Nerd já ecoou pelo grupo hoje.',
+  'O Antônio Nerd está estressado com a prova de química de novo.',
+];
+const SAUDACOES_HORA=[
+  { max:11, opcoes:['O Vasbobo te deseja um bom dia!','Bom dia, Vasbobo!','Acordou torcedor? Bom dia!'] },
+  { max:17, opcoes:['O Vasbobo te deseja uma boa tarde!','Boa tarde, Vasbobo!','Aproveita a tarde de Vasbobo!'] },
+  { max:24, opcoes:['O Vasbobo te deseja uma boa noite!','Boa noite, Vasbobo!','Fecha o dia com moral vascaína!'] },
+];
+function saudacaoLoginPorHora(){
+  const h=new Date().getHours();
+  const grupo=SAUDACOES_HORA.find(g=>h<g.max)||SAUDACOES_HORA[SAUDACOES_HORA.length-1];
+  return grupo.opcoes[Math.floor(Math.random()*grupo.opcoes.length)];
+}
+async function tentarMostrarSaudacaoLogin(){
+  if(!eu)return;
+  try{
+    const chaveHoje=new Date().toISOString().slice(0,10);
+    const ref=db.collection('saudacoes_login_uso').doc(eu);
+    const doc=await ref.get();
+    const dado=doc.exists?doc.data():{};
+    const contagemHoje=(dado.data===chaveHoje)?(dado.vezes||0):0;
+    if(contagemHoje>=3)return; // já saudou 3x hoje, não mostra mais
+    const frase=FRASES_SAUDACAO_LOGIN[Math.floor(Math.random()*FRASES_SAUDACAO_LOGIN.length)];
+    avisar(saudacaoLoginPorHora()+' '+frase,true,6000);
+    await ref.set({data:chaveHoje,vezes:contagemHoje+1},{merge:true});
+  }catch(e){ console.error('erro na saudação de login',e); }
+}
 function entrarNoApp(){
   setTimeout(iniciarMidiaJanela, 300);
   setTimeout(verificarPendenciasRodada, 500);
@@ -2338,6 +2394,7 @@ function entrarNoApp(){
   if(fmEl)fmEl.classList.remove('oculto');
   fqAtualizarBarra();
   atualizarBotaoNotificacao();
+  setTimeout(tentarMostrarSaudacaoLogin,1200);
   if('Notification' in window&&Notification.permission==='granted')ativarOuvintePrimeiroPlano();
   timerTick=setInterval(async()=>{
     const el=document.activeElement;
