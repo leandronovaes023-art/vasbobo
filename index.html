@@ -2579,7 +2579,9 @@ function htmlRodadaBox(){
           '<div class="premio-sub">'+prem.max+' pts — coroa na cabeça, moral no grupo e zoação liberada até o próximo apito.</div>'+
           (prem.ribas.length?'<div class="premio-titulo" style="color:var(--vermelho);margin-top:12px;display:flex;align-items:center;gap:6px">Ribamar da rodada '+ICON_RIBA+'</div>'+
           '<div class="premio-nome">'+prem.ribas.map(esc).join(' & ')+'</div>'+
-          '<div class="premio-sub">'+prem.min+' pt'+(prem.min===1?'':'s')+' — errou até o hino. Agora a roleta do castigo te espera.</div>':'')+'</div>';
+          '<div class="premio-sub">'+prem.min+' pt'+(prem.min===1?'':'s')+' — errou até o hino. Agora a roleta do castigo te espera.</div>':'')+
+          '<div class="premio-sub" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--linha);opacity:.75">'+nomeJogoComPlacar(rj)+' · '+fmtData(rj)+'</div>'+
+          '</div>';
       }else if(tabela.length){
         const lider=tabela[0], ultimo=tabela[tabela.length-1];
         const empatados=lider.pts===ultimo.pts;
