@@ -2575,10 +2575,10 @@ function htmlRodadaBox(){
       const prem=premiacaoJogo(rj);
       if(prem){
         html+='<div class="premio-g"><div class="premio-titulo" style="color:var(--ouro);display:flex;align-items:center;gap:6px">Reizinho da rodada '+ICON_REI+'</div>'+
-          '<div class="premio-nome" style="color:var(--ouro)">'+prem.reis.map(esc).join(' & ')+'</div>'+
+          '<div class="premio-nome" style="color:var(--ouro);display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.reis.map(u=>fotoUsuario(u,40)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
           '<div class="premio-sub">'+prem.max+' pts — coroa na cabeça, moral no grupo e zoação liberada até o próximo apito.</div>'+
           (prem.ribas.length?'<div class="premio-titulo" style="color:var(--vermelho);margin-top:12px;display:flex;align-items:center;gap:6px">Ribamar da rodada '+ICON_RIBA+'</div>'+
-          '<div class="premio-nome">'+prem.ribas.map(esc).join(' & ')+'</div>'+
+          '<div class="premio-nome" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.ribas.map(u=>fotoUsuario(u,40)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
           '<div class="premio-sub">'+prem.min+' pt'+(prem.min===1?'':'s')+' — errou até o hino. Agora a roleta do castigo te espera.</div>':'')+
           '<div class="premio-sub" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--linha);opacity:.75">'+nomeJogoComPlacar(rj)+' · '+fmtData(rj)+'</div>'+
           '</div>';
@@ -3954,10 +3954,10 @@ async function renderAdmin(){
   '<div id="notifTabEnviar" class="oculto">'+
   '<p class="nota-rodape" style="margin:0 0 10px">Escreve na hora, ou vai na Biblioteca e clica em "usar essa" pra trazer uma frase pronta aqui (e pode editar antes de mandar).</p>'+
   '<textarea id="composerTexto" rows="3" placeholder="Mensagem que vai ser enviada…" style="width:100%;margin-bottom:10px;resize:vertical"></textarea>'+
-  '<div class="grid g2" style="margin-bottom:10px">'+
-  '<div><label for="composerDestino">Destino</label><select id="composerDestino" onchange="document.getElementById(\'campoComposerUsuario\').style.display=this.value===\'um\'?\'block\':\'none\'">'+
-  '<option value="todos">Todo mundo</option><option value="um">Um usuário específico</option></select></div>'+
-  '<div id="campoComposerUsuario" style="display:none"><label for="composerUsuario">Usuário</label><select id="composerUsuario">'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
+  '<label style="display:block;margin-bottom:6px">Destino</label>'+
+  '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;padding:10px;border:1px solid var(--linha);border-radius:8px">'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:700;text-transform:none;letter-spacing:0;margin:0"><input type="checkbox" id="composerTodos" style="width:auto" onchange="alternarComposerTodos(this.checked)"> Todo mundo</label>'+
+  Object.keys(dados.usuarios).sort().map(u=>'<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;text-transform:none;letter-spacing:0;margin:0"><input type="checkbox" class="chkComposerUsuario" value="'+u+'" style="width:auto" onchange="document.getElementById(\'composerTodos\').checked=false"> '+cap(u)+'</label>').join('')+
   '</div>'+
   '<div class="grid g2" style="margin-bottom:10px">'+
   '<div><label for="composerQuando">Quando</label><select id="composerQuando" onchange="alternarCamposComposerAgendar(this.value)">'+
@@ -4195,35 +4195,46 @@ function alternarCamposComposerAgendar(valor){
     if(!horaInput.value)horaInput.value=agora.getHours();
   }
 }
+function alternarComposerTodos(marcado){
+  document.querySelectorAll('.chkComposerUsuario').forEach(c=>{c.checked=false;c.disabled=marcado;});
+}
+function usuariosSelecionadosComposer(){
+  if(document.getElementById('composerTodos').checked)return null; // null = todo mundo
+  return [...document.querySelectorAll('.chkComposerUsuario:checked')].map(c=>c.value);
+}
 async function executarComposer(){
   const texto=(document.getElementById('composerTexto').value||'').trim();
-  const destino=document.getElementById('composerDestino').value;
-  const usuario=destino==='um'?document.getElementById('composerUsuario').value:null;
+  const usuarios=usuariosSelecionadosComposer();
   const quando=document.getElementById('composerQuando').value;
   const status=document.getElementById('composerStatus');
   if(!texto){avisar('Escreve a mensagem primeiro.');return;}
+  if(usuarios!==null&&usuarios.length===0){avisar('Escolhe pelo menos um destinatário (ou marca "Todo mundo").');return;}
+  const rotuloDestino=usuarios===null?'todo mundo':(usuarios.length===1?cap(usuarios[0]):usuarios.length+' pessoas');
   if(quando==='agendar'){
     const data=document.getElementById('composerData').value;
     const hora=parseInt(document.getElementById('composerHora').value,10);
     const repetir=document.getElementById('composerRepetir').checked;
     if(!data){avisar('Escolhe a data.');return;}
     if(isNaN(hora)||hora<0||hora>23){avisar('Hora precisa ser um número de 0 a 23.');return;}
-    const dado={texto,hora,ativo:true,criadoEm:Date.now(),criadoPor:eu};
-    if(usuario)dado.usuario=usuario;
-    if(!repetir)dado.data=data; // sem "data" = repete todo dia; com "data" = só naquele dia específico
     try{
-      await db.collection('mensagens_agendadas').add(dado);
-      status.textContent='Agendado'+(usuario?' pra '+cap(usuario):' pra todo mundo')+(repetir?' às '+hora+'h, todo dia':' pra '+data+' às '+hora+'h')+'.';
+      const alvos=usuarios===null?[null]:usuarios; // null = uma entrada sem "usuario" (vale pra todo mundo)
+      for(const u of alvos){
+        const dado={texto,hora,ativo:true,criadoEm:Date.now(),criadoPor:eu};
+        if(u)dado.usuario=u;
+        if(!repetir)dado.data=data;
+        await db.collection('mensagens_agendadas').add(dado);
+      }
+      status.textContent='Agendado pra '+rotuloDestino+(repetir?' às '+hora+'h, todo dia':' pra '+data+' às '+hora+'h')+'.';
       avisar('Agendado ✓',true);
       carregarMensagensAgendadas();
     }catch(e){ status.textContent='Erro: '+e.message; }
     return;
   }
-  if(!(await confirmar('Vai mandar essa notificação AGORA'+(usuario?' só pra '+cap(usuario):' pra todo mundo que ativou o sino')+'. Confirma?')))return;
+  if(!(await confirmar('Vai mandar essa notificação AGORA pra '+rotuloDestino+'. Confirma?')))return;
   status.textContent='Enviando…';
   try{
     const body={texto,admin:eu};
-    if(usuario)body.usuario=usuario;
+    if(usuarios!==null)body.usuarios=usuarios;
     const r=await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     status.textContent=await r.text();
     if(r.ok){document.getElementById('composerTexto').value='';avisar('Enviado ✓',true);}
