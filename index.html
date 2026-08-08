@@ -2569,9 +2569,36 @@ function atualizarCronometro(){
   el.innerHTML=(d>0?d+'d ':'')+h+'h '+m+'m '+s+'s<small>para a bola rolar'+alerta+'</small>';
 }
 
+const FRASES_CASTIGO_PENDENTE=[
+  (n)=>n+', a roleta já está de olho em você. Gira logo.',
+  (n)=>'Foi mal, '+n+', mas alguém tinha que ser o Ribamar da vez. Gira aí.',
+  (n)=>n+', a roleta não morde (muito). Gira e encara.',
+  (n)=>'Coragem, '+n+'. A roleta é rápida, a vergonha é que dura.',
+  (n)=>n+', todo mundo já tá de olho pra ver o que vai sair. Gira!',
+  (n)=>'Sem fugir, '+n+'. A roleta te encontra em qualquer lugar.',
+  (n)=>n+', respira fundo e gira essa roda da desgraça.',
+  (n)=>'É a vez do '+n+' provar que sabe perder com estilo. Gira aí.',
+  (n)=>n+', o grupo inteiro está na torcida (contra você). Gira!',
+  (n)=>'Prepara a câmera, '+n+' vai girar a roleta agora.',
+];
 function htmlCastigoRodadaBox(){
-  return '<div class="rodada-box"><h3><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span></h3>'+
-    '<p class="nota-rodape" style="margin:0 0 10px">Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira essa roleta:</p>'+
+  const rod=jogoDaRodada();
+  let textoIntro='Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira essa roleta:';
+  let cabecalhoExtra='';
+  if(rod){
+    const [,rj]=rod;
+    const ativo=statusJogo(rj)==='andamento'||(rj.resultadoEm&&(Date.now()-rj.resultadoEm)<(PRAZO_AVALIAR_MS+PRAZO_EXTRA_RESULTADO_MS));
+    if(ativo){
+      const prem=premiacaoJogo(rj);
+      if(prem&&prem.ribas.length){
+        const nome=cap(prem.ribas[0]);
+        textoIntro=FRASES_CASTIGO_PENDENTE[Math.floor(Math.random()*FRASES_CASTIGO_PENDENTE.length)](nome);
+        cabecalhoExtra=' <span style="display:inline-flex;align-items:center;gap:6px;margin-left:6px">'+fotoUsuario(prem.ribas[0],26)+'<span style="font-size:.82rem;font-weight:700">'+esc(nome)+'</span></span>';
+      }
+    }
+  }
+  return '<div class="rodada-box"><h3><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span>'+cabecalhoExtra+'</h3>'+
+    '<p class="nota-rodape" style="margin:0 0 10px">'+esc(textoIntro)+'</p>'+
     '<div class="roleta-wrap-mini"><div class="roleta-ponteiro-mini">▼</div>'+
     '<svg class="roleta-svg-mini" viewBox="0 0 300 300"></svg>'+
     '</div><div style="text-align:center"><div class="badge-audio">🎙️ Áudio mínimo de 30 segundos</div></div></div>';
