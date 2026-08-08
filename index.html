@@ -2659,10 +2659,10 @@ function htmlRodadaBox(){
       const prem=premiacaoJogo(rj);
       if(prem){
         html+='<div class="premio-g"><div class="premio-titulo" style="color:var(--ouro);display:flex;align-items:center;gap:6px">Reizinho da rodada '+ICON_REI+'</div>'+
-          '<div class="premio-nome" style="color:var(--ouro);display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.reis.map(u=>fotoUsuario(u,40)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
+          '<div class="premio-nome" style="color:var(--ouro);display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.reis.map(u=>fotoUsuario(u,26)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
           '<div class="premio-sub">'+prem.max+' pts — coroa na cabeça, moral no grupo e zoação liberada até o próximo apito.</div>'+
           (prem.ribas.length?'<div class="premio-titulo" style="color:var(--vermelho);margin-top:12px;display:flex;align-items:center;gap:6px">Ribamar da rodada '+ICON_RIBA+'</div>'+
-          '<div class="premio-nome" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.ribas.map(u=>fotoUsuario(u,40)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
+          '<div class="premio-nome" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.ribas.map(u=>fotoUsuario(u,26)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
           '<div class="premio-sub">'+prem.min+' pt'+(prem.min===1?'':'s')+' — errou até o hino. Agora a roleta do castigo te espera.</div>':'')+
           '<div class="premio-sub" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--linha);opacity:.75">'+nomeJogoComPlacar(rj)+' · '+fmtData(rj)+'</div>'+
           '</div>';
