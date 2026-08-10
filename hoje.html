@@ -30,6 +30,17 @@ function registrarLog(tipo,detalhe){
   }catch(e){}
 }
 registrarLog('aba','Abriu página: '+location.pathname);
+const LIMITE_CLIQUES_LOG_DIA=500;
+function podeGravarCliqueLog(){
+  try{
+    const hoje=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
+    const chave='vasbobo:logclicks:'+hoje;
+    const n=+(localStorage.getItem(chave)||0);
+    if(n>=LIMITE_CLIQUES_LOG_DIA)return false;
+    localStorage.setItem(chave,n+1);
+    return true;
+  }catch(e){ return true; }
+}
 let ultimoCliqueLog='';
 document.addEventListener('click',(e)=>{
   const alvo=e.target.closest('button,a,input[type="checkbox"],input[type="radio"]');
@@ -39,6 +50,7 @@ document.addEventListener('click',(e)=>{
   if(rotulo===ultimoCliqueLog)return;
   ultimoCliqueLog=rotulo;
   setTimeout(()=>{if(ultimoCliqueLog===rotulo)ultimoCliqueLog='';},400);
+  if(!podeGravarCliqueLog())return;
   registrarLog('clique',rotulo);
 },true);
 

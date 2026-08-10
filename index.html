@@ -982,7 +982,21 @@ function registrarLog(tipo,detalhe,usuarioForcado){
   }catch(e){}
 }
 /* clique genérico: cobre "toda navegação" sem precisar anotar botão por botão.
-   Ações importantes (abaixo) ganham um registro extra, mais descritivo, além deste. */
+   Ações importantes (abaixo) ganham um registro extra, mais descritivo, além deste.
+   Trava de segurança: no máximo LIMITE_CLIQUES_LOG_DIA cliques logados por dispositivo por dia —
+   depois disso, o site continua funcionando normal, só para de registrar log de clique até virar o dia
+   (login/logout/navegação de aba/ações admin continuam sendo logados sempre, sem limite). */
+const LIMITE_CLIQUES_LOG_DIA=500;
+function podeGravarCliqueLog(){
+  try{
+    const hoje=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
+    const chave='vasbobo:logclicks:'+hoje;
+    const n=+(localStorage.getItem(chave)||0);
+    if(n>=LIMITE_CLIQUES_LOG_DIA)return false;
+    localStorage.setItem(chave,n+1);
+    return true;
+  }catch(e){ return true; }
+}
 let ultimoCliqueLog='';
 document.addEventListener('click',(e)=>{
   const alvo=e.target.closest('button,a,input[type="checkbox"],input[type="radio"],.jogo-item,.cal-filtro');
@@ -992,6 +1006,7 @@ document.addEventListener('click',(e)=>{
   if(rotulo===ultimoCliqueLog)return; // evita duplicar log de clique duplo/repetido muito rápido
   ultimoCliqueLog=rotulo;
   setTimeout(()=>{if(ultimoCliqueLog===rotulo)ultimoCliqueLog='';},400);
+  if(!podeGravarCliqueLog())return;
   registrarLog('clique',rotulo);
 },true);
 /* =================== FOTOS PERSISTENTES NO FIREBASE (perfil + castigo) =================== */
@@ -4060,7 +4075,7 @@ async function limparMinhasAvaliacoes(){
 }
 async function renderAdmin(){
   const sec=document.getElementById('secAdmin');
-  let html='<div class="card"><h2>🔔 Notificações</h2>'+
+  let html='<div class="card"><details><summary>🔔 Notificações</summary><div style="margin-top:12px">'+
   '<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;border-bottom:1px solid var(--linha);padding-bottom:10px">'+
   '<button class="btn fantasma tab-notif" id="tabNotifBiblioteca" onclick="mudarTabNotif(\'biblioteca\')" style="padding:6px 14px;font-size:.78rem">📚 Biblioteca de frases</button>'+
   '<button class="btn fantasma tab-notif" id="tabNotifEnviar" onclick="mudarTabNotif(\'enviar\')" style="padding:6px 14px;font-size:.78rem">📣 Enviar / Agendar</button>'+
@@ -4069,7 +4084,7 @@ async function renderAdmin(){
   '<div id="notifTabBiblioteca">'+
   '<p class="nota-rodape" style="margin:0 0 10px">Todas as frases usadas pelas notificações automáticas — editáveis de verdade (mudou aqui, muda em todo lugar que ela é usada).</p>'+
   '<div class="grid g2" style="margin-bottom:10px">'+
-  '<div><label for="filtroTipoFrase">Filtrar por tipo</label><select id="filtroTipoFrase" onchange="carregarBibliotecaFrases()">'+
+  '<div><label for="filtroTipoFrase">Filtrar por tipo</label><select id="filtroTipoFrase" onchange="if(document.getElementById(&quot;detalhesListaFrases&quot;).open)carregarBibliotecaFrases()">'+
   '<option value="votar">🗳️ Votar palpite</option><option value="avaliar">🚫 Avaliar jogadores</option>'+
   '<option value="motivacional">🎯 Vasbobo Acredita</option><option value="quiz">⚽ Quiz</option>'+
   '<option value="saudacao">💬 Saudação (use {nome})</option></select></div>'+
@@ -4077,7 +4092,9 @@ async function renderAdmin(){
   '</div>'+
   '<div class="grid g2" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaFraseTexto">Nova frase</label><input id="novaFraseTexto" placeholder="Escreva a frase…"></div></div>'+
   '<button class="btn fantasma" onclick="criarFraseBiblioteca()">+ Adicionar à biblioteca</button>'+
-  '<div id="listaBibliotecaFrases" style="margin-top:14px">Carregando…</div>'+
+  '<details id="detalhesListaFrases" style="margin-top:14px" ontoggle="if(this.open)carregarBibliotecaFrases()"><summary>👀 Ver todas as frases cadastradas</summary>'+
+  '<div id="listaBibliotecaFrases" style="margin-top:10px">Carregando…</div>'+
+  '</details>'+
   '</div>'+
   '<div id="notifTabEnviar" class="oculto">'+
   '<p class="nota-rodape" style="margin:0 0 10px">Escreve na hora, ou vai na Biblioteca e clica em "usar essa" pra trazer uma frase pronta aqui (e pode editar antes de mandar).</p>'+
@@ -4106,7 +4123,7 @@ async function renderAdmin(){
   '<button class="btn fantasma" onclick="criarMensagemAgendada()">+ Adicionar mensagem agendada</button>'+
   '<div id="listaMsgAgendadasItens" style="margin-top:14px">Carregando…</div>'+
   '</div>'+
-  '</div>'+
+  '</div></details></div>'+
   '<div class="card"><details><summary>🧹 Limpar dados de um usuário</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Escolha o que quer apagar de um usuário específico (ex.: uma conta de teste).</p>'+
   '<input id="limparUsuarioNome" placeholder="nome de login exato (ex.: teste)" style="width:100%;margin-bottom:10px">'+
@@ -4166,14 +4183,16 @@ async function renderAdmin(){
       '<span style="display:flex;gap:8px"><button class="btn fantasma" onclick="resetarSenha(\''+u+'\')">Resetar senha</button>'+(u!==eu?'<button class="btn-x" onclick="removerUsuario(\''+u+'\')">remover</button>':'')+'</span></div>';
   });
   html+='</div></div></details></div>'+
-  '<div class="card"><h2>Backup</h2><p class="nota-rodape" style="margin:0 0 12px">Baixe de tempos em tempos um arquivo com tudo: usuários, jogos, palpites, notas e comentários. <b>Antes de qualquer republicação do app, baixe o backup</b> — se os dados aparecerem zerados na versão nova, é só restaurar aqui e tudo volta.</p>'+
+  '<div class="card"><details><summary>💾 Backup</summary><div style="margin-top:12px">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Baixe de tempos em tempos um arquivo com tudo: usuários, jogos, palpites, notas e comentários. <b>Antes de qualquer republicação do app, baixe o backup</b> — se os dados aparecerem zerados na versão nova, é só restaurar aqui e tudo volta.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn claro" onclick="exportarDados()">Baixar backup (.json)</button>'+
   '<button class="btn fantasma" onclick="document.getElementById(\'arqImport\').click()">Restaurar de um backup</button>'+
   '<input type="file" id="arqImport" accept=".json,application/json" style="display:none" onchange="importarDados(this)"></div>'+
-  '<p class="nota-rodape" id="infoBackup"></p></div>'+
-  '<div class="card"><h2>🔄 Backups automáticos</h2><p class="nota-rodape" style="margin:0 0 12px">O site agora salva uma cópia sozinho a cada 6 horas, sem precisar lembrar de nada. Guarda os últimos 14 dias.</p>'+
-  '<div id="listaBackupsAuto">Carregando…</div></div>'+
-  '<div class="card"><h2>🗂️ Logs de acesso e ações</h2>'+
+  '<p class="nota-rodape" id="infoBackup"></p></div></details></div>'+
+  '<div class="card"><details ontoggle="if(this.open)carregarBackupsAutomaticos()"><summary>🔄 Backups automáticos</summary><div style="margin-top:12px">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">O site agora salva uma cópia sozinho a cada 6 horas, sem precisar lembrar de nada. Guarda os últimos 14 dias.</p>'+
+  '<div id="listaBackupsAuto">Carregando…</div></div></details></div>'+
+  '<div class="card"><details><summary>🗂️ Logs de acesso e ações</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Login/logout, navegação (abas e cliques) e ações administrativas de todo mundo — guardado pra sempre. Também tem uma cópia diária arquivada sozinha às 3h. Escolha os filtros que quiser (deixe em branco pra não filtrar) e busque — nada carrega sozinho, pra economizar.</p>'+
   '<div class="grid g3" style="margin-bottom:10px">'+
   '<div><label for="logAno">Ano</label><input id="logAno" type="number" placeholder="ex.: 2026"></div>'+
@@ -4186,10 +4205,8 @@ async function renderAdmin(){
   '<div><label for="logUsuario">Usuário</label><select id="logUsuario"><option value="">Todos</option>'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
   '</div>'+
   '<button class="btn" onclick="buscarLogs()">🔍 Buscar logs</button>'+
-  '<div id="listaLogs" style="margin-top:14px"></div></div>';
+  '<div id="listaLogs" style="margin-top:14px"></div></div></details></div>';
   sec.innerHTML=html;
-  carregarBackupsAutomaticos();
-  carregarMensagensAgendadas();
   mudarTabNotif('biblioteca');
 }
 async function buscarLogs(){
@@ -4232,7 +4249,7 @@ function mudarTabNotif(nome){
     if(painel)painel.classList.toggle('oculto',t!==nome);
     if(btn)btn.classList.toggle('claro',t===nome);
   });
-  if(nome==='biblioteca')carregarBibliotecaFrases();
+  if(nome==='agendadas')carregarMensagensAgendadas();
 }
 const TIPOS_COM_HORA=['motivacional','quiz'];
 async function carregarBibliotecaFrases(){
