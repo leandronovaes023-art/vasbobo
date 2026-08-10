@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vasbobo</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#17171B">
+<meta name="theme-color" content="#0B0D10">
 <link rel="icon" href="/icons/favicon-cruz-v2.png?v=2" sizes="32x32">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -85,47 +85,45 @@ console.log('Firebase conectado ao Vasbobo ✓');
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --preto:#F2F0EA;
-    --carvao:rgba(255,255,255,.92);
-    --carvao2:rgba(255,255,255,.86);
-    --branco:#17171B;
-    --vermelho:#C0121B;
-    --cinza:#6C6C74;
-    --linha:#DAD7D0;
-    --ouro:#A97B12;
-    --verde:#22794F;
+    --preto:#0B0D10;
+    --carvao:#15181D;
+    --carvao2:#1B1F25;
+    --branco:#F3F4F6;
+    --vermelho:#E0293B;
+    --cinza:#8A8F98;
+    --linha:#262B33;
+    --ouro:#D9AE4E;
+    --verde:#2FD08E;
+    --azul:#4FA6F0;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
-  body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5}
-  body::before{content:"";position:fixed;inset:0;background:url("img/embed/asset0.jpg") center top / cover no-repeat;z-index:-2}
-  body::after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(244,242,237,.24) 0%,rgba(244,242,237,.34) 45%,rgba(244,242,237,.52) 100%);z-index:-1}
+  body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5;background:var(--preto)}
   .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
   .oculto{display:none!important}
 
-  header{border-bottom:3px solid var(--branco);background:linear-gradient(180deg,rgba(250,249,246,.55),rgba(250,249,246,.85))}
+  header{border-bottom:1px solid var(--linha);background:var(--preto)}
   .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 4px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:nowrap}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
-  .sino-notif{background:rgba(255,255,255,.08);border:1px solid var(--linha);color:var(--branco);border-radius:7px;
+  .sino-notif{background:var(--carvao);border:1px solid var(--linha);color:var(--branco);border-radius:7px;
     width:34px;height:34px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
-  .sino-notif.ativado{background:rgba(30,138,76,.18);border-color:var(--verde)}
+  .sino-notif.ativado{background:rgba(47,208,142,.14);border-color:var(--verde)}
   .sino-notif.balancando{animation:sinoBalanca 2.4s ease-in-out infinite}
   @keyframes sinoBalanca{0%,90%,100%{transform:rotate(0)}91%{transform:rotate(-14deg)}93%{transform:rotate(11deg)}95%{transform:rotate(-8deg)}97%{transform:rotate(5deg)}99%{transform:rotate(-2deg)}}
   h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1;text-shadow:none}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px}
   .logo-row{display:flex;align-items:center;gap:14px;cursor:pointer;padding:6px 10px;border-radius:14px;
-    background:linear-gradient(145deg,rgba(255,255,255,.55),rgba(255,255,255,.15));
-    box-shadow:5px 5px 10px rgba(23,23,27,.12),-4px -4px 8px rgba(255,255,255,.7),inset 0 0 0 1px rgba(255,255,255,.3);
-    transition:transform .12s,box-shadow .12s;
+    background:var(--carvao);border:1px solid var(--linha);
+    transition:transform .12s,border-color .12s;
     user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
-  .logo-row:active{transform:translateY(1px);box-shadow:2px 2px 5px rgba(23,23,27,.14),-2px -2px 4px rgba(255,255,255,.6),inset 1px 1px 3px rgba(23,23,27,.15)}
-  .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--branco);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
+  .logo-row:active{transform:translateY(1px);border-color:var(--azul)}
+  .bobo{width:96px;height:96px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--linha);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
   .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
-  .tela-login{position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:rgba(20,20,24,.15)}
+  .tela-login{position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:var(--preto)}
   .bobo-login{display:block;margin:0 auto 6px;width:150px;height:auto;border-radius:16px;filter:drop-shadow(0 14px 18px rgba(0,0,0,.35))}
-  .eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:#4A4A52;margin-bottom:6px;text-shadow:0 1px 3px #000}
-  .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px)}
-  #whoFoto img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--vermelho);display:block;vertical-align:middle}
+  .eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cinza);margin-bottom:6px}
+  .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px}
+  #whoFoto img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--azul);display:block;vertical-align:middle}
   .who b{text-transform:capitalize}
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
@@ -145,73 +143,73 @@ console.log('Firebase conectado ao Vasbobo ✓');
     scrollbar-width:none;-ms-overflow-style:none}
   .menu-secundario::-webkit-scrollbar{display:none;height:0}
   .menu-secundario.oculto{display:none}
-  .menu-secundario .tab{background:rgba(255,255,255,.92);border:none;color:#17171B;text-align:center;padding:8px 14px;border-radius:8px;
+  .menu-secundario .tab{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);text-align:center;padding:8px 14px;border-radius:8px;
     font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
-    display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none;box-shadow:0 3px 8px rgba(0,0,0,.25)}
-  .menu-secundario .tab:hover{background:#fff}
+    display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
+  .menu-secundario .tab:hover{border-color:var(--azul)}
   nav::-webkit-scrollbar{display:none}
-  .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
-  .tab.ativa{background:var(--branco);color:#FFFFFF}
-  .tab:focus-visible,button:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+  .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;white-space:nowrap}
+  .tab.ativa{background:var(--branco);color:var(--preto)}
+  .tab:focus-visible,button:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
   main{max-width:1320px;margin:0 auto;padding:6px 20px 102px}
-  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:#0A0A0C;border-top:1px solid rgba(255,255,255,.1);
+  .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:var(--carvao);border-top:1px solid var(--linha);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
   .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;
-    padding:14px 2px 11px;text-decoration:none;color:rgba(255,255,255,.68);font-size:.6rem;font-weight:700;
+    padding:14px 2px 11px;text-decoration:none;color:var(--cinza);font-size:.6rem;font-weight:700;
     text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
   .menu-fixo a .mf-icone{font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;height:30px}
   .menu-fixo a .mf-icone img{width:32px;height:32px;object-fit:contain;display:block}
-  .menu-fixo a.ativo{color:#fff}
-  .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--vermelho)}
+  .menu-fixo a.ativo{color:var(--branco)}
+  .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--azul)}
   .menu-fixo a{position:relative}
-  .menu-fixo a .mf-sinal{position:absolute;top:9px;right:calc(50% - 24px);width:8px;height:8px;border-radius:50%;background:var(--vermelho);border:1.5px solid #17171B}
+  .menu-fixo a .mf-sinal{position:absolute;top:9px;right:calc(50% - 24px);width:8px;height:8px;border-radius:50%;background:var(--vermelho);border:1.5px solid var(--carvao)}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
-  .bar-teste div{background:rgba(224,169,63,.14);border:1px solid var(--ouro);color:#6B5310;border-radius:9px;padding:8px 14px;font-size:.78rem;backdrop-filter:blur(6px)}
+  .bar-teste div{background:rgba(217,174,78,.1);border:1px solid var(--ouro);color:var(--ouro);border-radius:9px;padding:8px 14px;font-size:.78rem}
 
-  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;padding:16px 18px;margin-bottom:14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 1px 3px rgba(23,23,27,.04)}
+  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   .card h2{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;font-size:.96rem;letter-spacing:.05em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--linha);text-shadow:none}
   .vazio{color:var(--cinza);text-align:center;padding:26px 16px;border:1px dashed var(--linha);border-radius:12px;line-height:1.6}
   .nota-rodape{color:var(--cinza);font-size:.76rem;line-height:1.6;margin-top:8px}
   .aviso{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);background:#2a1113;border:1px solid var(--vermelho);color:#f2cfd1;border-radius:10px;padding:11px 18px;font-size:.87rem;display:none;z-index:900;max-width:92vw;text-align:center}
   .aviso.ok{background:#0f231a;border-color:var(--verde);color:#cfe9db}
 
-  input,select,textarea{background:rgba(255,255,255,.92);border:1px solid var(--linha);color:var(--branco);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:.95rem;width:100%}
-  input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--vermelho);outline-offset:1px}
+  input,select,textarea{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:.95rem;width:100%}
+  input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--azul);outline-offset:1px}
   label{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cinza);margin-bottom:5px}
   .grid{display:grid;gap:12px}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr 1fr 1fr}
   @media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
-  .btn{background:var(--vermelho);color:#FFFFFF;border:none;border-radius:9px;padding:11px 20px;font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:.92rem;cursor:pointer}
+  .btn{background:var(--azul);color:#08121C;border:none;border-radius:9px;padding:11px 20px;font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:.92rem;cursor:pointer}
   .btn:hover{filter:brightness(1.12)}
-  .btn.claro{background:var(--branco);color:#FFFFFF}
+  .btn.claro{background:var(--branco);color:var(--preto)}
   .btn.fantasma{background:none;border:1px solid var(--linha);color:var(--cinza);font-size:.78rem;padding:8px 14px}
   .btn:disabled{opacity:.4;cursor:not-allowed}
   details>summary{cursor:pointer;font-size:.78rem;color:var(--cinza);letter-spacing:.1em;text-transform:uppercase;padding:6px 0}
 
   /* .tela-login base rules moved earlier to a fixed full-viewport overlay */
-  .caixa-login{background:rgba(255,255,255,.9);box-shadow:0 24px 70px rgba(23,23,27,.22);border:1px solid var(--linha);border-top:4px solid var(--branco);border-radius:16px;padding:34px 30px;max-width:430px;width:100%;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .caixa-login{background:var(--carvao);box-shadow:0 24px 70px rgba(0,0,0,.4);border:1px solid var(--linha);border-top:4px solid var(--azul);border-radius:16px;padding:34px 30px;max-width:430px;width:100%}
   .caixa-login h1{font-size:2.6rem;text-align:center}
-  .caixa-login .sub{text-align:center;color:#4A4A52;font-size:.85rem;margin:6px 0 24px;line-height:1.5}
+  .caixa-login .sub{text-align:center;color:var(--cinza);font-size:.85rem;margin:6px 0 24px;line-height:1.5}
 
   /* modal de confirmação (substitui o confirm() do navegador, bloqueado no artefato) */
   .veu{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99}
-  .modal{background:rgba(255,255,255,.97);border:1px solid var(--linha);border-top:4px solid var(--vermelho);border-radius:14px;padding:26px;max-width:420px;width:100%;max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .destaque-sistema-pont{background:linear-gradient(90deg,rgba(192,18,27,.09),rgba(207,169,74,.09));
-    border:1.5px solid var(--vermelho);border-radius:12px;padding:12px 16px;margin:10px 0 14px;
+  .modal{background:var(--carvao);border:1px solid var(--linha);border-top:4px solid var(--azul);border-radius:14px;padding:26px;max-width:420px;width:100%;max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .destaque-sistema-pont{background:rgba(79,166,240,.08);
+    border:1.5px solid var(--azul);border-radius:12px;padding:12px 16px;margin:10px 0 14px;
     cursor:pointer;font-size:.9rem;color:var(--branco);transition:transform .15s}
   .destaque-sistema-pont:hover{transform:translateY(-1px)}
   .modal-pontuacao{max-width:560px;max-height:86vh;overflow-y:auto;text-align:left}
   .modal-pontuacao h3{text-transform:none;font-size:1.3rem;margin-bottom:12px}
   .modal-pontuacao h4{font-family:'Anton',sans-serif;font-size:.95rem;letter-spacing:.02em;text-transform:uppercase;
-    color:var(--vermelho);margin:16px 0 6px}
-  .modal-pontuacao p,.modal-pontuacao li{font-size:.86rem;line-height:1.55;color:#33333A}
+    color:var(--azul);margin:16px 0 6px}
+  .modal-pontuacao p,.modal-pontuacao li{font-size:.86rem;line-height:1.55;color:var(--branco)}
   .corpo-pontuacao .tabela-pont td{font-size:.8rem;padding:5px 4px}
   .modal p{font-size:.95rem;line-height:1.55;margin-bottom:18px}
   .modal .acoes{display:flex;gap:10px;justify-content:flex-end}
 
-  .destaque{border:1px solid var(--branco);background:linear-gradient(115deg,rgba(255,255,255,.7),var(--carvao) 60%)}
+  .destaque{border:1px solid var(--azul);background:linear-gradient(115deg,rgba(79,166,240,.07),var(--carvao) 60%)}
   .selo-destaque{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--branco);font-weight:700;margin-bottom:8px}
   .selo-destaque .cruz{color:var(--vermelho)}
   .dest-grid{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:16px;align-items:start}
@@ -222,7 +220,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:rgba(255,255,255,.65);border:1px solid rgba(23,23,27,.32);border-radius:12px;padding:12px 14px}
+  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:12px 14px}
   .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
     letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
@@ -239,11 +237,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rx-barra-t{flex:1;height:7px;background:rgba(0,0,0,.08);border-radius:99px;overflow:hidden;border:1px solid rgba(0,0,0,.1)}
   .rx-barra-f{height:100%;border-radius:99px;background:repeating-linear-gradient(45deg,var(--vermelho),var(--vermelho) 6px,#8f0f16 6px,#8f0f16 12px)}
   .rx-frase{background:#fff;border:1px dashed var(--vermelho);padding:8px 12px;font-size:.78rem;margin-bottom:10px;border-radius:6px;font-style:italic}
-  .rx-diag{font-size:.76rem;color:#3A331F;line-height:1.6;background:rgba(192,18,27,.06);padding:8px 12px;border-radius:6px}
+  .rx-diag{font-size:.76rem;color:#3A331F;line-height:1.6;background:rgba(224,41,59,.06);padding:8px 12px;border-radius:6px}
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
-  .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid rgba(150,148,140,.4)}
-  .mini-linha-ultimo{background:rgba(192,18,27,.07);margin:0 -10px;padding:7px 10px;border-radius:8px;border-bottom:none}
+  .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid var(--linha)}
+  .mini-linha-ultimo{background:rgba(224,41,59,.08);margin:0 -10px;padding:7px 10px;border-radius:8px;border-bottom:none}
   .mini-linha-ultimo .rank-nome{color:var(--vermelho);font-weight:900}
   .mini-linha-ultimo .pt{color:var(--vermelho);font-weight:900}
   .mini-linha:last-child{border-bottom:none}
@@ -261,17 +259,21 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .jogo-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border:1px solid var(--linha);border-radius:11px;margin-bottom:8px;background:var(--carvao2);cursor:pointer;width:100%;text-align:left;color:var(--branco);font-family:inherit;backdrop-filter:blur(6px)}
   .cal-filtros{display:flex;gap:6px;flex-wrap:wrap}
   .cal-filtro{background:var(--carvao2);border:1px solid var(--linha);color:var(--cinza);border-radius:99px;padding:6px 13px;font-size:.74rem;font-weight:700;letter-spacing:.02em;cursor:pointer;font-family:'Inter',sans-serif}
-  .cal-filtro.ativa{background:var(--vermelho);border-color:var(--vermelho);color:#fff}
-  .cal-mes{color:#6C6C74;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;border-bottom:1px solid var(--linha);padding-bottom:5px}
+  .cal-filtro.ativa{background:var(--azul);border-color:var(--azul);color:#08121C}
+  .cal-mes{color:var(--cinza);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;border-bottom:1px solid var(--linha);padding-bottom:5px}
   .cal-mes:first-child{margin-top:0}
-  .cal-linha{display:flex;flex-direction:column;gap:1px;padding:8px 0;border-bottom:1px solid var(--linha);font-size:.76rem;color:#17171B}
+  .cal-linha{display:flex;flex-direction:column;gap:1px;padding:8px 0;border-bottom:1px solid var(--linha);font-size:.76rem;color:var(--branco)}
   .cal-linha:last-child{border-bottom:none}
   .cal-linha-txt{font-weight:700;line-height:1.35}
-  .cal-comp{color:#6C6C74;font-size:.66rem}
+  .cal-comp{color:var(--cinza);font-size:.66rem}
   .jogo-item:hover{border-color:var(--cinza)}
   .jogo-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:.01em}
   .jogo-nome .x{color:var(--cinza)}
   .meta{font-size:.72rem;color:var(--cinza);letter-spacing:.03em;text-transform:uppercase;margin-top:3px;line-height:1.5}
+  .info-pilha{display:flex;flex-direction:column;gap:3px;margin-top:5px}
+  .info-linha{font-size:.72rem;color:var(--cinza);letter-spacing:.03em;text-transform:uppercase;line-height:1.4;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  @media(max-width:380px){.info-linha{font-size:.66rem}}
   .selo{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid var(--linha);white-space:nowrap}
   .s-aberto{color:var(--verde);border-color:var(--verde)}
   .s-andamento{color:var(--ouro);border-color:var(--ouro)}
@@ -280,11 +282,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .placar-final{font-family:'Anton',sans-serif;font-size:1rem;white-space:nowrap}
   .mes-sep{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;
     color:var(--branco);margin:18px 0 8px;padding:6px 10px;border-radius:7px;
-    background:rgba(255,255,255,.82);border-bottom:2px solid var(--branco);
-    box-shadow:0 1px 4px rgba(0,0,0,.12)}
+    background:var(--carvao2);border-bottom:2px solid var(--azul);
+    box-shadow:0 1px 4px rgba(0,0,0,.2)}
 
   .placar-grande{font-family:'Anton',sans-serif;font-size:clamp(1.3rem,4.5vw,1.9rem);display:flex;align-items:center;gap:10px;text-transform:uppercase;flex-wrap:wrap}
-  .placar-grande .num{background:var(--branco);color:#FFFFFF;border-radius:8px;padding:2px 12px;min-width:44px;text-align:center}
+  .placar-grande .num{background:var(--carvao2);color:var(--branco);border-radius:8px;padding:2px 12px;min-width:44px;text-align:center;border:1px solid var(--linha)}
   .placar-grande .x{color:var(--cinza);font-size:.8em}
   .palpite-form{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
   .palpite-form input[type=number]{width:68px;text-align:center;font-family:'Anton',sans-serif;font-size:1.15rem}
@@ -304,7 +306,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .notas-botoes::-webkit-scrollbar{display:none}
   .btn-nota{width:28px;height:28px;min-width:28px;border-radius:7px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;font-size:.78rem;flex:none}
   .btn-nota.btn-na{width:auto;padding:0 8px}
-  .btn-nota:hover{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
+  .btn-nota:hover{background:var(--azul);color:#08121C;border-color:var(--azul)}
   .nota-escolhida{margin-top:10px;display:flex;align-items:center;gap:10px;font-size:.92rem}
   .btn-mic.gravando{background:var(--vermelho);color:#fff;border-color:var(--vermelho);animation:micPulso 1s ease-in-out infinite}
   @keyframes micPulso{0%,100%{opacity:1}50%{opacity:.6}}
@@ -322,7 +324,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rank-detalhe{font-size:.7rem;color:var(--cinza);letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
   .rank-nome{text-transform:capitalize;font-weight:700}
 
-  .pos-titulo{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.82rem;color:#4A4A52;margin:16px 2px 8px;text-shadow:0 1px 3px #000}
+  .pos-titulo{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.82rem;color:var(--cinza);margin:16px 2px 8px}
   .jog-linha{display:grid;grid-template-columns:40px 1fr auto auto auto;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--linha);border-radius:10px;margin-bottom:6px;background:var(--carvao2);font-size:.9rem}
   @media(max-width:600px){.jog-linha{grid-template-columns:34px 1fr auto auto auto;font-size:.82rem}}
   .jogo-resenha>summary{padding:14px 16px;font-weight:800;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.02em;font-size:.95rem;cursor:pointer}
@@ -334,7 +336,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-x{background:none;border:1px solid var(--linha);color:var(--vermelho);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:.75rem;font-family:inherit}
   .auto-info{font-size:.76rem;color:#1D5C38;background:rgba(34,121,79,.1);border:1px solid var(--verde);border-radius:8px;padding:8px 12px;margin-top:10px;line-height:1.5}
   .modal-sair{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px;z-index:99}
-  .modal-sair .modal{background:rgba(255,255,255,.97);border:1px solid var(--linha);border-top:4px solid var(--vermelho);border-radius:14px;padding:26px;max-width:380px;width:100%;text-align:center}
+  .modal-sair .modal{background:var(--carvao);border:1px solid var(--linha);border-top:4px solid var(--azul);border-radius:14px;padding:26px;max-width:380px;width:100%;text-align:center}
   .modal-sair h3{font-family:'Anton',sans-serif;font-size:1.4rem;text-transform:uppercase;margin-bottom:10px}
   .modal-sair p{color:var(--cinza);font-size:.88rem;line-height:1.5;margin-bottom:18px}
 
@@ -369,7 +371,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     text-align:center;box-shadow:0 30px 90px rgba(0,0,0,.5)}
   .modal-castigo .tag-castigo{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--vermelho);
     font-weight:800;margin-bottom:2px}
-  .modal-castigo h2{font-family:'Anton',sans-serif;font-size:1.05rem;text-transform:uppercase;margin-bottom:3px}
+  .modal-castigo h2{font-family:'Anton',sans-serif;font-size:1.05rem;text-transform:uppercase;margin-bottom:3px;color:var(--preto)}
   .modal-castigo p{color:var(--cinza);font-size:.72rem;line-height:1.3;margin-bottom:6px}
   .roleta-wrap{position:relative;width:210px;height:210px;margin:2px auto 6px;max-width:66vw;max-height:66vw}
   .roleta-svg{width:100%;height:100%;filter:drop-shadow(0 8px 20px rgba(0,0,0,.28));
@@ -380,29 +382,29 @@ console.log('Firebase conectado ao Vasbobo ✓');
     border-radius:50%;background:#FFFFFF;border:3px solid var(--preto);display:flex;align-items:center;
     justify-content:center;font-size:1.3rem;color:var(--vermelho);z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.25)}
   .info-pontuacao{position:relative;display:block}
-  .info-pontuacao > a{display:inline-flex;align-items:center;gap:6px;color:#17171B;font-size:.86rem;font-weight:800;text-decoration:none;
+  .info-pontuacao > a{display:inline-flex;align-items:center;gap:6px;color:var(--branco);font-size:.86rem;font-weight:800;text-decoration:none;
     background:var(--carvao);border:1px solid var(--linha);border-radius:10px;padding:9px 14px;cursor:pointer}
-  .info-pontuacao > a:hover{border-color:var(--vermelho)}
-  .info-pontuacao > a::after{content:"▾";font-size:.75em;color:var(--vermelho)}
-  .info-pontuacao .tooltip-pont{display:none;width:100%;max-width:100%;background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;
-    padding:14px 16px;box-shadow:0 6px 20px rgba(0,0,0,.14);margin-top:8px;box-sizing:border-box}
+  .info-pontuacao > a:hover{border-color:var(--azul)}
+  .info-pontuacao > a::after{content:"▾";font-size:.75em;color:var(--azul)}
+  .info-pontuacao .tooltip-pont{display:none;width:100%;max-width:100%;background:var(--carvao);border:1px solid var(--linha);border-radius:12px;
+    padding:14px 16px;box-shadow:0 6px 20px rgba(0,0,0,.3);margin-top:8px;box-sizing:border-box}
   .info-pontuacao .tooltip-pont.aberto{display:block}
   .tooltip-pont{cursor:default}
   .tabela-pont{border-collapse:collapse;margin-bottom:10px;width:100%}
-  .tabela-pont td{font-size:.74rem;color:#33333A;line-height:1.4;padding:4px 0;text-align:left;vertical-align:top}
+  .tabela-pont td{font-size:.74rem;color:var(--branco);line-height:1.4;padding:4px 0;text-align:left;vertical-align:top}
   .tabela-pont td:first-child{font-weight:800;color:var(--ouro);padding-right:10px;white-space:nowrap;width:40px}
-  .tooltip-pont .tp-link{font-size:.76rem;color:var(--vermelho);font-weight:800;text-decoration:none}
+  .tooltip-pont .tp-link{font-size:.76rem;color:var(--azul);font-weight:800;text-decoration:none}
 
   .divisor-rodada{border:none;border-top:1px solid var(--linha);margin:16px 0}
   .chips-coroa{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;text-align:center}
   .chip-coroa{display:inline-flex;align-items:center;gap:8px;background:rgba(169,123,18,.08);
     border:1.5px solid var(--ouro);color:var(--ouro);border-radius:99px;padding:5px 12px 5px 14px;
     font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem}
-  .chip-coroa.riba{background:rgba(192,18,27,.06);border-color:var(--vermelho);color:var(--vermelho)}
+  .chip-coroa.riba{background:rgba(224,41,59,.06);border-color:var(--vermelho);color:var(--vermelho)}
   .roleta-wrap-mini{position:relative;width:100%;max-width:380px;aspect-ratio:1;margin:6px auto 4px}
   .roleta-svg-mini{width:100%;height:100%;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
   .badge-audio{text-align:center;margin:10px auto 0;display:inline-flex;align-items:center;gap:6px;
-    background:rgba(192,18,27,.08);border:1.5px solid var(--vermelho);color:var(--vermelho);
+    background:rgba(224,41,59,.08);border:1.5px solid var(--vermelho);color:var(--vermelho);
     border-radius:99px;padding:6px 14px;font-size:.78rem;font-weight:800;font-family:'Inter',sans-serif}
   .badge-audio-wrap{text-align:center}
   .roleta-ponteiro-mini{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:1.2rem;
@@ -411,7 +413,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     border-radius:50%;background:#FFFFFF;border:2px solid var(--preto);display:flex;align-items:center;
     justify-content:center;font-size:.95rem;color:var(--vermelho);z-index:2;box-shadow:0 2px 6px rgba(0,0,0,.22)}
   .roleta-resultado{font-family:'Anton',sans-serif;font-size:.92rem;line-height:1.3;margin-bottom:8px;
-    min-height:30px;text-transform:none;color:var(--branco)}
+    min-height:30px;text-transform:none;color:var(--preto)}
   .btn-girar{width:100%;background:var(--vermelho);color:#FFF;border:none;border-radius:10px;padding:11px;
     font-family:'Anton',sans-serif;font-size:.88rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
   .btn-girar:disabled{opacity:.5;cursor:wait}
@@ -427,9 +429,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
     max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
     box-shadow:0 24px 70px rgba(0,0,0,.4)}
   .modal-banner .emoji-grande{font-size:2.6rem;margin-bottom:10px}
-  .modal-banner h3{font-family:'Anton',sans-serif;font-size:1.3rem;text-transform:uppercase;line-height:1.2;margin-bottom:8px}
+  .modal-banner h3{font-family:'Anton',sans-serif;font-size:1.3rem;text-transform:uppercase;line-height:1.2;margin-bottom:8px;color:var(--preto)}
   .modal-banner p{color:var(--cinza);font-size:.85rem;margin-bottom:16px}
-  .modal-banner button{width:100%;background:var(--branco);color:#FFF;border:none;border-radius:10px;padding:12px;
+  .modal-banner button{width:100%;background:var(--azul);color:#08121C;border:none;border-radius:10px;padding:12px;
     font-family:'Inter',sans-serif;font-weight:800;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
 
   .castigo-item{background:var(--carvao);border:1px solid var(--linha);border-radius:12px;padding:14px 16px;
@@ -438,12 +440,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .castigo-item .ci-nome{font-weight:800;text-transform:capitalize}
   .castigo-item .ci-data{font-size:.72rem;color:var(--cinza)}
   .castigo-item .ci-texto{margin-top:6px;font-size:.88rem;color:var(--branco)}
-  .castigo-item.pendente{border-color:var(--vermelho);background:rgba(192,18,27,.05)}
+  .castigo-item.pendente{border-color:var(--vermelho);background:rgba(224,41,59,.05)}
   .castigo-item.pendente .ci-texto{color:var(--vermelho);font-style:italic}
 
   .topo-btn{position:fixed;left:14px;bottom:14px;width:44px;height:44px;border-radius:50%;
-    background:var(--branco);color:#FFFFFF;border:none;font-size:1.15rem;cursor:pointer;
-    box-shadow:0 8px 26px rgba(23,23,27,.35);z-index:45;display:none;align-items:center;justify-content:center}
+    background:var(--azul);color:#08121C;border:none;font-size:1.15rem;cursor:pointer;
+    box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:45;display:none;align-items:center;justify-content:center}
   .topo-btn.on{display:flex}
 
 /* ===== O Que Mais Entende de Futebol — barra lateral tipo "edge panel" (expande/recolhe) ===== */
@@ -456,7 +458,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
 .fq-edge-seta-esq{transform:scaleX(-1);padding:12px 6px!important}
 .fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(1)}
-.lembrete-avaliar{position:fixed;left:8px;bottom:92px;z-index:850;width:max-content;max-width:min(92vw,340px);background:#17171B;color:#fff;
+.lembrete-avaliar{position:fixed;left:8px;bottom:92px;z-index:850;width:max-content;max-width:min(92vw,340px);background:var(--carvao2);color:#fff;
   border-radius:9px;padding:5px 9px;font-size:.66rem;line-height:1.3;box-shadow:0 8px 24px rgba(0,0,0,.35);
   border:1px solid var(--vermelho)}
 .lembrete-avaliar.oculto{display:none}
@@ -464,7 +466,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .lembrete-linha1,.lembrete-linha2{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .lembrete-linha2{margin-top:1px}
 .lembrete-corpo{cursor:pointer}
-.lembrete-fechar{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:#17171B;
+.lembrete-fechar{position:absolute;top:-6px;right:-6px;width:16px;height:16px;border-radius:50%;background:var(--carvao2);
   border:1px solid var(--vermelho);color:#fff;font-size:.56rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .lembrete-avaliar.recolhido{width:38px;height:38px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;
   animation:lembreteFlutua 2.4s ease-in-out infinite}
@@ -476,7 +478,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   transition:max-width .25s ease,padding .25s ease}
 .fq-edge-corpo img{width:74px;height:111px;border-radius:9px;object-fit:cover;object-position:top;display:block}
 .fq-edge.recolhida .fq-edge-corpo{max-width:0;padding-left:0;padding-right:0}
-.fq-edge-seta{background:none;border:none;color:var(--vermelho);font-size:1.05rem;font-weight:900;
+.fq-edge-seta{background:none;border:none;color:var(--azul);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
 .fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
 @media(max-width:480px){.fq-edge-corpo img{width:58px;height:87px}.fq-edge-corpo{max-width:74px}}
@@ -516,7 +518,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   margin-top:10px;cursor:pointer;font-weight:700;font-family:'Inter',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px}
 .fq-fechar:hover{border-color:#F2F0EA}
-.fq-fechar .cruz-btn{color:var(--vermelho);font-size:1.1em}
+.fq-fechar .cruz-btn{color:var(--azul);font-size:1.1em}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -636,7 +638,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   <div class="caixa-login">
     <img class="bobo g" src="img/embed/asset1.jpg" alt="Bobo da corte">
     <h1 class="display" style="font-size:1.8rem;text-align:center">É você mesmo?</h1>
-    <div style="background:rgba(192,18,27,.12);border:1px solid var(--vermelho);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px">
+    <div style="background:rgba(79,166,240,.1);border:1px solid var(--azul);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px">
       <div id="confNomeExibido" style="font-family:'Anton',sans-serif;font-size:2rem;text-transform:capitalize;letter-spacing:.04em"></div>
       <div style="font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cinza);margin-top:4px">sessão salva neste dispositivo</div>
     </div>
@@ -676,7 +678,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
         </div>
         <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
           <button id="btnNotificacao" onclick="pedirPermissaoNotificacao()" class="sino-notif" aria-label="Ativar notificações" title="Ativar notificações">🔔</button>
-          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(192,18,27,.2);border:1px solid var(--vermelho);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">📲 App VASBOBO</button>
+          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">📲 App VASBOBO</button>
         </div>
       </div>
     </div>
@@ -2675,12 +2677,13 @@ function htmlRodadaBox(){
     const tabela=tabelaRodada(rj);
     let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+'</h3>'+
       '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer;margin-bottom:8px">'+
-      '<div style="font-size:1.15rem;font-weight:800;color:var(--vermelho);text-transform:uppercase;line-height:1.3">'+nomeJogo(rj)+'</div>'+
-      '<div class="meta" style="margin-top:2px">'+fmtData(rj)+' · '+esc(rj.competicao)+(rj.fase?' ('+esc(rj.fase)+')':'')+'</div>'+
-      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--vermelho);color:#fff;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
+      '<div style="font-size:1.15rem;font-weight:800;color:var(--azul);text-transform:uppercase;line-height:1.3">'+nomeJogo(rj)+'</div>'+
+      '<div class="meta" style="margin-top:2px">'+fmtData(rj)+'</div>'+
+      '<div class="info-linha">'+esc(rj.competicao)+(rj.fase?' ('+esc(rj.fase)+')':'')+'</div>'+
+      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--azul);color:#08121C;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
       '</div>';
     if(rj.resultado&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
-      html+='<button class="jogo-item" style="background:rgba(192,18,27,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
+      html+='<button class="jogo-item" style="background:rgba(224,41,59,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
         '<span><span class="jogo-nome" style="color:var(--vermelho);text-transform:uppercase;white-space:nowrap;font-size:.92rem">VOCÊ AINDA NÃO AVALIOU A SELEVASCO</span>'+
         '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada. <b style="color:var(--vermelho)">Penalidade -2 pontos</b></div></span></button>';
     }
@@ -2746,9 +2749,11 @@ function htmlRodadaBox(){
     .sort((a,b)=>b.pts-a.pts||(b.confirmado-a.confirmado)||a.u.localeCompare(b.u));
   let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span></h3>'+
     '<div onclick="abrirJogo(\''+did+'\')" style="cursor:pointer;margin-bottom:8px">'+
-    '<div style="font-size:1.15rem;font-weight:800;color:var(--vermelho);text-transform:uppercase;line-height:1.3">'+nomeJogo(dj)+'</div>'+
-    '<div class="meta" style="margin-top:2px">'+fmtData(dj)+' · '+esc(dj.competicao)+(dj.fase?' ('+esc(dj.fase)+')':'')+' · '+(dj.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
-    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--vermelho);color:#fff;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
+    '<div style="font-size:1.15rem;font-weight:800;color:var(--azul);text-transform:uppercase;line-height:1.3">'+nomeJogo(dj)+'</div>'+
+    '<div class="meta" style="margin-top:2px">'+fmtData(dj)+'</div>'+
+    '<div class="info-linha">'+esc(dj.competicao)+(dj.fase?' ('+esc(dj.fase)+')':'')+'</div>'+
+    '<div class="info-linha">'+(dj.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--azul);color:#08121C;border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
     '</div>';
   if(linhasRodada.length){
     html+=linhasRodada.map((l,i)=>'<div class="mini-linha"><span>'+(i+1)+'º <b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+
@@ -2775,7 +2780,7 @@ function renderListaJogos(){
       return agora-fim>3*3600000; // mais de 3h depois do fim esperado, sem resultado
     });
     if(pendentes.length){
-      html+='<div class="card" style="border-color:var(--vermelho);background:rgba(192,18,27,.08)"><h2 style="color:var(--vermelho)">⚠️ Placar pendente <span class="adm">admin</span></h2>'+
+      html+='<div class="card" style="border-color:var(--vermelho);background:rgba(224,41,59,.08)"><h2 style="color:var(--vermelho)">⚠️ Placar pendente <span class="adm">admin</span></h2>'+
         '<p class="nota-rodape" style="margin:0 0 10px">A busca automática não achou o resultado desses jogos ainda. Lança manualmente pra liberar o ranking e as notas:</p>'+
         pendentes.map(([id,j])=>'<button class="jogo-item" onclick="abrirJogo(\''+id+'\')"><span><span class="jogo-nome">'+nomeJogo(j)+'</span>'+
           '<div class="meta">'+fmtData(j)+' · '+esc(j.competicao)+'</div></span><span class="selo s-avaliar">lançar placar</span></button>').join('')+
@@ -2793,11 +2798,14 @@ function renderListaJogos(){
       '<div class="dest-grid"><div class="rodada-box">'+
       '<div class="jogo-nome" style="font-size:1.35rem">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
       '<div class="data-grande">'+fmtData(j)+'</div>'+
-      '<div class="meta" style="font-size:.86rem;margin-top:4px">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
-      (j.ondeAssistir?'<div style="margin-top:6px">'+badgeTransmissao(j)+'</div>':'')+
+      '<div class="info-pilha">'+
+        '<div class="info-linha">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
+        '<div class="info-linha">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+        (j.ondeAssistir?'<div class="info-linha" style="text-transform:none">'+badgeTransmissao(j)+'</div>':'')+
+      '</div>'+
       (s==='aberto'&&j.hora?'<div class="cronometro" id="cronoDest" data-jogo="'+id+'">…</div>':'')+
-      '<p style="font-size:.9rem;margin:10px 0 12px;color:#33333A">'+chamada+'.</p>'+
-      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" style="background:#17171B;border-color:#17171B" onclick="abrirJogo(\''+id+'\')">✠ Abrir jogo</button><span class="selo '+cls+'">'+txt+'</span></div>'+
+      '<p style="font-size:.9rem;margin:10px 0 12px;color:var(--branco)">'+chamada+'.</p>'+
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> Abrir jogo</button><span class="selo '+cls+'">'+txt+'</span></div>'+
       '</div>'+htmlRodadaBox()+htmlCastigoRodadaBox()+'</div></div>';
   }
 
@@ -2814,7 +2822,12 @@ function renderListaJogos(){
     const [cls,txt]=textoSelo(s);
     const meu=j.palpites[eu];
     html+='<button class="jogo-item" onclick="abrirJogo(\''+id+'\')"><span><span class="jogo-nome">'+nomeJogo(j)+'</span>'+
-      '<div class="meta">'+fmtData(j)+' '+badgeTransmissao(j,true)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+(meu?' · seu palpite: '+meu.v+'×'+meu.a:'')+'</div></span>'+
+      '<div class="info-pilha">'+
+        '<div class="info-linha">'+fmtData(j)+'</div>'+
+        '<div class="info-linha">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
+        (meu?'<div class="info-linha">seu palpite: '+meu.v+'×'+meu.a+'</div>':'')+
+        (j.ondeAssistir?'<div class="info-linha" style="text-transform:none">'+badgeTransmissao(j,true)+'</div>':'')+
+      '</div></span>'+
       '<span style="display:flex;align-items:center;gap:10px">'+(placarTexto(j,true)?'<span class="placar-final">'+placarTexto(j,true)+(j.resultado?'':' (ao vivo)')+'</span>':'')+'<span class="selo '+cls+'">'+txt+'</span></span></button>';
   });
   if(arquivados>0){
@@ -3010,7 +3023,7 @@ function renderAvaliacaoCard(j,s){
     return m.nota!==undefined&&m.nota!==null&&m.nota!=='';
   });
   if(jaAvaliouTudo&&!mostrarAvaliacaoDetalhe){
-    html+='<button class="jogo-item" style="width:100%" onclick="toggleAvaliacaoDetalhe()"><span><span class="jogo-nome" style="color:var(--vermelho)">✅ Você já avaliou. Quer alterar algo? Clique</span></span></button></div>';
+    html+='<button class="jogo-item" style="width:100%" onclick="toggleAvaliacaoDetalhe()"><span><span class="jogo-nome" style="color:var(--azul)">✅ Você já avaliou. Quer alterar algo? Clique</span></span></button></div>';
     return html;
   }
   const pendentes=lista.filter(p=>{
@@ -3047,7 +3060,7 @@ function renderAvaliacaoCard(j,s){
       '</div>'+
       '<div id="comRegistrado_'+p.id+'" class="salvo-tick on" style="display:'+((minha.com||'')?'flex':'none')+';align-items:center;font-size:.82rem;color:var(--cinza);gap:8px">'+
       ((minha.com||'').indexOf('🎙️')===0||(minha.com||'').indexOf('🎙️')>=0?'🎙️ Áudio registrado':'✓ Comentário registrado')+
-      ' <button type="button" onclick="reabrirComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--vermelho);text-decoration:underline;cursor:pointer;font-size:.78rem">editar</button></div>'+
+      ' <button type="button" onclick="reabrirComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--azul);text-decoration:underline;cursor:pointer;font-size:.78rem">editar</button></div>'+
       '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+' <span style="font-size:.72rem;font-weight:700">Gravar áudio</span></button>'+
       '</div>'+
       (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
@@ -3453,7 +3466,8 @@ function renderPartidas(){
     filtrados.forEach(([id,j])=>{
       const mes=nomeMes(j.data);
       if(mes!==mesAtual){mesAtual=mes;linhasCal+='<div class="cal-mes">'+mesAtual+'</div>';}
-      linhasCal+='<div class="cal-linha"><span class="cal-linha-txt">'+fmtDataCal(j)+' · '+(j.hora||'horário a definir')+' · '+nomeJogo(j)+'</span>'+
+      linhasCal+='<div class="cal-linha"><span class="cal-linha-txt" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+fmtDataCal(j)+' · '+(j.hora||'a definir')+'</span>'+
+        '<span class="cal-linha-txt" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nomeJogo(j)+'</span>'+
         '<span class="cal-comp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+badgeTransmissao(j,true)+'</span></div>';
     });
   }
@@ -3946,7 +3960,7 @@ async function fmSortear(){
     await db.collection('frases_uso').doc(eu).set({data:chave,frase});
     try{ const ref=await db.collection('frases_uso_historico').add({usuario:eu,frase,quando:Date.now()}); ultimoHistoricoMotivId=ref.id; }catch(e){ ultimoHistoricoMotivId=null; }
     el.innerHTML='<div id="fmCard" style="background:#17171B;color:#fff;border-radius:14px;padding:28px 20px;text-align:center">'+
-      '<div class="eyebrow" style="color:var(--vermelho);text-align:center">Frase Vasbobo Motivacional</div>'+
+      '<div class="eyebrow" style="color:var(--verde);text-align:center">Frase Vasbobo Motivacional</div>'+
       '<div style="font-family:\'Anton\',sans-serif;font-size:1.35rem;text-transform:uppercase;line-height:1.5;margin-top:10px">'+esc(frase)+'</div></div>'+
       '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">'+
       '<button class="btn fantasma" style="flex:1" onclick="fmPrintTela()">📸 Print a toda Tela</button>'+
@@ -4115,7 +4129,7 @@ async function renderAdmin(){
   '<div><label for="composerHora">Hora (0-23)</label><input id="composerHora" type="number" min="0" max="23"></div>'+
   '<div style="display:flex;align-items:flex-end;padding-bottom:8px"><label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:400"><input type="checkbox" id="composerRepetir" style="width:auto"> repetir todo dia</label></div>'+
   '</div>'+
-  '<button class="btn" style="background:var(--vermelho)" onclick="executarComposer()">Enviar / Agendar</button>'+
+  '<button class="btn" style="background:var(--azul)" onclick="executarComposer()">Enviar / Agendar</button>'+
   '<p class="nota-rodape" id="composerStatus" style="margin-top:10px"></p>'+
   '</div>'+
   '<div id="notifTabAgendadas" class="oculto">'+
