@@ -15,6 +15,33 @@ firebase.initializeApp({
 });
 const dbGal = firebase.firestore();
 const db = dbGal;
+
+/* =================== LOG DE ACESSO (mesma coleção "logs" usada pelo app principal) =================== */
+function registrarLog(tipo,detalhe){
+  try{
+    let usuario='(deslogado)';
+    try{usuario=localStorage.getItem('vasbobo:sessao')||'(deslogado)';}catch(e){}
+    const agora=new Date();
+    const br=new Date(agora.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
+    db.collection('logs').add({
+      ts:agora.getTime(),ano:br.getFullYear(),mes:br.getMonth()+1,dia:br.getDate(),hora:br.getHours(),minuto:br.getMinutes(),
+      usuario,tipo,detalhe:String(detalhe||'').slice(0,300),pagina:location.pathname
+    }).catch(()=>{});
+  }catch(e){}
+}
+registrarLog('aba','Abriu página: '+location.pathname);
+let ultimoCliqueLog='';
+document.addEventListener('click',(e)=>{
+  const alvo=e.target.closest('button,a,input[type="checkbox"],input[type="radio"]');
+  if(!alvo)return;
+  let rotulo=(alvo.getAttribute('aria-label')||alvo.title||alvo.textContent||alvo.id||'').trim().replace(/\s+/g,' ').slice(0,80);
+  if(!rotulo)rotulo=alvo.tagName.toLowerCase();
+  if(rotulo===ultimoCliqueLog)return;
+  ultimoCliqueLog=rotulo;
+  setTimeout(()=>{if(ultimoCliqueLog===rotulo)ultimoCliqueLog='';},400);
+  registrarLog('clique',rotulo);
+},true);
+
 let eu = "";
 </script>
 <meta charset="UTF-8">

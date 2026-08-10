@@ -10,3 +10,6 @@
 
 [functions."backup-automatico"]
   schedule = "0 */6 * * *"
+
+[functions."backup-logs"]
+  schedule = "0 6 * * *"
