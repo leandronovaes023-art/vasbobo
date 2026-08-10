@@ -17,6 +17,7 @@ const dbHoje = firebase.firestore();
 const db = dbHoje;
 
 /* =================== LOG DE ACESSO (mesma coleção "logs" usada pelo app principal) =================== */
+const NIVEL_PADRAO_TIPO={login:'importante',logout:'importante',aba:'comum',clique:'comum'};
 function registrarLog(tipo,detalhe){
   try{
     let usuario='(deslogado)';
@@ -25,7 +26,7 @@ function registrarLog(tipo,detalhe){
     const br=new Date(agora.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
     db.collection('logs').add({
       ts:agora.getTime(),ano:br.getFullYear(),mes:br.getMonth()+1,dia:br.getDate(),hora:br.getHours(),minuto:br.getMinutes(),
-      usuario,tipo,detalhe:String(detalhe||'').slice(0,300),pagina:location.pathname
+      usuario,tipo,nivel:NIVEL_PADRAO_TIPO[tipo]||'comum',detalhe:String(detalhe||'').slice(0,300),pagina:location.pathname
     }).catch(()=>{});
   }catch(e){}
 }

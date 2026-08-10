@@ -1,7 +1,7 @@
 // Backup automático — roda sozinho (agendado no netlify.toml) e guarda uma cópia
 // do banco de dados principal a cada execução, numa coleção separada.
 // Existe pra nunca mais passarmos pela situação de perder dados sem ter pra onde voltar.
-const { garantirFirebase, admin } = require('./_push-helper');
+const { garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
 
 const DIAS_PARA_GUARDAR = 14; // mantém backups dos últimos 14 dias, apaga os mais antigos sozinho
 
@@ -35,8 +35,10 @@ exports.handler = async () => {
       apagados++;
     }
 
+    await registrarLogServidor(db, { tipo: 'sistema', nivel: 'comum', detalhe: `Backup automático do banco rodou OK (${apagados} backup(s) antigo(s) removido(s))` });
     return { statusCode: 200, body: `Backup salvo (${idBackup}). ${apagados} backup(s) antigo(s) removido(s).` };
   } catch (e) {
+    await registrarLogServidor(db, { tipo: 'sistema', nivel: 'critico', detalhe: `Backup automático do banco FALHOU: ${e.message}` });
     return { statusCode: 500, body: 'Erro ao fazer backup: ' + e.message };
   }
 };

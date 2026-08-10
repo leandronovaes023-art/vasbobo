@@ -6,7 +6,7 @@
 //
 // As frases agora vivem no Firestore (coleção notif_frases, ver _frases.js), editáveis
 // pelo admin em Configurações → Notificações. Nada mais fica fixo no código.
-const { mandarPush, garantirFirebase, admin } = require('./_push-helper');
+const { mandarPush, garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
 const { garantirSeed, buscarFrases, sorteia } = require('./_frases');
 
 const HORA = 3600000;
@@ -42,6 +42,7 @@ exports.handler = async () => {
     return { statusCode: 500, body: 'Config ausente: ' + e.message };
   }
   const db = admin.firestore();
+  try {
   await garantirSeed(db);
   const agora = new Date();
   const horaAtual = agora.getHours();
@@ -230,4 +231,8 @@ exports.handler = async () => {
   }
 
   return { statusCode: 200, body: `OK - ${enviados} enviadas, ${falhas} falharam` };
+  } catch (e) {
+    await registrarLogServidor(db, { tipo: 'sistema', nivel: 'critico', detalhe: `Função de notificações agendadas FALHOU: ${e.message}` });
+    return { statusCode: 500, body: 'Erro: ' + e.message };
+  }
 };

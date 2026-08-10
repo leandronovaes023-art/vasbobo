@@ -969,15 +969,17 @@ function avisar(msg,ok,ms){const a=document.getElementById('aviso');a.textConten
 function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
 /* =================== LOG DE ACESSO E AÇÕES (auditoria — guardado pra sempre no Firestore, coleção "logs") =================== */
 /* Cada registro já nasce com ano/mes/dia/hora/minuto separados (no horário de Brasília) pra dar pra filtrar
-   na aba de admin sem precisar de índice composto no Firestore (só filtros de igualdade == são usados). */
-function registrarLog(tipo,detalhe,usuarioForcado){
+   na aba de admin sem precisar de índice composto no Firestore (só filtros de igualdade == são usados).
+   "nivel" classifica a importância: comum (navegação), importante (login/admin/notificação), crítico (exclusões e falhas). */
+const NIVEL_PADRAO_TIPO={login:'importante',logout:'importante',aba:'comum',clique:'comum',admin:'importante',notificacao:'importante',sistema:'comum'};
+function registrarLog(tipo,detalhe,usuarioForcado,nivelForcado){
   try{
     const usuario=usuarioForcado||eu||'(deslogado)';
     const agora=new Date();
     const br=new Date(agora.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
     db.collection('logs').add({
       ts:agora.getTime(),ano:br.getFullYear(),mes:br.getMonth()+1,dia:br.getDate(),hora:br.getHours(),minuto:br.getMinutes(),
-      usuario,tipo,detalhe:String(detalhe||'').slice(0,300),pagina:location.pathname
+      usuario,tipo,nivel:nivelForcado||NIVEL_PADRAO_TIPO[tipo]||'comum',detalhe:String(detalhe||'').slice(0,300),pagina:location.pathname
     }).catch(()=>{});
   }catch(e){}
 }
@@ -3512,7 +3514,7 @@ async function salvarTransmissao(){
 async function excluirJogoId(id){
   const j=dados.jogos[id];
   if(!(await confirmar('Excluir '+(j?j.adversario:'este jogo')+'? Palpites e avaliações dele serão apagados.')))return;
-  registrarLog('admin','Excluiu jogo: '+(j?j.adversario+' ('+j.data+')':id));
+  registrarLog('admin','Excluiu jogo: '+(j?j.adversario+' ('+j.data+')':id),null,'critico');
   await mutar(()=>{delete dados.jogos[id];});
   avisar('Jogo excluído.',true);
   render();
@@ -4192,50 +4194,55 @@ async function renderAdmin(){
   '<div class="card"><details ontoggle="if(this.open)carregarBackupsAutomaticos()"><summary>🔄 Backups automáticos</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">O site agora salva uma cópia sozinho a cada 6 horas, sem precisar lembrar de nada. Guarda os últimos 14 dias.</p>'+
   '<div id="listaBackupsAuto">Carregando…</div></div></details></div>'+
-  '<div class="card"><details><summary>🗂️ Logs de acesso e ações</summary><div style="margin-top:12px">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Login/logout, navegação (abas e cliques) e ações administrativas de todo mundo — guardado pra sempre. Também tem uma cópia diária arquivada sozinha às 3h. Escolha os filtros que quiser (deixe em branco pra não filtrar) e busque — nada carrega sozinho, pra economizar.</p>'+
-  '<div class="grid g3" style="margin-bottom:10px">'+
-  '<div><label for="logAno">Ano</label><input id="logAno" type="number" placeholder="ex.: 2026"></div>'+
-  '<div><label for="logMes">Mês (1-12)</label><input id="logMes" type="number" min="1" max="12"></div>'+
-  '<div><label for="logDia">Dia (1-31)</label><input id="logDia" type="number" min="1" max="31"></div>'+
+  '<div class="card"><details ontoggle="if(this.open)prepararLogs()"><summary>🗂️ Logs de acesso e ações</summary><div style="margin-top:12px">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Login/logout, navegação, ações administrativas, notificações enviadas e eventos do sistema (backups, atualização do site) — guardado pra sempre. Escolha o dia e, se quiser, refine com os filtros abaixo.</p>'+
+  '<div class="grid g2" style="margin-bottom:10px">'+
+  '<div><label for="logData">Dia</label><input id="logData" type="date" onchange="buscarLogs()"></div>'+
+  '<div><label for="logHora">Hora (deixe em branco pra ver o dia todo)</label><input id="logHora" type="number" min="0" max="23" onchange="buscarLogs()"></div>'+
   '</div>'+
   '<div class="grid g3" style="margin-bottom:10px">'+
-  '<div><label for="logHora">Hora (0-23)</label><input id="logHora" type="number" min="0" max="23"></div>'+
-  '<div><label for="logTipo">Tipo</label><select id="logTipo"><option value="">Todos</option><option value="login">🔓 Login</option><option value="logout">🔒 Logout</option><option value="aba">🧭 Navegação (aba)</option><option value="clique">👆 Clique</option><option value="admin">🛠️ Ação admin</option></select></div>'+
-  '<div><label for="logUsuario">Usuário</label><select id="logUsuario"><option value="">Todos</option>'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
+  '<div><label for="logUsuario">Usuário</label><select id="logUsuario" onchange="buscarLogs()"><option value="">Todos</option>'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
+  '<div><label for="logNivel">Nível</label><select id="logNivel" onchange="buscarLogs()"><option value="">Todos</option><option value="critico">🔴 Crítico</option><option value="importante">🟡 Importante</option><option value="comum">⚪ Comum</option></select></div>'+
+  '<div><label for="logTipo">Tipo</label><select id="logTipo" onchange="buscarLogs()"><option value="">Todos</option><option value="login">🔓 Login</option><option value="logout">🔒 Logout</option><option value="aba">🧭 Navegação (aba)</option><option value="clique">👆 Clique</option><option value="admin">🛠️ Ação admin</option><option value="notificacao">📣 Notificação enviada</option><option value="sistema">⚙️ Sistema (backup/deploy)</option></select></div>'+
   '</div>'+
-  '<button class="btn" onclick="buscarLogs()">🔍 Buscar logs</button>'+
   '<div id="listaLogs" style="margin-top:14px"></div></div></details></div>';
   sec.innerHTML=html;
   mudarTabNotif('biblioteca');
 }
+function prepararLogs(){
+  const campoData=document.getElementById('logData');
+  if(campoData&&!campoData.value){
+    campoData.value=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'}); // hoje, no fuso de Brasília
+    buscarLogs();
+  }
+}
 async function buscarLogs(){
   const el=document.getElementById('listaLogs');
+  const campoData=document.getElementById('logData');
+  if(!campoData.value){el.innerHTML='<div class="vazio">Escolha um dia pra ver os logs.</div>';return;}
   el.innerHTML='Buscando…';
-  const ano=document.getElementById('logAno').value.trim();
-  const mes=document.getElementById('logMes').value.trim();
-  const dia=document.getElementById('logDia').value.trim();
+  const [ano,mes,dia]=campoData.value.split('-').map(Number);
   const hora=document.getElementById('logHora').value.trim();
+  const nivel=document.getElementById('logNivel').value;
   const tipo=document.getElementById('logTipo').value;
   const usuario=document.getElementById('logUsuario').value;
   try{
-    let ref=db.collection('logs');
-    if(ano)ref=ref.where('ano','==',+ano);
-    if(mes)ref=ref.where('mes','==',+mes);
-    if(dia)ref=ref.where('dia','==',+dia);
+    let ref=db.collection('logs').where('ano','==',ano).where('mes','==',mes).where('dia','==',dia);
     if(hora!=='')ref=ref.where('hora','==',+hora);
+    if(nivel)ref=ref.where('nivel','==',nivel);
     if(tipo)ref=ref.where('tipo','==',tipo);
     if(usuario)ref=ref.where('usuario','==',usuario);
-    const snap=await ref.limit(500).get();
+    const snap=await ref.limit(1000).get();
     let regs=snap.docs.map(d=>d.data());
-    regs.sort((a,b)=>b.ts-a.ts);
-    if(!regs.length){el.innerHTML='<div class="vazio">Nenhum registro encontrado com esses filtros.</div>';return;}
-    const iconeTipo={login:'🔓',logout:'🔒',aba:'🧭',clique:'👆',admin:'🛠️'};
-    let out='<p class="nota-rodape" style="margin:0 0 10px">'+regs.length+' registro(s)'+(regs.length===500?' (mostrando os 500 mais recentes — refine o filtro pra ver mais)':'')+'.</p>';
+    regs.sort((a,b)=>a.ts-b.ts); // ordem crescente por horário, como pedido
+    if(!regs.length){el.innerHTML='<div class="vazio">Nenhum registro nesse dia com esses filtros.</div>';return;}
+    const iconeTipo={login:'🔓',logout:'🔒',aba:'🧭',clique:'👆',admin:'🛠️',notificacao:'📣',sistema:'⚙️'};
+    const iconeNivel={critico:'🔴',importante:'🟡',comum:'⚪'};
+    let out='<p class="nota-rodape" style="margin:0 0 10px">'+regs.length+' registro(s)'+(regs.length===1000?' (mostrando os 1000 primeiros do dia — refine o filtro pra ver o resto)':'')+'.</p>';
     regs.forEach(r=>{
-      const quando=String(r.dia).padStart(2,'0')+'/'+String(r.mes).padStart(2,'0')+'/'+r.ano+' '+String(r.hora).padStart(2,'0')+':'+String(r.minuto||0).padStart(2,'0');
-      out+='<div class="linha-tabela"><span class="rank-nome">'+(iconeTipo[r.tipo]||'•')+' '+esc(cap(r.usuario||'?'))+' <small style="color:var(--cinza)">· '+quando+'</small></span>'+
-        '<span style="font-size:.8rem;color:var(--branco);text-align:right">'+esc(r.detalhe||'')+'</span></div>';
+      const hhmm=String(r.hora).padStart(2,'0')+':'+String(r.minuto||0).padStart(2,'0');
+      out+='<div class="linha-tabela"><span class="rank-nome">'+(iconeNivel[r.nivel]||'⚪')+' '+hhmm+' — '+(iconeTipo[r.tipo]||'•')+' '+esc(r.detalhe||'')+'</span>'+
+        '<span style="font-size:.8rem;color:var(--cinza);white-space:nowrap">'+esc(cap(r.usuario||'?'))+'</span></div>';
     });
     el.innerHTML=out;
   }catch(e){
@@ -4486,7 +4493,7 @@ async function resetarSenha(u){
 async function removerUsuario(u){
   if(!(await confirmar('Remover o usuário '+u+'? Os palpites e notas antigos dele continuam no histórico.')))return;
   await mutar(()=>{delete dados.usuarios[u];});
-  registrarLog('admin','Removeu usuário: '+u);
+  registrarLog('admin','Removeu usuário: '+u,null,'critico');
   avisar('Usuário '+u+' removido.',true);
   render();
 }

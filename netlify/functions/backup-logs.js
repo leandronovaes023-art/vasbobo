@@ -1,7 +1,7 @@
 // Backup diário dos logs de acesso/ações — roda sozinho todo dia às 3h (horário de Brasília)
 // e arquiva o dia anterior inteiro numa coleção separada, pra nunca depender só da coleção
 // "logs" ao vivo. Nada aqui é apagado — fica guardado pra sempre, como pedido.
-const { garantirFirebase, admin } = require('./_push-helper');
+const { garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
 
 exports.handler = async () => {
   try {
@@ -24,6 +24,7 @@ exports.handler = async () => {
       .get();
 
     if (snap.empty) {
+      await registrarLogServidor(db, { tipo: 'sistema', nivel: 'comum', detalhe: `Backup diário de logs rodou OK (nada em ${idDia})` });
       return { statusCode: 200, body: `Nenhum log em ${idDia} pra arquivar.` };
     }
 
@@ -39,8 +40,10 @@ exports.handler = async () => {
       });
     }
 
+    await registrarLogServidor(db, { tipo: 'sistema', nivel: 'comum', detalhe: `Backup diário de logs rodou OK (${registros.length} registro(s) arquivado(s) de ${idDia})` });
     return { statusCode: 200, body: `Backup de logs salvo (${idDia}), ${registros.length} registro(s).` };
   } catch (e) {
+    await registrarLogServidor(db, { tipo: 'sistema', nivel: 'critico', detalhe: `Backup diário de logs FALHOU: ${e.message}` });
     return { statusCode: 500, body: 'Erro ao arquivar logs: ' + e.message };
   }
 };

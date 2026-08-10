@@ -24,6 +24,19 @@ async function saudacaoPersonalizada(db, usuario) {
   return texto.replace('{nome}', nome);
 }
 
+async function registrarLogServidor(db, { usuario, tipo, nivel, detalhe }) {
+  try {
+    const agora = new Date();
+    const br = new Date(agora.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    await db.collection('logs').add({
+      ts: agora.getTime(), ano: br.getFullYear(), mes: br.getMonth() + 1, dia: br.getDate(),
+      hora: br.getHours(), minuto: br.getMinutes(),
+      usuario: usuario || '(sistema)', tipo, nivel: nivel || 'comum',
+      detalhe: String(detalhe || '').slice(0, 300), pagina: 'servidor',
+    });
+  } catch (e) { /* nunca deixa um erro de log quebrar a função principal */ }
+}
+
 async function mandarPush(usuario, titulo, texto, url, comSaudacao = true) {
   garantirFirebase();
   const db = admin.firestore();
@@ -42,6 +55,7 @@ async function mandarPush(usuario, titulo, texto, url, comSaudacao = true) {
       data: { title: titulo || 'VASBOBO', body: corpoFinal, url: url || '/' },
       webpush: { headers: { Urgency: 'high' } },
     });
+    await registrarLogServidor(db, { usuario, tipo: 'notificacao', nivel: 'importante', detalhe: `Notificação enviada: "${titulo || 'VASBOBO'}" — ${corpoFinal}` });
     return { ok: true };
   } catch (e) {
     const codigo = e.code || '';
@@ -53,4 +67,4 @@ async function mandarPush(usuario, titulo, texto, url, comSaudacao = true) {
   }
 }
 
-module.exports = { garantirFirebase, mandarPush, admin };
+module.exports = { garantirFirebase, mandarPush, admin, registrarLogServidor };
