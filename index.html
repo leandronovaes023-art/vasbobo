@@ -1027,7 +1027,7 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
 /* Cada registro já nasce com ano/mes/dia/hora/minuto separados (no horário de Brasília) pra dar pra filtrar
    na aba de admin sem precisar de índice composto no Firestore (só filtros de igualdade == são usados).
    "nivel" classifica a importância: comum (navegação), importante (login/admin/notificação), crítico (exclusões e falhas). */
-const NIVEL_PADRAO_TIPO={login:'importante',logout:'importante',aba:'comum',clique:'comum',admin:'importante',notificacao:'importante',sistema:'comum'};
+const NIVEL_PADRAO_TIPO={login:'importante',logout:'importante',aba:'comum',clique:'comum',admin:'importante',notificacao:'importante',sistema:'comum',pagamento:'importante'};
 function registrarLog(tipo,detalhe,usuarioForcado,nivelForcado){
   try{
     const usuario=usuarioForcado||eu||'(deslogado)';
@@ -1473,6 +1473,53 @@ function placarTexto(j,usarParcial){
   return casa?(r.v+' × '+r.a):(r.a+' × '+r.v);
 }
 function jogadorPorId(id){return (dados.jogadores||[]).find(p=>p.id===id);}
+/* =================== MENSALIDADE (R$5/mês via Pix, sem taxa, usando InfinitePay) =================== */
+function chaveMensalidadeAtual(){
+  const agora=new Date();
+  const br=new Date(agora.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
+  return {ano:br.getFullYear(),mes:br.getMonth()+1,nomeMes:br.toLocaleDateString('pt-BR',{month:'long'})};
+}
+function htmlCardMensalidade(){
+  const {nomeMes}=chaveMensalidadeAtual();
+  return '<div class="card" id="cardMensalidade"><h2>💰 Mensalidade — '+cap(nomeMes)+'</h2>'+
+    '<div id="statusMensalidade"><p class="nota-rodape" style="margin:0">Verificando...</p></div></div>';
+}
+async function carregarStatusMensalidade(){
+  const el=document.getElementById('statusMensalidade');
+  if(!el||!eu)return;
+  const {ano,mes}=chaveMensalidadeAtual();
+  const docId=eu+'_'+ano+'_'+String(mes).padStart(2,'0');
+  try{
+    const snap=await db.collection('mensalidades').doc(docId).get();
+    if(snap.exists&&snap.data().pago){
+      const d=snap.data();
+      el.innerHTML='<div style="display:flex;align-items:center;gap:10px">'+
+        '<span style="background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--verde);border-radius:99px;padding:4px 12px;font-size:.76rem;font-weight:800;text-transform:uppercase">✅ Pago</span>'+
+        '<span class="nota-rodape" style="margin:0">em '+new Date(d.pagoEm).toLocaleDateString('pt-BR')+(d.comprovante?' · <a href="'+esc(d.comprovante)+'" target="_blank" style="color:var(--azul)">ver comprovante</a>':'')+'</span></div>';
+    }else{
+      el.innerHTML='<p class="nota-rodape" style="margin:0 0 10px">Pendente — R$5,00, via Pix (sem taxa nenhuma pra você).</p>'+
+        '<button class="btn" onclick="pagarMensalidade()" id="btnPagarMensalidade">Pagar agora</button>';
+    }
+  }catch(e){
+    el.innerHTML='<p class="nota-rodape" style="margin:0">Não consegui checar agora. <button class="btn fantasma" onclick="carregarStatusMensalidade()">tentar de novo</button></p>';
+  }
+}
+async function pagarMensalidade(){
+  const btn=document.getElementById('btnPagarMensalidade');
+  if(btn){btn.disabled=true;btn.textContent='Gerando cobrança…';}
+  try{
+    const r=await fetch('/.netlify/functions/mensalidade?acao=criar&usuario='+encodeURIComponent(eu));
+    const info=await r.json();
+    if(info.erro||!info.url){avisar('Não consegui gerar o Pix agora. Tenta de novo em instantes.');if(btn){btn.disabled=false;btn.textContent='Pagar agora';}return;}
+    registrarLog('pagamento','Gerou cobrança da mensalidade',eu,'comum');
+    window.open(info.url,'_blank');
+    avisar('Abriu a tela de pagamento numa aba nova. Depois de pagar, volta aqui — confirma sozinho em alguns segundos.',true);
+    if(btn){btn.disabled=false;btn.textContent='Pagar agora';}
+  }catch(e){
+    avisar('Erro ao gerar a cobrança: '+(e.message||e));
+    if(btn){btn.disabled=false;btn.textContent='Pagar agora';}
+  }
+}
 function nomeJogador(id){
   if(id===SEM_GOL)return 'Vasco não marca';
   const p=jogadorPorId(id);return p?p.nome:'(jogador removido)';
@@ -3172,6 +3219,8 @@ function renderListaJogos(){
   const lista=jogosOrdenados();
   let html='';
 
+  html+=htmlCardMensalidade();
+
   if(souAdmin()){
     const agora=Date.now();
     const pendentes=lista.filter(([id,j])=>{
@@ -3240,6 +3289,7 @@ function renderListaJogos(){
   sec.innerHTML=html;
   atualizarCronometro();
   atualizarCronometroAvaliar();
+  carregarStatusMensalidade();
 }
 
 /* =================== DETALHE DO JOGO =================== */
@@ -4674,11 +4724,37 @@ async function renderAdmin(){
   '<div class="grid g3" style="margin-bottom:10px">'+
   '<div><label for="logUsuario">Usuário</label><select id="logUsuario" onchange="buscarLogs()"><option value="">Todos</option>'+Object.keys(dados.usuarios).sort().map(u=>'<option value="'+u+'">'+cap(u)+'</option>').join('')+'</select></div>'+
   '<div><label for="logNivel">Nível</label><select id="logNivel" onchange="buscarLogs()"><option value="">Todos</option><option value="critico">🔴 Crítico</option><option value="importante">🟡 Importante</option><option value="comum">⚪ Comum</option></select></div>'+
-  '<div><label for="logTipo">Tipo</label><select id="logTipo" onchange="buscarLogs()"><option value="">Todos</option><option value="login">🔓 Login</option><option value="logout">🔒 Logout</option><option value="aba">🧭 Navegação (aba)</option><option value="clique">👆 Clique</option><option value="admin">🛠️ Ação admin</option><option value="notificacao">📣 Notificação enviada</option><option value="sistema">⚙️ Sistema (backup/deploy)</option></select></div>'+
+  '<div><label for="logTipo">Tipo</label><select id="logTipo" onchange="buscarLogs()"><option value="">Todos</option><option value="login">🔓 Login</option><option value="logout">🔒 Logout</option><option value="aba">🧭 Navegação (aba)</option><option value="clique">👆 Clique</option><option value="admin">🛠️ Ação admin</option><option value="notificacao">📣 Notificação enviada</option><option value="sistema">⚙️ Sistema (backup/deploy)</option><option value="pagamento">💰 Pagamento</option></select></div>'+
   '</div>'+
-  '<div id="listaLogs" style="margin-top:14px"></div></div></details></div>';
+  '<div id="listaLogs" style="margin-top:14px"></div></div></details></div>'+
+  '<div class="card"><details ontoggle="if(this.open)carregarPainelMensalidades()"><summary>💰 Mensalidades</summary><div style="margin-top:12px">'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Quem já pagou a mensalidade de R$5 desse mês, confirmado automaticamente via Pix (sem taxa nenhuma). Comprovante gerado sozinho pra cada pagamento.</p>'+
+  '<div id="painelMensalidades">Carregando…</div></div></details></div>';
   sec.innerHTML=html;
   mudarTabNotif('biblioteca');
+}
+async function carregarPainelMensalidades(){
+  const el=document.getElementById('painelMensalidades');
+  if(!el)return;
+  const {ano,mes,nomeMes}=chaveMensalidadeAtual();
+  try{
+    const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).get();
+    const pagos={};
+    snap.forEach(doc=>{pagos[doc.data().usuario]=doc.data();});
+    const usuarios=Object.keys(dados.usuarios).sort();
+    const totalPago=usuarios.filter(u=>pagos[u]&&pagos[u].pago).length;
+    let html='<p style="font-weight:800;margin-bottom:10px">'+cap(nomeMes)+' — '+totalPago+'/'+usuarios.length+' pagaram</p>';
+    usuarios.forEach(u=>{
+      const p=pagos[u];
+      html+='<div class="mini-linha"><span class="rank-nome">'+esc(cap(u))+'</span>'+
+        (p&&p.pago?'<span style="color:var(--verde);font-weight:800;font-size:.78rem">✅ '+new Date(p.pagoEm).toLocaleDateString('pt-BR')+(p.comprovante?' · <a href="'+esc(p.comprovante)+'" target="_blank" style="color:var(--azul)">comprovante</a>':'')+'</span>'
+          :'<span style="color:var(--cinza);font-weight:800;font-size:.78rem">⏳ pendente</span>')+
+        '</div>';
+    });
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
+  }
 }
 function prepararLogs(){
   const campoData=document.getElementById('logData');
@@ -4707,7 +4783,7 @@ async function buscarLogs(){
     let regs=snap.docs.map(d=>d.data());
     regs.sort((a,b)=>a.ts-b.ts); // ordem crescente por horário, como pedido
     if(!regs.length){el.innerHTML='<div class="vazio">Nenhum registro nesse dia com esses filtros.</div>';return;}
-    const iconeTipo={login:'🔓',logout:'🔒',aba:'🧭',clique:'👆',admin:'🛠️',notificacao:'📣',sistema:'⚙️'};
+    const iconeTipo={login:'🔓',logout:'🔒',aba:'🧭',clique:'👆',admin:'🛠️',notificacao:'📣',sistema:'⚙️',pagamento:'💰'};
     const iconeNivel={critico:'🔴',importante:'🟡',comum:'⚪'};
     let out='<p class="nota-rodape" style="margin:0 0 10px">'+regs.length+' registro(s)'+(regs.length===1000?' (mostrando os 1000 primeiros do dia — refine o filtro pra ver o resto)':'')+'.</p>';
     regs.forEach(r=>{
