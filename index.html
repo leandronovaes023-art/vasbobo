@@ -1237,8 +1237,9 @@ function htmlBadgeEscalacao(id,j){
       'ESCALAÇÃO<br><span style="text-decoration:underline">Já saiu. Clique.</span></button>';
   }
   return '<div style="background:var(--carvao2);border:1px solid var(--linha);border-radius:10px;padding:6px 12px;'+
-    'font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--branco);text-align:center;white-space:nowrap;line-height:1.5;flex:none">'+
-    'ESCALAÇÃO!<br><span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--cinza)">Saiu e você recebe no celular</span></div>';
+    'font-size:.66rem;letter-spacing:.02em;text-align:center;white-space:nowrap;line-height:1.5;flex:none">'+
+    '<span style="color:var(--vermelho);font-weight:800;text-transform:uppercase">ESCALAÇÃO!</span><br>'+
+    '<b style="color:var(--branco);font-weight:800">Assim que sair você recebe</b></div>';
 }
 function abrirEscalacaoPreJogo(id){
   const j=dados.jogos[id];
@@ -2899,15 +2900,14 @@ function renderListaJogos(){
     const chamada=s==='aberto'?'Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar':s==='andamento'?'Bola rolando! Placar atualizando e avaliação libera no apito final':s==='avaliar'?'Fim de jogo: hora de dar as notas e soltar o verbo':'Veja como a galera se saiu';
     html+='<div class="card destaque"><div class="selo-destaque"><span class="cruz">✠</span> Jogo em destaque</div>'+
       '<div class="dest-grid"><div class="rodada-box">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'+
       '<div class="jogo-nome" style="font-size:1.12rem">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
-      htmlBadgeEscalacao(id,j)+
-      '</div>'+
       '<div class="data-grande">'+fmtData(j)+'</div>'+
       '<div class="info-pilha">'+
         '<div class="info-linha">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
         '<div class="info-linha">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
-        (j.ondeAssistir?'<div class="info-linha" style="text-transform:none">'+badgeTransmissao(j)+'</div>':'')+
+        '<div class="info-linha" style="text-transform:none;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'+
+          '<span>'+(j.ondeAssistir?badgeTransmissao(j):'')+'</span>'+htmlBadgeEscalacao(id,j)+
+        '</div>'+
       '</div>'+
       (s==='aberto'&&j.hora?'<div class="cronometro" id="cronoDest" data-jogo="'+id+'">…</div>':'')+
       '<p style="font-size:.9rem;margin:10px 0 12px;color:var(--branco)">'+chamada+'.</p>'+
