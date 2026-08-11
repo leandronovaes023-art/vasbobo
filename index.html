@@ -1232,14 +1232,14 @@ function badgeTransmissao(j,mini){
 function htmlBadgeEscalacao(id,j){
   if(!j.hora||j.resultado)return '';
   if(j.escalacaoPreJogo&&j.escalacaoPreJogo.jogadores&&j.escalacaoPreJogo.jogadores.length){
-    return '<button onclick="abrirEscalacaoPreJogo(\''+id+'\')" style="background:rgba(47,208,142,.12);border:1.5px solid var(--verde);color:var(--verde);'+
-      'border-radius:10px;padding:6px 12px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;text-align:center;white-space:nowrap;line-height:1.5;font-family:inherit;flex:none">'+
+    return '<button onclick="abrirEscalacaoPreJogo(\''+id+'\')" style="background:rgba(47,208,142,.14);border:1.5px solid var(--verde);color:var(--verde);'+
+      'border-radius:9px;padding:7px 14px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;text-align:center;white-space:nowrap;line-height:1.45;font-family:inherit;flex:none;box-shadow:0 2px 6px rgba(0,0,0,.25)">'+
       'ESCALAÇÃO<br><span style="text-decoration:underline">Já saiu. Clique.</span></button>';
   }
-  return '<div style="background:var(--carvao2);border:1px solid var(--linha);border-radius:10px;padding:6px 12px;'+
-    'font-size:.66rem;letter-spacing:.02em;text-align:center;white-space:nowrap;line-height:1.5;flex:none">'+
+  return '<button onclick="avisar(\'Assim que a escalação sair, você recebe uma notificação no celular.\',true)" style="background:var(--carvao2);border:1.5px solid var(--linha);border-radius:9px;padding:7px 14px;'+
+    'font-size:.6rem;letter-spacing:.02em;text-align:center;white-space:nowrap;line-height:1.45;flex:none;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.25)">'+
     '<span style="color:var(--vermelho);font-weight:800;text-transform:uppercase">ESCALAÇÃO!</span><br>'+
-    '<b style="color:var(--branco);font-weight:800">Assim que sair você recebe</b></div>';
+    '<b style="color:var(--branco);font-weight:800">Assim que sair você recebe</b></button>';
 }
 function abrirEscalacaoPreJogo(id){
   const j=dados.jogos[id];
@@ -1941,12 +1941,12 @@ function jogoQuizAtual(){
 async function fqLerEstado(){
   try{
     const snap=await db.collection('shared').doc('vasbobo_quiz').get();
-    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}, vistas:v.vistas||{}, filaOrdem:v.filaOrdem||[], filaPonteiro:v.filaPonteiro||0}; }
+    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}, vistas:v.vistas||{}, filaTextosV2:v.filaTextosV2||[], filaPonteiroV2:v.filaPonteiroV2||0}; }
   }catch(e){}
-  return {diario:{}, porJogo:{}, vistas:{}, filaOrdem:[], filaPonteiro:0};
+  return {diario:{}, porJogo:{}, vistas:{}, filaTextosV2:[], filaPonteiroV2:0};
 }
 async function fqSalvarEstado(estado){
-  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, filaOrdem:estado.filaOrdem||[], filaPonteiro:estado.filaPonteiro||0, atualizadoEm:Date.now()}); return true; }
+  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, filaTextosV2:estado.filaTextosV2||[], filaPonteiroV2:estado.filaPonteiroV2||0, atualizadoEm:Date.now()}); return true; }
   catch(e){ return false; }
 }
 function fqStatusDia(estado,usuario){
@@ -2022,17 +2022,35 @@ function fqEmbaralhar(arr){
   for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
   return a;
 }
+/* o banco de perguntas tem várias cópias da MESMA pergunta, só com a ordem das alternativas
+   embaralhada diferente (ex.: 7 ids diferentes pra "Em que local foi fundado o Vasco?") — sem
+   agrupar por texto, a fila deixava passar como se fossem perguntas novas mesmo repetindo o
+   conteúdo. Agrupa tudo pelo texto da pergunta, e cada "pergunta de verdade" só sai de novo
+   depois que todas as outras já saíram — sorteando qual cópia (ordem de alternativas) usar. */
+function fqGruposUnicos(){
+  const grupos={};
+  FQ_PERGUNTAS.forEach(q=>{
+    const chave=(q.pergunta||'').trim();
+    if(!grupos[chave])grupos[chave]=[];
+    grupos[chave].push(q.id);
+  });
+  return grupos;
+}
 /* fila única compartilhada por TODO o grupo: cada pergunta só volta a poder sair de novo depois
-   que as outras 999 já saíram pra alguém — evita repetição não só pra cada pessoa individualmente,
+   que as outras já saíram pra alguém — evita repetição não só pra cada pessoa individualmente,
    mas a mesma pergunta caindo pra pessoas diferentes perto uma da outra */
 async function fqEscolherPergunta(usuario){
   const estado=await fqLerEstado(); // lê sempre fresco, pra não competir com outra pessoa pedindo pergunta ao mesmo tempo
-  if(!estado.filaOrdem||!estado.filaOrdem.length||estado.filaPonteiro==null||estado.filaPonteiro>=estado.filaOrdem.length){
-    estado.filaOrdem=fqEmbaralhar(FQ_PERGUNTAS.map(q=>q.id));
-    estado.filaPonteiro=0;
+  const grupos=fqGruposUnicos();
+  const textosUnicos=Object.keys(grupos);
+  if(!estado.filaTextosV2||!estado.filaTextosV2.length||estado.filaPonteiroV2==null||estado.filaPonteiroV2>=estado.filaTextosV2.length){
+    estado.filaTextosV2=fqEmbaralhar(textosUnicos); // a fila agora é de TEXTOS únicos, não de ids soltos
+    estado.filaPonteiroV2=0;
   }
-  const id=estado.filaOrdem[estado.filaPonteiro];
-  estado.filaPonteiro++;
+  const textoEscolhido=estado.filaTextosV2[estado.filaPonteiroV2];
+  estado.filaPonteiroV2++;
+  const variantes=grupos[textoEscolhido]||[];
+  const id=variantes[Math.floor(Math.random()*variantes.length)]||variantes[0]; // sorteia só a ordem das alternativas
   if(!estado.vistas)estado.vistas={};
   if(!estado.vistas[usuario])estado.vistas[usuario]=[];
   if(estado.vistas[usuario].indexOf(id)===-1)estado.vistas[usuario].push(id);
@@ -2903,7 +2921,7 @@ function renderListaJogos(){
       '<span><span class="cruz">✠</span> Jogo em destaque</span>'+htmlBadgeEscalacao(id,j)+
       '</div>'+
       '<div class="dest-grid"><div class="rodada-box">'+
-      '<div class="jogo-nome" style="font-size:1.12rem;margin-top:6px">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
+      '<div class="jogo-nome" style="font-size:1.12rem;margin-top:16px">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
       '<div class="data-grande">'+fmtData(j)+'</div>'+
       '<div class="info-pilha">'+
         '<div class="info-linha">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
