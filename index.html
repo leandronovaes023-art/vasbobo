@@ -346,6 +346,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .campinho-jog{display:flex;flex-direction:column;align-items:center;gap:1px;width:58px}
   .campinho-num{font-family:'Anton',sans-serif;font-size:.62rem;color:#fff;background:rgba(0,0,0,.45);border-radius:99px;padding:0 6px;margin-top:-11px;line-height:1.5}
   .campinho-nome{font-size:.6rem;font-weight:800;color:#fff;text-align:center;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.65);line-height:1.15;max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .campinho-pos{font-size:.52rem;font-weight:700;color:rgba(255,255,255,.72);letter-spacing:.04em;text-shadow:0 1px 3px rgba(0,0,0,.65)}
   .jogo-resenha>summary{padding:14px 16px;font-weight:800;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.02em;font-size:.95rem;cursor:pointer}
   .jogador-resenha{border-top:1px solid var(--linha);padding:10px 0}
   .jogador-resenha>summary{cursor:pointer;font-weight:700;font-size:.86rem}
@@ -1176,6 +1177,15 @@ function fotoJogador(id,px){
     'object-fit:cover;object-position:top;border:1.5px solid var(--linha);display:block" '+
     'onerror="this.style.display=\'none\'"></span>';
 }
+let _fotosPrecarregadas=false;
+/* baixa as fotos de todo o elenco em segundo plano, escondido, assim que o app abre — assim,
+   quando o usuário abre o seletor de jogador (MVP, gol, escalação), as fotos já estão em cache
+   do navegador e aparecem na hora, em vez de esperar o download de ~30 fotos de uma vez */
+function precarregarFotosJogadores(){
+  if(_fotosPrecarregadas||!dados||!dados.jogadores)return;
+  _fotosPrecarregadas=true;
+  dados.jogadores.forEach(p=>{ const img=new Image(); img.src='img/jogadores/'+p.id+'.jpg'; });
+}
 function tooltipPontuacao(){
   const linhas=[
     [PTS_EXATO,'🎯 placar exato'],
@@ -1289,6 +1299,7 @@ function htmlBadgeEscalacao(id,j){
 /* organiza os titulares num campinho visual, por posição — bate os nomes (que vêm em texto puro,
    direto do UOL) com o elenco cadastrado, reaproveitando a mesma lógica de "achar quem é quem"
    já usada pra goleadores */
+const ABREV_POS={'Goleiro':'GOL','Lateral-direito':'LD','Lateral-esquerdo':'LE','Zagueiro':'ZAG','Volante':'VOL','Meia':'MEI','Ponta/Atacante':'PONTA','Centroavante':'CA'};
 function renderCampinho(nomes,tecnicoId){
   const ids=mapearGoleadores(nomes);
   const jogadoresMapeados=ids.map(id=>jogadorPorId(id)).filter(Boolean);
@@ -1296,22 +1307,49 @@ function renderCampinho(nomes,tecnicoId){
     const alvo=normalizar(n);
     return !jogadoresMapeados.some(p=>{const nx=normalizar(p.nome);return nx===alvo||nx.includes(alvo)||alvo.includes(nx.split(' ')[0]);});
   });
-  const grupos={goleiro:[],defesa:[],volante:[],meia:[],ataque:[]};
+  // agrupa por posição EXATA (não mistura mais lateral/zagueiro, pra poder montar a defesa
+  // na ordem certa: lateral-esquerdo sempre na ponta esquerda da tela, lateral-direito na direita)
+  const grupos={goleiro:[],ld:[],zag:[],le:[],volante:[],meia:[],ponta:[],centro:[]};
   jogadoresMapeados.forEach(p=>{
     if(p.pos==='Goleiro')grupos.goleiro.push(p);
-    else if(p.pos==='Zagueiro'||p.pos==='Lateral-direito'||p.pos==='Lateral-esquerdo')grupos.defesa.push(p);
+    else if(p.pos==='Lateral-direito')grupos.ld.push(p);
+    else if(p.pos==='Lateral-esquerdo')grupos.le.push(p);
+    else if(p.pos==='Zagueiro')grupos.zag.push(p);
     else if(p.pos==='Volante')grupos.volante.push(p);
     else if(p.pos==='Meia')grupos.meia.push(p);
-    else grupos.ataque.push(p);
+    else if(p.pos==='Centroavante')grupos.centro.push(p);
+    else grupos.ponta.push(p); // Ponta/Atacante
   });
-  const ordemDefesa={'Lateral-direito':0,'Zagueiro':1,'Lateral-esquerdo':2};
-  grupos.defesa.sort((a,b)=>(ordemDefesa[a.pos]??1)-(ordemDefesa[b.pos]??1));
-  const linha=jogs=>jogs.length?('<div class="campinho-linha">'+jogs.map(p=>
-    '<div class="campinho-jog">'+fotoJogador(p.id,44)+
+  const cartao=p=>'<div class="campinho-jog">'+fotoJogador(p.id,44)+
     '<span class="campinho-num">'+(p.num||'')+'</span>'+
-    '<span class="campinho-nome">'+esc((p.nome||'').split(' ').slice(-1)[0])+'</span></div>'
-  ).join('')+'</div>'):'';
-  let html='<div class="campinho">'+linha(grupos.ataque)+linha(grupos.meia)+linha(grupos.volante)+linha(grupos.defesa)+linha(grupos.goleiro)+'</div>';
+    '<span class="campinho-nome">'+esc((p.nome||'').split(' ').slice(-1)[0])+'</span>'+
+    '<span class="campinho-pos">'+(ABREV_POS[p.pos]||'')+'</span></div>';
+  const linha=jogs=>jogs.length?('<div class="campinho-linha">'+jogs.map(cartao).join('')+'</div>'):'';
+
+  // defesa: esquerda-esquerda pra esquerda da tela, direita pra direita — [LE, zagueiro(s), LD]
+  const linhaDefesa=linha([...grupos.le,...grupos.zag,...grupos.ld]);
+
+  // volante: jogando com 3, separa 1 mais recuado (o primeiro marcado) + 2 mais avançados lado a lado,
+  // igual a formação real. Com 2 ou menos, fica tudo numa linha só.
+  let linhasVolante='';
+  if(grupos.volante.length===3){
+    linhasVolante=linha([grupos.volante[1],grupos.volante[2]])+linha([grupos.volante[0]]);
+  }else{
+    linhasVolante=linha(grupos.volante);
+  }
+
+  // ataque: o Andrés Gómez joga pela direita (sempre); o(s) outro(s) ponta(s) pela esquerda;
+  // quem centraliza a frente (centroavante, ou o último ponta marcado se não tiver um centroavante
+  // separado) fica na linha mais avançada de todas
+  let pontas=[...grupos.ponta];
+  let centro=[...grupos.centro];
+  if(!centro.length&&pontas.length)centro=[pontas.pop()];
+  const idxAndres=pontas.findIndex(p=>normalizar(p.nome).includes('andres'));
+  if(idxAndres>-1){const [and]=pontas.splice(idxAndres,1);pontas.push(and);} // Andrés sempre por último = lado direito da tela
+  const linhaCentro=linha(centro);
+  const linhaPontas=linha(pontas);
+
+  let html='<div class="campinho">'+linhaCentro+linhaPontas+linha(grupos.meia)+linhasVolante+linhaDefesa+linha(grupos.goleiro)+'</div>';
   // técnico sempre aparece junto, fora do campo (ele não joga, mas comanda) — auto-selecionado
   const tecnico=jogadorPorId(tecnicoId||'p_pedroemanuel');
   if(tecnico){
@@ -1336,14 +1374,16 @@ function abrirEscalacaoAdmin(id){
   const j=dados.jogos[id];
   if(!j)return;
   window._escalacaoAdminJogoId=id;
-  const jaEscolhidos=new Set((j.escalacaoPreJogo?mapearGoleadores(j.escalacaoPreJogo.jogadores):[]));
-  let html='<p class="nota-rodape" style="margin:0 0 10px">Marca os 11 titulares. O técnico Pedro Emanuel entra sozinho, não precisa marcar.</p>'+
+  const jaEscolhidosIds=j.escalacaoPreJogo?mapearGoleadores(j.escalacaoPreJogo.jogadores):[];
+  window._escalacaoOrdemClique=jaEscolhidosIds.slice(); // preserva a ordem de quando foi definida (importa pra saber quem é o volante mais recuado, etc.)
+  const jaEscolhidos=new Set(jaEscolhidosIds);
+  let html='<p class="nota-rodape" style="margin:0 0 10px">Marca os 11 titulares <b>na ordem</b>: se o time joga com 3 volantes, marca primeiro o que joga mais recuado. Nas pontas, marca primeiro quem joga mais pra esquerda. O técnico Pedro Emanuel entra sozinho, não precisa marcar.</p>'+
     '<p id="contadorEscalacaoAdmin" style="font-weight:800;margin-bottom:10px;color:var(--verde)">0/11 selecionados</p>';
   let posAtual='';
   jogadoresAtivos().filter(p=>p.pos!=='Técnico').forEach(p=>{
     if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div>';}
     html+='<label style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.88rem;text-transform:none;letter-spacing:0;color:var(--branco)">'+
-      '<input type="checkbox" style="width:auto" value="'+p.id+'" class="chkEscalacaoAdmin" onchange="atualizarContadorEscalacaoAdmin()" '+(jaEscolhidos.has(p.id)?'checked':'')+'>'+
+      '<input type="checkbox" style="width:auto" value="'+p.id+'" class="chkEscalacaoAdmin" onchange="onToggleChkEscalacao(this)" '+(jaEscolhidos.has(p.id)?'checked':'')+'>'+
       fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</span></label>';
   });
   document.getElementById('corpoEscalacaoAdmin').innerHTML=html;
@@ -1351,6 +1391,15 @@ function abrirEscalacaoAdmin(id){
   atualizarContadorEscalacaoAdmin();
 }
 function fecharEscalacaoAdmin(){document.getElementById('modalEscalacaoAdmin').classList.add('oculto');}
+function onToggleChkEscalacao(chk){
+  if(!window._escalacaoOrdemClique)window._escalacaoOrdemClique=[];
+  if(chk.checked){
+    if(!window._escalacaoOrdemClique.includes(chk.value))window._escalacaoOrdemClique.push(chk.value);
+  }else{
+    window._escalacaoOrdemClique=window._escalacaoOrdemClique.filter(v=>v!==chk.value);
+  }
+  atualizarContadorEscalacaoAdmin();
+}
 function atualizarContadorEscalacaoAdmin(){
   const n=document.querySelectorAll('.chkEscalacaoAdmin:checked').length;
   const el=document.getElementById('contadorEscalacaoAdmin');
@@ -1362,7 +1411,7 @@ async function confirmarEscalacaoAdmin(){
   const id=window._escalacaoAdminJogoId;
   const j=dados.jogos[id];
   if(!j)return;
-  const marcados=[...document.querySelectorAll('.chkEscalacaoAdmin:checked')].map(c=>c.value);
+  const marcados=(window._escalacaoOrdemClique||[]).filter(id2=>document.querySelector('.chkEscalacaoAdmin[value="'+id2+'"]')?.checked);
   if(marcados.length!==11){avisar('Marca exatamente 11 titulares (hoje tem '+marcados.length+').');return;}
   const jogadores=marcados.map(id2=>jogadorPorId(id2)).filter(Boolean).map(p=>p.nome);
   await mutar(()=>{const x=dados.jogos[id];if(x)x.escalacaoPreJogo={jogadores,tecnicoId:'p_pedroemanuel',quando:Date.now(),fonte:'admin'};});
@@ -1374,6 +1423,7 @@ async function confirmarEscalacaoAdmin(){
       body:JSON.stringify({titulo:'SAIU A ESCALAÇÃO!',texto:nomeJogo(j).replace(/<[^>]+>/g,'')+'. Clique!',url:'/?abrirEscalacao='+id})});
   }catch(e){}
   render();
+  setTimeout(()=>abrirEscalacaoPreJogo(id),300); // check-up visual na hora: já mostra como ficou no campinho
 }
 async function adminRemoverEscalacaoPreJogo(id){
   const j=dados.jogos[id];
@@ -2729,6 +2779,7 @@ async function tentarMostrarSaudacaoLogin(){
 function entrarNoApp(){
   registrarLog('login','Entrou no app');
   carregarFrasesGol();
+  setTimeout(precarregarFotosJogadores, 800);
   setTimeout(iniciarMidiaJanela, 300);
   setTimeout(verificarPendenciasRodada, 500);
   mostrar('app');
