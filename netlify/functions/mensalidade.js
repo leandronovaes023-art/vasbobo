@@ -27,7 +27,7 @@ async function acaoCriar(params, res) {
     order_nsu: orderNsu,
     webhook_url: `${SITE_URL}/.netlify/functions/mensalidade-webhook`,
     redirect_url: `${SITE_URL}/?mensalidadePaga=1`,
-    items: [{ quantity: 1, price: VALOR_MENSALIDADE_CENTAVOS, description: `Vasbolão - ${mesNome}/${ano}` }],
+    items: [{ quantity: 1, price: VALOR_MENSALIDADE_CENTAVOS, description: `Vasbet - ${mesNome}/${ano}` }],
   };
 
   try {

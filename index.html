@@ -106,7 +106,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .oculto{display:none!important}
 
   header{border-bottom:1px solid var(--linha);background:var(--preto)}
-  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px;display:flex;align-items:stretch;justify-content:space-between;gap:12px;flex-wrap:nowrap}
+  .header-inner{max-width:1320px;margin:0 auto;padding:8px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
   .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none;text-transform:uppercase}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   .sino-notif{background:none;border:none;color:var(--branco);
@@ -114,20 +114,20 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .sino-notif.ativado{color:var(--verde)}
   .sino-notif.balancando{animation:sinoBalanca 2.4s ease-in-out infinite}
   @keyframes sinoBalanca{0%,90%,100%{transform:rotate(0)}91%{transform:rotate(-14deg)}93%{transform:rotate(11deg)}95%{transform:rotate(-8deg)}97%{transform:rotate(5deg)}99%{transform:rotate(-2deg)}}
-  h1{font-size:clamp(2.2rem,6.5vw,3.05rem);line-height:1;text-shadow:none;width:auto}
+  h1{font-size:clamp(1.5rem,4.8vw,2.15rem);line-height:1;text-shadow:none;width:auto}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px;display:inline-block;
     animation:balancarCruz 3s ease-in-out infinite}
   @keyframes balancarCruz{0%,80%,100%{transform:rotate(0)}84%{transform:rotate(-13deg)}88%{transform:rotate(10deg)}92%{transform:rotate(-6deg)}96%{transform:rotate(3deg)}}
-  .logo-row{display:flex;align-items:center;gap:14px;cursor:pointer;padding:6px 10px;border-radius:14px;
+  .logo-row{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 8px;border-radius:12px;
     background:var(--carvao);border:1px solid var(--linha);
     transition:transform .12s,border-color .12s;
     user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
   .logo-row:active{transform:translateY(1px);border-color:var(--linha)}
-  .bobo{width:108px;height:108px;border-radius:14px;object-fit:cover;object-position:top;border:2px solid var(--linha);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
+  .bobo{width:52px;height:52px;border-radius:10px;object-fit:cover;object-position:top;border:2px solid var(--linha);box-shadow:0 3px 10px rgba(0,0,0,.35);flex:none}
   .bobo.g{width:150px;height:186px;margin:0 auto 14px;display:block;border-radius:16px;object-fit:cover;object-position:top}
   .tela-login{position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;background:var(--preto)}
   .bobo-login{display:block;margin:0 auto 6px;width:150px;height:auto;border-radius:16px;filter:drop-shadow(0 14px 18px rgba(0,0,0,.35))}
-  .eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cinza);margin-bottom:6px}
+  .eyebrow{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cinza);margin-bottom:3px}
   .who{background:none;border:none;padding:0;font-size:.85rem;display:flex;align-items:center;gap:8px;color:var(--branco)}
   #whoFoto img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.3);display:block;vertical-align:middle}
   .who b{text-transform:capitalize}
@@ -507,13 +507,13 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
 @media(max-width:480px){.fq-edge-corpo img{width:58px;height:87px}.fq-edge-corpo{max-width:74px}}
 @media(max-width:480px){
-  .bobo{width:64px;height:64px;border-radius:10px}
-  .header-inner{gap:8px}
-  .logo-row{gap:8px}
-  h1{font-size:1.42rem}
-  .eyebrow{font-size:.58rem;letter-spacing:.12em}
-  .who{padding:0;font-size:.7rem;gap:4px}
-  #btnInstalarApp{padding:6px 9px!important;font-size:.7rem!important;margin-right:6px!important}
+  .bobo{width:40px;height:40px;border-radius:8px}
+  .header-inner{gap:6px}
+  .logo-row{gap:6px;padding:3px 6px}
+  h1{font-size:1.1rem}
+  .eyebrow{font-size:.5rem;letter-spacing:.1em;margin-bottom:1px}
+  .who{padding:0;font-size:.66rem;gap:4px}
+  #btnInstalarApp{padding:4px 6px!important;font-size:.56rem!important}
 }
 .fq-veu{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000}
 .fq-veu.oculto{display:none}
@@ -578,7 +578,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 </div>
 
-<!-- modal do mês do Vasbolão (quem pagou) -->
+<!-- modal do mês do Vasbet (quem pagou) -->
 <div class="modal-sair oculto" id="modalVasbolaoMes" onclick="if(event.target===this)fecharVasbolaoMes()">
   <div class="modal" style="max-width:420px;max-height:80vh;max-height:80dvh;overflow-y:auto">
     <h3 style="text-align:left;margin-bottom:10px" id="tituloVasbolaoMes"></h3>
@@ -587,10 +587,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 </div>
 
-<!-- modal explicando o Ranking do Vasbolão -->
+<!-- modal explicando o Ranking do Vasbet -->
 <div class="modal-sair oculto" id="modalExplicacaoVasbolao" onclick="if(event.target===this)fecharExplicacaoVasbolao()">
   <div class="modal" style="max-width:420px;max-height:80vh;max-height:80dvh;overflow-y:auto">
-    <h3 style="text-align:left;margin-bottom:10px">🏅 Como funciona o Ranking do Vasbolão</h3>
+    <h3 style="text-align:left;margin-bottom:10px">🏅 Como funciona o Ranking do Vasbet</h3>
     <div id="corpoExplicacaoVasbolao"></div>
     <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" style="flex:1" onclick="fecharExplicacaoVasbolao()">Entendi</button></div>
   </div>
@@ -644,7 +644,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       <ol style="margin:0 0 10px 18px;padding:0">
         <li><b>Ranking da Rodada</b>: é só sobre o jogo que está rolando agora — mostra quem está indo bem naquela partida específica, some quando o jogo termina e vira histórico.</li>
         <li><b>Reizinho / Ribamar</b>: ao final de cada rodada, quem tirou a maior pontuação vira Reizinho (+2 pts) e quem tirou a menor vira Ribamar (-2 pts, e gira a roleta do castigo). Esse bônus/penalidade entra direto na conta do <b>Ranking Geral</b> (o de sempre, contando a temporada toda).</li>
-        <li><b>Ranking do Vasbolão</b>: é mensal — zera todo mês e conta só os jogos daquele mês (incluindo os mesmos bônus de Reizinho/Ribamar). É o que define o prêmio do mês.</li>
+        <li><b>Ranking do Vasbet</b>: é mensal — zera todo mês e conta só os jogos daquele mês (incluindo os mesmos bônus de Reizinho/Ribamar). É o que define o prêmio do mês.</li>
       </ol>
 
       <h4>🎯 Placar exato — 15 pts</h4>
@@ -746,7 +746,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 <div id="vApp" class="oculto">
   <header>
     <div class="header-inner">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;min-width:0">
         <div class="logo-row" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');}else{location.href='/';}" title="Ir para a tela inicial">
           <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
           <div>
@@ -754,7 +754,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
             <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
           </div>
         </div>
-        <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700;flex:none">Baixar APP</button>
+        <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:6px;padding:5px 8px;cursor:pointer;font-size:.62rem;letter-spacing:.03em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700;flex:none;white-space:nowrap">Baixar APP</button>
       </div>
       <div class="header-right-stack">
         <div class="who">
@@ -934,7 +934,7 @@ const CHAVE='vasbobo:v2';
 const CHAVE_SESSAO='vasbobo:sessao';
 const SENHA_PADRAO='vasco123';
 const PTS_EXATO=15, PTS_RESULTADO=8, PTS_UMTIME_ERROU=3, PTS_GOL=6, PTS_MVP=6, PTS_NAO_AVALIOU=-2, PTS_CASTIGO=-2;
-const PTS_BONUS_REIZINHO=2, PTS_PENALIDADE_RIBAMAR=-2; // bônus/penalidade por ser rei/ribamar de uma rodada — vale no ranking geral e no Vasbolão
+const PTS_BONUS_REIZINHO=2, PTS_PENALIDADE_RIBAMAR=-2; // bônus/penalidade por ser rei/ribamar de uma rodada — vale no ranking geral e no Vasbet
 function penalidadeCastigo(id,j,usuario){
   return 0; // decisão do grupo: só quem não avalia os jogadores perde ponto; não girar/pagar o castigo não desconta mais
 }
@@ -1499,7 +1499,7 @@ function placarTexto(j,usarParcial){
   return casa?(r.v+' × '+r.a):(r.a+' × '+r.v);
 }
 function jogadorPorId(id){return (dados.jogadores||[]).find(p=>p.id===id);}
-/* =================== VASBOLÃO (R$10/mês via Pix, sem taxa, usando InfinitePay) =================== */
+/* =================== VASBET (R$10/mês via Pix, sem taxa, usando InfinitePay) =================== */
 /* R$10 = R$5 vira prêmio do mês + R$5 acumula pro prêmio de fim de ano */
 const VASBOLAO_VALOR_TEXTO='R$10,00';
 function chaveVasbolaoAtual(){
@@ -1511,7 +1511,7 @@ function nomeMesPt(mes){
   return ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][mes-1]||'';
 }
 function htmlVasbolaoStatusCard(){
-  return '<div class="card"><h2>🏆 Vasbolão — sua contribuição</h2>'+
+  return '<div class="card"><h2>🏆 Vasbet — sua contribuição</h2>'+
     '<p class="nota-rodape" style="margin:0 0 12px">R$10,00 por mês, via Pix. Metade (R$5) vira o prêmio do mês, a outra metade (R$5) acumula pro prêmio de fim de ano.</p>'+
     '<div id="statusVasbolao"><p class="nota-rodape" style="margin:0">Verificando...</p></div></div>';
 }
@@ -1544,7 +1544,7 @@ async function pagarVasbolao(){
     const r=await fetch('/.netlify/functions/mensalidade?acao=criar&usuario='+encodeURIComponent(eu));
     const info=await r.json();
     if(info.erro||!info.url){avisar('Não consegui gerar o Pix agora. Tenta de novo em instantes.');if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}return;}
-    registrarLog('pagamento','Gerou cobrança do Vasbolão',eu,'comum');
+    registrarLog('pagamento','Gerou cobrança do Vasbet',eu,'comum');
     window.open(info.url,'_blank');
     avisar('Abriu a tela de pagamento numa aba nova. Não precisa mandar comprovante pra ninguém — depois de pagar, o app confirma e guarda tudo sozinho. Só volta aqui em alguns segundos.',true);
     setTimeout(carregarStatusVasbolao,4000);
@@ -1607,7 +1607,7 @@ async function abrirComprovanteVasbolao(docId){
   }catch(e){avisar('Erro ao abrir o comprovante.');}
 }
 async function zerarTemporada(){
-  if(!(await confirmar('Zerar a pontuação de todo mundo a partir de hoje? Isso não apaga nenhum palpite/nota antiga — só faz o Ranking Geral e o Ranking do Vasbolão pararem de contar jogos anteriores a hoje. A partir do próximo jogo, tudo recomeça do zero pra todo mundo.')))return;
+  if(!(await confirmar('Zerar a pontuação de todo mundo a partir de hoje? Isso não apaga nenhum palpite/nota antiga — só faz o Ranking Geral e o Ranking do Vasbet pararem de contar jogos anteriores a hoje. A partir do próximo jogo, tudo recomeça do zero pra todo mundo.')))return;
   const hoje=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
   await mutar(()=>{
     if(!dados.config)dados.config={};
@@ -1617,7 +1617,7 @@ async function zerarTemporada(){
   avisar('Pontuação zerada! A partir de agora, só conta jogo novo.',true);
   render();
 }
-/* ---- Vasbolão Ranking: mesma lógica de pontuação do ranking geral, só que contando SÓ os
+/* ---- Vasbet Ranking: mesma lógica de pontuação do ranking geral, só que contando SÓ os
    jogos do mês corrente (palpite + quiz daquela rodada + bônus/penalidade de rei/ribamar) ---- */
 function calcularPlacarVasbolao(ano,mes){
   const placar={};
@@ -1661,7 +1661,7 @@ function htmlVasbolaoRanking(limite){
     .sort((a,b)=>b[1].pts-a[1].pts||b[1].exato-a[1].exato);
   const lista=limite?ordem.slice(0,limite):ordem;
   let html='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">'+
-    '<h2 style="margin:0;padding:0;border:none">🏆 Vasbolão — '+cap(nomeMes)+'</h2>'+
+    '<h2 style="margin:0;padding:0;border:none">🏆 Vasbet — '+cap(nomeMes)+'</h2>'+
     '<button class="btn fantasma" style="padding:6px 10px;font-size:.68rem" onclick="abrirExplicacaoVasbolaoRanking()">Como funciona?</button></div>';
   if(!lista.length){
     html+='<div class="vazio">Ainda não tem jogo pontuado esse mês.</div>';
@@ -1679,14 +1679,14 @@ function htmlVasbolaoRanking(limite){
     }).join('');
   }
   if(limite&&ordem.length>limite){
-    html+='<button class="btn fantasma" style="width:100%;margin-top:10px" onclick="mudarAba(\'vasbolao\')">Ver ranking do Vasbolão completo</button>';
+    html+='<button class="btn fantasma" style="width:100%;margin-top:10px" onclick="mudarAba(\'vasbolao\')">Ver ranking do Vasbet completo</button>';
   }
   html+='</div>';
   return html;
 }
 function abrirExplicacaoVasbolaoRanking(){
   document.getElementById('corpoExplicacaoVasbolao').innerHTML=
-    '<p style="margin-bottom:10px">O <b>Ranking do Vasbolão</b> é como o ranking geral, só que zera todo mês — só conta os jogos daquele mês.</p>'+
+    '<p style="margin-bottom:10px">O <b>Ranking do Vasbet</b> é como o ranking geral, só que zera todo mês — só conta os jogos daquele mês.</p>'+
     '<p style="margin-bottom:10px">Cada rodada soma:</p>'+
     '<ul style="margin:0 0 10px 18px;line-height:1.7">'+
     '<li>Pontos do palpite (placar exato, resultado certo, etc.)</li>'+
@@ -2211,7 +2211,7 @@ const PATCH_ZERAR_TEMPORADA_V=1;
 function migrar(){
   let mudou=false;
   if(!dados.config){dados.config={modoTeste:false};mudou=true;}
-  /* zera a pontuação geral e a do Vasbolão: decisão do grupo de recomeçar do zero, mantendo os
+  /* zera a pontuação geral e a do Vasbet: decisão do grupo de recomeçar do zero, mantendo os
      mesmos parâmetros de pontuação — não apaga nenhum palpite/nota antiga, só marca uma data de
      corte a partir de hoje, e o cálculo do ranking já sabe ignorar tudo antes disso */
   if((dados.patchZerarTemporadaV||0)<PATCH_ZERAR_TEMPORADA_V){
@@ -4952,11 +4952,11 @@ async function renderAdmin(){
   '<div><label for="logTipo">Tipo</label><select id="logTipo" onchange="buscarLogs()"><option value="">Todos</option><option value="login">🔓 Login</option><option value="logout">🔒 Logout</option><option value="aba">🧭 Navegação (aba)</option><option value="clique">👆 Clique</option><option value="admin">🛠️ Ação admin</option><option value="notificacao">📣 Notificação enviada</option><option value="sistema">⚙️ Sistema (backup/deploy)</option><option value="pagamento">💰 Pagamento</option></select></div>'+
   '</div>'+
   '<div id="listaLogs" style="margin-top:14px"></div></div></details></div>'+
-  '<div class="card"><details ontoggle="if(this.open)carregarMesesVasbolaoAdmin()"><summary>💰 Vasbolão — pagamentos</summary><div style="margin-top:12px">'+
+  '<div class="card"><details ontoggle="if(this.open)carregarMesesVasbolaoAdmin()"><summary>💰 Vasbet — pagamentos</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Quem pagou, quando, e o comprovante de cada um — visível só pra admin. Escolhe o mês pra ver.</p>'+
   '<div id="listaMesesVasbolaoAdmin">Carregando…</div></div></details></div>'+
   '<div class="card"><details><summary>♻️ Zerar temporada</summary><div style="margin-top:12px">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Zera o Ranking Geral e o Ranking do Vasbolão pra todo mundo, sem apagar o histórico — jogos de antes da data que você escolher simplesmente saem da conta.'+
+  '<p class="nota-rodape" style="margin:0 0 12px">Zera o Ranking Geral e o Ranking do Vasbet pra todo mundo, sem apagar o histórico — jogos de antes da data que você escolher simplesmente saem da conta.'+
   (dados.config&&dados.config.inicioTemporada?' <b style="color:var(--verde)">Temporada atual começou em '+new Date(dados.config.inicioTemporada+'T12:00').toLocaleDateString('pt-BR')+'.</b>':'')+'</p>'+
   '<button class="btn fantasma" style="color:var(--vermelho);border-color:var(--vermelho)" onclick="zerarTemporada()">Zerar a pontuação a partir de hoje</button>'+
   '</div></details></div>';
@@ -5368,7 +5368,7 @@ function iniciarMidiaJanela(){
 </script>
   <nav class="menu-fixo" id="menuFixo">
     <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:60px;height:auto"></span>Home</a>
-    <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>Vasbolão</a>
+    <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>Vasbet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
