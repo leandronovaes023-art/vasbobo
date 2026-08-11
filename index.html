@@ -112,8 +112,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .sino-notif{background:none;border:none;color:var(--branco);
     width:34px;height:34px;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
   .sino-notif.ativado{color:var(--verde)}
-  .sino-notif.balancando{animation:sinoBalanca 2.4s ease-in-out infinite}
-  @keyframes sinoBalanca{0%,90%,100%{transform:rotate(0)}91%{transform:rotate(-14deg)}93%{transform:rotate(11deg)}95%{transform:rotate(-8deg)}97%{transform:rotate(5deg)}99%{transform:rotate(-2deg)}}
+  .sino-notif.balancando{animation:sinoBalanca 1.7s ease-in-out infinite}
+  @keyframes sinoBalanca{0%,100%{transform:rotate(0)}12%{transform:rotate(-16deg)}24%{transform:rotate(13deg)}36%{transform:rotate(-11deg)}48%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}72%{transform:rotate(3deg)}84%{transform:rotate(-1deg)}}
   h1{font-size:clamp(2.1rem,6.6vw,2.95rem);line-height:1;text-shadow:none;width:auto}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px;display:inline-block;
     animation:balancarCruz 3s ease-in-out infinite}
@@ -366,7 +366,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
 
   /* janela de mídia flutuante */
-  .midia-janela{position:fixed;right:6px;bottom:74px;width:min(115px,32vw);height:18vh;max-height:165px;
+  .midia-janela{position:fixed;right:6px;bottom:calc(84px + env(safe-area-inset-bottom,0));width:min(115px,32vw);height:18vh;max-height:165px;
     background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;overflow:hidden;
     box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:395;display:flex;flex-direction:column}
   .midia-top{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;
@@ -467,7 +467,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .castigo-item.pendente{border-color:var(--vermelho);background:rgba(224,41,59,.05)}
   .castigo-item.pendente .ci-texto{color:var(--vermelho);font-style:italic}
 
-  .topo-btn{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
+  .topo-btn{position:fixed;left:14px;bottom:calc(84px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
     background:var(--branco);color:var(--preto);border:none;font-size:1.15rem;cursor:pointer;
     box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:400;display:none;align-items:center;justify-content:center}
   .topo-btn.on{display:flex}
@@ -1583,20 +1583,28 @@ async function abrirMesVasbolaoAdmin(ano,mes){
     let html='<p style="font-weight:800;margin-bottom:10px">'+totalPago+'/'+usuarios.length+' pagaram</p>';
     usuarios.forEach(u=>{
       const p=pagos[u];
+      const docId=u+'_'+ano+'_'+String(mes).padStart(2,'0');
       html+='<div class="mini-linha"><span class="rank-nome">'+esc(cap(u))+'</span>'+
         (p&&p.pago
           ?('<span style="color:var(--verde);font-weight:800;font-size:.78rem;display:flex;align-items:center;gap:8px">✅ '+new Date(p.pagoEm).toLocaleDateString('pt-BR')+
-             (p.comprovante?' <a href="'+esc(p.comprovante)+'" target="_blank" style="color:var(--azul)">comprovante</a>':'')+
+             ' <a href="javascript:void(0)" onclick="abrirComprovanteAdmin(\''+esc(u)+'\')" style="color:var(--azul);cursor:pointer">comprovante</a>'+
              '</span>')
           :'<span style="color:var(--cinza);font-weight:800;font-size:.78rem">⏳ pendente</span>')+
         '</div>';
     });
     corpo.innerHTML=html;
+    window._vasbolaoMesAtual={ano,mes,pagos};
   }catch(e){
     corpo.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
   }
 }
 function fecharVasbolaoMes(){document.getElementById('modalVasbolaoMes').classList.add('oculto');}
+function abrirComprovanteAdmin(usuario){
+  const info=window._vasbolaoMesAtual;
+  const p=info&&info.pagos&&info.pagos[usuario];
+  if(p&&p.comprovante){ window.open(p.comprovante,'_blank'); return; }
+  avisar('Contribuição isenta esse mês (autorizada pelo admin) — não tem comprovante de pagamento real, foi liberado manualmente.',true);
+}
 async function abrirComprovanteVasbolao(docId){
   // trava de privacidade: só o dono do próprio pagamento pode usar isso (é o botão "ver meu comprovante")
   if(!docId.startsWith(eu+'_')){avisar('Você só pode ver o seu próprio comprovante.');return;}
