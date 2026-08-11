@@ -1233,12 +1233,12 @@ function htmlBadgeEscalacao(id,j){
   if(!j.hora||j.resultado)return '';
   if(j.escalacaoPreJogo&&j.escalacaoPreJogo.jogadores&&j.escalacaoPreJogo.jogadores.length){
     return '<button onclick="abrirEscalacaoPreJogo(\''+id+'\')" style="background:rgba(47,208,142,.12);border:1.5px solid var(--verde);color:var(--verde);'+
-      'border-radius:10px;padding:6px 12px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;text-align:center;white-space:nowrap;line-height:1.5;font-family:inherit">'+
-      '📋 Escalação saiu!<br><span style="text-decoration:underline">Toque pra ver</span></button>';
+      'border-radius:10px;padding:6px 12px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;text-align:center;white-space:nowrap;line-height:1.5;font-family:inherit;flex:none">'+
+      'ESCALAÇÃO<br><span style="text-decoration:underline">Já saiu. Clique.</span></button>';
   }
   return '<div style="background:var(--carvao2);border:1px solid var(--linha);border-radius:10px;padding:6px 12px;'+
-    'font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--cinza);text-align:center;white-space:nowrap;line-height:1.5">'+
-    '🔔 Escalação<br><span style="font-weight:400;text-transform:none;letter-spacing:0">notificamos assim que sair</span></div>';
+    'font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--branco);text-align:center;white-space:nowrap;line-height:1.5;flex:none">'+
+    'ESCALAÇÃO!<br><span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--cinza)">Saiu e você recebe no celular</span></div>';
 }
 function abrirEscalacaoPreJogo(id){
   const j=dados.jogos[id];
@@ -1262,7 +1262,7 @@ async function adminDefinirEscalacaoPreJogo(id){
   avisar('Escalação registrada — mandando a notificação pra todo mundo…',true);
   try{
     await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({texto:'📋 Escalação do Vasco saiu! '+nomeJogo(j).replace(/<[^>]+>/g,'')+' — toque pra ver quem começa jogando.'})});
+      body:JSON.stringify({titulo:'SAIU A ESCALAÇÃO!',texto:nomeJogo(j).replace(/<[^>]+>/g,'')+'. Clique!',url:'/?abrirEscalacao='+id})});
   }catch(e){}
   render();
 }
@@ -2242,8 +2242,8 @@ async function sincronizarJogos(){
     if(j.resultado||!j.hora||j.escalacaoPreJogo)continue;
     if(!/brasileir[ãa]o|campeonato brasileiro/i.test(j.competicao||''))continue;
     const ini=inicioJogo(j).getTime();
-    if(agora<ini-2*3600000||agora>=ini)continue; // só entre 2h antes e o início
-    if(j.escSyncPreJogoEm&&agora-j.escSyncPreJogoEm<3*60000)continue; // não insiste mais que 1x a cada 3min
+    if(agora<ini-45*60000||agora>=ini)continue; // janela: dos 45min antes até o início (sai por padrão aos 30min)
+    if(j.escSyncPreJogoEm&&agora-j.escSyncPreJogoEm<30000)continue; // nessa janela quente, insiste a cada ~30s (o mesmo ritmo do relógio do app)
     await mutar(()=>{const x=dados.jogos[id];if(x)x.escSyncPreJogoEm=agora;});
     try{
       const casa=j.local!=='fora';
@@ -2252,11 +2252,11 @@ async function sincronizarJogos(){
       const info=await r.json();
       if(info.encontrada&&info.escalacao){
         const nomes=casa?info.escalacao.casa:info.escalacao.fora;
-        if(nomes&&nomes.length>=9){
+        if(nomes&&nomes.length===11){
           await mutar(()=>{const x=dados.jogos[id];if(x&&!x.escalacaoPreJogo)x.escalacaoPreJogo={jogadores:nomes,quando:Date.now(),fonte:info.fonte||'uol'};});
           try{
             await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-              body:JSON.stringify({texto:'📋 Escalação do Vasco saiu! '+nomeJogo(j).replace(/<[^>]+>/g,'')+' — toque pra ver quem começa jogando.'})});
+              body:JSON.stringify({titulo:'SAIU A ESCALAÇÃO!',texto:nomeJogo(j).replace(/<[^>]+>/g,'')+'. Clique!',url:'/?abrirEscalacao='+id})});
           }catch(e){}
         }
       }
@@ -2538,6 +2538,14 @@ function entrarNoApp(){
   atualizarMenuFixo('jogos');
   render();
   sincronizarJogos();
+  // veio de uma notificação de "saiu a escalação" (clique abre o app com ?abrirEscalacao=ID)
+  try{
+    const idEscalacao=new URLSearchParams(location.search).get('abrirEscalacao');
+    if(idEscalacao&&dados.jogos[idEscalacao]){
+      setTimeout(()=>abrirEscalacaoPreJogo(idEscalacao),400);
+      history.replaceState(null,'',location.pathname); // limpa o link da barra de endereço
+    }
+  }catch(e){}
   document.getElementById('fqFixo').classList.remove('oculto');
   const fmEl=document.getElementById('fmFixo');
   if(fmEl)fmEl.classList.remove('oculto');
@@ -2891,8 +2899,8 @@ function renderListaJogos(){
     const chamada=s==='aberto'?'Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar':s==='andamento'?'Bola rolando! Placar atualizando e avaliação libera no apito final':s==='avaliar'?'Fim de jogo: hora de dar as notas e soltar o verbo':'Veja como a galera se saiu';
     html+='<div class="card destaque"><div class="selo-destaque"><span class="cruz">✠</span> Jogo em destaque</div>'+
       '<div class="dest-grid"><div class="rodada-box">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'+
-      '<div class="jogo-nome" style="font-size:1.35rem">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'+
+      '<div class="jogo-nome" style="font-size:1.12rem">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
       htmlBadgeEscalacao(id,j)+
       '</div>'+
       '<div class="data-grande">'+fmtData(j)+'</div>'+

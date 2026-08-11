@@ -99,7 +99,7 @@ async function tentarEscalacaoBrasileirao({ data, timeCasa, timeFora }) {
   try {
     const urls = montarUrlsBrasileirao(data, timeCasa, timeFora);
     const uol = await extrairUol(urls.uol).catch(() => null);
-    if (uol && uol.escalacaoTitular && (uol.escalacaoTitular.casa.length >= 9 || uol.escalacaoTitular.fora.length >= 9)) {
+    if (uol && uol.escalacaoTitular && (uol.escalacaoTitular.casa.length === 11 || uol.escalacaoTitular.fora.length === 11)) {
       return uol.escalacaoTitular;
     }
   } catch (e) { /* segue sem escalação, sem quebrar nada */ }
