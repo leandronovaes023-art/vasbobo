@@ -5,8 +5,15 @@
 // Uso pelo site:
 //   /.netlify/functions/futebol?acao=proximos
 //     -> últimos jogos (com placar, se já aconteceram) + próximos jogos do Vasco
-//   /.netlify/functions/futebol?acao=detalhe&data=2026-08-02&adversario=Botafogo
+//   /.netlify/functions/futebol?acao=detalhe&data=2026-08-02&adversario=Botafogo&local=casa&competicao=Campeonato+Brasileiro
 //     -> placar final + quem entrou em campo (se o jogo já tiver acabado)
+//     -> se for jogo do Brasileirão, confere o placar também no LANCE!+UOL antes de confiar
+//        só na TheSportsDB (a escalação continua vindo sempre da TheSportsDB — LANCE/UOL só
+//        têm a linha do tempo de eventos, não a lista de titulares)
+
+const { extrairLance } = require('./lance-jogo');
+const { extrairUol } = require('./uol-jogo');
+const { verificarJogo } = require('./_comparador-fontes');
 
 const BASE = 'https://www.thesportsdb.com/api/v1/json/123';
 const TIME_NOME = 'Vasco da Gama';
@@ -27,6 +34,57 @@ async function idDoVasco() {
   if (!achado) throw new Error('Time "Vasco da Gama" não encontrado na TheSportsDB');
   CACHE_TIME_ID = achado.idTeam;
   return CACHE_TIME_ID;
+}
+
+// slug simples: minúsculo, sem acento, espaços viram hífen (serve pro LANCE e de forma similar pro UOL)
+function slugificar(nome) {
+  return (nome || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-');
+}
+// nomes que a TheSportsDB usa não batem sempre com o "apelido curto" que LANCE/UOL usam na URL
+// (ex.: TheSportsDB manda "Vasco da Gama", mas o site usa só "vasco"). Mapeia os times que o
+// Vasco mais enfrenta no Brasileirão — qualquer time fora dessa lista cai no slug genérico, que
+// funciona bem pra times de nome já curto (ex.: "Bahia", "Santos", "Palmeiras").
+const APELIDO_TIME = {
+  'vasco da gama': 'vasco', vasco: 'vasco',
+  'athletico paranaense': 'athletico-pr', 'atletico paranaense': 'athletico-pr', athletico: 'athletico-pr',
+  'atletico mineiro': 'atletico-mg', 'atlético mineiro': 'atletico-mg',
+  'red bull bragantino': 'red-bull-bragantino', bragantino: 'red-bull-bragantino',
+  'sao paulo': 'sao-paulo',
+  fluminense: 'fluminense', flamengo: 'flamengo', botafogo: 'botafogo', corinthians: 'corinthians',
+  palmeiras: 'palmeiras', santos: 'santos', gremio: 'gremio', internacional: 'internacional',
+  cruzeiro: 'cruzeiro', bahia: 'bahia', vitoria: 'vitoria', coritiba: 'coritiba', remo: 'remo',
+  ceara: 'ceara', fortaleza: 'fortaleza', mirassol: 'mirassol', juventude: 'juventude',
+};
+function nomeParaSlug(nome) {
+  const chave = (nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  return APELIDO_TIME[chave] || slugificar(nome);
+}
+
+// tenta confirmar o placar de um jogo do Brasileirão direto no LANCE!+UOL — só funciona pra essa
+// competição por enquanto, porque foi o único padrão de endereço que já testamos de verdade.
+// Se der qualquer erro (site fora do ar, slug de time que a gente não mapeou direito, etc.),
+// simplesmente devolve null e quem chamou continua usando a TheSportsDB normalmente — não quebra nada.
+async function tentarConfirmarBrasileirao({ data, timeCasa, timeFora }) {
+  try {
+    const [ano, mes, dia] = data.split('-');
+    const slugCasa = nomeParaSlug(timeCasa), slugFora = nomeParaSlug(timeFora);
+    const urlLance = `https://www.lance.com.br/temporeal/partida/brasileirao-serie-a-${ano}-${dia}-${mes}-${ano}-${slugCasa.replace(/-/g,'')}x${slugFora.replace(/-/g,'')}`;
+    const urlUol = `https://placar.uol.com.br/esporte/futebol/brasileirao/${ano}/${mes}/${dia}/${slugCasa}-x-${slugFora}.htm`;
+
+    const [lance, uol] = await Promise.all([
+      extrairLance(urlLance).catch(() => null),
+      extrairUol(urlUol).catch(() => null),
+    ]);
+    const veredito = verificarJogo([lance, uol].filter(Boolean));
+    if (veredito.placar && (veredito.placar.nivel === 'confirmado' || veredito.placar.nivel === 'provavel')) {
+      return { golsMandante: veredito.placar.placar.casa, golsVisitante: veredito.placar.placar.fora, nivel: veredito.placar.nivel, fontes: veredito.placar.fontesConcordantes };
+    }
+  } catch (e) { /* qualquer erro aqui e a gente simplesmente segue com a TheSportsDB, sem quebrar nada */ }
+  return null;
 }
 
 function statusEncerrado(ev) {
@@ -102,6 +160,20 @@ async function acaoDetalhe(params, res) {
     return res(200, { jogo: resumo, encerrado: false });
   }
 
+  // Brasileirão: tenta confirmar o placar direto no LANCE!+UOL — se confirmar, usa esse
+  // placar (mais rápido e assertivo que esperar a TheSportsDB atualizar); senão, segue com
+  // o que a TheSportsDB já trouxe, sem travar nem quebrar nada.
+  const ehBrasileirao = /brasileir[ãa]o|campeonato brasileiro/i.test(params.competicao || resumo.liga || '');
+  let fonteExtra = null;
+  if (ehBrasileirao) {
+    const confirmado = await tentarConfirmarBrasileirao({ data: resumo.data, timeCasa: resumo.mandante, timeFora: resumo.visitante });
+    if (confirmado) {
+      resumo.golsMandante = confirmado.golsMandante;
+      resumo.golsVisitante = confirmado.golsVisitante;
+      fonteExtra = { fonte: 'lance+uol', nivel: confirmado.nivel, fontesConcordantes: confirmado.fontes };
+    }
+  }
+
   let escalacao = { mandante: [], visitante: [] };
   try {
     const linJ = await chamarApi(`/lookuplineup.php?id=${eventoId}`);
@@ -116,7 +188,7 @@ async function acaoDetalhe(params, res) {
     });
   } catch (e) { /* lineup pode não estar disponível — segue só com o placar */ }
 
-  res(200, { jogo: resumo, encerrado: true, escalacao, escalacaoDisponivel: escalacao.mandante.length + escalacao.visitante.length > 0 });
+  res(200, { jogo: resumo, encerrado: true, escalacao, escalacaoDisponivel: escalacao.mandante.length + escalacao.visitante.length > 0, placarConfirmadoPor: fonteExtra });
 }
 
 exports.handler = async (event) => {

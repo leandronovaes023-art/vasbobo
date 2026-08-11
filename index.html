@@ -737,7 +737,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       <button onclick="fmFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px;z-index:2">✕</button>
       <img src="img/embed/motivacional-capa.jpg" alt="" style="width:100%;max-width:220px;display:block;margin:0 auto 14px;border-radius:12px">
       <h3 style="text-align:center;margin-bottom:14px;padding-right:0">O Vasbobo tem uma mensagem Motivacional para você</h3>
-      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque e veja a frase para renovar sua esperança</button></div>
+      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()"><span style="color:var(--vermelho)">✠</span> Toque e veja a frase para renovar sua esperança</button></div>
     </div>
   </div>
 
@@ -1892,12 +1892,12 @@ function jogoQuizAtual(){
 async function fqLerEstado(){
   try{
     const snap=await db.collection('shared').doc('vasbobo_quiz').get();
-    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}, vistas:v.vistas||{}}; }
+    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}, vistas:v.vistas||{}, filaOrdem:v.filaOrdem||[], filaPonteiro:v.filaPonteiro||0}; }
   }catch(e){}
-  return {diario:{}, porJogo:{}, vistas:{}};
+  return {diario:{}, porJogo:{}, vistas:{}, filaOrdem:[], filaPonteiro:0};
 }
 async function fqSalvarEstado(estado){
-  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, atualizadoEm:Date.now()}); return true; }
+  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, filaOrdem:estado.filaOrdem||[], filaPonteiro:estado.filaPonteiro||0, atualizadoEm:Date.now()}); return true; }
   catch(e){ return false; }
 }
 function fqStatusDia(estado,usuario){
@@ -1917,20 +1917,9 @@ function rankingQuizTotal(estado){
   });
   return Object.entries(totais).map(([u,pts])=>({u,pts})).sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
 }
-/* pergunta já vista por esse usuário, alguma vez (evita repetição) */
+/* pergunta já vista por esse usuário, alguma vez (histórico, hoje não usado pra escolher, mas fica disponível) */
 function fqVistasUsuario(estado,usuario){
   return (estado.vistas&&estado.vistas[usuario])||[];
-}
-async function fqRegistrarVista(usuario,id){
-  const estado=await fqLerEstado();
-  if(!estado.vistas)estado.vistas={};
-  if(!estado.vistas[usuario])estado.vistas[usuario]=[];
-  if(estado.vistas[usuario].indexOf(id)===-1){
-    estado.vistas[usuario].push(id);
-    await fqSalvarEstado(estado);
-  }
-  ESTADO_QUIZ=estado;
-  return estado;
 }
 async function fqRegistrarResposta(usuario,acertou){
   const estado=await fqLerEstado();
@@ -1979,23 +1968,38 @@ function fqMostrarEsgotado(){
     '<button class="fq-fechar" onclick="fqFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
   modal.classList.remove('oculto');
 }
-/* escolhe uma pergunta ainda não vista por esse usuário; se ele já viu todas, reinicia o ciclo */
-function fqEscolherPergunta(usuario){
-  const vistas=new Set(fqVistasUsuario(ESTADO_QUIZ,usuario));
-  let disponiveis=FQ_PERGUNTAS.filter(q=>!vistas.has(q.id));
-  if(!disponiveis.length)disponiveis=FQ_PERGUNTAS;
-  return disponiveis[Math.floor(Math.random()*disponiveis.length)];
+function fqEmbaralhar(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+/* fila única compartilhada por TODO o grupo: cada pergunta só volta a poder sair de novo depois
+   que as outras 999 já saíram pra alguém — evita repetição não só pra cada pessoa individualmente,
+   mas a mesma pergunta caindo pra pessoas diferentes perto uma da outra */
+async function fqEscolherPergunta(usuario){
+  const estado=await fqLerEstado(); // lê sempre fresco, pra não competir com outra pessoa pedindo pergunta ao mesmo tempo
+  if(!estado.filaOrdem||!estado.filaOrdem.length||estado.filaPonteiro==null||estado.filaPonteiro>=estado.filaOrdem.length){
+    estado.filaOrdem=fqEmbaralhar(FQ_PERGUNTAS.map(q=>q.id));
+    estado.filaPonteiro=0;
+  }
+  const id=estado.filaOrdem[estado.filaPonteiro];
+  estado.filaPonteiro++;
+  if(!estado.vistas)estado.vistas={};
+  if(!estado.vistas[usuario])estado.vistas[usuario]=[];
+  if(estado.vistas[usuario].indexOf(id)===-1)estado.vistas[usuario].push(id);
+  await fqSalvarEstado(estado);
+  ESTADO_QUIZ=estado;
+  return FQ_PERGUNTAS.find(q=>q.id===id)||FQ_PERGUNTAS[0];
 }
 async function fqProximaPergunta(){
   await fqCarregarPerguntas();
   if(!FQ_PERGUNTAS.length){avisar('Não consegui carregar as perguntas agora.');return;}
   const usuario=fqUsuario();
-  fqPerguntaAtual=fqEscolherPergunta(usuario);
+  fqPerguntaAtual=await fqEscolherPergunta(usuario);
   fqRespondida=false;
   fqRenderPergunta();
   document.getElementById('fqModal').classList.remove('oculto');
   fqIniciarTimer();
-  fqRegistrarVista(usuario,fqPerguntaAtual.id);
 }
 function fqRenderPergunta(){
   const q=fqPerguntaAtual;
@@ -2102,23 +2106,24 @@ async function chamarClaude(prompt,maxTokens){
 }
 
 /* =================== SINCRONIZAÇÃO AUTOMÁTICA DE PLACAR =================== */
-/* Usa a busca inteligente do Claude (pesquisa ge.globo, ESPN, Sofascore etc.)
-   para registrar placar ao vivo, resultado final e goleadores sem ação do admin. */
+/* Busca placar/escalação na TheSportsDB — pro Brasileirão, o servidor ainda confere o placar
+   direto no LANCE!+UOL antes de confiar só nela (mais rápido e assertivo). */
 async function consultarPlacarIA(j){
   try{
-    const r=await fetch(`/.netlify/functions/futebol?acao=detalhe&data=${j.data}&adversario=${encodeURIComponent(j.adversario||'')}`);
+    const r=await fetch(`/.netlify/functions/futebol?acao=detalhe&data=${j.data}&adversario=${encodeURIComponent(j.adversario||'')}&competicao=${encodeURIComponent(j.competicao||'')}`);
     const info=await r.json();
     if(info.erro||!info.jogo)return {encontrado:false};
     const casa=j.local!=='fora';
     const gv=casa?info.jogo.golsMandante:info.jogo.golsVisitante;
     const ga=casa?info.jogo.golsVisitante:info.jogo.golsMandante;
     if(gv===null||gv===undefined||ga===null||ga===undefined)return {encontrado:false};
-    return {encontrado:true,encerrado:!!info.jogo.encerrado,gols_vasco:gv,gols_adversario:ga,goleadores_vasco:[],fonte:'TheSportsDB'};
+    const fonte=info.placarConfirmadoPor?('LANCE!+UOL ('+info.placarConfirmadoPor.nivel+')'):'TheSportsDB';
+    return {encontrado:true,encerrado:!!info.jogo.encerrado,gols_vasco:gv,gols_adversario:ga,goleadores_vasco:[],fonte};
   }catch(e){ return {encontrado:false}; }
 }
 async function consultarEscalacaoIA(j){
   try{
-    const r=await fetch(`/.netlify/functions/futebol?acao=detalhe&data=${j.data}&adversario=${encodeURIComponent(j.adversario||'')}`);
+    const r=await fetch(`/.netlify/functions/futebol?acao=detalhe&data=${j.data}&adversario=${encodeURIComponent(j.adversario||'')}&competicao=${encodeURIComponent(j.competicao||'')}`);
     const info=await r.json();
     if(info.erro||!info.encerrado||!info.escalacaoDisponivel)return {encontrado:false};
     const casaApi=(info.jogo.mandante||'').toLowerCase().includes('vasco');
@@ -2694,7 +2699,7 @@ function htmlRodadaBox(){
       '<div style="font-size:1.15rem;font-weight:800;color:var(--branco);text-transform:uppercase;line-height:1.3">'+nomeJogo(rj)+'</div>'+
       '<div class="meta" style="margin-top:2px">'+fmtData(rj)+'</div>'+
       '<div class="info-linha">'+esc(rj.competicao)+(rj.fase?' ('+esc(rj.fase)+')':'')+'</div>'+
-      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
+      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px"><span style="color:var(--vermelho)">✠</span> Toque para abrir</span>'+
       '</div>';
     if(rj.resultado&&rj.palpites&&rj.palpites[eu]&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
       html+='<button class="jogo-item" style="background:rgba(224,41,59,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
@@ -2769,7 +2774,7 @@ function htmlRodadaBox(){
     '<div class="meta" style="margin-top:2px">'+fmtData(dj)+'</div>'+
     '<div class="info-linha">'+esc(dj.competicao)+(dj.fase?' ('+esc(dj.fase)+')':'')+'</div>'+
     '<div class="info-linha">'+(dj.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
-    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px">✠ Toque para abrir</span>'+
+    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px"><span style="color:var(--vermelho)">✠</span> Toque para abrir</span>'+
     '</div>';
   if(linhasRodada.length){
     html+=linhasRodada.map((l,i)=>'<div class="mini-linha"><span>'+(i+1)+'º <b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+
@@ -2924,7 +2929,7 @@ function renderPalpiteCard(j,s){
       '<div class="grid g2" style="margin-top:12px">'+
       '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
       '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
-      '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()">✠ '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
+      '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()"><span style="color:var(--vermelho)">✠</span> '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
       (meu?'<button class="btn fantasma" style="margin-top:8px;color:var(--vermelho)" onclick="removerMeuPalpite()">🗑️ Remover meu palpite</button>':'')+
       (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
       '<p class="nota-rodape" style="margin-bottom:6px">Palpites fecham '+FECHA_PALPITE_MIN+' minutos antes da bola rolar. Placar, MVP e gol são obrigatórios pra salvar.</p>'+
@@ -3082,7 +3087,7 @@ function renderAvaliacaoCard(j,s){
       (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
       '</div>';
   });
-  html+='<button class="btn" style="width:100%;margin-top:6px" onclick="finalizarAvaliacao()">✠ Finalizar avaliação</button>';
+  html+='<button class="btn" style="width:100%;margin-top:6px" onclick="finalizarAvaliacao()"><span style="color:var(--vermelho)">✠</span> Finalizar avaliação</button>';
   html+='</div>';
   return html;
 }
@@ -3958,7 +3963,7 @@ function fmChaveHoje(){
 }
 async function fmAbrir(){
   document.getElementById('modalFraseMotiv').classList.remove('oculto');
-  document.getElementById('fmConteudo').innerHTML='<button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque para uma frase motivacional</button>';
+  document.getElementById('fmConteudo').innerHTML='<button class="btn" style="width:100%" onclick="fmSortear()"><span style="color:var(--vermelho)">✠</span> Toque para uma frase motivacional</button>';
 }
 function fmFechar(){document.getElementById('modalFraseMotiv').classList.add('oculto');}
 async function fmSortear(){

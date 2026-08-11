@@ -341,7 +341,7 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
       <button onclick="fmFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px;z-index:2">✕</button>
       <img src="img/embed/motivacional-capa.jpg" alt="" style="width:100%;max-width:220px;display:block;margin:0 auto 14px;border-radius:12px">
       <h3 style="text-align:center;margin-bottom:14px">O Vasbobo tem uma mensagem Motivacional para você</h3>
-      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque e veja a frase para renovar sua esperança</button></div>
+      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()"><span style="color:var(--vermelho)">✠</span> Toque e veja a frase para renovar sua esperança</button></div>
     </div>
   </div>
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
@@ -993,7 +993,7 @@ function fmChaveHoje(){
 }
 async function fmAbrir(){
   document.getElementById('modalFraseMotiv').classList.remove('oculto');
-  document.getElementById('fmConteudo').innerHTML='<button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque para uma frase motivacional</button>';
+  document.getElementById('fmConteudo').innerHTML='<button class="btn" style="width:100%" onclick="fmSortear()"><span style="color:var(--vermelho)">✠</span> Toque para uma frase motivacional</button>';
 }
 function fmFechar(){document.getElementById('modalFraseMotiv').classList.add('oculto');}
 async function fmSortear(){

@@ -103,27 +103,27 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .page-title p{color:var(--cinza);font-size:.88rem;margin-top:8px;line-height:1.6}
 .page-title{padding:18px 22px;background:var(--carvao);border:1px solid var(--linha);border-radius:14px}
 
-.card{background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:18px;margin-top:16px;backdrop-filter:blur(8px)}
+.card{background:#FFFFFF;color:#1B1F25;border:1px solid var(--linha);border-radius:16px;padding:18px;margin-top:16px}
 
 /* ===== quiz "O que mais entende de futebol" ===== */
 .fq-mascote{width:96px;height:auto;border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.3);float:right;margin:-6px 0 10px 14px}
 .fq-banner-wrap{display:flex;justify-content:center;margin-bottom:18px}
 .fq-banner{max-width:280px;width:100%;height:auto;border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.35);display:block}
 .fq-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
-.fq-stat{background:rgba(255,255,255,.75);border:1px solid var(--linha);border-radius:12px;padding:14px;text-align:center}
+.fq-stat{background:#F3F4F6;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center}
 .fq-stat b{display:block;font-family:'Anton',sans-serif;font-size:1.6rem;color:var(--verde)}
-.fq-stat span{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--cinza)}
-.fq-btn{width:100%;background:var(--branco);color:var(--preto);border:none;border-radius:11px;
+.fq-stat span{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#6B7280}
+.fq-btn{width:100%;background:#1B1F25;color:#FFFFFF;border:none;border-radius:11px;
   padding:16px;font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;margin-top:18px}
 .fq-btn:hover{filter:brightness(1.12)}
 .fq-btn:disabled{opacity:.5;cursor:not-allowed}
-.fq-regras{font-size:.82rem;color:var(--cinza);line-height:1.7;margin-top:14px}
+.fq-regras{font-size:.82rem;color:#4B5563;line-height:1.7;margin-top:14px}
 .fq-regras li{margin-left:18px}
-.fq-rank-linha{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--linha);font-size:.88rem}
+.fq-rank-linha{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #E5E7EB;font-size:.88rem}
 .fq-rank-linha:last-child{border-bottom:none}
 .fq-rank-pos{font-family:'Anton',sans-serif;color:var(--verde);width:28px}
 .fq-rank-nome{text-transform:capitalize;flex:1}
-.fq-rank-pts{font-family:'Anton',sans-serif;color:var(--branco)}
+.fq-rank-pts{font-family:'Anton',sans-serif;color:#1B1F25}
 
 .fq-veu{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000}
 .fq-veu.oculto{display:none}
@@ -287,7 +287,7 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
       <button onclick="fmFechar()" aria-label="Fechar" style="position:absolute;top:10px;right:12px;background:none;border:none;color:var(--cinza);font-size:1.3rem;cursor:pointer;line-height:1;padding:4px;z-index:2">✕</button>
       <img src="img/embed/motivacional-capa.jpg" alt="" style="width:100%;max-width:220px;display:block;margin:0 auto 14px;border-radius:12px">
       <h3 style="text-align:center;margin-bottom:14px">O Vasbobo tem uma mensagem Motivacional para você</h3>
-      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque e veja a frase para renovar sua esperança</button></div>
+      <div id="fmConteudo"><button class="btn" style="width:100%" onclick="fmSortear()"><span style="color:var(--vermelho)">✠</span> Toque e veja a frase para renovar sua esperança</button></div>
     </div>
   </div>
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
@@ -711,7 +711,7 @@ function fmChaveHoje(){
 }
 async function fmAbrir(){
   document.getElementById('modalFraseMotiv').classList.remove('oculto');
-  document.getElementById('fmConteudo').innerHTML='<button class="btn" style="width:100%" onclick="fmSortear()">✠ Toque para uma frase motivacional</button>';
+  document.getElementById('fmConteudo').innerHTML='<button class="btn" style="width:100%" onclick="fmSortear()"><span style="color:var(--vermelho)">✠</span> Toque para uma frase motivacional</button>';
 }
 function fmFechar(){document.getElementById('modalFraseMotiv').classList.add('oculto');}
 async function fmSortear(){
