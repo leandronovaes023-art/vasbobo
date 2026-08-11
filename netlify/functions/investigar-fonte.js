@@ -6,7 +6,8 @@
 // Uso: /.netlify/functions/investigar-fonte?url=<endereco-completo-da-pagina>
 const cheerio = require('cheerio');
 
-const TERMOS = ['__NUXT__', 'red-card', 'goal-marker', 'substitution', 'card-marker', 'liveBlogUpdate'];
+const TERMOS = ['scoreboard-event substitution'];
+const JANELA = 3500;
 
 exports.handler = async (event) => {
   const { url } = event.queryStringParameters || {};
@@ -25,7 +26,7 @@ exports.handler = async (event) => {
     const achados = {};
     TERMOS.forEach((termo) => {
       const idx = html.indexOf(termo);
-      achados[termo] = idx >= 0 ? html.slice(Math.max(0, idx - 900), idx + 900) : null;
+      achados[termo] = idx >= 0 ? html.slice(Math.max(0, idx - 300), idx + JANELA) : null;
     });
 
     return {
