@@ -6,7 +6,7 @@
 // Uso: /.netlify/functions/investigar-fonte?url=<endereco-completo-da-pagina>
 const cheerio = require('cheerio');
 
-const TERMOS = ['FIM DE JOGO', 'Encerrado', 'Encerrada', 'Fim de jogo', 'substituições', 'Substituição', 'Substituições', 'Escalação', 'Cartão amarelo'];
+const TERMOS = ['__NUXT__', 'red-card', 'goal-marker', 'substitution', 'card-marker', 'liveBlogUpdate'];
 
 exports.handler = async (event) => {
   const { url } = event.queryStringParameters || {};
