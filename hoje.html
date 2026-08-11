@@ -619,12 +619,6 @@ async function salvarCacheHoje(info){
     info: JSON.stringify(info), rev: revisaoNecessaria(), quando: Date.now() }); }catch(e){}
 }
 async function autoIniciar(){
-  if(!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY==='COLE_SUA_CHAVE_AQUI'){
-    const hoje=new Date();
-    const dataFormatada = hoje.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-    abrirConferencia({ temJogosHoje:false, jogos:[] }, dataFormatada);
-    return;
-  }
   const cache = await lerCacheHoje();
   if(cache && cache.rev >= revisaoNecessaria()){
     try{
@@ -646,12 +640,6 @@ async function autoIniciar(){
 }
 
 async function buscarJogos(automatico) {
-  if(!ANTHROPIC_API_KEY || ANTHROPIC_API_KEY==='COLE_SUA_CHAVE_AQUI'){
-    const hoje0=new Date();
-    const dataFormatada0 = hoje0.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
-    abrirConferencia({ temJogosHoje:false, jogos:[] }, dataFormatada0);
-    return;
-  }
   const btn = document.getElementById('btnBuscar');
   const status = document.getElementById('status');
   const resultado = document.getElementById('resultado');
@@ -667,36 +655,31 @@ async function buscarJogos(automatico) {
   const dataFormatada = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
   try {
-    const prompt = 'Hoje é '+dataFormatada+' ('+dataISO+'). Pesquise na web (fontes principais, nesta ordem de prioridade: sofascore.com, depois 365scores.com/pt-br/where-to-watch, depois ge.globo) e monte um raio-x dos jogos de futebol de HOJE ('+dataISO+') envolvendo times brasileiros no Campeonato Brasileiro Série A, na Copa do Brasil, na Copa Libertadores ou na Copa Sudamericana.\n\n'+
-      'Passo 1: descubra a posição atual do Vasco da Gama na tabela do Campeonato Brasileiro Série A (colocação e pontos) e identifique os times que estão na "briga direta" com o Vasco na tabela — os 3 times imediatamente acima e os 3 imediatamente abaixo dele.\n\n'+
-      'Passo 2: liste TODOS os jogos de hoje ('+dataISO+') dessas 4 competições que tenham pelo menos um time brasileiro (incluindo, se houver, jogo do próprio Vasco). Para cada jogo, informe mandante, visitante, competição, horário no fuso de Brasília (formato HH:MM), onde assistir no Brasil (TV aberta, fechada ou streaming), se é jogo do Vasco, e se um dos dois times participantes é um dos rivais diretos do Vasco identificados no Passo 1.\n\n'+
-      'Responda SOMENTE com JSON válido, sem markdown e sem texto fora do JSON, no formato exato:\n'+
-      '{"posicaoVasco":numero ou null,"pontosVasco":numero ou null,"jogos":[{"mandante":"...","visitante":"...","competicao":"...","horario":"HH:MM","ondeAssistir":"...","ehVasco":true ou false,"relevanteVasco":true ou false,"timeRivalNoJogo":"nome do time rival, vazio se não houver","posicaoRival":numero ou null,"motivoRelevancia":"frase curta, vazio se não houver"}]}\n'+
-      'Se não encontrar nenhum jogo hoje nessas competições, responda {"posicaoVasco":numero ou null,"pontosVasco":numero ou null,"jogos":[]}.';
+    // busca direto na TheSportsDB (grátis, sem IA, sem custo). Traz só mandante/visitante/
+    // horário/competição — "onde assistir" e "é rival direto" a pessoa confirma na tela
+    // seguinte, que já existia justamente pra essa revisão antes de gerar a mensagem final.
+    const r = await fetch(`/.netlify/functions/futebol?acao=hoje&data=${dataISO}`);
+    const dadosApi = await r.json();
+    if(dadosApi.erro) throw new Error(dadosApi.erro);
 
-    const r = await chamarClaude(prompt, 2000);
-    if(!r) throw new Error('sem resposta da IA (verifique se ANTHROPIC_API_KEY foi preenchida em hoje.html)');
-
-    const posicaoVasco = r.posicaoVasco ?? null;
-    const pontosVasco = r.pontosVasco ?? null;
-    const jogos = (r.jogos||[]).map(f=>({
+    const jogos = (dadosApi.jogos||[]).map(f=>({
       mandante: f.mandante||'',
       visitante: f.visitante||'',
       competicao: f.competicao||'',
       ehVasco: !!f.ehVasco,
       horario: f.horario||'',
-      ondeAssistir: f.ondeAssistir||'',
-      relevanteVasco: !!f.relevanteVasco && !f.ehVasco,
-      timeRivalNoJogo: f.timeRivalNoJogo||'',
-      posicaoRival: f.posicaoRival ?? null,
-      motivoRelevancia: f.motivoRelevancia||(f.relevanteVasco?('está na briga direta com o Vasco na tabela'):''),
-      resultadoIdealVasco: f.relevanteVasco?('Secar o '+(f.timeRivalNoJogo||f.mandante)):'',
+      ondeAssistir: '',
+      relevanteVasco: false,
+      timeRivalNoJogo: '',
+      posicaoRival: null,
+      motivoRelevancia: '',
+      resultadoIdealVasco: '',
     })).sort((a,b)=>a.horario.localeCompare(b.horario));
 
-    const info = { temJogosHoje: jogos.length>0, posicaoVasco, pontosVasco, jogos };
+    const info = { temJogosHoje: jogos.length>0, posicaoVasco: null, pontosVasco: null, jogos };
 
-    window._posicaoVasco = posicaoVasco;
-    window._pontosVasco = pontosVasco;
+    window._posicaoVasco = null;
+    window._pontosVasco = null;
     await salvarCacheHoje(info);
     if (automatico) {
       dataAtualFormatada = dataFormatada;
@@ -706,10 +689,7 @@ async function buscarJogos(automatico) {
       abrirConferencia(info, dataFormatada);
     }
   } catch (e) {
-    const semChave = !ANTHROPIC_API_KEY || ANTHROPIC_API_KEY === 'COLE_SUA_CHAVE_AQUI';
-    erro.textContent = semChave
-      ? '⚠️ A chave da API (ANTHROPIC_API_KEY) ainda não foi preenchida no arquivo hoje.html do site publicado. Sem ela, a busca automática não funciona. Adicione os jogos manualmente abaixo por enquanto.'
-      : '⚠️ Não consegui buscar os jogos agora. Tente novamente em instantes, ou adicione manualmente.';
+    erro.textContent = '⚠️ Não consegui buscar os jogos agora (TheSportsDB pode estar fora do ar). Tente novamente em instantes, ou adicione manualmente.';
     erro.classList.add('on');
     abrirConferencia({ temJogosHoje:false, jogos:[] }, dataFormatada);
   } finally {
@@ -944,17 +924,6 @@ function copiarMensagem() {
   });
 }
 
-function temChaveIA(){ return !!(ANTHROPIC_API_KEY && ANTHROPIC_API_KEY!=='COLE_SUA_CHAVE_AQUI'); }
-(function ajustarUiConformeChave(){
-  const btn=document.getElementById('btnBuscar');
-  const tit=document.getElementById('tituloConferencia');
-  const txt=document.getElementById('textoConferencia');
-  if(!temChaveIA()){
-    if(btn)btn.style.display='none';
-    if(tit)tit.textContent='✅ Cadastre os jogos de hoje';
-    if(txt)txt.textContent='Busca automática desativada por escolha do grupo (evita custo de API). Adicione os jogos de hoje manualmente abaixo.';
-  }
-})();
 autoIniciar();
 
 window.addEventListener('scroll',()=>{

@@ -249,7 +249,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
   .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:5px 0;border-bottom:1px solid var(--linha)}
-  .mini-linha-ultimo{background:rgba(194,87,15,.14);margin:0 -10px;padding:7px 10px;border-radius:8px;border-bottom:none}
+  .mini-linha-ultimo{margin:0 -10px;padding:7px 10px;border-radius:8px;border-bottom:none}
   .mini-linha-ultimo .rank-nome{color:var(--laranja);font-weight:900}
   .mini-linha-ultimo .pt{color:var(--laranja);font-weight:900}
   .mini-linha:last-child{border-bottom:none}
@@ -333,8 +333,19 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rank-nome{text-transform:uppercase;font-weight:700;font-size:1.12em;letter-spacing:.02em}
 
   .pos-titulo{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.82rem;color:var(--cinza);margin:16px 2px 8px}
-  .jog-linha{display:grid;grid-template-columns:40px 1fr auto auto auto;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--linha);border-radius:10px;margin-bottom:6px;background:var(--carvao2);font-size:.9rem}
-  @media(max-width:600px){.jog-linha{grid-template-columns:34px 1fr auto auto auto;font-size:.82rem}}
+  .jog-linha{display:grid;grid-template-columns:34px 40px 1fr auto auto auto;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--linha);border-radius:10px;margin-bottom:6px;background:var(--carvao2);font-size:.9rem}
+  @media(max-width:600px){.jog-linha{grid-template-columns:30px 34px 1fr auto auto auto;font-size:.82rem}}
+  .campinho{background:linear-gradient(180deg,#1E8145,#0F6631 55%,#1E8145);border-radius:14px;padding:18px 6px;
+    display:flex;flex-direction:column;justify-content:space-between;gap:16px;position:relative;overflow:hidden;
+    min-height:400px;border:2px solid rgba(255,255,255,.35)}
+  .campinho::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:84px;height:84px;border:2px solid rgba(255,255,255,.3);border-radius:50%;pointer-events:none}
+  .campinho::after{content:"";position:absolute;left:50%;top:-1px;transform:translateX(-50%);
+    width:58%;height:54px;border:2px solid rgba(255,255,255,.3);border-top:none;pointer-events:none}
+  .campinho-linha{display:flex;justify-content:space-evenly;flex-wrap:wrap;gap:6px;position:relative;z-index:1}
+  .campinho-jog{display:flex;flex-direction:column;align-items:center;gap:1px;width:58px}
+  .campinho-num{font-family:'Anton',sans-serif;font-size:.62rem;color:#fff;background:rgba(0,0,0,.45);border-radius:99px;padding:0 6px;margin-top:-11px;line-height:1.5}
+  .campinho-nome{font-size:.6rem;font-weight:800;color:#fff;text-align:center;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.65);line-height:1.15;max-width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .jogo-resenha>summary{padding:14px 16px;font-weight:800;font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.02em;font-size:.95rem;cursor:pointer}
   .jogador-resenha{border-top:1px solid var(--linha);padding:10px 0}
   .jogador-resenha>summary{cursor:pointer;font-weight:700;font-size:.86rem}
@@ -408,7 +419,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .chip-coroa{display:inline-flex;align-items:center;gap:8px;background:rgba(169,123,18,.08);
     border:1.5px solid var(--ouro);color:var(--ouro);border-radius:99px;padding:5px 12px 5px 14px;
     font-family:'Inter',sans-serif;font-weight:800;font-size:.82rem}
-  .chip-coroa.riba{background:rgba(194,87,15,.12);border-color:var(--laranja);color:var(--laranja)}
+  .chip-coroa.riba{background:none;border-color:transparent;color:var(--laranja)}
   .roleta-wrap-mini{position:relative;width:100%;max-width:380px;aspect-ratio:1;margin:6px auto 4px}
   .roleta-svg-mini{width:100%;height:100%;filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
   .badge-audio{text-align:center;margin:10px auto 0;display:inline-flex;align-items:center;gap:6px;
@@ -552,8 +563,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
 <!-- modal da escalação pré-jogo -->
 <div class="modal-sair oculto" id="modalEscalacaoPreJogo" onclick="if(event.target===this)fecharEscalacaoPreJogo()">
-  <div class="modal">
-    <h3 style="text-align:left">📋 Escalação — <span id="tituloEscalacaoPreJogo"></span></h3>
+  <div class="modal" style="border-top-color:var(--verde);max-width:420px">
+    <h3 style="text-align:left;line-height:1.3">📋 Escalação<br><span id="tituloEscalacaoPreJogo" style="font-size:.7em;color:var(--cinza);text-transform:none;letter-spacing:0"></span></h3>
     <div id="corpoEscalacaoPreJogo" style="margin-top:10px"></div>
     <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" style="flex:1" onclick="fecharEscalacaoPreJogo()">Fechar</button></div>
   </div>
@@ -894,7 +905,7 @@ function penalidadeNaoAvaliou(j,usuario){
 }
 const FECHA_PALPITE_MIN=5;          // palpites fecham 5 min antes da bola rolar
 const DURACAO_JOGO_MIN=110;         // tempo estimado até o apito final (45+15 intervalo+45+~5 acréscimos)
-const SYNC_INTERVALO_MS=5*60000;    // busca placar a cada 5 min durante o jogo
+const SYNC_INTERVALO_MS=60*1000;    // busca placar a cada 1 min durante o jogo (apertado pra pegar gol quase na hora)
 const SYNC_POS_MS=30*1000;          // logo após o fim esperado: busca a cada 30s
 const SYNC_POS_LIMITE_MIN=30;       // ...por até 30 min depois do fim esperado
 const SYNC_FALLBACK_MS=15*60000;    // passado esse prazo (jogo esticou: prorrogação/atraso), espaça as buscas
@@ -919,32 +930,33 @@ function posIndex(pos){
 const JOGADORES_INICIAIS=[
  ['p_leojardim','1','Léo Jardim','Goleiro'],
  ['p_fuzato','13','Daniel Fuzato','Goleiro'],
- ['p_pablo','31','Pablo','Goleiro'],
- ['p_paulohenrique','2','Paulo Henrique','Lateral-direito'],
- ['p_puma','17','Puma Rodríguez','Lateral-direito'],
+ ['p_pablo','37','Pablo','Goleiro'],
+ ['p_puma','2','Puma Rodríguez','Lateral-direito'],
+ ['p_paulohenrique','96','Paulo Henrique','Lateral-direito'],
  ['p_piton','6','Lucas Piton','Lateral-esquerdo'],
  ['p_cuiabano','66','Cuiabano','Lateral-esquerdo'],
- ['p_robertrenan','3','Robert Renan','Zagueiro'],
- ['p_saldivia','5','Alan Saldivia','Zagueiro'],
- ['p_lucasfreitas','44','Lucas Freitas','Zagueiro'],
- ['p_cuesta','47','Carlos Cuesta','Zagueiro'],
- ['p_tchetche','22','Tchê Tchê','Volante'],
- ['p_jair','18','Jair','Volante'],
- ['p_cocao','30','Mateus Carvalho (Cocão)','Volante'],
- ['p_lucaseduardo','85','Lucas Eduardo','Volante'],
+ ['p_paulinhole','29','Paulinho','Lateral-esquerdo'],
+ ['p_robertrenan','30','Robert Renan','Zagueiro'],
+ ['p_saldivia','4','Alan Saldivia','Zagueiro'],
+ ['p_lucasfreitas','43','Lucas Freitas','Zagueiro'],
+ ['p_cuesta','46','Carlos Cuesta','Zagueiro'],
+ ['p_walace','64','Walace Fernandes','Zagueiro'],
+ ['p_tchetche','3','Tchê Tchê','Volante'],
+ ['p_jair','8','Jair','Volante'],
+ ['p_cocao','85','Mateus Carvalho (Cocão)','Volante'],
  ['p_cauanbarros','88','Cauan Barros','Volante'],
  ['p_thiagomendes','23','Thiago Mendes','Volante'],
- ['p_estrella','14','Estrella','Meia'],
- ['p_jp','7','JP','Meia'],
- ['p_johanrojas','77','Johan Rojas','Meia'],
- ['p_ramonrique','83','Ramon Rique','Meia'],
+ ['p_ramonrique','83','Ramon Rique','Volante'],
+ ['p_jp','98','JP','Meia'],
+ ['p_johanrojas','10','Johan Rojas','Meia'],
  ['p_adson','28','Adson','Ponta/Atacante'],
- ['p_david','','David','Ponta/Atacante'],
- ['p_andresgomez','15','Andrés Gómez','Ponta/Atacante'],
- ['p_hinestroza','19','Marino Hinestroza','Ponta/Atacante'],
- ['p_nunomoreira','','Nuno Moreira','Ponta/Atacante'],
- ['p_brenner','9','Brenner','Centroavante'],
- ['p_spinelli','99','Spinelli','Centroavante'],
+ ['p_david','7','David','Ponta/Atacante'],
+ ['p_andresgomez','11','Andrés Gómez','Ponta/Atacante'],
+ ['p_hinestroza','18','Marino Hinestroza','Ponta/Atacante'],
+ ['p_nunomoreira','17','Nuno Moreira','Ponta/Atacante'],
+ ['p_joaovitor','60','João Vitor','Ponta/Atacante'],
+ ['p_brenner','20','Brenner','Centroavante'],
+ ['p_spinelli','77','Spinelli','Centroavante'],
 ];
 
 const JOGOS_INICIAIS=[
@@ -1130,6 +1142,19 @@ function fotoUsuario(u,px){
     'object-fit:cover;border:2px solid rgba(255,255,255,.3);vertical-align:middle" '+
     'onerror="this.style.display=\'none\'">';
 }
+/* foto de rosto do jogador (recortada do elenco oficial) — se não existir arquivo, mostra
+   o número num círculo escuro como reserva (nunca deixa buraco vazio no layout) */
+function fotoJogador(id,px){
+  px=px||40;
+  const p=jogadorPorId(id);
+  const num=(p&&p.num)?esc(p.num):'–';
+  return '<span style="position:relative;display:inline-block;width:'+px+'px;height:'+px+'px;flex:none">'+
+    '<span style="position:absolute;inset:0;border-radius:50%;background:var(--carvao2);border:1.5px solid var(--linha);'+
+    'display:flex;align-items:center;justify-content:center;font-family:Anton,sans-serif;font-size:'+Math.round(px*.34)+'px;color:var(--cinza)">'+num+'</span>'+
+    '<img src="img/jogadores/'+id+'.jpg" alt="" style="position:relative;width:'+px+'px;height:'+px+'px;border-radius:50%;'+
+    'object-fit:cover;object-position:top;border:1.5px solid var(--linha);display:block" '+
+    'onerror="this.style.display=\'none\'"></span>';
+}
 function tooltipPontuacao(){
   const linhas=[
     [PTS_EXATO,'🎯 placar exato'],
@@ -1232,21 +1257,49 @@ function badgeTransmissao(j,mini){
 function htmlBadgeEscalacao(id,j){
   if(!j.hora||j.resultado)return '';
   if(j.escalacaoPreJogo&&j.escalacaoPreJogo.jogadores&&j.escalacaoPreJogo.jogadores.length){
-    return '<button onclick="abrirEscalacaoPreJogo(\''+id+'\')" style="background:rgba(47,208,142,.14);border:1.5px solid var(--verde);color:var(--verde);'+
+    return '<button onclick="abrirEscalacaoPreJogo(\''+id+'\')" style="background:var(--carvao2);border:1.5px solid var(--verde);color:var(--branco);'+
       'border-radius:9px;padding:7px 14px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;text-align:center;white-space:nowrap;line-height:1.45;font-family:inherit;flex:none;box-shadow:0 2px 6px rgba(0,0,0,.25)">'+
-      'ESCALAÇÃO<br><span style="text-decoration:underline">Já saiu. Clique.</span></button>';
+      '📋 ESCALAÇÃO<br><span style="text-decoration:underline">Já saiu. Clique.</span></button>';
   }
-  return '<button onclick="avisar(\'Assim que a escalação sair, você recebe uma notificação no celular.\',true)" style="background:var(--carvao2);border:1.5px solid var(--linha);border-radius:9px;padding:7px 14px;'+
-    'font-size:.6rem;letter-spacing:.02em;text-align:center;white-space:nowrap;line-height:1.45;flex:none;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.25)">'+
-    '<span style="color:var(--vermelho);font-weight:800;text-transform:uppercase">ESCALAÇÃO!</span><br>'+
-    '<b style="color:var(--branco);font-weight:800">Assim que sair você recebe</b></button>';
+  return '<button onclick="avisar(\'Assim que a escalação sair, você recebe uma notificação no celular.\',true)" style="background:var(--carvao2);border:1.5px solid var(--vermelho);color:var(--branco);border-radius:9px;padding:7px 14px;'+
+    'font-size:.6rem;font-weight:800;letter-spacing:.02em;text-align:center;white-space:nowrap;line-height:1.45;flex:none;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.25)">'+
+    '📋 ESCALAÇÃO!<br><span style="font-weight:800">Assim que sair você recebe</span></button>';
+}
+/* organiza os titulares num campinho visual, por posição — bate os nomes (que vêm em texto puro,
+   direto do UOL) com o elenco cadastrado, reaproveitando a mesma lógica de "achar quem é quem"
+   já usada pra goleadores */
+function renderCampinho(nomes){
+  const ids=mapearGoleadores(nomes);
+  const jogadoresMapeados=ids.map(id=>jogadorPorId(id)).filter(Boolean);
+  const semMatch=(nomes||[]).filter(n=>{
+    const alvo=normalizar(n);
+    return !jogadoresMapeados.some(p=>{const nx=normalizar(p.nome);return nx===alvo||nx.includes(alvo)||alvo.includes(nx.split(' ')[0]);});
+  });
+  const grupos={goleiro:[],defesa:[],volante:[],meia:[],ataque:[]};
+  jogadoresMapeados.forEach(p=>{
+    if(p.pos==='Goleiro')grupos.goleiro.push(p);
+    else if(p.pos==='Zagueiro'||p.pos==='Lateral-direito'||p.pos==='Lateral-esquerdo')grupos.defesa.push(p);
+    else if(p.pos==='Volante')grupos.volante.push(p);
+    else if(p.pos==='Meia')grupos.meia.push(p);
+    else grupos.ataque.push(p);
+  });
+  const ordemDefesa={'Lateral-direito':0,'Zagueiro':1,'Lateral-esquerdo':2};
+  grupos.defesa.sort((a,b)=>(ordemDefesa[a.pos]??1)-(ordemDefesa[b.pos]??1));
+  const linha=jogs=>jogs.length?('<div class="campinho-linha">'+jogs.map(p=>
+    '<div class="campinho-jog">'+fotoJogador(p.id,44)+
+    '<span class="campinho-num">'+(p.num||'')+'</span>'+
+    '<span class="campinho-nome">'+esc((p.nome||'').split(' ').slice(-1)[0])+'</span></div>'
+  ).join('')+'</div>'):'';
+  let html='<div class="campinho">'+linha(grupos.ataque)+linha(grupos.meia)+linha(grupos.volante)+linha(grupos.defesa)+linha(grupos.goleiro)+'</div>';
+  if(semMatch.length)html+='<p class="nota-rodape" style="margin-top:10px">Não achei no elenco cadastrado: '+semMatch.map(esc).join(', ')+'.</p>';
+  return html;
 }
 function abrirEscalacaoPreJogo(id){
   const j=dados.jogos[id];
   if(!j||!j.escalacaoPreJogo)return;
   document.getElementById('tituloEscalacaoPreJogo').innerHTML=nomeJogo(j);
   document.getElementById('corpoEscalacaoPreJogo').innerHTML=
-    j.escalacaoPreJogo.jogadores.map(n=>'<div class="mini-linha"><span class="rank-nome">'+esc(n)+'</span></div>').join('')+
+    renderCampinho(j.escalacaoPreJogo.jogadores)+
     '<p class="nota-rodape" style="margin-top:10px">Divulgada '+new Date(j.escalacaoPreJogo.quando).toLocaleString('pt-BR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})+' · fonte: '+esc(j.escalacaoPreJogo.fonte||'admin')+'</p>';
   document.getElementById('modalEscalacaoPreJogo').classList.remove('oculto');
 }
@@ -1265,6 +1318,15 @@ async function adminDefinirEscalacaoPreJogo(id){
     await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({titulo:'SAIU A ESCALAÇÃO!',texto:nomeJogo(j).replace(/<[^>]+>/g,'')+'. Clique!',url:'/?abrirEscalacao='+id})});
   }catch(e){}
+  render();
+}
+async function adminRemoverEscalacaoPreJogo(id){
+  const j=dados.jogos[id];
+  if(!j)return;
+  if(!(await confirmar('Remover a escalação registrada desse jogo? A busca automática (e a notificação) continuam funcionando normalmente pra próxima vez que ela sair.')))return;
+  await mutar(()=>{const x=dados.jogos[id];if(x)delete x.escalacaoPreJogo;});
+  registrarLog('admin','Removeu a escalação pré-jogo de '+nomeJogo(j).replace(/<[^>]+>/g,''),null,'importante');
+  avisar('Escalação removida.',true);
   render();
 }
 function nomeJogo(j){
@@ -1800,9 +1862,26 @@ const ADICIONAR_P2=[
  ['p_spinelli','99','Spinelli','Centroavante'],
 ];
 const PATCH_TV_V=2;
+const PATCH_ELENCO2_V=1;
 function migrar(){
   let mudou=false;
   if(!dados.config){dados.config={modoTeste:false};mudou=true;}
+  /* corrige o elenco pra bater com o elenco real de verdade (números trocados, gente que faltava
+     cadastrar, gente que não está mais no elenco) — a lista JOGADORES_INICIAIS só vale pra
+     instalação nova, então isso aqui corrige quem já está salvo no Firestore */
+  if((dados.patchElenco2V||0)<PATCH_ELENCO2_V){
+    const porId={};
+    dados.jogadores.forEach(p=>{porId[p.id]=p;});
+    JOGADORES_INICIAIS.forEach(([id,num,nome,pos])=>{
+      if(porId[id]){ porId[id].num=num; porId[id].pos=pos; porId[id].nome=nome; porId[id].ativo=true; }
+      else dados.jogadores.push({id,num,nome,pos,ativo:true});
+    });
+    // saíram do elenco — não apaga o histórico de notas/palpites, só marca como inativo
+    // (assim para de aparecer nas listas de avaliação, mas continua contando pontuação antiga)
+    ['p_estrella','p_lucaseduardo'].forEach(id=>{ if(porId[id])porId[id].ativo=false; });
+    dados.patchElenco2V=PATCH_ELENCO2_V;
+    mudou=true;
+  }
   /* transmissão confirmada (MKT Esportivo, Máquina do Esporte, NetVasco, Olympics.com) */
   if((dados.patchTvV||0)<PATCH_TV_V){
     if(dados.jogos.g260722&&!dados.jogos.g260722.ondeAssistir)dados.jogos.g260722.ondeAssistir='ESPN e Disney+';
@@ -1941,12 +2020,12 @@ function jogoQuizAtual(){
 async function fqLerEstado(){
   try{
     const snap=await db.collection('shared').doc('vasbobo_quiz').get();
-    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}, vistas:v.vistas||{}, filaTextosV2:v.filaTextosV2||[], filaPonteiroV2:v.filaPonteiroV2||0}; }
+    if(snap.exists){ const v=snap.data(); return {diario:v.diario||{}, porJogo:v.porJogo||{}, vistas:v.vistas||{}, filasPorUsuario:v.filasPorUsuario||{}}; }
   }catch(e){}
-  return {diario:{}, porJogo:{}, vistas:{}, filaTextosV2:[], filaPonteiroV2:0};
+  return {diario:{}, porJogo:{}, vistas:{}, filasPorUsuario:{}};
 }
 async function fqSalvarEstado(estado){
-  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, filaTextosV2:estado.filaTextosV2||[], filaPonteiroV2:estado.filaPonteiroV2||0, atualizadoEm:Date.now()}); return true; }
+  try{ await db.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, filasPorUsuario:estado.filasPorUsuario||{}, atualizadoEm:Date.now()}); return true; }
   catch(e){ return false; }
 }
 function fqStatusDia(estado,usuario){
@@ -2036,19 +2115,26 @@ function fqGruposUnicos(){
   });
   return grupos;
 }
-/* fila única compartilhada por TODO o grupo: cada pergunta só volta a poder sair de novo depois
-   que as outras já saíram pra alguém — evita repetição não só pra cada pessoa individualmente,
-   mas a mesma pergunta caindo pra pessoas diferentes perto uma da outra */
+/* fila individual, por pessoa: quando uma pergunta sai pra alguém, ela vai pro FINAL da fila
+   DAQUELA pessoa — só volta a poder sair pra ela de novo depois que todas as outras da fila
+   dela já tiverem passado. Pode sair pra outra pessoa a qualquer momento (filas independentes). */
 async function fqEscolherPergunta(usuario){
   const estado=await fqLerEstado(); // lê sempre fresco, pra não competir com outra pessoa pedindo pergunta ao mesmo tempo
   const grupos=fqGruposUnicos();
   const textosUnicos=Object.keys(grupos);
-  if(!estado.filaTextosV2||!estado.filaTextosV2.length||estado.filaPonteiroV2==null||estado.filaPonteiroV2>=estado.filaTextosV2.length){
-    estado.filaTextosV2=fqEmbaralhar(textosUnicos); // a fila agora é de TEXTOS únicos, não de ids soltos
-    estado.filaPonteiroV2=0;
+  if(!estado.filasPorUsuario)estado.filasPorUsuario={};
+  let fila=estado.filasPorUsuario[usuario];
+  if(!fila||!fila.length){
+    fila=fqEmbaralhar(textosUnicos);
+  }else{
+    // perguntas novas (criadas depois da fila dessa pessoa já existir) entram no final, embaralhadas
+    const jaNaFila=new Set(fila);
+    const novas=textosUnicos.filter(t=>!jaNaFila.has(t));
+    if(novas.length)fila=fila.concat(fqEmbaralhar(novas));
   }
-  const textoEscolhido=estado.filaTextosV2[estado.filaPonteiroV2];
-  estado.filaPonteiroV2++;
+  const textoEscolhido=fila.shift(); // tira da frente da fila dessa pessoa
+  fila.push(textoEscolhido);         // e manda pro final — só repete depois de dar a volta completa
+  estado.filasPorUsuario[usuario]=fila;
   const variantes=grupos[textoEscolhido]||[];
   const id=variantes[Math.floor(Math.random()*variantes.length)]||variantes[0]; // sorteia só a ordem das alternativas
   if(!estado.vistas)estado.vistas={};
@@ -2309,6 +2395,7 @@ async function sincronizarJogos(){
     if(!r||!r.encontrado)continue;
     const gv=+r.gols_vasco,ga=+r.gols_adversario;
     if(isNaN(gv)||isNaN(ga))continue;
+    let disparaGol=false,placarGolTexto='';
     await mutar(()=>{
       const x=dados.jogos[id];if(!x||x.resultado)return;
       const registro={quando:Date.now(),v:gv,a:ga,fonte:r.fonte||'busca na web'};
@@ -2320,9 +2407,25 @@ async function sincronizarJogos(){
         x.fonteAuto=registro;
         x.parcial=null;
       }else{
+        const golAnteriorVasco=x.parcial?x.parcial.v:0;
         x.parcial={v:gv,a:ga,quando:Date.now(),fonte:r.fonte||'busca na web'};
+        // trava contra notificação duplicada: só dispara se ESSA contagem de gol específica
+        // ainda não tiver sido notificada (mesmo se vários usuários detectarem quase juntos)
+        if(gv>golAnteriorVasco&&(x.ultimoGolNotificado||0)<gv){
+          x.ultimoGolNotificado=gv;
+          disparaGol=true;
+          const casa=j.local!=='fora';
+          placarGolTexto=casa?('Vasco '+gv+' x '+ga+' '+j.adversario):(j.adversario+' '+ga+' x '+gv+' Vasco');
+        }
       }
     });
+    if(disparaGol){
+      try{
+        const frase=escolherFraseGol(placarGolTexto);
+        await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/'})});
+      }catch(e){}
+    }
     render();
   }
   // transmissão (onde assistir): depende de busca via IA, só roda se a chave da Anthropic estiver configurada
@@ -2543,6 +2646,7 @@ async function tentarMostrarSaudacaoLogin(){
 }
 function entrarNoApp(){
   registrarLog('login','Entrou no app');
+  carregarFrasesGol();
   setTimeout(iniciarMidiaJanela, 300);
   setTimeout(verificarPendenciasRodada, 500);
   mostrar('app');
@@ -2760,6 +2864,32 @@ const FRASES_CASTIGO_PENDENTE=[
   (n)=>n+', o grupo inteiro está na torcida (contra você). Gira!',
   (n)=>'Prepara a câmera, '+n+' vai girar a roleta agora.',
 ];
+/* notificação disparada automaticamente quando o placar ao vivo mostra um gol A MAIS do Vasco
+   (nunca do adversário) — o placar (ex.: "Vasco 1 x 0 Bahia") é sempre adicionado no final.
+   As 200 frases de verdade vêm de frases_gol_vasco.json (carregadas sob demanda); essas aqui
+   são só um fallback caso o arquivo não carregue por algum motivo. */
+const FRASES_GOL_FALLBACK=[
+  'GOOOOL DO VASCO!',
+  'TREME A REDE DE SÃO JANUÁRIO! Gol do Vasco!',
+  'Sobe o Gigante da Colina! Gol vascaíno!',
+  'Cruz de Malta no fundo do gol!',
+  'GOL DO VASCO! Comemora, torcida!',
+];
+let FRASES_GOL=[];
+async function carregarFrasesGol(){
+  if(FRASES_GOL.length)return FRASES_GOL;
+  try{
+    const lista=await (await fetch('/frases_gol_vasco.json')).json();
+    FRASES_GOL=lista.map(x=>x.texto).filter(Boolean);
+  }catch(e){}
+  if(!FRASES_GOL.length)FRASES_GOL=FRASES_GOL_FALLBACK;
+  return FRASES_GOL;
+}
+function escolherFraseGol(placarTexto){
+  const lista=FRASES_GOL.length?FRASES_GOL:FRASES_GOL_FALLBACK;
+  const base=lista[Math.floor(Math.random()*lista.length)];
+  return base+' '+placarTexto;
+}
 function htmlCastigoRodadaBox(){
   const rod=jogoDaRodada();
   let textoIntro='Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira essa roleta:';
@@ -3164,7 +3294,7 @@ function renderAvaliacaoCard(j,s){
     const temNota=minha.nota!==undefined&&minha.nota!==null&&minha.nota!=='';
     if(temNota&&!jogadoresExpandidos.has(p.id)){
       html+='<div class="aval-bloco" style="padding:10px 14px;cursor:pointer" onclick="toggleJogadorExpandido(\''+p.id+'\')" id="jogb_'+p.id+'">'+
-        '<div class="aval-topo"><span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span>'+
+        '<div class="aval-topo"><span class="aval-nome" style="display:flex;align-items:center;gap:8px">'+fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span></span>'+
         '<span style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--cinza)"><b style="color:var(--branco)">Nota '+fmtNota(minha.nota)+'</b>'+((minha.com||'').length?' · registrado ✓':'')+'</span></div></div>';
       return;
     }
@@ -3174,7 +3304,7 @@ function renderAvaliacaoCard(j,s){
       '<button type="button" class="btn-nota btn-na" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'NA\')" title="Jogou pouco / sem nota definida">N/A</button></div>';
     const comentarios=coletarComentarios(j,p.id);
     html+='<div class="aval-bloco" id="jogb_'+p.id+'"><div class="aval-topo">'+
-      '<span class="aval-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span>'+
+      '<span class="aval-nome" style="display:flex;align-items:center;gap:8px">'+fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span></span>'+
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
       '<span class="media-chip '+(media&&media.media!==null?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'<small id="votos_'+p.id+'">'+(media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos')+'</small></span></span></div>'+
       botoesNota+
@@ -3378,9 +3508,10 @@ function renderAdminJogo(j,s){
   let html='<div class="card"><h2>Área do admin</h2><p class="nota-rodape" style="margin-top:0">O placar, os goleadores e a transmissão são registrados <b>automaticamente</b> via busca na web. Use esta área só para forçar ou corrigir algo.</p>'+
     '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px"><div style="flex:1;min-width:200px"><label for="admTv">Onde assistir (corrigir manualmente)</label><input id="admTv" placeholder="Ex.: Paramount+ e ESPN" value="'+esc(j.ondeAssistir||'')+'"></div>'+
     '<button class="btn fantasma" onclick="salvarTransmissao()">salvar</button></div>'+
-    (!j.resultado?('<div style="margin-bottom:14px"><button class="btn fantasma" onclick="adminDefinirEscalacaoPreJogo(\''+jogoAberto+'\')">📋 '+(j.escalacaoPreJogo?'Corrigir escalação pré-jogo':'Definir escalação pré-jogo (e notificar todo mundo)')+'</button></div>'):'');
+    (!j.resultado?('<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn fantasma" onclick="adminDefinirEscalacaoPreJogo(\''+jogoAberto+'\')">📋 '+(j.escalacaoPreJogo?'Corrigir escalação pré-jogo':'Definir escalação pré-jogo (e notificar todo mundo)')+'</button>'+
+      (j.escalacaoPreJogo?'<button class="btn fantasma" style="color:var(--vermelho);border-color:var(--vermelho)" onclick="adminRemoverEscalacaoPreJogo(\''+jogoAberto+'\')">🗑️ Remover escalação</button>':'')+'</div>'):'');
   if(!j.resultado){
-    const golsChecks=jogadoresAtivos().map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0"><input type="checkbox" style="width:auto" value="'+p.id+'" class="chkGol">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>').join('');
+    const golsChecks=jogadoresAtivos().map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0">'+fotoJogador(p.id,26)+'<input type="checkbox" style="width:auto" value="'+p.id+'" class="chkGol">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>').join('');
     html+='<div class="palpite-form"><span class="display" style="font-size:1rem">Vasco</span>'+
       '<input type="number" min="0" max="20" id="rrV" aria-label="Gols do Vasco">'+
       '<span class="display" style="color:var(--cinza)">×</span>'+
@@ -3399,7 +3530,7 @@ function renderAdminJogo(j,s){
   let chkCampo='',posAtualCampo='';
   listaCampo.forEach(p=>{
     if(p.pos!==posAtualCampo){posAtualCampo=p.pos;chkCampo+='</div><div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div><div class="grid g3" style="margin-top:6px">';}
-    chkCampo+='<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0"><input type="checkbox" style="width:auto" value="'+p.id+'" class="chkCampo" '+(marcados.includes(p.id)?'checked':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>';
+    chkCampo+='<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0">'+fotoJogador(p.id,26)+'<input type="checkbox" style="width:auto" value="'+p.id+'" class="chkCampo" '+(marcados.includes(p.id)?'checked':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>';
   });
   chkCampo=chkCampo.replace('</div><div class="pos-titulo"','<div class="pos-titulo"')+'</div>';
   html+='<details style="margin-top:14px"><summary>Quem entrou em campo ('+marcados.length+' registrados) — libera as notas</summary>'+
@@ -3423,14 +3554,32 @@ async function buscarAgora(){
   let r=null;
   try{r=await consultarPlacarIA(j);}catch(e){}
   if(!r||!r.encontrado){avisar('Não encontrei placar confiável ainda. Tente de novo em alguns minutos ou lance manualmente.');return;}
+  let disparaGol=false,placarGolTexto='';
   await mutar(()=>{
     const x=dados.jogos[id];if(!x)return;
-    const registro={quando:Date.now(),v:+r.gols_vasco,a:+r.gols_adversario,fonte:r.fonte||'busca na web'};
+    const gv=+r.gols_vasco,ga=+r.gols_adversario;
+    const registro={quando:Date.now(),v:gv,a:ga,fonte:r.fonte||'busca na web'};
     if(!x.historicoAuto)x.historicoAuto=[];
     x.historicoAuto.push(registro);
-    if(r.encerrado){x.resultado={v:+r.gols_vasco,a:+r.gols_adversario};x.resultadoEm=Date.now();x.goleadores=mapearGoleadores(r.goleadores_vasco);x.fonteAuto=registro;x.parcial=null;}
-    else x.parcial={v:+r.gols_vasco,a:+r.gols_adversario,quando:Date.now(),fonte:r.fonte||'busca na web'};
+    if(r.encerrado){x.resultado={v:gv,a:ga};x.resultadoEm=Date.now();x.goleadores=mapearGoleadores(r.goleadores_vasco);x.fonteAuto=registro;x.parcial=null;}
+    else{
+      const golAnteriorVasco=x.parcial?x.parcial.v:0;
+      x.parcial={v:gv,a:ga,quando:Date.now(),fonte:r.fonte||'busca na web'};
+      if(gv>golAnteriorVasco&&(x.ultimoGolNotificado||0)<gv){
+        x.ultimoGolNotificado=gv;
+        disparaGol=true;
+        const casa=j.local!=='fora';
+        placarGolTexto=casa?('Vasco '+gv+' x '+ga+' '+j.adversario):(j.adversario+' '+ga+' x '+gv+' Vasco');
+      }
+    }
   });
+  if(disparaGol){
+    try{
+      const frase=escolherFraseGol(placarGolTexto);
+      await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/'})});
+    }catch(e){}
+  }
   avisar(r.encerrado?'Resultado final registrado!':'Placar parcial atualizado.',true);
   render();
 }
@@ -3905,7 +4054,7 @@ function renderJogadores(){
     jogadoresAtivos().forEach(p=>{
       if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo">'+esc(p.pos)+'s</div>';}
       const m=mediasJogador(p.id);
-      html+='<div class="jog-linha"><span class="jog-num">'+(p.num||'–')+'</span><span><b>'+esc(p.nome)+'</b></span>'+
+      html+='<div class="jog-linha">'+fotoJogador(p.id,34)+'<span class="jog-num">'+(p.num||'–')+'</span><span><b>'+esc(p.nome)+'</b></span>'+
         '<span class="jog-media '+(m.geral!==null?classeNota(m.geral):'')+'">'+(m.geral!==null?m.geral.toFixed(1).replace('.',','):'–')+'<small>galera ('+m.nGeral+')</small></span>'+
         '<button class="btn-x" onclick="removerJogador(\''+p.id+'\')">remover</button></div>';
     });

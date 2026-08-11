@@ -103,7 +103,7 @@ async function tentarConfirmarPlacar({ data, timeCasa, timeFora, competicao }) {
     ]);
     const veredito = verificarJogo([lance, uol].filter(Boolean));
     if (veredito.placar && (veredito.placar.nivel === 'confirmado' || veredito.placar.nivel === 'provavel')) {
-      return { golsMandante: veredito.placar.placar.casa, golsVisitante: veredito.placar.placar.fora, nivel: veredito.placar.nivel, fontes: veredito.placar.fontesConcordantes };
+      return { golsMandante: veredito.placar.placar.casa, golsVisitante: veredito.placar.placar.fora, nivel: veredito.placar.nivel, fontes: veredito.placar.fontesConcordantes, encerrado: !!veredito.placar.encerrado };
     }
   } catch (e) { /* qualquer erro aqui e a gente simplesmente segue com a TheSportsDB, sem quebrar nada */ }
   return null;
@@ -194,19 +194,21 @@ async function acaoDetalhe(params, res) {
   if (!ev) return res(404, { erro: 'Jogo não encontrado.' });
   const resumo = resumirEvento(ev);
 
-  if (!resumo.encerrado) {
-    return res(200, { jogo: resumo, encerrado: false });
-  }
-
-  // tenta confirmar o placar direto no LANCE!+UOL (qualquer competição mapeada) — se confirmar,
-  // usa esse placar (mais rápido e assertivo que esperar a TheSportsDB atualizar); senão, segue
-  // com o que a TheSportsDB já trouxe, sem travar nem quebrar nada.
+  // tenta confirmar/atualizar o placar direto no LANCE!+UOL (qualquer competição mapeada) —
+  // funciona tanto pro jogo já encerrado quanto AO VIVO (placar parcial, durante a partida) —
+  // se confirmar, usa esse placar (mais rápido e assertivo que esperar a TheSportsDB atualizar);
+  // senão, segue com o que a TheSportsDB já trouxe, sem travar nem quebrar nada.
   let fonteExtra = null;
   const confirmado = await tentarConfirmarPlacar({ data: resumo.data, timeCasa: resumo.mandante, timeFora: resumo.visitante, competicao: params.competicao || resumo.liga });
   if (confirmado) {
     resumo.golsMandante = confirmado.golsMandante;
     resumo.golsVisitante = confirmado.golsVisitante;
+    if (confirmado.encerrado) resumo.encerrado = true; // LANCE/UOL podem saber que acabou antes da TheSportsDB atualizar
     fonteExtra = { fonte: 'lance+uol', nivel: confirmado.nivel, fontesConcordantes: confirmado.fontes };
+  }
+
+  if (!resumo.encerrado) {
+    return res(200, { jogo: resumo, encerrado: false, placarConfirmadoPor: fonteExtra });
   }
 
   let escalacao = { mandante: [], visitante: [] };
@@ -235,6 +237,27 @@ async function acaoEscalacaoPreJogo(params, res) {
   res(200, { encontrada: true, escalacao, fonte: 'uol' });
 }
 
+// jogos de futebol de HOJE envolvendo qualquer time brasileiro, nas principais competições —
+// usado pela aba "Quem joga hoje" no lugar da busca por IA (que nunca chegou a ser ativada,
+// já que a chave da Anthropic foi deixada em branco de propósito, pra manter tudo grátis).
+// Fonte: TheSportsDB, com um filtro por nome de competição (não é perfeito, mas cobre bem
+// Brasileirão A/B, Copa do Brasil, Libertadores e Sudamericana).
+const COMPETICOES_HOJE = /brasileir[aã]o|brazilian s[ée]rie|copa do brasil|copa conmebol libertadores|copa libertadores|conmebol sudamericana|copa sudamericana/i;
+async function acaoHoje(params, res) {
+  const data = params.data || new Date().toISOString().slice(0, 10);
+  const j = await chamarApi(`/eventsday.php?d=${data}&s=Soccer`);
+  const todos = j.events || [];
+  const relevantes = todos.filter(ev => COMPETICOES_HOJE.test(ev.strLeague || ''));
+  const jogos = relevantes.map(ev => ({
+    mandante: ev.strHomeTeam || '',
+    visitante: ev.strAwayTeam || '',
+    competicao: ev.strLeague || '',
+    horario: (ev.strTime || '').slice(0, 5),
+    ehVasco: /vasco/i.test(ev.strHomeTeam || '') || /vasco/i.test(ev.strAwayTeam || ''),
+  })).sort((a, b) => a.horario.localeCompare(b.horario));
+  res(200, { data, jogos });
+}
+
 exports.handler = async (event) => {
   const responder = (status, body) => ({
     statusCode: status,
@@ -248,7 +271,8 @@ exports.handler = async (event) => {
     if (params.acao === 'proximos') await acaoProximos(capturar);
     else if (params.acao === 'detalhe') await acaoDetalhe(params, capturar);
     else if (params.acao === 'escalacaoPreJogo') await acaoEscalacaoPreJogo(params, capturar);
-    else return responder(400, { erro: 'Use ?acao=proximos, ?acao=detalhe ou ?acao=escalacaoPreJogo' });
+    else if (params.acao === 'hoje') await acaoHoje(params, capturar);
+    else return responder(400, { erro: 'Use ?acao=proximos, ?acao=detalhe, ?acao=escalacaoPreJogo ou ?acao=hoje' });
     return responder(resultado.statusCode, resultado.body);
   } catch (e) {
     return responder(500, { erro: String(e.message || e) });

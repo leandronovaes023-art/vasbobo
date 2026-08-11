@@ -26,9 +26,12 @@ function mesmoJogador(a, b) {
 }
 
 // junta os placares das fontes disponíveis e decide o nível de confiança
+// junta os placares das fontes disponíveis e decide o nível de confiança — funciona tanto
+// pra jogo já encerrado quanto pra placar AO VIVO (parcial, durante a partida)
 function compararPlacares(resultados) {
-  const validos = resultados.filter((r) => r && r.placar && r.encerrado);
-  if (!validos.length) return { nivel: 'sem_dados', motivo: 'nenhuma fonte encontrou o jogo encerrado ainda' };
+  const validos = resultados.filter((r) => r && r.placar);
+  if (!validos.length) return { nivel: 'sem_dados', motivo: 'nenhuma fonte encontrou o jogo ainda' };
+  const encerrado = validos.some((r) => r.encerrado);
 
   const chave = (r) => `${r.placar.casa}-${r.placar.fora}`;
   const contagem = {};
@@ -39,7 +42,7 @@ function compararPlacares(resultados) {
   if (chaves.length === 1) {
     const [casa, fora] = chaves[0].split('-').map(Number);
     const nivel = validos.length >= 3 ? 'confirmado' : validos.length === 2 ? 'provavel' : 'unica_fonte';
-    return { nivel, placar: { casa, fora }, fontesConcordantes: contagem[chaves[0]], totalFontesConsultadas: resultados.length };
+    return { nivel, placar: { casa, fora }, encerrado, fontesConcordantes: contagem[chaves[0]], totalFontesConsultadas: resultados.length };
   }
 
   // fontes divergindo — não publica sozinho

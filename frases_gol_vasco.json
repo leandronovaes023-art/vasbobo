@@ -1,0 +1,1002 @@
+[
+  {
+    "id": 1,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL DO VASCO, CARALHO!"
+  },
+  {
+    "id": 2,
+    "categoria": "genericas_xingamento",
+    "texto": "É NÓIS, PORRA!!! GOL VASCÃO!"
+  },
+  {
+    "id": 3,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA, DESGRAÇA! GOL DO VASCO!"
+  },
+  {
+    "id": 4,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, QUE GOLAÇO! VASCÃO!"
+  },
+  {
+    "id": 5,
+    "categoria": "genericas_xingamento",
+    "texto": "PUTA QUE PARIU, GOL!"
+  },
+  {
+    "id": 6,
+    "categoria": "genericas_xingamento",
+    "texto": "AAAAH PORRA, GOL DO VASCO!"
+  },
+  {
+    "id": 7,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NO CU, GOL VASCÃO!"
+  },
+  {
+    "id": 8,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI TOMAR NO CU, É GOL!"
+  },
+  {
+    "id": 9,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, GOL DO VASCO!!!"
+  },
+  {
+    "id": 10,
+    "categoria": "genericas_xingamento",
+    "texto": "QUE PORRA DE GOL, MEU DEUS!"
+  },
+  {
+    "id": 11,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOOL, PORRA! CHORA, ADVERSÁRIO!"
+  },
+  {
+    "id": 12,
+    "categoria": "genericas_xingamento",
+    "texto": "É ISSO AÍ PORRA, VASCÃO!!!"
+  },
+  {
+    "id": 13,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA, DESGRAÇADO! GOL!"
+  },
+  {
+    "id": 14,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, EU GRITEI ATÉ RASGAR A GARGANTA! GOL!"
+  },
+  {
+    "id": 15,
+    "categoria": "genericas_xingamento",
+    "texto": "FILHO DA PUTA QUE GOLAÇO! VASCÃO!"
+  },
+  {
+    "id": 16,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI SE FODER, RIVAL! GOL DO VASCO!"
+  },
+  {
+    "id": 17,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA NENHUMA SEGURA O VASCO! GOL!"
+  },
+  {
+    "id": 18,
+    "categoria": "genericas_xingamento",
+    "texto": "CHORA, DESGRAÇA! GOL DO VASCO!"
+  },
+  {
+    "id": 19,
+    "categoria": "genericas_xingamento",
+    "texto": "AAAAH CARALHO QUE ALÍVIO, GOL!"
+  },
+  {
+    "id": 20,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NA TROUXA! GOL VASCÃO!"
+  },
+  {
+    "id": 21,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL PUTA MERDA, ISSO AÍ!"
+  },
+  {
+    "id": 22,
+    "categoria": "genericas_xingamento",
+    "texto": "VASCÃO NÃO TEM PIEDADE, PORRA! GOL!"
+  },
+  {
+    "id": 23,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, LEVANTEI DO SOFÁ! GOL!"
+  },
+  {
+    "id": 24,
+    "categoria": "genericas_xingamento",
+    "texto": "É GOL DESGRAÇA, VAI CHORAR!"
+  },
+  {
+    "id": 25,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, QUE MOMENTO! GOL DO VASCO!"
+  },
+  {
+    "id": 26,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, ISSO É GOL DE VERDADE!"
+  },
+  {
+    "id": 27,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA NA TROMBA! VASCÃO GOL!"
+  },
+  {
+    "id": 28,
+    "categoria": "genericas_xingamento",
+    "texto": "QUE PORRA DE FINALIZAÇÃO, GOL!"
+  },
+  {
+    "id": 29,
+    "categoria": "genericas_xingamento",
+    "texto": "ARRASOU PORRA! GOL DO VASCO!"
+  },
+  {
+    "id": 30,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI CHORAR AGORA, DESGRAÇADO! GOL!"
+  },
+  {
+    "id": 31,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO EU TÔ CHORANDO! GOL VASCÃO!"
+  },
+  {
+    "id": 32,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA, SEU BOSTA! GOL DO VASCO!"
+  },
+  {
+    "id": 33,
+    "categoria": "genericas_xingamento",
+    "texto": "É NÓIS PORRA, VAMO QUE VAMO! GOL!"
+  },
+  {
+    "id": 34,
+    "categoria": "genericas_xingamento",
+    "texto": "FODA-SE O RIVAL, GOL DO VASCO!"
+  },
+  {
+    "id": 35,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA QUE GOLAÇO FILHO DA PUTA!"
+  },
+  {
+    "id": 36,
+    "categoria": "genericas_xingamento",
+    "texto": "GRITEI IGUAL LOUCO, PORRA! GOL!"
+  },
+  {
+    "id": 37,
+    "categoria": "genericas_xingamento",
+    "texto": "VASCÃO METEU O PÉ, PORRA! GOL!"
+  },
+  {
+    "id": 38,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA, SEU MERDA! GOL!"
+  },
+  {
+    "id": 39,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, VAI SE FODER ADVERSÁRIO! GOL!"
+  },
+  {
+    "id": 40,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, QUE ALEGRIA DESGRAÇADA! GOL!"
+  },
+  {
+    "id": 41,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL PUTA QUE PARIU, VASCÃO!"
+  },
+  {
+    "id": 42,
+    "categoria": "genericas_xingamento",
+    "texto": "CHUPA ESSA, DESGRAÇA! GOL DO VASCO!"
+  },
+  {
+    "id": 43,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, ISSO AÍ É QUE É FUTEBOL! GOL!"
+  },
+  {
+    "id": 44,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI TOMAR NO SACO, RIVAL! GOL!"
+  },
+  {
+    "id": 45,
+    "categoria": "genericas_xingamento",
+    "texto": "GRITA PORRA, É GOL DO VASCO!"
+  },
+  {
+    "id": 46,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, ESSE GOL DOEU NO OUTRO!"
+  },
+  {
+    "id": 47,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NA CARA, DESGRAÇADO! GOL!"
+  },
+  {
+    "id": 48,
+    "categoria": "genericas_xingamento",
+    "texto": "PUTA MERDA QUE GOLAÇO, VASCÃO!"
+  },
+  {
+    "id": 49,
+    "categoria": "genericas_xingamento",
+    "texto": "É ISSO PORRA, BORA VASCO!"
+  },
+  {
+    "id": 50,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI CHORAR PRA CARALHO! GOL!"
+  },
+  {
+    "id": 51,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, EXPLODIU A CASA! GOL DO VASCO!"
+  },
+  {
+    "id": 52,
+    "categoria": "genericas_xingamento",
+    "texto": "FODEU GERAL, GOL VASCÃO!"
+  },
+  {
+    "id": 53,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA MERDA, RIVAL! GOL!"
+  },
+  {
+    "id": 54,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, QUE PRAZER! GOL DO VASCO!"
+  },
+  {
+    "id": 55,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, ISSO É QUE É TIME! GOL!"
+  },
+  {
+    "id": 56,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL FILHO DA PUTA, VASCÃO!!!"
+  },
+  {
+    "id": 57,
+    "categoria": "genericas_xingamento",
+    "texto": "CHUPA, ADVERSÁRIO DESGRAÇADO! GOL!"
+  },
+  {
+    "id": 58,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA EU GRITEI ATÉ ROUQUEJAR! GOL!"
+  },
+  {
+    "id": 59,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NO OLHO! GOL DO VASCO!"
+  },
+  {
+    "id": 60,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI SE FODER, DEFESA RIVAL! GOL!"
+  },
+  {
+    "id": 61,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO QUE ALEGRIA PORRA! GOL!"
+  },
+  {
+    "id": 62,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, EXPLODIU TUDO! GOL VASCÃO!"
+  },
+  {
+    "id": 63,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA, SEU CUZÃO! GOL!"
+  },
+  {
+    "id": 64,
+    "categoria": "genericas_xingamento",
+    "texto": "É GOL PUTA QUE PARIU!!!"
+  },
+  {
+    "id": 65,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, VASCÃO NÃO PERDOA! GOL!"
+  },
+  {
+    "id": 66,
+    "categoria": "genericas_xingamento",
+    "texto": "FODA-SE, GOL É GOL! VASCÃO!"
+  },
+  {
+    "id": 67,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, MANDOU BEM PRA CARALHO! GOL!"
+  },
+  {
+    "id": 68,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NA TESTA, DESGRAÇA! GOL!"
+  },
+  {
+    "id": 69,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, CHORA QUE É GOL! VASCÃO!"
+  },
+  {
+    "id": 70,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL CACETA, LEVANTA O BAIRRO INTEIRO!"
+  },
+  {
+    "id": 71,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI TOMAR NO CU DE NOVO! GOL!"
+  },
+  {
+    "id": 72,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, TÔ SEM VOZ DE TANTO GRITAR! GOL!"
+  },
+  {
+    "id": 73,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA PRA VOCÊ, DESGRAÇADO! GOL DO VASCO!"
+  },
+  {
+    "id": 74,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA SANTA, QUE GOLAÇO! VASCÃO!"
+  },
+  {
+    "id": 75,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, ISSO AÍ É HISTÓRIA! GOL!"
+  },
+  {
+    "id": 76,
+    "categoria": "genericas_xingamento",
+    "texto": "FODEU O RIVAL DE NOVO! GOL VASCÃO!"
+  },
+  {
+    "id": 77,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, EU PULEI NO SOFÁ! GOL!"
+  },
+  {
+    "id": 78,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NA CARA DE PAU! GOL DO VASCO!"
+  },
+  {
+    "id": 79,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, ISSO É QUE É PAIXÃO! GOL!"
+  },
+  {
+    "id": 80,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL DESGRAÇA, CHORA GOSTOSO!"
+  },
+  {
+    "id": 81,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI SE FODER, ZAGUEIRO! GOL VASCÃO!"
+  },
+  {
+    "id": 82,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO QUE MOMENTO SAGRADO! GOL!"
+  },
+  {
+    "id": 83,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA, SEU FILHO DA PUTA! GOL!"
+  },
+  {
+    "id": 84,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, ISSO MERECIA CHAMPANHE! GOL!"
+  },
+  {
+    "id": 85,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, VASCÃO SEMPRE VASCÃO! GOL!"
+  },
+  {
+    "id": 86,
+    "categoria": "genericas_xingamento",
+    "texto": "É GOL, CARALHO, PODE GRITAR!"
+  },
+  {
+    "id": 87,
+    "categoria": "genericas_xingamento",
+    "texto": "FODEU GERAL DE NOVO! GOL DO VASCO!"
+  },
+  {
+    "id": 88,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, ISSO É QUE É TALENTO! GOL!"
+  },
+  {
+    "id": 89,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NA GOELA, RIVAL! GOL!"
+  },
+  {
+    "id": 90,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, EU TREMI TODO! GOL VASCÃO!"
+  },
+  {
+    "id": 91,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL PUTA MERDA, LINDO DEMAIS!"
+  },
+  {
+    "id": 92,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI CHORAR PRA CACETA! GOL DO VASCO!"
+  },
+  {
+    "id": 93,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, ISSO FOI DIVINO! GOL!"
+  },
+  {
+    "id": 94,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA ESSA MERDA TODA, DESGRAÇA! GOL!"
+  },
+  {
+    "id": 95,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, EXPLODIU O BAIRRO! GOL VASCÃO!"
+  },
+  {
+    "id": 96,
+    "categoria": "genericas_xingamento",
+    "texto": "CACETA, ISSO É AMOR PORRA! GOL!"
+  },
+  {
+    "id": 97,
+    "categoria": "genericas_xingamento",
+    "texto": "FODA-SE TUDO, É GOL DO VASCO!"
+  },
+  {
+    "id": 98,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, VALEU A PENA CADA XINGAMENTO! GOL!"
+  },
+  {
+    "id": 99,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA NA CABEÇA, DESGRAÇADO! GOL!"
+  },
+  {
+    "id": 100,
+    "categoria": "genericas_xingamento",
+    "texto": "PORRA, VASCO DA GAMA, CARALHO! GOOOOOL!"
+  },
+  {
+    "id": 101,
+    "categoria": "genericas_xingamento",
+    "texto": "É GOL CARALHO! VASCO!!!"
+  },
+  {
+    "id": 102,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL, PORRA! VAI TOMAR NO CU!"
+  },
+  {
+    "id": 103,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOOL. É O VASCO, PORRA."
+  },
+  {
+    "id": 104,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL! VAAAAAMOS!"
+  },
+  {
+    "id": 105,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL FILHA DA PUTA É O VASCO PORRA!"
+  },
+  {
+    "id": 106,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL, CARALHO! LEVANTA TODO MUNDO!"
+  },
+  {
+    "id": 107,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI SE FODER, É GOL!"
+  },
+  {
+    "id": 108,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL PORRA, EU SABIA!"
+  },
+  {
+    "id": 109,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL DESGRAÇA, VASCO DA GAMA!"
+  },
+  {
+    "id": 110,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, GOL! BORA VASCÃO!"
+  },
+  {
+    "id": 111,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL PUTA QUE PARIU, VAMOOO!"
+  },
+  {
+    "id": 112,
+    "categoria": "genericas_xingamento",
+    "texto": "É NÓIS, CARALHO! GOL!"
+  },
+  {
+    "id": 113,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL, FILHO DA PUTA, SIMBORA!"
+  },
+  {
+    "id": 114,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL PORRA, CHORA RIVAL!"
+  },
+  {
+    "id": 115,
+    "categoria": "genericas_xingamento",
+    "texto": "VASCO, CARALHO! GOOOL!"
+  },
+  {
+    "id": 116,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL DESGRAÇADO, VAI TOMAR NO CU!"
+  },
+  {
+    "id": 117,
+    "categoria": "genericas_xingamento",
+    "texto": "PUTA MERDA, GOL! VASCÃO!"
+  },
+  {
+    "id": 118,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL CACETA, É NÓIS!"
+  },
+  {
+    "id": 119,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL PORRA, TOMA ESSA!"
+  },
+  {
+    "id": 120,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, É GOL! VAMO VASCO!"
+  },
+  {
+    "id": 121,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL FILHO DA PUTA, SIMMM!"
+  },
+  {
+    "id": 122,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI À MERDA, É GOL DO VASCO!"
+  },
+  {
+    "id": 123,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL PORRA, GRITA COMIGO!"
+  },
+  {
+    "id": 124,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL CACETA, ISSO É VASCO!"
+  },
+  {
+    "id": 125,
+    "categoria": "genericas_xingamento",
+    "texto": "TOMA, DESGRAÇA! GOOOL!"
+  },
+  {
+    "id": 126,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL PUTA QUE PARIU, VASCÃO CARALHO!"
+  },
+  {
+    "id": 127,
+    "categoria": "genericas_xingamento",
+    "texto": "É GOL, PORRA! SEGURA QUEM PUDER!"
+  },
+  {
+    "id": 128,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL, CARALHO! ANIMAL!"
+  },
+  {
+    "id": 129,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL DESGRAÇA, EXPLODIU TUDO!"
+  },
+  {
+    "id": 130,
+    "categoria": "genericas_xingamento",
+    "texto": "VAI SE FODER RIVAL, GOL!"
+  },
+  {
+    "id": 131,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL PORRA, VASCO NÃO PERDOA!"
+  },
+  {
+    "id": 132,
+    "categoria": "genericas_xingamento",
+    "texto": "CARALHO, GOOOL! CHORA GOSTOSO!"
+  },
+  {
+    "id": 133,
+    "categoria": "genericas_xingamento",
+    "texto": "GOL FILHO DA PUTA, TOMA!"
+  },
+  {
+    "id": 134,
+    "categoria": "genericas_xingamento",
+    "texto": "É GOL CACETA, LEVANTA O BAIRRO!"
+  },
+  {
+    "id": 135,
+    "categoria": "genericas_xingamento",
+    "texto": "GOOOL PUTA MERDA, VAMO VASCO!"
+  },
+  {
+    "id": 136,
+    "categoria": "personagem_Antonio Nerd",
+    "texto": "GOOOL, CARALHO! Antonio Nerd gritou tão suave que parece até declaração de amor pro Novaes."
+  },
+  {
+    "id": 137,
+    "categoria": "personagem_Antonio Nerd",
+    "texto": "GOL PORRA! Antonio Nerd já tá deitado em cima do Novaes de novo, agora de comemoração."
+  },
+  {
+    "id": 138,
+    "categoria": "personagem_Antonio Nerd",
+    "texto": "É GOL, DESGRAÇA! Antonio Nerd estressado igual sempre, mas a voz aveludada segura o grito."
+  },
+  {
+    "id": 139,
+    "categoria": "personagem_Antonio Nerd",
+    "texto": "GOOOL! Só o Antonio Nerd pra comemorar gol e parecer que tá narrando audiobook."
+  },
+  {
+    "id": 140,
+    "categoria": "personagem_Antonio Nerd",
+    "texto": "GOL CARALHO! Antonio Nerd deitou de novo no Novaes, arquibancada não é colchão, mano."
+  },
+  {
+    "id": 141,
+    "categoria": "personagem_Daniel",
+    "texto": "GOOOL PORRA! Daniel já parou de encher o saco do Pedrinho e do Felipe por 3 segundos pra comemorar."
+  },
+  {
+    "id": 142,
+    "categoria": "personagem_Daniel",
+    "texto": "É GOL, CACETA! Daniel de meia do Bob Esponja gritando mais alto que a pochete colorida dele."
+  },
+  {
+    "id": 143,
+    "categoria": "personagem_Daniel",
+    "texto": "GOL DESGRAÇA! Daniel e Novaes brigando até no meio da comemoração, clássico."
+  },
+  {
+    "id": 144,
+    "categoria": "personagem_Daniel",
+    "texto": "GOOOL CARALHO! Daniel já zoando o Douglas de novo, nem o gol segura essa rivalidade."
+  },
+  {
+    "id": 145,
+    "categoria": "personagem_Daniel",
+    "texto": "GOL PORRA! Daniel de pochete voando de tanto pular."
+  },
+  {
+    "id": 146,
+    "categoria": "personagem_Velloso",
+    "texto": "GOOOL! Velloso correu mais rápido que o próprio jogador pra chegar na comemoração."
+  },
+  {
+    "id": 147,
+    "categoria": "personagem_Velloso",
+    "texto": "É GOL, CARALHO! Velloso tá de óculos de Ciclope enxergando o gol antes de todo mundo."
+  },
+  {
+    "id": 148,
+    "categoria": "personagem_Velloso",
+    "texto": "GOL PORRA! Velloso já deu volta na arquibancada de tênis caro só de emoção."
+  },
+  {
+    "id": 149,
+    "categoria": "personagem_Velloso",
+    "texto": "GOOOL DESGRAÇA! Velloso maratonista até na comemoração, ninguém alcança."
+  },
+  {
+    "id": 150,
+    "categoria": "personagem_Velloso",
+    "texto": "GOL CARALHO! Óculos de Ciclope do Velloso disparando raio X de gol."
+  },
+  {
+    "id": 151,
+    "categoria": "personagem_Pedro",
+    "texto": "GOOOL PORRA! Pedro já tá ligando pro Otávio pra contar que o Vasco fez gol."
+  },
+  {
+    "id": 152,
+    "categoria": "personagem_Pedro",
+    "texto": "É GOL, CARALHO! Pedro comemorando igual criança, mas o Otávio é que devia estar aqui vendo."
+  },
+  {
+    "id": 153,
+    "categoria": "personagem_Pedro",
+    "texto": "GOL DESGRAÇA! Pedro guardando essa comemoração pra contar história pro Otávio quando crescer."
+  },
+  {
+    "id": 154,
+    "categoria": "personagem_Pedro",
+    "texto": "GOOOL! Se Otávio soubesse, já ia estar pulando igual o pai."
+  },
+  {
+    "id": 155,
+    "categoria": "personagem_Pedro",
+    "texto": "GOL PORRA! Pedro grita gol pensando em criar mais um vascaíno em casa."
+  },
+  {
+    "id": 156,
+    "categoria": "personagem_Vitor",
+    "texto": "GOOOL CARALHO! Vitor já tava lá 3 horas antes, claro que foi o primeiro a ver o gol."
+  },
+  {
+    "id": 157,
+    "categoria": "personagem_Vitor",
+    "texto": "É GOL, PORRA! Vitor deve estar ligando pro Léo Dias pra virar fofoca amanhã."
+  },
+  {
+    "id": 158,
+    "categoria": "personagem_Vitor",
+    "texto": "GOL DESGRAÇA! Vitor chegou cedo até pra esse gol, moleque tem instinto."
+  },
+  {
+    "id": 159,
+    "categoria": "personagem_Vitor",
+    "texto": "GOOOL! Se essa comemoração não virar matéria do Léo Dias, Vitor vai ficar chateado."
+  },
+  {
+    "id": 160,
+    "categoria": "personagem_Vitor",
+    "texto": "GOL CARALHO! Vitor de novo o primeiro no estádio, primeiro a gritar."
+  },
+  {
+    "id": 161,
+    "categoria": "personagem_Juan",
+    "texto": "GOOOL PORRA! Juan conseguiu escapulir de casa hoje e o Vasco retribuiu com gol."
+  },
+  {
+    "id": 162,
+    "categoria": "personagem_Juan",
+    "texto": "É GOL, CARALHO! Se a esposa do Juan soubesse a festa que ele tá fazendo agora..."
+  },
+  {
+    "id": 163,
+    "categoria": "personagem_Juan",
+    "texto": "GOL DESGRAÇA! Juan aproveitando a saidinha rara pra gritar até ficar rouco."
+  },
+  {
+    "id": 164,
+    "categoria": "personagem_Juan",
+    "texto": "GOOOL! Juan vai contar essa comemoração em casa igual quem conta história de guerra."
+  },
+  {
+    "id": 165,
+    "categoria": "personagem_Juan",
+    "texto": "GOL PORRA! Autorização de saída valeu a pena, Juan comemorando igual doido."
+  },
+  {
+    "id": 166,
+    "categoria": "personagem_Jorge",
+    "texto": "GOOOL CARALHO! Jorge já ergueu a cerveja e a aposta ao mesmo tempo."
+  },
+  {
+    "id": 167,
+    "categoria": "personagem_Jorge",
+    "texto": "É GOL, PORRA! Jorge dobrou a aposta na bet só de emoção do gol."
+  },
+  {
+    "id": 168,
+    "categoria": "personagem_Jorge",
+    "texto": "GOL DESGRAÇA! Jorge com a gordinha do lado e a cerveja na mão, vida perfeita."
+  },
+  {
+    "id": 169,
+    "categoria": "personagem_Jorge",
+    "texto": "GOOOL! Jorge comemorando gol e green na bet no mesmo minuto."
+  },
+  {
+    "id": 170,
+    "categoria": "personagem_Jorge",
+    "texto": "GOL CARALHO! Aposta paga, cerveja gelada, gol do Vasco — dia perfeito do Jorge."
+  },
+  {
+    "id": 171,
+    "categoria": "personagem_Alex",
+    "texto": "GOOOL PORRA! Alex já analisando a jogada como scout, mas gritando igual torcedor comum."
+  },
+  {
+    "id": 172,
+    "categoria": "personagem_Alex",
+    "texto": "É GOL, CARALHO! Alex formado em educação física, mas o pulo de comemoração não tem técnica nenhuma."
+  },
+  {
+    "id": 173,
+    "categoria": "personagem_Alex",
+    "texto": "GOL DESGRAÇA! Alex vai revisar esse gol em câmera lenta depois, mas agora é só grito."
+  },
+  {
+    "id": 174,
+    "categoria": "personagem_Alex",
+    "texto": "GOOOL! Scout do Vasco aprovando a jogada com nota máxima."
+  },
+  {
+    "id": 175,
+    "categoria": "personagem_Alex",
+    "texto": "GOL PORRA! Alex analisando estatística no meio do abraço de comemoração."
+  },
+  {
+    "id": 176,
+    "categoria": "personagem_Novaes",
+    "texto": "GOOOL CARALHO! Novaes já preparando a imagem de IA pra mandar no grupo em 3, 2, 1."
+  },
+  {
+    "id": 177,
+    "categoria": "personagem_Novaes",
+    "texto": "É GOL, PORRA! Guardião do Pedrinho ativado, Novaes protegendo a honra do camisa em peso."
+  },
+  {
+    "id": 178,
+    "categoria": "personagem_Novaes",
+    "texto": "GOL DESGRAÇA! Novaes xingando o Daniel de alegria, tradição é tradição."
+  },
+  {
+    "id": 179,
+    "categoria": "personagem_Novaes",
+    "texto": "GOOOL! Novaes tirou o cigarro da boca só pra gritar esse gol."
+  },
+  {
+    "id": 180,
+    "categoria": "personagem_Novaes",
+    "texto": "GOL CARALHO! Daqui a pouco chega imagem de IA do Novaes comemorando esse gol de um jeito bizarro."
+  },
+  {
+    "id": 181,
+    "categoria": "personagem_Novaes",
+    "texto": "GOOOL PORRA! Novaes e Douglas guardiões do Pedrinho, gol aprovado pela dupla."
+  },
+  {
+    "id": 182,
+    "categoria": "personagem_Douglas",
+    "texto": "GOOOL DESGRAÇA! Douglas já mandando o link do gol no Netvasco antes de acabar a comemoração."
+  },
+  {
+    "id": 183,
+    "categoria": "personagem_Douglas",
+    "texto": "É GOL, CARALHO! Guardião do Pedrinho, Douglas comemorando com o Novaes lado a lado."
+  },
+  {
+    "id": 184,
+    "categoria": "personagem_Douglas",
+    "texto": "GOL PORRA! Douglas e Novaes zoando o Daniel até no meio da festa do gol."
+  },
+  {
+    "id": 185,
+    "categoria": "personagem_Douglas",
+    "texto": "GOOOL! Douglas já com o link do Netvasco pronto pra postar essa pérola."
+  },
+  {
+    "id": 186,
+    "categoria": "personagem_Douglas",
+    "texto": "GOL CARALHO! Dupla guardiã do Pedrinho aprova esse gol com louvor."
+  },
+  {
+    "id": 187,
+    "categoria": "personagem_André",
+    "texto": "GOOOL PORRA! André gritando o nome do Sforza no meio da comemoração."
+  },
+  {
+    "id": 188,
+    "categoria": "personagem_André",
+    "texto": "É GOL, CARALHO! André não fala mal só nesse momento, nem do Pedrosa."
+  },
+  {
+    "id": 189,
+    "categoria": "personagem_André",
+    "texto": "GOL DESGRAÇA! André ama o Sforza tanto que dedica esse gol a ele."
+  },
+  {
+    "id": 190,
+    "categoria": "personagem_André",
+    "texto": "GOOOL! Se fosse gol do Pedrosa, André nem comemorava — mas hoje é geral."
+  },
+  {
+    "id": 191,
+    "categoria": "personagem_André",
+    "texto": "GOL CARALHO! André comemorando e evitando falar de Pedrosa, foco total no Sforza."
+  },
+  {
+    "id": 192,
+    "categoria": "personagem_Combo",
+    "texto": "GOOOL PORRA! Antonio Nerd deitado no Novaes, Daniel de pochete voando, é a arquibancada clássica."
+  },
+  {
+    "id": 193,
+    "categoria": "personagem_Combo",
+    "texto": "É GOL, CARALHO! Velloso já correu até lá embaixo comemorar com o Vitor, que chegou 3 horas antes."
+  },
+  {
+    "id": 194,
+    "categoria": "personagem_Combo",
+    "texto": "GOL DESGRAÇA! Novaes e Douglas gritando 'Pedrinho, Pedrinho' no meio do gol, guardiões inseparáveis."
+  },
+  {
+    "id": 195,
+    "categoria": "personagem_Combo",
+    "texto": "GOOOL! Juan aproveitando a saída rara pra comemorar igual o Jorge com a bet ganhando."
+  },
+  {
+    "id": 196,
+    "categoria": "personagem_Combo",
+    "texto": "GOL CARALHO! Alex já filmando pra analisar depois, Pedro já ligando pro Otávio."
+  },
+  {
+    "id": 197,
+    "categoria": "personagem_Combo",
+    "texto": "GOOOL PORRA! Daniel e Novaes se xingando, Douglas mandando link do Netvasco, dia normal no grupo."
+  },
+  {
+    "id": 198,
+    "categoria": "personagem_Combo",
+    "texto": "É GOL, DESGRAÇA! André gritando Sforza, Antonio Nerd deitado no Novaes, resumo perfeito da galera."
+  },
+  {
+    "id": 199,
+    "categoria": "personagem_Combo",
+    "texto": "GOL CARALHO! Vitor já ligando pro Léo Dias, Velloso correndo pra comemorar com todo mundo."
+  },
+  {
+    "id": 200,
+    "categoria": "personagem_Combo",
+    "texto": "GOOOL PORRA! O grupo inteiro gritando junto — Pedrinho e Felipe aprovados pelos guardiões Novaes e Douglas."
+  }
+]
