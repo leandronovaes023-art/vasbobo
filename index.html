@@ -561,6 +561,27 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 </div>
 
+<!-- modal de definir escalação (admin) — checklist com foto, igual "quem entrou em campo" -->
+<div class="modal-sair oculto" id="modalEscalacaoAdmin" onclick="if(event.target===this)fecharEscalacaoAdmin()">
+  <div class="modal" style="max-width:440px;max-height:82vh;max-height:82dvh;overflow-y:auto">
+    <h3 style="text-align:left;margin-bottom:10px">Definir escalação titular</h3>
+    <div id="corpoEscalacaoAdmin"></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn fantasma" style="flex:1" onclick="fecharEscalacaoAdmin()">Cancelar</button>
+      <button class="btn" style="flex:1" onclick="confirmarEscalacaoAdmin()">Confirmar e notificar</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal de escolher jogador (foto + número + nome) — usado no MVP, quem faz gol, etc. -->
+<div class="modal-sair oculto" id="modalEscolherJogador" onclick="if(event.target===this)fecharEscolherJogador()">
+  <div class="modal" style="max-width:420px;max-height:80vh;max-height:80dvh;overflow-y:auto">
+    <h3 style="text-align:left;margin-bottom:10px">Escolher jogador</h3>
+    <div id="corpoEscolherJogador"></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn fantasma" style="flex:1" onclick="fecharEscolherJogador()">Fechar</button></div>
+  </div>
+</div>
+
 <!-- modal da escalação pré-jogo -->
 <div class="modal-sair oculto" id="modalEscalacaoPreJogo" onclick="if(event.target===this)fecharEscalacaoPreJogo()">
   <div class="modal" style="border-top-color:var(--verde);max-width:420px">
@@ -1268,7 +1289,7 @@ function htmlBadgeEscalacao(id,j){
 /* organiza os titulares num campinho visual, por posição — bate os nomes (que vêm em texto puro,
    direto do UOL) com o elenco cadastrado, reaproveitando a mesma lógica de "achar quem é quem"
    já usada pra goleadores */
-function renderCampinho(nomes){
+function renderCampinho(nomes,tecnicoId){
   const ids=mapearGoleadores(nomes);
   const jogadoresMapeados=ids.map(id=>jogadorPorId(id)).filter(Boolean);
   const semMatch=(nomes||[]).filter(n=>{
@@ -1291,6 +1312,13 @@ function renderCampinho(nomes){
     '<span class="campinho-nome">'+esc((p.nome||'').split(' ').slice(-1)[0])+'</span></div>'
   ).join('')+'</div>'):'';
   let html='<div class="campinho">'+linha(grupos.ataque)+linha(grupos.meia)+linha(grupos.volante)+linha(grupos.defesa)+linha(grupos.goleiro)+'</div>';
+  // técnico sempre aparece junto, fora do campo (ele não joga, mas comanda) — auto-selecionado
+  const tecnico=jogadorPorId(tecnicoId||'p_pedroemanuel');
+  if(tecnico){
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding:10px 12px;background:var(--carvao2);border:1px solid var(--linha);border-radius:10px">'+
+      fotoJogador(tecnico.id,40)+'<span><span style="display:block;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza)">Técnico</span>'+
+      '<b>'+esc(tecnico.nome)+'</b></span></div>';
+  }
   if(semMatch.length)html+='<p class="nota-rodape" style="margin-top:10px">Não achei no elenco cadastrado: '+semMatch.map(esc).join(', ')+'.</p>';
   return html;
 }
@@ -1299,20 +1327,47 @@ function abrirEscalacaoPreJogo(id){
   if(!j||!j.escalacaoPreJogo)return;
   document.getElementById('tituloEscalacaoPreJogo').innerHTML=nomeJogo(j);
   document.getElementById('corpoEscalacaoPreJogo').innerHTML=
-    renderCampinho(j.escalacaoPreJogo.jogadores)+
+    renderCampinho(j.escalacaoPreJogo.jogadores,j.escalacaoPreJogo.tecnicoId)+
     '<p class="nota-rodape" style="margin-top:10px">Divulgada '+new Date(j.escalacaoPreJogo.quando).toLocaleString('pt-BR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})+' · fonte: '+esc(j.escalacaoPreJogo.fonte||'admin')+'</p>';
   document.getElementById('modalEscalacaoPreJogo').classList.remove('oculto');
 }
 function fecharEscalacaoPreJogo(){document.getElementById('modalEscalacaoPreJogo').classList.add('oculto');}
-async function adminDefinirEscalacaoPreJogo(id){
+function abrirEscalacaoAdmin(id){
   const j=dados.jogos[id];
   if(!j)return;
-  const texto=prompt('Cole os nomes dos titulares (um por linha, ou separados por vírgula):');
-  if(!texto)return;
-  const jogadores=texto.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
-  if(!jogadores.length)return;
-  await mutar(()=>{const x=dados.jogos[id];if(x)x.escalacaoPreJogo={jogadores,quando:Date.now(),fonte:'admin'};});
+  window._escalacaoAdminJogoId=id;
+  const jaEscolhidos=new Set((j.escalacaoPreJogo?mapearGoleadores(j.escalacaoPreJogo.jogadores):[]));
+  let html='<p class="nota-rodape" style="margin:0 0 10px">Marca os 11 titulares. O técnico Pedro Emanuel entra sozinho, não precisa marcar.</p>'+
+    '<p id="contadorEscalacaoAdmin" style="font-weight:800;margin-bottom:10px;color:var(--verde)">0/11 selecionados</p>';
+  let posAtual='';
+  jogadoresAtivos().filter(p=>p.pos!=='Técnico').forEach(p=>{
+    if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div>';}
+    html+='<label style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:.88rem;text-transform:none;letter-spacing:0;color:var(--branco)">'+
+      '<input type="checkbox" style="width:auto" value="'+p.id+'" class="chkEscalacaoAdmin" onchange="atualizarContadorEscalacaoAdmin()" '+(jaEscolhidos.has(p.id)?'checked':'')+'>'+
+      fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</span></label>';
+  });
+  document.getElementById('corpoEscalacaoAdmin').innerHTML=html;
+  document.getElementById('modalEscalacaoAdmin').classList.remove('oculto');
+  atualizarContadorEscalacaoAdmin();
+}
+function fecharEscalacaoAdmin(){document.getElementById('modalEscalacaoAdmin').classList.add('oculto');}
+function atualizarContadorEscalacaoAdmin(){
+  const n=document.querySelectorAll('.chkEscalacaoAdmin:checked').length;
+  const el=document.getElementById('contadorEscalacaoAdmin');
+  if(!el)return;
+  el.textContent=n+'/11 selecionados';
+  el.style.color=n===11?'var(--verde)':'var(--laranja)';
+}
+async function confirmarEscalacaoAdmin(){
+  const id=window._escalacaoAdminJogoId;
+  const j=dados.jogos[id];
+  if(!j)return;
+  const marcados=[...document.querySelectorAll('.chkEscalacaoAdmin:checked')].map(c=>c.value);
+  if(marcados.length!==11){avisar('Marca exatamente 11 titulares (hoje tem '+marcados.length+').');return;}
+  const jogadores=marcados.map(id2=>jogadorPorId(id2)).filter(Boolean).map(p=>p.nome);
+  await mutar(()=>{const x=dados.jogos[id];if(x)x.escalacaoPreJogo={jogadores,tecnicoId:'p_pedroemanuel',quando:Date.now(),fonte:'admin'};});
   registrarLog('admin','Definiu a escalação pré-jogo de '+nomeJogo(j).replace(/<[^>]+>/g,''),null,'importante');
+  fecharEscalacaoAdmin();
   avisar('Escalação registrada — mandando a notificação pra todo mundo…',true);
   try{
     await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -2368,7 +2423,7 @@ async function sincronizarJogos(){
       if(info.encontrada&&info.escalacao){
         const nomes=casa?info.escalacao.casa:info.escalacao.fora;
         if(nomes&&nomes.length===11){
-          await mutar(()=>{const x=dados.jogos[id];if(x&&!x.escalacaoPreJogo)x.escalacaoPreJogo={jogadores:nomes,quando:Date.now(),fonte:info.fonte||'uol'};});
+          await mutar(()=>{const x=dados.jogos[id];if(x&&!x.escalacaoPreJogo)x.escalacaoPreJogo={jogadores:nomes,tecnicoId:'p_pedroemanuel',quando:Date.now(),fonte:info.fonte||'uol'};});
           try{
             await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
               body:JSON.stringify({titulo:'SAIU A ESCALAÇÃO!',texto:nomeJogo(j).replace(/<[^>]+>/g,'')+'. Clique!',url:'/?abrirEscalacao='+id})});
@@ -3176,6 +3231,40 @@ function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
   if(posAtual)opts.push('</optgroup>');
   return '<select id="'+idSel+'">'+opts.join('')+'</select>';
 }
+/* botão que abre um seletor visual (foto + número + nome) no lugar do <select> nativo, que não
+   consegue mostrar foto dentro das opções — usado no MVP e no "quem faz gol" do palpite */
+function botaoEscolherJogador(idCampo,valorAtual,incluirSemGol,incluirTecnico){
+  const jSel=valorAtual&&valorAtual!==SEM_GOL?jogadorPorId(valorAtual):null;
+  const texto=valorAtual===SEM_GOL?'Vasco não marca 😢':(jSel?((jSel.num?jSel.num+' · ':'')+jSel.nome):'— escolher —');
+  const fotoTxt=jSel?fotoJogador(jSel.id,26):'';
+  return '<input type="hidden" id="'+idCampo+'" value="'+esc(valorAtual||'')+'">'+
+    '<button type="button" class="btn fantasma" style="width:100%;display:flex;align-items:center;gap:8px;justify-content:flex-start;text-align:left;padding:9px 12px" '+
+    'onclick="abrirEscolherJogador(\''+idCampo+'\','+(incluirSemGol?'true':'false')+','+(incluirTecnico?'true':'false')+')" id="btnEsc_'+idCampo+'">'+
+    '<span id="fotoEsc_'+idCampo+'">'+fotoTxt+'</span><span id="txtEsc_'+idCampo+'">'+esc(texto)+'</span></button>';
+}
+function abrirEscolherJogador(idCampo,incluirSemGol,incluirTecnico){
+  window._escolherJogadorAlvo=idCampo;
+  let html='';
+  if(incluirSemGol)html+='<button type="button" class="jogo-item" style="width:100%;margin-bottom:8px" onclick="selecionarJogadorModal(\''+SEM_GOL+'\')"><span class="jogo-nome">Vasco não marca 😢</span></button>';
+  let posAtual='';
+  jogadoresAtivos().filter(p=>incluirTecnico||p.pos!=='Técnico').forEach(p=>{
+    if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div>';}
+    html+='<button type="button" class="jogo-item" style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:6px" onclick="selecionarJogadorModal(\''+p.id+'\')">'+
+      fotoJogador(p.id,32)+'<span class="jogo-nome" style="font-size:.88rem">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</span></button>';
+  });
+  document.getElementById('corpoEscolherJogador').innerHTML=html||'<div class="vazio">Ninguém no elenco ainda.</div>';
+  document.getElementById('modalEscolherJogador').classList.remove('oculto');
+}
+function fecharEscolherJogador(){document.getElementById('modalEscolherJogador').classList.add('oculto');}
+function selecionarJogadorModal(id){
+  const idCampo=window._escolherJogadorAlvo;
+  if(!idCampo)return;
+  document.getElementById(idCampo).value=id;
+  const jSel=id!==SEM_GOL?jogadorPorId(id):null;
+  document.getElementById('txtEsc_'+idCampo).textContent=id===SEM_GOL?'Vasco não marca 😢':(jSel?((jSel.num?jSel.num+' · ':'')+jSel.nome):'— escolher —');
+  document.getElementById('fotoEsc_'+idCampo).innerHTML=jSel?fotoJogador(jSel.id,26):'';
+  fecharEscolherJogador();
+}
 
 function renderPalpiteCard(j,s){
   const meu=j.palpites[eu];
@@ -3188,8 +3277,8 @@ function renderPalpiteCard(j,s){
       '<input type="number" min="0" max="20" id="ppA" value="'+(meu?meu.a:'')+'" aria-label="Gols do adversário">'+
       '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
       '<div class="grid g2" style="margin-top:12px">'+
-      '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
-      '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
+      '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+botaoEscolherJogador('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
+      '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+botaoEscolherJogador('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
       '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()"><span style="color:var(--vermelho)">✠</span> '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
       (meu?'<button class="btn fantasma" style="margin-top:8px;color:var(--vermelho)" onclick="removerMeuPalpite()">🗑️ Remover meu palpite</button>':'')+
       (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
@@ -3535,7 +3624,7 @@ function renderAdminJogo(j,s){
   let html='<div class="card"><h2>Área do admin</h2><p class="nota-rodape" style="margin-top:0">O placar, os goleadores e a transmissão são registrados <b>automaticamente</b> via busca na web. Use esta área só para forçar ou corrigir algo.</p>'+
     '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px"><div style="flex:1;min-width:200px"><label for="admTv">Onde assistir (corrigir manualmente)</label><input id="admTv" placeholder="Ex.: Paramount+ e ESPN" value="'+esc(j.ondeAssistir||'')+'"></div>'+
     '<button class="btn fantasma" onclick="salvarTransmissao()">salvar</button></div>'+
-    (!j.resultado?('<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn fantasma" onclick="adminDefinirEscalacaoPreJogo(\''+jogoAberto+'\')">📋 '+(j.escalacaoPreJogo?'Corrigir escalação pré-jogo':'Definir escalação pré-jogo (e notificar todo mundo)')+'</button>'+
+    (!j.resultado?('<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn fantasma" onclick="abrirEscalacaoAdmin(\''+jogoAberto+'\')">📋 '+(j.escalacaoPreJogo?'Corrigir escalação pré-jogo':'Definir escalação pré-jogo (e notificar todo mundo)')+'</button>'+
       (j.escalacaoPreJogo?'<button class="btn fantasma" style="color:var(--vermelho);border-color:var(--vermelho)" onclick="adminRemoverEscalacaoPreJogo(\''+jogoAberto+'\')">🗑️ Remover escalação</button>':'')+'</div>'):'');
   if(!j.resultado){
     const golsChecks=jogadoresAtivos().map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0">'+fotoJogador(p.id,26)+'<input type="checkbox" style="width:auto" value="'+p.id+'" class="chkGol">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>').join('');
