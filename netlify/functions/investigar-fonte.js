@@ -6,8 +6,8 @@
 // Uso: /.netlify/functions/investigar-fonte?url=<endereco-completo-da-pagina>
 const cheerio = require('cheerio');
 
-const TERMOS = ['scoreboard-event substitution'];
-const JANELA = 3500;
+const TERMOS = ['__espnfitt__', 'Full Time', 'Fim de Jogo', 'substitution'];
+const JANELA = 900;
 
 exports.handler = async (event) => {
   const { url } = event.queryStringParameters || {};
