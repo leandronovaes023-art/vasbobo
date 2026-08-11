@@ -366,7 +366,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
 
   /* janela de mídia flutuante */
-  .midia-janela{position:fixed;right:6px;bottom:calc(84px + env(safe-area-inset-bottom,0));width:min(115px,32vw);height:18vh;max-height:165px;
+  .midia-janela{position:fixed;right:6px;bottom:calc(96px + env(safe-area-inset-bottom,0));width:min(115px,32vw);height:18vh;max-height:165px;
     background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;overflow:hidden;
     box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:395;display:flex;flex-direction:column}
   .midia-top{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;
@@ -467,7 +467,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .castigo-item.pendente{border-color:var(--vermelho);background:rgba(224,41,59,.05)}
   .castigo-item.pendente .ci-texto{color:var(--vermelho);font-style:italic}
 
-  .topo-btn{position:fixed;left:14px;bottom:calc(84px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
+  .topo-btn{position:fixed;left:14px;bottom:calc(96px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
     background:var(--branco);color:var(--preto);border:none;font-size:1.15rem;cursor:pointer;
     box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:400;display:none;align-items:center;justify-content:center}
   .topo-btn.on{display:flex}
@@ -3014,8 +3014,9 @@ async function ativarNotificacoes(pulaPedidoDePermissao){
 }
 function atualizarBotaoNotificacao(){
   const btn=document.getElementById('btnNotificacao');
-  if(!btn||!('Notification' in window))return;
-  if(Notification.permission==='granted'){
+  if(!btn)return;
+  const suportado=('Notification' in window);
+  if(suportado&&Notification.permission==='granted'){
     btn.classList.add('ativado');btn.classList.remove('balancando');btn.textContent='🔔';btn.title='Notificações ativadas';
   }else{
     btn.classList.remove('ativado');btn.classList.add('balancando');btn.title='Ativar notificações';
@@ -4856,6 +4857,7 @@ async function renderAdmin(){
   '<button class="btn fantasma tab-notif" id="tabNotifBiblioteca" onclick="mudarTabNotif(\'biblioteca\')" style="padding:6px 14px;font-size:.78rem">📚 Biblioteca de frases</button>'+
   '<button class="btn fantasma tab-notif" id="tabNotifEnviar" onclick="mudarTabNotif(\'enviar\')" style="padding:6px 14px;font-size:.78rem">📣 Enviar / Agendar</button>'+
   '<button class="btn fantasma tab-notif" id="tabNotifAgendadas" onclick="mudarTabNotif(\'agendadas\')" style="padding:6px 14px;font-size:.78rem">📅 Agendadas específicas</button>'+
+  '<button class="btn fantasma tab-notif" id="tabNotifAtivados" onclick="mudarTabNotif(\'ativados\')" style="padding:6px 14px;font-size:.78rem">🔔 Quem ativou</button>'+
   '</div>'+
   '<div id="notifTabBiblioteca">'+
   '<p class="nota-rodape" style="margin:0 0 10px">Todas as frases usadas pelas notificações automáticas — editáveis de verdade (mudou aqui, muda em todo lugar que ela é usada).</p>'+
@@ -4898,6 +4900,10 @@ async function renderAdmin(){
   '<div><label for="novaMsgHora">Hora (0-23)</label><input id="novaMsgHora" type="number" min="0" max="23" placeholder="20"></div></div>'+
   '<button class="btn fantasma" onclick="criarMensagemAgendada()">+ Adicionar mensagem agendada</button>'+
   '<div id="listaMsgAgendadasItens" style="margin-top:14px">Carregando…</div>'+
+  '</div>'+
+  '<div id="notifTabAtivados" class="oculto">'+
+  '<p class="nota-rodape" style="margin:0 0 10px">Quem já ativou as notificações push e está recebendo no aparelho — e quem ainda não ativou.</p>'+
+  '<div id="listaNotifAtivados">Carregando…</div>'+
   '</div>'+
   '</div></details></div>'+
   '<div class="card"><details><summary>🧹 Limpar dados de um usuário</summary><div style="margin-top:12px">'+
@@ -5032,13 +5038,38 @@ async function buscarLogs(){
   }
 }
 function mudarTabNotif(nome){
-  ['biblioteca','enviar','agendadas'].forEach(t=>{
+  ['biblioteca','enviar','agendadas','ativados'].forEach(t=>{
     const painel=document.getElementById('notifTab'+cap(t));
     const btn=document.getElementById('tabNotif'+cap(t));
     if(painel)painel.classList.toggle('oculto',t!==nome);
     if(btn)btn.classList.toggle('claro',t===nome);
   });
   if(nome==='agendadas')carregarMensagensAgendadas();
+  if(nome==='ativados')carregarNotifAtivados();
+}
+async function carregarNotifAtivados(){
+  const el=document.getElementById('listaNotifAtivados');
+  if(!el)return;
+  el.innerHTML='Carregando…';
+  try{
+    const snap=await db.collection('push_tokens').get();
+    const ativos={};
+    snap.forEach(doc=>{ativos[doc.id]=doc.data();});
+    const usuarios=Object.keys(dados.usuarios).sort();
+    const totalAtivos=usuarios.filter(u=>ativos[u]).length;
+    let html='<p style="font-weight:800;margin-bottom:10px">'+totalAtivos+'/'+usuarios.length+' com notificação ativada</p>';
+    usuarios.forEach(u=>{
+      const a=ativos[u];
+      html+='<div class="mini-linha"><span class="rank-nome">'+esc(cap(u))+'</span>'+
+        (a
+          ?'<span style="color:var(--verde);font-weight:800;font-size:.78rem">🔔 ativado'+(a.atualizadoEm?' · '+new Date(a.atualizadoEm).toLocaleDateString('pt-BR'):'')+'</span>'
+          :'<span style="color:var(--cinza);font-weight:800;font-size:.78rem">🔕 não ativou</span>')+
+        '</div>';
+    });
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
+  }
 }
 const TIPOS_COM_HORA=['motivacional','quiz'];
 async function carregarBibliotecaFrases(){
