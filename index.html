@@ -106,14 +106,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .oculto{display:none!important}
 
   header{border-bottom:1px solid var(--linha);background:var(--preto)}
-  .header-inner{max-width:1320px;margin:0 auto;padding:12px 20px 8px;display:flex;flex-direction:column;gap:6px}
-  .header-top{display:flex;justify-content:center;width:100%;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
-  .header-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
-  .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:8px;padding:9px 18px;cursor:pointer;font-size:.92rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none}
+  .header-inner{max-width:1320px;margin:0 auto;padding:12px 20px 8px;display:flex;flex-direction:column;gap:0}
+  .header-top{display:flex;justify-content:center;width:100%;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;padding-bottom:9px;border-bottom:1px solid var(--linha);margin-bottom:9px}
+  .header-bottom{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;width:100%}
+  .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none;text-transform:uppercase}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
-  .sino-notif{background:var(--carvao);border:1px solid var(--linha);color:var(--branco);border-radius:7px;
-    width:34px;height:34px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
-  .sino-notif.ativado{background:rgba(47,208,142,.14);border-color:var(--verde)}
+  .sino-notif{background:none;border:none;color:var(--branco);
+    width:34px;height:34px;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+  .sino-notif.ativado{color:var(--verde)}
   .sino-notif.balancando{animation:sinoBalanca 2.4s ease-in-out infinite}
   @keyframes sinoBalanca{0%,90%,100%{transform:rotate(0)}91%{transform:rotate(-14deg)}93%{transform:rotate(11deg)}95%{transform:rotate(-8deg)}97%{transform:rotate(5deg)}99%{transform:rotate(-2deg)}}
   h1{font-size:clamp(2.6rem,10vw,4.6rem);line-height:1;text-shadow:none;width:100%;text-align:center}
@@ -749,14 +749,16 @@ console.log('Firebase conectado ao Vasbobo ✓');
         <h1 class="display titulo-vasbobo"><span>V</span><span>A</span><span>S</span><span>B</span><span>O</span><span>B</span><span>O</span><span class="cruz">✠</span></h1>
       </div>
       <div class="header-bottom">
-        <button class="btn-vasbolao-header" id="btnVasbolaoHeader" onclick="mudarAba('rank');setTimeout(()=>{const el=document.querySelector('#secRank .rank-linha');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},250)" title="Ir direto pro Ranking do Vasbolão">🏆 Vasbolão</button>
-        <div class="who">
-          <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
-          <span class="adm oculto" id="whoAdm">admin</span>
-          <button onclick="pedirConfirmacaoSair()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+          <button class="btn-vasbolao-header" id="btnVasbolaoHeader" onclick="mudarAba('rank');setTimeout(()=>{const el=document.querySelector('#secRank .rank-linha');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},250)" title="Ir direto pro Ranking do Vasbolão">💰 VASBOLÃO</button>
+          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:7px;padding:5px 10px;cursor:pointer;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">Baixar APP</button>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;flex:none">
-          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">Baixar APP</button>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <div class="who">
+            <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
+            <span class="adm oculto" id="whoAdm">admin</span>
+            <button onclick="pedirConfirmacaoSair()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
+          </div>
           <button id="btnNotificacao" onclick="pedirPermissaoNotificacao()" class="sino-notif" aria-label="Ativar notificações" title="Ativar notificações">🔔</button>
         </div>
       </div>
@@ -2575,6 +2577,18 @@ function fqFecharModal(){
   clearInterval(fqTimerInterval);
   document.getElementById('fqModal').classList.add('oculto');
 }
+async function zerarQuizSeNecessario(){
+  // limpeza definitiva do quiz (não só filtrar na exibição) — dispara uma vez só, só pelo admin,
+  // pra não ter vários usuários tentando escrever ao mesmo tempo
+  if(!souAdmin())return;
+  if(dados.config&&(dados.config.quizZeradoV||0)>=1)return;
+  try{
+    ESTADO_QUIZ.porJogo={};
+    await fqSalvarEstado(ESTADO_QUIZ);
+    await mutar(()=>{ if(!dados.config)dados.config={}; dados.config.quizZeradoV=1; });
+    render();
+  }catch(e){}
+}
 async function fqAtualizarBarra(){
   const usuario=fqUsuario();
   const elFixo=document.getElementById('fqFixo');
@@ -3061,6 +3075,7 @@ function entrarNoApp(){
   const fmEl=document.getElementById('fmFixo');
   if(fmEl)fmEl.classList.remove('oculto');
   fqAtualizarBarra();
+  zerarQuizSeNecessario();
   atualizarBotaoNotificacao();
   setTimeout(tentarMostrarSaudacaoLogin,1200);
   if('Notification' in window&&Notification.permission==='granted')ativarOuvintePrimeiroPlano();
