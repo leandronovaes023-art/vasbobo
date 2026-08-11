@@ -4,6 +4,8 @@
 // Depois que o sistema de verificação estiver pronto, este arquivo pode ser apagado.
 //
 // Uso: /.netlify/functions/investigar-fonte?url=<endereco-completo-da-pagina>
+const cheerio = require('cheerio');
+
 exports.handler = async (event) => {
   const { url } = event.queryStringParameters || {};
   if (!url) {
@@ -17,35 +19,39 @@ exports.handler = async (event) => {
       },
     });
     const html = await r.text();
+    const $ = cheerio.load(html);
 
-    const temNextData = html.includes('__NEXT_DATA__');
-    const temNuxtData = html.includes('__NUXT__');
-    const temApolloState = html.includes('__APOLLO_STATE__');
-    const temPartidaEncerrada = /Partida encerrada|Fim de jogo|FIM DE JOGO|Encerrado/i.test(html);
-    const temSubstituicao = /Substitui[çc][ãa]o/i.test(html);
-    const temVasco = /Vasco/i.test(html);
+    // acha o elemento que contém o texto "Partida encerrada" (ou "Fim de jogo") e sobe alguns
+    // níveis de pai, pra ver a "vizinhança" onde normalmente fica o placar junto
+    let statusHtml = null;
+    $('*').each((i, el) => {
+      if (statusHtml) return;
+      const txt = $(el).clone().children().remove().end().text().trim();
+      if (/^(Partida encerrada|Fim de jogo)$/i.test(txt)) {
+        statusHtml = $(el).parent().parent().html();
+      }
+    });
 
-    // se tiver __NEXT_DATA__, extrai só esse bloco (é onde moram os dados estruturados de verdade)
-    let blocoNextData = null;
-    if (temNextData) {
-      const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-      if (m) blocoNextData = m[1].slice(0, 6000); // corta pra não estourar o tamanho da resposta
-    }
+    // acha o bloco de "linha do tempo" procurando o texto "Substituição" ou "Fim de jogo" na lista de eventos
+    let timelineHtml = null;
+    $('li, div').each((i, el) => {
+      if (timelineHtml) return;
+      const txt = $(el).text();
+      if (/Fim de jogo/i.test(txt) && /Substitui/i.test($(el).parent().text())) {
+        timelineHtml = $(el).parent().html();
+      }
+    });
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify({
-        status: r.status,
         tamanhoHtml: html.length,
-        temNextData, temNuxtData, temApolloState,
-        temPartidaEncerrada, temSubstituicao, temVasco,
-        // pedaço bruto do começo do HTML, pra eu ver como está estruturado por fora
-        trechoInicial: html.slice(0, 1500),
-        blocoNextData,
+        statusHtml: (statusHtml || '(não achei)').slice(0, 2500),
+        timelineHtml: (timelineHtml || '(não achei)').slice(0, 4000),
       }, null, 2),
     };
   } catch (e) {
-    return { statusCode: 500, body: JSON.stringify({ erro: e.message }) };
+    return { statusCode: 500, body: JSON.stringify({ erro: e.message, stack: e.stack }) };
   }
 };
