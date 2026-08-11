@@ -73,6 +73,7 @@ const COMPETICOES = [
   { teste: /brasileir[ãa]o|campeonato brasileiro/i, lance: 'brasileirao-serie-a', uol: 'brasileirao' },
   { teste: /sul[ -]?americana|sudamericana/i, lance: 'copa-sul-americana', uol: 'sul-americana' },
   { teste: /libertadores/i, lance: 'copa-libertadores-da-america', uol: 'libertadores' },
+  { teste: /copa do brasil/i, lance: 'copa-do-brasil', uol: 'copa-do-brasil' },
 ];
 function achaCompeticao(nomeCompeticao) {
   return COMPETICOES.find(c => c.teste.test(nomeCompeticao || '')) || null;

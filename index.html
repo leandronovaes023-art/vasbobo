@@ -2242,7 +2242,7 @@ async function sincronizarJogos(){
   // antes até o início, e só se ainda não tiver sido registrada
   for(const [id,j] of jogosOrdenados()){
     if(j.resultado||!j.hora||j.escalacaoPreJogo)continue;
-    if(!/brasileir[ãa]o|campeonato brasileiro|sul[ -]?americana|sudamericana|libertadores/i.test(j.competicao||''))continue;
+    if(!/brasileir[ãa]o|campeonato brasileiro|sul[ -]?americana|sudamericana|libertadores|copa do brasil/i.test(j.competicao||''))continue;
     const ini=inicioJogo(j).getTime();
     if(agora<ini-45*60000||agora>=ini)continue; // janela: dos 45min antes até o início (sai por padrão aos 30min)
     if(j.escSyncPreJogoEm&&agora-j.escSyncPreJogoEm<30000)continue; // nessa janela quente, insiste a cada ~30s (o mesmo ritmo do relógio do app)
@@ -2899,16 +2899,16 @@ function renderListaJogos(){
     const s=statusJogo(j);
     const [cls,txt]=textoSelo(s);
     const chamada=s==='aberto'?'Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar':s==='andamento'?'Bola rolando! Placar atualizando e avaliação libera no apito final':s==='avaliar'?'Fim de jogo: hora de dar as notas e soltar o verbo':'Veja como a galera se saiu';
-    html+='<div class="card destaque"><div class="selo-destaque"><span class="cruz">✠</span> Jogo em destaque</div>'+
+    html+='<div class="card destaque"><div class="selo-destaque" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px">'+
+      '<span><span class="cruz">✠</span> Jogo em destaque</span>'+htmlBadgeEscalacao(id,j)+
+      '</div>'+
       '<div class="dest-grid"><div class="rodada-box">'+
-      '<div class="jogo-nome" style="font-size:1.12rem">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
+      '<div class="jogo-nome" style="font-size:1.12rem;margin-top:6px">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
       '<div class="data-grande">'+fmtData(j)+'</div>'+
       '<div class="info-pilha">'+
         '<div class="info-linha">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
         '<div class="info-linha">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
-        '<div class="info-linha" style="text-transform:none;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'+
-          '<span>'+(j.ondeAssistir?badgeTransmissao(j):'')+'</span>'+htmlBadgeEscalacao(id,j)+
-        '</div>'+
+        (j.ondeAssistir?'<div class="info-linha" style="text-transform:none">'+badgeTransmissao(j)+'</div>':'')+
       '</div>'+
       (s==='aberto'&&j.hora?'<div class="cronometro" id="cronoDest" data-jogo="'+id+'">…</div>':'')+
       '<p style="font-size:.9rem;margin:10px 0 12px;color:var(--branco)">'+chamada+'.</p>'+
