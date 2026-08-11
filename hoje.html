@@ -115,7 +115,7 @@ async function chamarClaude(prompt,maxTokens){
   --card:#15181D;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
+html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable;font-size:106%}
 body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px;line-height:1.5;background:var(--preto)}
 
 .voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
@@ -298,6 +298,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .fq-edge-seta{background:none;border:none;color:var(--azul);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
 .fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
+.fq-fechar .cruz-btn{color:var(--vermelho);font-size:1.1em}
 </style>
 <script>
 function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
@@ -445,7 +446,7 @@ function sairSatelite(){
 
 <main>
   <div class="page-title">
-    <h1><img src="img/menu/icone-quemjogahoje.png" alt="" style="height:1.1em;vertical-align:-0.2em;margin-right:6px">Quem joga <span style="color:var(--azul)">hoje?</span></h1>
+    <h1><img src="img/menu/icone-quemjogahoje.png" alt="" style="height:1.1em;vertical-align:-0.2em;margin-right:6px">Quem joga <span style="color:var(--branco)">hoje?</span></h1>
   </div>
 
   <div class="card" style="padding-bottom:6px">

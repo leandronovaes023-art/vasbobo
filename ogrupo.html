@@ -91,7 +91,7 @@ let eu = "";
   --card:#15181D;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
+html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable;font-size:106%}
 body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:60px;line-height:1.5;background:var(--preto)}
 
 .voltar{background:none;border:1px solid var(--linha);color:var(--cinza);border-radius:8px;padding:8px 14px;
@@ -299,6 +299,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .fq-edge-seta{background:none;border:none;color:var(--azul);font-size:1.05rem;font-weight:900;
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
 .fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
+.fq-fechar .cruz-btn{color:var(--vermelho);font-size:1.1em}
 </style>
 <script>
 function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
@@ -445,7 +446,7 @@ function sairSatelite(){
 </script>
 
 <div class="page-title">
-  <h1>O <span style="color:var(--azul)">Grupo</span></h1>
+  <h1>O <span style="color:var(--branco)">Grupo</span></h1>
   <a href="/galeria.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:6px;text-decoration:none;
     background:#5AB4E0;color:#17171B;border-radius:9px;padding:9px 16px;font-weight:800;font-size:.85rem;
     letter-spacing:.03em;text-transform:uppercase;font-family:'Inter',sans-serif">🎨 Ver fotos e vídeos (Obras-Primas)</a>
@@ -453,7 +454,7 @@ function sairSatelite(){
 
 <div class="placar-geral">
   <div class="stat-geral"><div class="num">247k</div><div class="label">Mensagens enviadas</div></div>
-  <div class="stat-geral"><div class="num" style="color:var(--azul)">48k</div><div class="label">Só do Novaes</div></div>
+  <div class="stat-geral"><div class="num" style="color:var(--branco)">48k</div><div class="label">Só do Novaes</div></div>
   <div class="stat-geral"><div class="num" style="color:var(--verde)">1.096</div><div class="label">Porras do Novaes</div></div>
   <div class="stat-geral"><div class="num">483</div><div class="label">Vezes que Daniel citou o Novaes</div></div>
   <div class="stat-geral"><div class="num" style="color:var(--ouro)">2023</div><div class="label">Ano que o Vasco subiu e virou o grupo</div></div>

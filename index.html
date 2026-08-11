@@ -98,7 +98,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     --laranja:#C2570F;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable}
+  html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable;font-size:106%}
   body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5;background:var(--preto)}
   .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
   .oculto{display:none!important}
@@ -126,7 +126,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .bobo-login{display:block;margin:0 auto 6px;width:150px;height:auto;border-radius:16px;filter:drop-shadow(0 14px 18px rgba(0,0,0,.35))}
   .eyebrow{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cinza);margin-bottom:6px}
   .who{background:var(--carvao);border:1px solid var(--linha);padding:8px 14px;border-radius:9px;font-size:.85rem;display:flex;align-items:center;gap:10px}
-  #whoFoto img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid var(--vermelho);display:block;vertical-align:middle}
+  #whoFoto img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(255,255,255,.3);display:block;vertical-align:middle}
   .who b{text-transform:capitalize}
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
@@ -290,7 +290,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .placar-final{font-family:'Anton',sans-serif;font-size:1rem;white-space:nowrap}
   .mes-sep{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;
     color:var(--branco);margin:18px 0 8px;padding:6px 10px;border-radius:7px;
-    background:var(--carvao2);border-bottom:2px solid var(--azul);
+    background:var(--carvao2);border-bottom:3px solid var(--branco);
     box-shadow:0 1px 4px rgba(0,0,0,.2)}
 
   .placar-grande{font-family:'Anton',sans-serif;font-size:clamp(1.3rem,4.5vw,1.9rem);display:flex;align-items:center;gap:10px;text-transform:uppercase;flex-wrap:wrap}
@@ -330,7 +330,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rank-linha.lider .rank-pos{color:var(--ouro)}
   .rank-pts{font-family:'Anton',sans-serif;font-size:1.48rem}
   .rank-detalhe{font-size:.7rem;color:var(--cinza);letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
-  .rank-nome{text-transform:capitalize;font-weight:700;font-size:1.02em}
+  .rank-nome{text-transform:uppercase;font-weight:700;font-size:1.12em;letter-spacing:.02em}
 
   .pos-titulo{font-family:'Anton',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.82rem;color:var(--cinza);margin:16px 2px 8px}
   .jog-linha{display:grid;grid-template-columns:40px 1fr auto auto auto;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--linha);border-radius:10px;margin-bottom:6px;background:var(--carvao2);font-size:.9rem}
@@ -526,7 +526,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   margin-top:10px;cursor:pointer;font-weight:700;font-family:'Inter',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px}
 .fq-fechar:hover{border-color:#F2F0EA}
-.fq-fechar .cruz-btn{color:var(--azul);font-size:1.1em}
+.fq-fechar .cruz-btn{color:var(--vermelho);font-size:1.1em}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -1118,7 +1118,7 @@ function fotoUsuario(u,px){
   nome=ALIAS_PERFIL[nome]||nome;
   const src=FOTOS_PERFIL[nome]||('rostos/'+nome+'.jpg');
   return '<img src="'+src+'" alt="'+esc(cap(u))+'" style="width:'+px+'px;height:'+px+'px;border-radius:12px;'+
-    'object-fit:cover;border:2px solid var(--vermelho);vertical-align:middle" '+
+    'object-fit:cover;border:2px solid rgba(255,255,255,.3);vertical-align:middle" '+
     'onerror="this.style.display=\'none\'">';
 }
 function tooltipPontuacao(){
@@ -1449,10 +1449,9 @@ function montarSvgRoleta(svg){
   const raio=140, cx=150, cy=150;
   const fatia=360/n;
   let partes='';
-  // moldura: anel dourado grosso + friso vermelho + friso preto (referência à faixa diagonal do manto vascaíno)
-  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="149" fill="none" stroke="#A97B12" stroke-width="7"/>';
-  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="143.5" fill="none" stroke="#C0121B" stroke-width="2"/>';
-  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="149" fill="none" stroke="#17171B" stroke-width="1.5"/>';
+  // moldura: anel branco grosso + friso preto fino, limpo e sem sobreposição quebrada
+  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="146.5" fill="none" stroke="#FFFFFF" stroke-width="6"/>';
+  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="141" fill="none" stroke="#17171B" stroke-width="2"/>';
   for(let i=0;i<n;i++){
     const a0=(i*fatia-90)*Math.PI/180, a1=((i+1)*fatia-90)*Math.PI/180;
     const x0=cx+raio*Math.cos(a0), y0=cy+raio*Math.sin(a0);
@@ -1460,7 +1459,7 @@ function montarSvgRoleta(svg){
     const preto=(i%2===0); // alterna preto e branco setor a setor
     const cor=preto?'#17171B':'#F7F6F3';
     const corTxt=preto?'#FFFFFF':'#17171B';
-    partes+='<path d="M'+cx+','+cy+' L'+x0+','+y0+' A'+raio+','+raio+' 0 0 1 '+x1+','+y1+' Z" fill="'+cor+'" stroke="#A97B12" stroke-width="2.5"/>';
+    partes+='<path d="M'+cx+','+cy+' L'+x0+','+y0+' A'+raio+','+raio+' 0 0 1 '+x1+','+y1+' Z" fill="'+cor+'" stroke="#FFFFFF" stroke-width="2"/>';
     // texto do castigo via <text>/<tspan> nativo do SVG (evita foreignObject — tem histórico de bugs de render/clique no Safari)
     const am=(a0+a1)/2;
     const rotDeg=(am*180/Math.PI);
@@ -1475,9 +1474,8 @@ function montarSvgRoleta(svg){
       '<g transform="'+(precisaFlip?('rotate(180,'+radMid+',0)'):'')+'">'+
       '<text font-family="Inter,sans-serif" font-weight="800" font-size="13" fill="'+corTxt+'" text-anchor="middle" dominant-baseline="central">'+tspans+'</text></g></g>';
   }
-  // miolo central: cruz de malta vermelha sobre branco, com anel dourado
-  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="27" fill="#F7F6F3" stroke="#A97B12" stroke-width="3"/>';
-  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="27" fill="none" stroke="#17171B" stroke-width="1"/>';
+  // miolo central: cruz de malta vermelha sobre branco, com anel preto único e limpo
+  partes+='<circle cx="'+cx+'" cy="'+cy+'" r="27" fill="#F7F6F3" stroke="#17171B" stroke-width="2.5"/>';
   partes+='<text x="'+cx+'" y="'+cy+'" fill="#C0121B" font-size="22" text-anchor="middle" dominant-baseline="central">✠</text>';
   svg.innerHTML=partes;
   svg.style.transition='none';
