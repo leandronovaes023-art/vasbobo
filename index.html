@@ -2236,6 +2236,32 @@ async function sincronizarTransmissao(id){
 async function sincronizarJogos(){
   if(!dados)return;
   const agora=Date.now();
+  // escalação PRÉ-jogo (titulares anunciados antes da bola rolar) — só Brasileirão por enquanto,
+  // só na janela de ~2h antes até o início, e só se ainda não tiver sido registrada
+  for(const [id,j] of jogosOrdenados()){
+    if(j.resultado||!j.hora||j.escalacaoPreJogo)continue;
+    if(!/brasileir[ãa]o|campeonato brasileiro/i.test(j.competicao||''))continue;
+    const ini=inicioJogo(j).getTime();
+    if(agora<ini-2*3600000||agora>=ini)continue; // só entre 2h antes e o início
+    if(j.escSyncPreJogoEm&&agora-j.escSyncPreJogoEm<3*60000)continue; // não insiste mais que 1x a cada 3min
+    await mutar(()=>{const x=dados.jogos[id];if(x)x.escSyncPreJogoEm=agora;});
+    try{
+      const casa=j.local!=='fora';
+      const timeCasa=casa?'Vasco':j.adversario, timeFora=casa?j.adversario:'Vasco';
+      const r=await fetch(`/.netlify/functions/futebol?acao=escalacaoPreJogo&data=${j.data}&timeCasa=${encodeURIComponent(timeCasa)}&timeFora=${encodeURIComponent(timeFora)}&competicao=${encodeURIComponent(j.competicao||'')}`);
+      const info=await r.json();
+      if(info.encontrada&&info.escalacao){
+        const nomes=casa?info.escalacao.casa:info.escalacao.fora;
+        if(nomes&&nomes.length>=9){
+          await mutar(()=>{const x=dados.jogos[id];if(x&&!x.escalacaoPreJogo)x.escalacaoPreJogo={jogadores:nomes,quando:Date.now(),fonte:info.fonte||'uol'};});
+          try{
+            await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({texto:'📋 Escalação do Vasco saiu! '+nomeJogo(j).replace(/<[^>]+>/g,'')+' — toque pra ver quem começa jogando.'})});
+          }catch(e){}
+        }
+      }
+    }catch(e){}
+  }
   // escalação de quem jogou: para jogos já encerrados/no fim, nas últimas 48h — via TheSportsDB (grátis)
   for(const [id,j] of jogosOrdenados()){
     const s=statusJogo(j);

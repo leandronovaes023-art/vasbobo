@@ -64,26 +64,45 @@ function nomeParaSlug(nome) {
   return APELIDO_TIME[chave] || slugificar(nome);
 }
 
+function montarUrlsBrasileirao(data, timeCasa, timeFora) {
+  const [ano, mes, dia] = data.split('-');
+  const slugCasa = nomeParaSlug(timeCasa), slugFora = nomeParaSlug(timeFora);
+  return {
+    lance: `https://www.lance.com.br/temporeal/partida/brasileirao-serie-a-${ano}-${dia}-${mes}-${ano}-${slugCasa.replace(/-/g,'')}x${slugFora.replace(/-/g,'')}`,
+    uol: `https://placar.uol.com.br/esporte/futebol/brasileirao/${ano}/${mes}/${dia}/${slugCasa}-x-${slugFora}.htm`,
+  };
+}
+
 // tenta confirmar o placar de um jogo do Brasileirão direto no LANCE!+UOL — só funciona pra essa
 // competição por enquanto, porque foi o único padrão de endereço que já testamos de verdade.
 // Se der qualquer erro (site fora do ar, slug de time que a gente não mapeou direito, etc.),
 // simplesmente devolve null e quem chamou continua usando a TheSportsDB normalmente — não quebra nada.
 async function tentarConfirmarBrasileirao({ data, timeCasa, timeFora }) {
   try {
-    const [ano, mes, dia] = data.split('-');
-    const slugCasa = nomeParaSlug(timeCasa), slugFora = nomeParaSlug(timeFora);
-    const urlLance = `https://www.lance.com.br/temporeal/partida/brasileirao-serie-a-${ano}-${dia}-${mes}-${ano}-${slugCasa.replace(/-/g,'')}x${slugFora.replace(/-/g,'')}`;
-    const urlUol = `https://placar.uol.com.br/esporte/futebol/brasileirao/${ano}/${mes}/${dia}/${slugCasa}-x-${slugFora}.htm`;
-
+    const urls = montarUrlsBrasileirao(data, timeCasa, timeFora);
     const [lance, uol] = await Promise.all([
-      extrairLance(urlLance).catch(() => null),
-      extrairUol(urlUol).catch(() => null),
+      extrairLance(urls.lance).catch(() => null),
+      extrairUol(urls.uol).catch(() => null),
     ]);
     const veredito = verificarJogo([lance, uol].filter(Boolean));
     if (veredito.placar && (veredito.placar.nivel === 'confirmado' || veredito.placar.nivel === 'provavel')) {
       return { golsMandante: veredito.placar.placar.casa, golsVisitante: veredito.placar.placar.fora, nivel: veredito.placar.nivel, fontes: veredito.placar.fontesConcordantes };
     }
   } catch (e) { /* qualquer erro aqui e a gente simplesmente segue com a TheSportsDB, sem quebrar nada */ }
+  return null;
+}
+
+// tenta achar a escalação titular oficial de um jogo do Brasileirão ainda não iniciado, direto
+// no UOL (que publica num formato de dados limpo, casa/fora linha a linha). Normalmente só
+// aparece de ~30 a 60 minutos antes da bola rolar — antes disso, devolve null normalmente.
+async function tentarEscalacaoBrasileirao({ data, timeCasa, timeFora }) {
+  try {
+    const urls = montarUrlsBrasileirao(data, timeCasa, timeFora);
+    const uol = await extrairUol(urls.uol).catch(() => null);
+    if (uol && uol.escalacaoTitular && (uol.escalacaoTitular.casa.length >= 9 || uol.escalacaoTitular.fora.length >= 9)) {
+      return uol.escalacaoTitular;
+    }
+  } catch (e) { /* segue sem escalação, sem quebrar nada */ }
   return null;
 }
 
@@ -191,6 +210,17 @@ async function acaoDetalhe(params, res) {
   res(200, { jogo: resumo, encerrado: true, escalacao, escalacaoDisponivel: escalacao.mandante.length + escalacao.visitante.length > 0, placarConfirmadoPor: fonteExtra });
 }
 
+async function acaoEscalacaoPreJogo(params, res) {
+  if (!params.data || !params.timeCasa || !params.timeFora) {
+    return res(400, { erro: 'Informe "data" (YYYY-MM-DD), "timeCasa" e "timeFora".' });
+  }
+  const ehBrasileirao = /brasileir[ãa]o|campeonato brasileiro/i.test(params.competicao || '');
+  if (!ehBrasileirao) return res(200, { encontrada: false, motivo: 'Só disponível pro Brasileirão por enquanto.' });
+  const escalacao = await tentarEscalacaoBrasileirao({ data: params.data, timeCasa: params.timeCasa, timeFora: params.timeFora });
+  if (!escalacao) return res(200, { encontrada: false });
+  res(200, { encontrada: true, escalacao, fonte: 'uol' });
+}
+
 exports.handler = async (event) => {
   const responder = (status, body) => ({
     statusCode: status,
@@ -203,7 +233,8 @@ exports.handler = async (event) => {
     const capturar = (s, b) => { resultado = { statusCode: s, body: b }; };
     if (params.acao === 'proximos') await acaoProximos(capturar);
     else if (params.acao === 'detalhe') await acaoDetalhe(params, capturar);
-    else return responder(400, { erro: 'Use ?acao=proximos ou ?acao=detalhe' });
+    else if (params.acao === 'escalacaoPreJogo') await acaoEscalacaoPreJogo(params, capturar);
+    else return responder(400, { erro: 'Use ?acao=proximos, ?acao=detalhe ou ?acao=escalacaoPreJogo' });
     return responder(resultado.statusCode, resultado.body);
   } catch (e) {
     return responder(500, { erro: String(e.message || e) });
