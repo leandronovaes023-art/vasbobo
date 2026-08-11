@@ -905,7 +905,7 @@ function penalidadeNaoAvaliou(j,usuario){
 }
 const FECHA_PALPITE_MIN=5;          // palpites fecham 5 min antes da bola rolar
 const DURACAO_JOGO_MIN=110;         // tempo estimado até o apito final (45+15 intervalo+45+~5 acréscimos)
-const SYNC_INTERVALO_MS=60*1000;    // busca placar a cada 1 min durante o jogo (apertado pra pegar gol quase na hora)
+const SYNC_INTERVALO_MS=20*1000;    // busca placar/eventos a cada 20s durante o jogo — rápido o bastante pra pegar gol/substituição quase na hora, sem bater tão forte no LANCE!/UOL a ponto de arriscar bloqueio
 const SYNC_POS_MS=30*1000;          // logo após o fim esperado: busca a cada 30s
 const SYNC_POS_LIMITE_MIN=30;       // ...por até 30 min depois do fim esperado
 const SYNC_FALLBACK_MS=15*60000;    // passado esse prazo (jogo esticou: prorrogação/atraso), espaça as buscas
@@ -2271,8 +2271,17 @@ async function consultarPlacarIA(j){
     const ga=casa?info.jogo.golsVisitante:info.jogo.golsMandante;
     if(gv===null||gv===undefined||ga===null||ga===undefined)return {encontrado:false};
     const fonte=info.placarConfirmadoPor?('LANCE!+UOL ('+info.placarConfirmadoPor.nivel+')'):'TheSportsDB';
-    return {encontrado:true,encerrado:!!info.jogo.encerrado,gols_vasco:gv,gols_adversario:ga,goleadores_vasco:[],fonte};
+    return {encontrado:true,encerrado:!!info.jogo.encerrado,gols_vasco:gv,gols_adversario:ga,goleadores_vasco:[],fonte,substituicoes:info.substituicoes||[]};
   }catch(e){ return {encontrado:false}; }
+}
+/* das substituições vindas do LANCE/UOL, filtra só as do Vasco — bate "quem saiu"/"quem entrou"
+   contra o elenco cadastrado (reaproveitando o mesmo "bate nome" do resto do site); se o time
+   já veio marcado como "vasco" pela fonte, usa isso primeiro (mais rápido e mais confiável) */
+function substituicoesDoVasco(lista){
+  return (lista||[]).filter(s=>{
+    if(s.time)return /vasco/i.test(s.time);
+    return mapearGoleadores([s.entra]).length>0||mapearGoleadores([s.sai]).length>0;
+  });
 }
 async function consultarEscalacaoIA(j){
   try{
@@ -2395,7 +2404,7 @@ async function sincronizarJogos(){
     if(!r||!r.encontrado)continue;
     const gv=+r.gols_vasco,ga=+r.gols_adversario;
     if(isNaN(gv)||isNaN(ga))continue;
-    let disparaGol=false,placarGolTexto='';
+    let disparaGol=false,placarGolTexto='',novasSubs=[];
     await mutar(()=>{
       const x=dados.jogos[id];if(!x||x.resultado)return;
       const registro={quando:Date.now(),v:gv,a:ga,fonte:r.fonte||'busca na web'};
@@ -2418,12 +2427,30 @@ async function sincronizarJogos(){
           placarGolTexto=casa?('Vasco '+gv+' x '+ga+' '+j.adversario):(j.adversario+' '+ga+' x '+gv+' Vasco');
         }
       }
+      // substituições do Vasco (mesma trava contra duplicata: cada substituição só notifica 1x,
+      // mesmo se vários usuários com o app aberto detectarem quase ao mesmo tempo)
+      const subsVasco=substituicoesDoVasco(r.substituicoes);
+      if(subsVasco.length){
+        if(!x.substituicoesNotificadas)x.substituicoesNotificadas=[];
+        subsVasco.forEach(s=>{
+          const assinatura=(s.minuto||'?')+'|'+(s.entra||'')+'|'+(s.sai||'');
+          if(x.substituicoesNotificadas.includes(assinatura))return;
+          x.substituicoesNotificadas.push(assinatura);
+          novasSubs.push(s);
+        });
+      }
     });
     if(disparaGol){
       try{
         const frase=escolherFraseGol(placarGolTexto);
         await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/'})});
+      }catch(e){}
+    }
+    for(const s of novasSubs){
+      try{
+        await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({titulo:'SUBSTITUIÇÃO NO VASCO! 🔄',texto:'SAIU: '+(s.sai||'?')+' ➜ ENTROU: '+(s.entra||'?')+(s.minuto?' ('+s.minuto+'\')':''),url:'/'})});
       }catch(e){}
     }
     render();

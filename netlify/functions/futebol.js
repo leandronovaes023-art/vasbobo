@@ -103,7 +103,15 @@ async function tentarConfirmarPlacar({ data, timeCasa, timeFora, competicao }) {
     ]);
     const veredito = verificarJogo([lance, uol].filter(Boolean));
     if (veredito.placar && (veredito.placar.nivel === 'confirmado' || veredito.placar.nivel === 'provavel')) {
-      return { golsMandante: veredito.placar.placar.casa, golsVisitante: veredito.placar.placar.fora, nivel: veredito.placar.nivel, fontes: veredito.placar.fontesConcordantes, encerrado: !!veredito.placar.encerrado };
+      // substituições já confirmadas por pelo menos uma fonte confiável — o cliente decide
+      // quais são do Vasco (bate os nomes contra o elenco cadastrado) e quais já foram avisadas
+      const substituicoes = (veredito.eventos || [])
+        .filter(e => e.tipo === 'substituicao' && (e.nivel === 'confirmado' || e.nivel === 'provavel'))
+        .map(e => {
+          const comTime = (e.detalhesPorFonte || []).find(d => d.time);
+          return { minuto: e.minuto, entra: e.entra, sai: e.sai, time: comTime ? comTime.time : null };
+        });
+      return { golsMandante: veredito.placar.placar.casa, golsVisitante: veredito.placar.placar.fora, nivel: veredito.placar.nivel, fontes: veredito.placar.fontesConcordantes, encerrado: !!veredito.placar.encerrado, substituicoes };
     }
   } catch (e) { /* qualquer erro aqui e a gente simplesmente segue com a TheSportsDB, sem quebrar nada */ }
   return null;
@@ -198,17 +206,18 @@ async function acaoDetalhe(params, res) {
   // funciona tanto pro jogo já encerrado quanto AO VIVO (placar parcial, durante a partida) —
   // se confirmar, usa esse placar (mais rápido e assertivo que esperar a TheSportsDB atualizar);
   // senão, segue com o que a TheSportsDB já trouxe, sem travar nem quebrar nada.
-  let fonteExtra = null;
+  let fonteExtra = null, substituicoes = [];
   const confirmado = await tentarConfirmarPlacar({ data: resumo.data, timeCasa: resumo.mandante, timeFora: resumo.visitante, competicao: params.competicao || resumo.liga });
   if (confirmado) {
     resumo.golsMandante = confirmado.golsMandante;
     resumo.golsVisitante = confirmado.golsVisitante;
     if (confirmado.encerrado) resumo.encerrado = true; // LANCE/UOL podem saber que acabou antes da TheSportsDB atualizar
     fonteExtra = { fonte: 'lance+uol', nivel: confirmado.nivel, fontesConcordantes: confirmado.fontes };
+    substituicoes = confirmado.substituicoes || [];
   }
 
   if (!resumo.encerrado) {
-    return res(200, { jogo: resumo, encerrado: false, placarConfirmadoPor: fonteExtra });
+    return res(200, { jogo: resumo, encerrado: false, placarConfirmadoPor: fonteExtra, substituicoes });
   }
 
   let escalacao = { mandante: [], visitante: [] };
