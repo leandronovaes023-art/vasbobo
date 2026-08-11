@@ -280,12 +280,15 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
 <body>
   <header>
     <div class="header-inner">
-      <div class="logo-row" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');}else{location.href='/';}" title="Ir para a tela inicial">
-        <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
-        <div>
-          <div class="eyebrow">Direto do Bar da Tia</div>
-          <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="logo-row" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');}else{location.href='/';}" title="Ir para a tela inicial">
+          <img class="bobo" src="img/embed/asset1.jpg" alt="Bobo da corte vascaíno">
+          <div>
+            <div class="eyebrow">Direto do Bar da Tia</div>
+            <h1 class="display">Vasbobo<span class="cruz">✠</span></h1>
+          </div>
         </div>
+        <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700;flex:none">Baixar APP</button>
       </div>
       <div class="header-right-stack">
         <div class="who">
@@ -293,7 +296,6 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
           <span class="adm oculto" id="whoAdm">admin</span>
           <button onclick="sairSatelite()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
         </div>
-        <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:7px;padding:5px 10px;cursor:pointer;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">Baixar APP</button>
       </div>
     </div>
   </header>
