@@ -204,13 +204,15 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 /* === cabeçalho padronizado (igual ao index.html) === */
 /* === cabeçalho padronizado (igual ao index.html) === */
   .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
+.titulo-vasbobo{display:flex;justify-content:space-between;align-items:center;width:100%}
+.titulo-vasbobo .cruz{flex:none}
   .oculto{display:none!important}
 
   header{border-bottom:1px solid var(--linha);background:var(--preto)}
-  .header-inner{max-width:1320px;margin:0 auto;padding:16px 20px 8px;display:flex;flex-direction:column;gap:8px}
+  .header-inner{max-width:1320px;margin:0 auto;padding:12px 20px 8px;display:flex;flex-direction:column;gap:6px}
 .header-top{display:flex;justify-content:center;width:100%;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .header-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
-.btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.8rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:700}
+.btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:8px;padding:9px 18px;cursor:pointer;font-size:.92rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
   h1{font-size:clamp(2.6rem,10vw,4.6rem);line-height:1;text-shadow:none;width:100%;text-align:center}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px;display:inline-block;
@@ -310,16 +312,16 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
   <header>
     <div class="header-inner">
       <div class="header-top" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');}else{location.href='/';}" title="Ir para a tela inicial">
-        <h1 class="display">VASBOBO<span class="cruz">✠</span></h1>
+        <h1 class="display titulo-vasbobo"><span>V</span><span>A</span><span>S</span><span>B</span><span>O</span><span>B</span><span>O</span><span class="cruz">✠</span></h1>
       </div>
       <div class="header-bottom">
         <button class="btn-vasbolao-header" onclick="location.href='/#rank'" title="Ir direto pro Ranking do Vasbolão">🏆 Vasbolão</button>
-        <div class="header-right-stack">
-          <div class="who">
-            <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
-            <span class="adm oculto" id="whoAdm">admin</span>
-            <button onclick="sairSatelite()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
-          </div>
+        <div class="who">
+          <span id="whoFoto"></span><span>Fala, <b id="whoNome"></b>!</span>
+          <span class="adm oculto" id="whoAdm">admin</span>
+          <button onclick="sairSatelite()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;flex:none">
           <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700">Baixar APP</button>
         </div>
       </div>
