@@ -6,8 +6,8 @@
 // Uso: /.netlify/functions/investigar-fonte?url=<endereco-completo-da-pagina>
 const cheerio = require('cheerio');
 
-const TERMOS = ['__espnfitt__', 'Full Time', 'Fim de Jogo', 'substitution'];
-const JANELA = 900;
+const TERMOS = ['Titular', 'titular', 'Reservas', 'formation', 'Escalação confirmada'];
+const JANELA = 2500;
 
 exports.handler = async (event) => {
   const { url } = event.queryStringParameters || {};
