@@ -64,22 +64,38 @@ function nomeParaSlug(nome) {
   return APELIDO_TIME[chave] || slugificar(nome);
 }
 
-function montarUrlsBrasileirao(data, timeCasa, timeFora) {
+// mapeia cada competição do Vasco pro "pedaço" do endereço que cada site usa.
+// LANCE: confirmado de verdade pra Brasileirão, Sudamericana e Libertadores (testado com jogos reais).
+// UOL: confirmado só pra Brasileirão — "sul-americana"/"libertadores" é uma tentativa educada seguindo
+// o mesmo padrão do Brasileirão; se não bater o slug certo, a função simplesmente não confirma nada
+// e o site continua funcionando normal com a TheSportsDB, sem quebrar.
+const COMPETICOES = [
+  { teste: /brasileir[ãa]o|campeonato brasileiro/i, lance: 'brasileirao-serie-a', uol: 'brasileirao' },
+  { teste: /sul[ -]?americana|sudamericana/i, lance: 'copa-sul-americana', uol: 'sul-americana' },
+  { teste: /libertadores/i, lance: 'copa-libertadores-da-america', uol: 'libertadores' },
+];
+function achaCompeticao(nomeCompeticao) {
+  return COMPETICOES.find(c => c.teste.test(nomeCompeticao || '')) || null;
+}
+
+function montarUrlsJogo(data, timeCasa, timeFora, competicaoInfo) {
   const [ano, mes, dia] = data.split('-');
   const slugCasa = nomeParaSlug(timeCasa), slugFora = nomeParaSlug(timeFora);
   return {
-    lance: `https://www.lance.com.br/temporeal/partida/brasileirao-serie-a-${ano}-${dia}-${mes}-${ano}-${slugCasa.replace(/-/g,'')}x${slugFora.replace(/-/g,'')}`,
-    uol: `https://placar.uol.com.br/esporte/futebol/brasileirao/${ano}/${mes}/${dia}/${slugCasa}-x-${slugFora}.htm`,
+    lance: `https://www.lance.com.br/temporeal/partida/${competicaoInfo.lance}-${ano}-${dia}-${mes}-${ano}-${slugCasa.replace(/-/g,'')}x${slugFora.replace(/-/g,'')}`,
+    uol: `https://placar.uol.com.br/esporte/futebol/${competicaoInfo.uol}/${ano}/${mes}/${dia}/${slugCasa}-x-${slugFora}.htm`,
   };
 }
 
-// tenta confirmar o placar de um jogo do Brasileirão direto no LANCE!+UOL — só funciona pra essa
-// competição por enquanto, porque foi o único padrão de endereço que já testamos de verdade.
-// Se der qualquer erro (site fora do ar, slug de time que a gente não mapeou direito, etc.),
-// simplesmente devolve null e quem chamou continua usando a TheSportsDB normalmente — não quebra nada.
-async function tentarConfirmarBrasileirao({ data, timeCasa, timeFora }) {
+// tenta confirmar o placar de um jogo do Vasco direto no LANCE!+UOL, pra qualquer competição
+// mapeada em COMPETICOES. Se der qualquer erro (site fora do ar, slug de time ou de competição
+// que a gente não acertou, etc.), simplesmente devolve null e quem chamou continua usando a
+// TheSportsDB normalmente — não quebra nada.
+async function tentarConfirmarPlacar({ data, timeCasa, timeFora, competicao }) {
+  const info = achaCompeticao(competicao);
+  if (!info) return null;
   try {
-    const urls = montarUrlsBrasileirao(data, timeCasa, timeFora);
+    const urls = montarUrlsJogo(data, timeCasa, timeFora, info);
     const [lance, uol] = await Promise.all([
       extrairLance(urls.lance).catch(() => null),
       extrairUol(urls.uol).catch(() => null),
@@ -92,12 +108,14 @@ async function tentarConfirmarBrasileirao({ data, timeCasa, timeFora }) {
   return null;
 }
 
-// tenta achar a escalação titular oficial de um jogo do Brasileirão ainda não iniciado, direto
-// no UOL (que publica num formato de dados limpo, casa/fora linha a linha). Normalmente só
-// aparece de ~30 a 60 minutos antes da bola rolar — antes disso, devolve null normalmente.
-async function tentarEscalacaoBrasileirao({ data, timeCasa, timeFora }) {
+// tenta achar a escalação titular oficial de um jogo do Vasco ainda não iniciado, direto no UOL
+// (que publica num formato de dados limpo, casa/fora linha a linha). Normalmente só aparece de
+// ~30 a 60 minutos antes da bola rolar — antes disso, devolve null normalmente.
+async function tentarEscalacao({ data, timeCasa, timeFora, competicao }) {
+  const info = achaCompeticao(competicao);
+  if (!info) return null;
   try {
-    const urls = montarUrlsBrasileirao(data, timeCasa, timeFora);
+    const urls = montarUrlsJogo(data, timeCasa, timeFora, info);
     const uol = await extrairUol(urls.uol).catch(() => null);
     if (uol && uol.escalacaoTitular && (uol.escalacaoTitular.casa.length === 11 || uol.escalacaoTitular.fora.length === 11)) {
       return uol.escalacaoTitular;
@@ -179,18 +197,15 @@ async function acaoDetalhe(params, res) {
     return res(200, { jogo: resumo, encerrado: false });
   }
 
-  // Brasileirão: tenta confirmar o placar direto no LANCE!+UOL — se confirmar, usa esse
-  // placar (mais rápido e assertivo que esperar a TheSportsDB atualizar); senão, segue com
-  // o que a TheSportsDB já trouxe, sem travar nem quebrar nada.
-  const ehBrasileirao = /brasileir[ãa]o|campeonato brasileiro/i.test(params.competicao || resumo.liga || '');
+  // tenta confirmar o placar direto no LANCE!+UOL (qualquer competição mapeada) — se confirmar,
+  // usa esse placar (mais rápido e assertivo que esperar a TheSportsDB atualizar); senão, segue
+  // com o que a TheSportsDB já trouxe, sem travar nem quebrar nada.
   let fonteExtra = null;
-  if (ehBrasileirao) {
-    const confirmado = await tentarConfirmarBrasileirao({ data: resumo.data, timeCasa: resumo.mandante, timeFora: resumo.visitante });
-    if (confirmado) {
-      resumo.golsMandante = confirmado.golsMandante;
-      resumo.golsVisitante = confirmado.golsVisitante;
-      fonteExtra = { fonte: 'lance+uol', nivel: confirmado.nivel, fontesConcordantes: confirmado.fontes };
-    }
+  const confirmado = await tentarConfirmarPlacar({ data: resumo.data, timeCasa: resumo.mandante, timeFora: resumo.visitante, competicao: params.competicao || resumo.liga });
+  if (confirmado) {
+    resumo.golsMandante = confirmado.golsMandante;
+    resumo.golsVisitante = confirmado.golsVisitante;
+    fonteExtra = { fonte: 'lance+uol', nivel: confirmado.nivel, fontesConcordantes: confirmado.fontes };
   }
 
   let escalacao = { mandante: [], visitante: [] };
@@ -214,9 +229,7 @@ async function acaoEscalacaoPreJogo(params, res) {
   if (!params.data || !params.timeCasa || !params.timeFora) {
     return res(400, { erro: 'Informe "data" (YYYY-MM-DD), "timeCasa" e "timeFora".' });
   }
-  const ehBrasileirao = /brasileir[ãa]o|campeonato brasileiro/i.test(params.competicao || '');
-  if (!ehBrasileirao) return res(200, { encontrada: false, motivo: 'Só disponível pro Brasileirão por enquanto.' });
-  const escalacao = await tentarEscalacaoBrasileirao({ data: params.data, timeCasa: params.timeCasa, timeFora: params.timeFora });
+  const escalacao = await tentarEscalacao({ data: params.data, timeCasa: params.timeCasa, timeFora: params.timeFora, competicao: params.competicao });
   if (!escalacao) return res(200, { encontrada: false });
   res(200, { encontrada: true, escalacao, fonte: 'uol' });
 }
