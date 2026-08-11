@@ -464,9 +464,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .castigo-item.pendente{border-color:var(--vermelho);background:rgba(224,41,59,.05)}
   .castigo-item.pendente .ci-texto{color:var(--vermelho);font-style:italic}
 
-  .topo-btn{position:fixed;left:14px;bottom:14px;width:44px;height:44px;border-radius:50%;
+  .topo-btn{position:fixed;left:14px;bottom:calc(78px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
     background:var(--branco);color:var(--preto);border:none;font-size:1.15rem;cursor:pointer;
-    box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:45;display:none;align-items:center;justify-content:center}
+    box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:400;display:none;align-items:center;justify-content:center}
   .topo-btn.on{display:flex}
 
 /* ===== O Que Mais Entende de Futebol — barra lateral tipo "edge panel" (expande/recolhe) ===== */
@@ -581,6 +581,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <h3 style="text-align:left;margin-bottom:10px" id="tituloVasbolaoMes"></h3>
     <div id="corpoVasbolaoMes"></div>
     <div style="display:flex;gap:10px;margin-top:16px"><button class="btn fantasma" style="flex:1" onclick="fecharVasbolaoMes()">Fechar</button></div>
+  </div>
+</div>
+
+<!-- modal explicando o Ranking do Vasbolão -->
+<div class="modal-sair oculto" id="modalExplicacaoVasbolao" onclick="if(event.target===this)fecharExplicacaoVasbolao()">
+  <div class="modal" style="max-width:420px;max-height:80vh;max-height:80dvh;overflow-y:auto">
+    <h3 style="text-align:left;margin-bottom:10px">🏅 Como funciona o Ranking do Vasbolão</h3>
+    <div id="corpoExplicacaoVasbolao"></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" style="flex:1" onclick="fecharExplicacaoVasbolao()">Entendi</button></div>
   </div>
 </div>
 
@@ -911,6 +920,7 @@ const CHAVE='vasbobo:v2';
 const CHAVE_SESSAO='vasbobo:sessao';
 const SENHA_PADRAO='vasco123';
 const PTS_EXATO=15, PTS_RESULTADO=8, PTS_UMTIME_ERROU=3, PTS_GOL=6, PTS_MVP=6, PTS_NAO_AVALIOU=-2, PTS_CASTIGO=-2;
+const PTS_BONUS_REIZINHO=2, PTS_PENALIDADE_RIBAMAR=-2; // bônus/penalidade por ser rei/ribamar de uma rodada — vale no ranking geral e no Vasbolão
 function penalidadeCastigo(id,j,usuario){
   if(j.isentoPenalidade)return 0;
   if(!j.resultado||!j.resultadoEm)return 0;
@@ -1501,9 +1511,11 @@ async function renderVasbolao(){
   let html='<div class="card"><h2>🏆 Vasbolão</h2>'+
     '<p class="nota-rodape" style="margin:0 0 12px">'+VASBOLAO_VALOR_TEXTO+' por mês, via Pix, sem taxa nenhuma. Metade (R$5) vira o <b>prêmio do mês</b>, a outra metade (R$5) acumula pro <b>prêmio de fim de ano</b>.</p>'+
     '<div id="statusVasbolao"><p class="nota-rodape" style="margin:0">Verificando...</p></div></div>'+
+    '<div class="card" id="vasbolaoRanking">Carregando o ranking…</div>'+
     '<div class="card"><h2>📅 Histórico por mês</h2><div id="listaMesesVasbolao">Carregando…</div></div>';
   sec.innerHTML=html;
   carregarStatusVasbolao();
+  renderVasbolaoRanking();
   carregarMesesVasbolao();
 }
 async function carregarStatusVasbolao(){
@@ -1600,6 +1612,88 @@ async function abrirComprovanteVasbolao(docId){
     window.open(snap.data().comprovante,'_blank');
   }catch(e){avisar('Erro ao abrir o comprovante.');}
 }
+/* ---- Vasbolão Ranking: mesma lógica de pontuação do ranking geral, só que contando SÓ os
+   jogos do mês corrente (palpite + quiz daquela rodada + bônus/penalidade de rei/ribamar) ---- */
+function calcularPlacarVasbolao(ano,mes){
+  const placar={};
+  const zera=()=>({pts:0,exato:0,resultado:0,umtimeErrou:0,quiz:0,bonus:0,reis:0,ribas:0,naoAvaliou:0,naoCastigo:0});
+  Object.keys(dados.usuarios).forEach(u=>placar[u]=zera());
+  Object.entries(dados.jogos).forEach(([idJ,j])=>{
+    if(!j.data)return;
+    const [ja,jm]=j.data.split('-').map(Number);
+    if(ja!==ano||jm!==mes)return;
+    const chaveJ=fqChaveJogo(j);
+    Object.entries(j.palpites||{}).forEach(([u,p])=>{
+      if(!placar[u])placar[u]=zera();
+      const pts=pontosPalpite(p,j);
+      if(pts){
+        placar[u].pts+=pts.total;
+        if(pts.base===PTS_EXATO)placar[u].exato++;
+        else if(pts.base>=PTS_RESULTADO)placar[u].resultado++;
+        else if(pts.base===PTS_UMTIME_ERROU)placar[u].umtimeErrou++;
+        placar[u].bonus+=pts.bonusGol+pts.bonusMvp;
+      }
+      const pen=penalidadeNaoAvaliou(j,u);
+      if(pen){placar[u].pts+=pen;placar[u].naoAvaliou++;}
+      const penC=penalidadeCastigo(idJ,j,u);
+      if(penC){placar[u].pts+=penC;placar[u].naoCastigo++;}
+      const qz=ESTADO_QUIZ.porJogo[u+'|'+chaveJ]||0;
+      if(qz){placar[u].pts+=qz;placar[u].quiz+=qz;}
+    });
+    const prem=premiacaoJogo(j);
+    if(prem){
+      prem.reis.forEach(u=>{if(placar[u]){placar[u].reis++;placar[u].pts+=PTS_BONUS_REIZINHO;}});
+      prem.ribas.forEach(u=>{if(placar[u]){placar[u].ribas++;placar[u].pts+=PTS_PENALIDADE_RIBAMAR;}});
+    }
+  });
+  return placar;
+}
+function htmlVasbolaoPreview(){
+  return '<div class="card"><h2>🏆 Vasbolão</h2>'+
+    '<p class="nota-rodape" style="margin:0 0 12px">Sua contribuição mensal + o ranking só desse mês, com prêmio pra quem se sair melhor.</p>'+
+    '<div style="text-align:center"><button class="btn" style="display:inline-flex;align-items:center;gap:8px" onclick="mudarAba(\'vasbolao\')">💰 Ir pro Vasbolão</button></div></div>';
+}
+async function renderVasbolaoRanking(){
+  const el=document.getElementById('vasbolaoRanking');
+  if(!el)return;
+  const {ano,mes,nomeMes}=chaveVasbolaoAtual();
+  const placar=calcularPlacarVasbolao(ano,mes);
+  const ordem=Object.entries(placar).filter(([u,x])=>x.pts!==0||x.exato||x.resultado||x.umtimeErrou||x.quiz)
+    .sort((a,b)=>b[1].pts-a[1].pts||b[1].exato-a[1].exato);
+  let html='<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">'+
+    '<h2 style="margin:0;padding:0;border:none">🏅 Ranking do Vasbolão — '+cap(nomeMes)+'</h2>'+
+    '<button class="btn fantasma" style="padding:6px 10px;font-size:.68rem" onclick="abrirExplicacaoVasbolaoRanking()">Como funciona?</button></div>';
+  if(!ordem.length){
+    html+='<div class="vazio">Ainda não tem jogo pontuado esse mês.</div>';
+  }else{
+    html+=ordem.map(([u,x],i)=>{
+      const partes=[];
+      if(x.exato)partes.push(x.exato+' exato'+(x.exato>1?'s':''));
+      if(x.resultado)partes.push(x.resultado+' resultado');
+      if(x.quiz)partes.push('+'+x.quiz+' quiz');
+      if(x.reis)partes.push(x.reis+'x rei (+'+(x.reis*PTS_BONUS_REIZINHO)+')');
+      if(x.ribas)partes.push(x.ribas+'x ribamar ('+(x.ribas*PTS_PENALIDADE_RIBAMAR)+')');
+      return '<div class="rank-linha'+(i===0&&x.pts>0?' lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span>'+
+        '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+'<div class="rank-detalhe">'+(partes.join(' · ')||'sem pontos ainda')+'</div></span>'+
+        '<span class="rank-pts">'+x.pts+' pts</span></div>';
+    }).join('');
+  }
+  el.innerHTML=html;
+}
+function abrirExplicacaoVasbolaoRanking(){
+  document.getElementById('corpoExplicacaoVasbolao').innerHTML=
+    '<p style="margin-bottom:10px">O <b>Ranking do Vasbolão</b> é como o ranking geral, só que zera todo mês — só conta os jogos daquele mês.</p>'+
+    '<p style="margin-bottom:10px">Cada rodada soma:</p>'+
+    '<ul style="margin:0 0 10px 18px;line-height:1.7">'+
+    '<li>Pontos do palpite (placar exato, resultado certo, etc.)</li>'+
+    '<li>Pontos do quiz respondidos naquela rodada</li>'+
+    '<li>Penalidades de quem não avaliou ou não pagou o castigo</li>'+
+    '</ul>'+
+    '<p style="margin-bottom:6px"><b>+'+PTS_BONUS_REIZINHO+' pontos</b> extra pra quem for o Reizinho da rodada (maior pontuação daquela rodada).</p>'+
+    '<p style="margin-bottom:0"><b>'+PTS_PENALIDADE_RIBAMAR+' pontos</b> pra quem for o Ribamar da rodada (menor pontuação).</p>';
+  document.getElementById('modalExplicacaoVasbolao').classList.remove('oculto');
+}
+function fecharExplicacaoVasbolao(){document.getElementById('modalExplicacaoVasbolao').classList.add('oculto');}
 function nomeJogador(id){
   if(id===SEM_GOL)return 'Vasco não marca';
   const p=jogadorPorId(id);return p?p.nome:'(jogador removido)';
@@ -3338,6 +3432,7 @@ function renderListaJogos(){
       '<p style="font-size:.9rem;margin:10px 0 12px;color:var(--branco)">'+chamada+'.</p>'+
       '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> Abrir jogo</button><span class="selo '+cls+'">'+txt+'</span></div>'+
       '</div>'+htmlRodadaBox()+htmlCastigoRodadaBox()+'</div></div>';
+    html+=htmlVasbolaoPreview();
   }
 
   const destId=dest?dest[0]:null;
@@ -4218,8 +4313,8 @@ function renderRank(){
     });
     const prem=premiacaoJogo(j);
     if(prem){
-      prem.reis.forEach(u=>{if(placar[u])placar[u].reis++;});
-      prem.ribas.forEach(u=>{if(placar[u])placar[u].ribas++;});
+      prem.reis.forEach(u=>{if(placar[u]){placar[u].reis++;placar[u].pts+=PTS_BONUS_REIZINHO;}});
+      prem.ribas.forEach(u=>{if(placar[u]){placar[u].ribas++;placar[u].pts+=PTS_PENALIDADE_RIBAMAR;}});
     }
   });
   Object.keys(placar).forEach(u=>{
@@ -4245,6 +4340,8 @@ function renderRank(){
       if(x.bonus)partes.push('+'+x.bonus+' bônus');
       if(x.naoAvaliou)partes.push(x.naoAvaliou+'x não avaliou (-'+(x.naoAvaliou*2)+')');
       if(x.naoCastigo)partes.push(x.naoCastigo+'x não girou/pagou o castigo (-'+(x.naoCastigo*2)+')');
+      if(x.reis)partes.push(x.reis+'x reizinho da rodada (+'+(x.reis*PTS_BONUS_REIZINHO)+')');
+      if(x.ribas)partes.push(x.ribas+'x ribamar da rodada ('+(x.ribas*PTS_PENALIDADE_RIBAMAR)+')');
       const resumo=partes.length?partes.join(' · '):'ainda sem pontos';
       const idSeguro=('rk_'+u).replace(/[^a-zA-Z0-9_]/g,'');
       return '<div class="rank-linha '+(i===0&&x.pts>0?'lider':'')+'" style="cursor:pointer" onclick="document.getElementById(\''+idSeguro+'\').classList.toggle(\'oculto\')"><span class="rank-pos">'+(i+1)+'º</span>'+
@@ -4257,6 +4354,7 @@ function renderRank(){
     }).join('')+'</div>';
   }
   html+='</div>';
+  html+=htmlVasbolaoPreview();
 
   const reis=ordem.filter(([u,x])=>x.reis>0).sort((a,b)=>b[1].reis-a[1].reis);
   const ribas=ordem.filter(([u,x])=>x.ribas>0).sort((a,b)=>b[1].ribas-a[1].ribas);
