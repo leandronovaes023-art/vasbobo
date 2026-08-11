@@ -42,13 +42,22 @@ exports.handler = async (event) => {
       }
     });
 
+    // busca direta e bruta na string toda, caso a lógica acima não ache nada
+    // (por exemplo se os eventos ficarem numa aba que não carrega junto com a visão geral)
+    const idx = html.indexOf('Fim de jogo');
+    const trechoBrutoFimDeJogo = idx >= 0 ? html.slice(Math.max(0, idx - 1500), idx + 1500) : '(string "Fim de jogo" não existe em lugar nenhum do HTML)';
+    const idxSub = html.indexOf('Substitui');
+    const trechoBrutoSubstituicao = idxSub >= 0 ? html.slice(Math.max(0, idxSub - 800), idxSub + 800) : '(string "Substitui" não existe em lugar nenhum do HTML)';
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
       body: JSON.stringify({
         tamanhoHtml: html.length,
-        statusHtml: (statusHtml || '(não achei)').slice(0, 2500),
-        timelineHtml: (timelineHtml || '(não achei)').slice(0, 4000),
+        statusHtml: (statusHtml || '(não achei)').slice(0, 2000),
+        timelineHtml: (timelineHtml || '(não achei via cheerio)').slice(0, 100),
+        trechoBrutoFimDeJogo,
+        trechoBrutoSubstituicao,
       }, null, 2),
     };
   } catch (e) {
