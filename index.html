@@ -550,6 +550,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 </div>
 
+<!-- modal da escalação pré-jogo -->
+<div class="modal-sair oculto" id="modalEscalacaoPreJogo" onclick="if(event.target===this)fecharEscalacaoPreJogo()">
+  <div class="modal">
+    <h3 style="text-align:left">📋 Escalação — <span id="tituloEscalacaoPreJogo"></span></h3>
+    <div id="corpoEscalacaoPreJogo" style="margin-top:10px"></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" style="flex:1" onclick="fecharEscalacaoPreJogo()">Fechar</button></div>
+  </div>
+</div>
+
 <!-- modal do sistema de pontuação -->
 <div class="modal-sair oculto" id="modalSistemaPontuacao" onclick="if(event.target===this)fecharSistemaPontuacao()">
   <div class="modal modal-pontuacao">
@@ -1217,6 +1226,45 @@ const SVG_TV_CRUZ='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" s
 function badgeTransmissao(j,mini){
   if(!j.ondeAssistir)return '';
   return '<span class="tv-badge'+(mini?' mini':'')+'">'+SVG_TV_CRUZ+esc(j.ondeAssistir)+'</span>';
+}
+/* escalação anunciada antes do jogo (titulares) — diferente de j.emCampo, que só é preenchido
+   DEPOIS do jogo pra liberar a avaliação. Essa aqui é a "escalação oficial" divulgada ~30min antes. */
+function htmlBadgeEscalacao(id,j){
+  if(!j.hora||j.resultado)return '';
+  if(j.escalacaoPreJogo&&j.escalacaoPreJogo.jogadores&&j.escalacaoPreJogo.jogadores.length){
+    return '<button onclick="abrirEscalacaoPreJogo(\''+id+'\')" style="background:rgba(47,208,142,.12);border:1.5px solid var(--verde);color:var(--verde);'+
+      'border-radius:10px;padding:6px 12px;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.02em;cursor:pointer;text-align:center;white-space:nowrap;line-height:1.5;font-family:inherit">'+
+      '📋 Escalação saiu!<br><span style="text-decoration:underline">Toque pra ver</span></button>';
+  }
+  return '<div style="background:var(--carvao2);border:1px solid var(--linha);border-radius:10px;padding:6px 12px;'+
+    'font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--cinza);text-align:center;white-space:nowrap;line-height:1.5">'+
+    '🔔 Escalação<br><span style="font-weight:400;text-transform:none;letter-spacing:0">notificamos assim que sair</span></div>';
+}
+function abrirEscalacaoPreJogo(id){
+  const j=dados.jogos[id];
+  if(!j||!j.escalacaoPreJogo)return;
+  document.getElementById('tituloEscalacaoPreJogo').innerHTML=nomeJogo(j);
+  document.getElementById('corpoEscalacaoPreJogo').innerHTML=
+    j.escalacaoPreJogo.jogadores.map(n=>'<div class="mini-linha"><span class="rank-nome">'+esc(n)+'</span></div>').join('')+
+    '<p class="nota-rodape" style="margin-top:10px">Divulgada '+new Date(j.escalacaoPreJogo.quando).toLocaleString('pt-BR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})+' · fonte: '+esc(j.escalacaoPreJogo.fonte||'admin')+'</p>';
+  document.getElementById('modalEscalacaoPreJogo').classList.remove('oculto');
+}
+function fecharEscalacaoPreJogo(){document.getElementById('modalEscalacaoPreJogo').classList.add('oculto');}
+async function adminDefinirEscalacaoPreJogo(id){
+  const j=dados.jogos[id];
+  if(!j)return;
+  const texto=prompt('Cole os nomes dos titulares (um por linha, ou separados por vírgula):');
+  if(!texto)return;
+  const jogadores=texto.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+  if(!jogadores.length)return;
+  await mutar(()=>{const x=dados.jogos[id];if(x)x.escalacaoPreJogo={jogadores,quando:Date.now(),fonte:'admin'};});
+  registrarLog('admin','Definiu a escalação pré-jogo de '+nomeJogo(j).replace(/<[^>]+>/g,''),null,'importante');
+  avisar('Escalação registrada — mandando a notificação pra todo mundo…',true);
+  try{
+    await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({texto:'📋 Escalação do Vasco saiu! '+nomeJogo(j).replace(/<[^>]+>/g,'')+' — toque pra ver quem começa jogando.'})});
+  }catch(e){}
+  render();
 }
 function nomeJogo(j){
   const casa=j.local!=='fora';
@@ -2817,7 +2865,10 @@ function renderListaJogos(){
     const chamada=s==='aberto'?'Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar':s==='andamento'?'Bola rolando! Placar atualizando e avaliação libera no apito final':s==='avaliar'?'Fim de jogo: hora de dar as notas e soltar o verbo':'Veja como a galera se saiu';
     html+='<div class="card destaque"><div class="selo-destaque"><span class="cruz">✠</span> Jogo em destaque</div>'+
       '<div class="dest-grid"><div class="rodada-box">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'+
       '<div class="jogo-nome" style="font-size:1.35rem">'+nomeJogo(j)+' '+(placarTexto(j,true)?'<span class="placar-final" style="margin-left:8px">'+placarTexto(j,true)+'</span>':'')+'</div>'+
+      htmlBadgeEscalacao(id,j)+
+      '</div>'+
       '<div class="data-grande">'+fmtData(j)+'</div>'+
       '<div class="info-pilha">'+
         '<div class="info-linha">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
@@ -3273,7 +3324,8 @@ async function salvarAvaliacao(pid,campo,valor){
 function renderAdminJogo(j,s){
   let html='<div class="card"><h2>Área do admin</h2><p class="nota-rodape" style="margin-top:0">O placar, os goleadores e a transmissão são registrados <b>automaticamente</b> via busca na web. Use esta área só para forçar ou corrigir algo.</p>'+
     '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px"><div style="flex:1;min-width:200px"><label for="admTv">Onde assistir (corrigir manualmente)</label><input id="admTv" placeholder="Ex.: Paramount+ e ESPN" value="'+esc(j.ondeAssistir||'')+'"></div>'+
-    '<button class="btn fantasma" onclick="salvarTransmissao()">salvar</button></div>';
+    '<button class="btn fantasma" onclick="salvarTransmissao()">salvar</button></div>'+
+    (!j.resultado?('<div style="margin-bottom:14px"><button class="btn fantasma" onclick="adminDefinirEscalacaoPreJogo(\''+jogoAberto+'\')">📋 '+(j.escalacaoPreJogo?'Corrigir escalação pré-jogo':'Definir escalação pré-jogo (e notificar todo mundo)')+'</button></div>'):'');
   if(!j.resultado){
     const golsChecks=jogadoresAtivos().map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0"><input type="checkbox" style="width:auto" value="'+p.id+'" class="chkGol">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>').join('');
     html+='<div class="palpite-form"><span class="display" style="font-size:1rem">Vasco</span>'+
