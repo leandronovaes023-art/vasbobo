@@ -6,7 +6,7 @@
 //   -> devolve { url } — o link/QR Code de pagamento daquele usuário, pro mês atual
 
 const INFINITEPAY_TAG = 'leandro-pereira-12m'; // InfiniteTag pública (sem $), identifica a conta que recebe
-const VALOR_MENSALIDADE_CENTAVOS = 500; // R$5,00
+const VALOR_MENSALIDADE_CENTAVOS = 1000; // R$10,00 (R$5 vira prêmio do mês, R$5 acumula pro fim do ano)
 const SITE_URL = 'https://vasbobo.netlify.app';
 
 function mesAno() {
@@ -27,7 +27,7 @@ async function acaoCriar(params, res) {
     order_nsu: orderNsu,
     webhook_url: `${SITE_URL}/.netlify/functions/mensalidade-webhook`,
     redirect_url: `${SITE_URL}/?mensalidadePaga=1`,
-    items: [{ quantity: 1, price: VALOR_MENSALIDADE_CENTAVOS, description: `Mensalidade Vasbobo - ${mesNome}/${ano}` }],
+    items: [{ quantity: 1, price: VALOR_MENSALIDADE_CENTAVOS, description: `Vasbolão - ${mesNome}/${ano}` }],
   };
 
   try {

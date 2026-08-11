@@ -575,6 +575,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 </div>
 
+<!-- modal do mês do Vasbolão (quem pagou) -->
+<div class="modal-sair oculto" id="modalVasbolaoMes" onclick="if(event.target===this)fecharVasbolaoMes()">
+  <div class="modal" style="max-width:420px;max-height:80vh;max-height:80dvh;overflow-y:auto">
+    <h3 style="text-align:left;margin-bottom:10px" id="tituloVasbolaoMes"></h3>
+    <div id="corpoVasbolaoMes"></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn fantasma" style="flex:1" onclick="fecharVasbolaoMes()">Fechar</button></div>
+  </div>
+</div>
+
 <!-- modal de escolher jogador (foto + número + nome) — usado no MVP, quem faz gol, etc. -->
 <div class="modal-sair oculto" id="modalEscolherJogador" onclick="if(event.target===this)fecharEscolherJogador()">
   <div class="modal" style="max-width:420px;max-height:80vh;max-height:80dvh;overflow-y:auto">
@@ -832,6 +841,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz4.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
+      <button class="tab" id="tabVasbolao" onclick="mudarAba('vasbolao');toggleMenuSecundario()">🏆 Vasbolão</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
       <button class="tab" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
       <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
@@ -851,6 +861,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <section id="secPartidas" class="oculto"></section>
     <section id="secCastigos" class="oculto"></section>
     <section id="secAdmin" class="oculto"></section>
+    <section id="secVasbolao" class="oculto"></section>
   </main>
   <button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
 
@@ -1473,52 +1484,121 @@ function placarTexto(j,usarParcial){
   return casa?(r.v+' × '+r.a):(r.a+' × '+r.v);
 }
 function jogadorPorId(id){return (dados.jogadores||[]).find(p=>p.id===id);}
-/* =================== MENSALIDADE (R$5/mês via Pix, sem taxa, usando InfinitePay) =================== */
-function chaveMensalidadeAtual(){
+/* =================== VASBOLÃO (R$10/mês via Pix, sem taxa, usando InfinitePay) =================== */
+/* R$10 = R$5 vira prêmio do mês + R$5 acumula pro prêmio de fim de ano */
+const VASBOLAO_VALOR_TEXTO='R$10,00';
+function chaveVasbolaoAtual(){
   const agora=new Date();
   const br=new Date(agora.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
   return {ano:br.getFullYear(),mes:br.getMonth()+1,nomeMes:br.toLocaleDateString('pt-BR',{month:'long'})};
 }
-function htmlCardMensalidade(){
-  const {nomeMes}=chaveMensalidadeAtual();
-  return '<div class="card" id="cardMensalidade"><h2>💰 Mensalidade — '+cap(nomeMes)+'</h2>'+
-    '<div id="statusMensalidade"><p class="nota-rodape" style="margin:0">Verificando...</p></div></div>';
+function nomeMesPt(mes){
+  return ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][mes-1]||'';
 }
-async function carregarStatusMensalidade(){
-  const el=document.getElementById('statusMensalidade');
+async function renderVasbolao(){
+  const sec=document.getElementById('secVasbolao');
+  const {ano,mes,nomeMes}=chaveVasbolaoAtual();
+  let html='<div class="card"><h2>🏆 Vasbolão</h2>'+
+    '<p class="nota-rodape" style="margin:0 0 12px">'+VASBOLAO_VALOR_TEXTO+' por mês, via Pix, sem taxa nenhuma. Metade (R$5) vira o <b>prêmio do mês</b>, a outra metade (R$5) acumula pro <b>prêmio de fim de ano</b>.</p>'+
+    '<div id="statusVasbolao"><p class="nota-rodape" style="margin:0">Verificando...</p></div></div>'+
+    '<div class="card"><h2>📅 Histórico por mês</h2><div id="listaMesesVasbolao">Carregando…</div></div>';
+  sec.innerHTML=html;
+  carregarStatusVasbolao();
+  carregarMesesVasbolao();
+}
+async function carregarStatusVasbolao(){
+  const el=document.getElementById('statusVasbolao');
   if(!el||!eu)return;
-  const {ano,mes}=chaveMensalidadeAtual();
+  const {ano,mes}=chaveVasbolaoAtual();
   const docId=eu+'_'+ano+'_'+String(mes).padStart(2,'0');
   try{
     const snap=await db.collection('mensalidades').doc(docId).get();
     if(snap.exists&&snap.data().pago){
       const d=snap.data();
-      el.innerHTML='<div style="display:flex;align-items:center;gap:10px">'+
-        '<span style="background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--verde);border-radius:99px;padding:4px 12px;font-size:.76rem;font-weight:800;text-transform:uppercase">✅ Pago</span>'+
-        '<span class="nota-rodape" style="margin:0">em '+new Date(d.pagoEm).toLocaleDateString('pt-BR')+(d.comprovante?' · <a href="'+esc(d.comprovante)+'" target="_blank" style="color:var(--azul)">ver comprovante</a>':'')+'</span></div>';
+      el.innerHTML='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+        '<span style="background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--verde);border-radius:99px;padding:4px 12px;font-size:.76rem;font-weight:800;text-transform:uppercase">✅ Você já pagou este mês</span>'+
+        '<span class="nota-rodape" style="margin:0">em '+new Date(d.pagoEm).toLocaleDateString('pt-BR')+'</span></div>';
+      // não mostra nada de "pagar de novo" — só o botão de ver o próprio comprovante
+      el.innerHTML+='<button class="btn fantasma" style="margin-top:10px" onclick="abrirComprovanteVasbolao(\''+docId+'\')">🧾 Ver meu comprovante</button>';
     }else{
-      el.innerHTML='<p class="nota-rodape" style="margin:0 0 10px">Pendente — R$5,00, via Pix (sem taxa nenhuma pra você).</p>'+
-        '<button class="btn" onclick="pagarMensalidade()" id="btnPagarMensalidade">Pagar agora</button>';
+      el.innerHTML='<p class="nota-rodape" style="margin:0 0 10px">Pendente.</p>'+
+        '<button class="btn" onclick="pagarVasbolao()" id="btnPagarVasbolao">Pagar '+VASBOLAO_VALOR_TEXTO+'</button>';
     }
   }catch(e){
-    el.innerHTML='<p class="nota-rodape" style="margin:0">Não consegui checar agora. <button class="btn fantasma" onclick="carregarStatusMensalidade()">tentar de novo</button></p>';
+    el.innerHTML='<p class="nota-rodape" style="margin:0">Não consegui checar agora. <button class="btn fantasma" onclick="carregarStatusVasbolao()">tentar de novo</button></p>';
   }
 }
-async function pagarMensalidade(){
-  const btn=document.getElementById('btnPagarMensalidade');
+async function pagarVasbolao(){
+  const btn=document.getElementById('btnPagarVasbolao');
   if(btn){btn.disabled=true;btn.textContent='Gerando cobrança…';}
   try{
     const r=await fetch('/.netlify/functions/mensalidade?acao=criar&usuario='+encodeURIComponent(eu));
     const info=await r.json();
-    if(info.erro||!info.url){avisar('Não consegui gerar o Pix agora. Tenta de novo em instantes.');if(btn){btn.disabled=false;btn.textContent='Pagar agora';}return;}
-    registrarLog('pagamento','Gerou cobrança da mensalidade',eu,'comum');
+    if(info.erro||!info.url){avisar('Não consegui gerar o Pix agora. Tenta de novo em instantes.');if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}return;}
+    registrarLog('pagamento','Gerou cobrança do Vasbolão',eu,'comum');
     window.open(info.url,'_blank');
-    avisar('Abriu a tela de pagamento numa aba nova. Depois de pagar, volta aqui — confirma sozinho em alguns segundos.',true);
-    if(btn){btn.disabled=false;btn.textContent='Pagar agora';}
+    avisar('Abriu a tela de pagamento numa aba nova. Não precisa mandar comprovante pra ninguém — depois de pagar, o app confirma e guarda tudo sozinho. Só volta aqui em alguns segundos.',true);
+    setTimeout(carregarStatusVasbolao,4000);
+    if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}
   }catch(e){
     avisar('Erro ao gerar a cobrança: '+(e.message||e));
-    if(btn){btn.disabled=false;btn.textContent='Pagar agora';}
+    if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}
   }
+}
+/* lista dos últimos 12 meses (mesmo os que ainda não têm ninguém pago) — clica no mês pra ver
+   quem pagou (nome de todo mundo é público) e cada um só vê o PRÓPRIO comprovante */
+async function carregarMesesVasbolao(){
+  const el=document.getElementById('listaMesesVasbolao');
+  if(!el)return;
+  const {ano,mes}=chaveVasbolaoAtual();
+  const meses=[];
+  for(let i=0;i<12;i++){
+    let m=mes-i,a=ano;
+    while(m<1){m+=12;a--;}
+    meses.push({ano:a,mes:m});
+  }
+  el.innerHTML=meses.map(({ano:a,mes:m})=>
+    '<button class="jogo-item" onclick="abrirMesVasbolao('+a+','+m+')"><span class="jogo-nome">'+cap(nomeMesPt(m))+' de '+a+'</span></button>'
+  ).join('');
+}
+async function abrirMesVasbolao(ano,mes){
+  document.getElementById('tituloVasbolaoMes').textContent=cap(nomeMesPt(mes))+' de '+ano;
+  const corpo=document.getElementById('corpoVasbolaoMes');
+  corpo.innerHTML='Carregando…';
+  document.getElementById('modalVasbolaoMes').classList.remove('oculto');
+  try{
+    const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).get();
+    const pagos={};
+    snap.forEach(doc=>{pagos[doc.data().usuario]=doc.data();});
+    const usuarios=Object.keys(dados.usuarios).sort();
+    const totalPago=usuarios.filter(u=>pagos[u]&&pagos[u].pago).length;
+    let html='<p style="font-weight:800;margin-bottom:10px">'+totalPago+'/'+usuarios.length+' pagaram</p>';
+    usuarios.forEach(u=>{
+      const p=pagos[u];
+      const souEu=u===eu;
+      const docId=u+'_'+ano+'_'+String(mes).padStart(2,'0');
+      html+='<div class="mini-linha"><span class="rank-nome">'+esc(cap(u))+(souEu?' (você)':'')+'</span>'+
+        (p&&p.pago
+          ?('<span style="color:var(--verde);font-weight:800;font-size:.78rem;display:flex;align-items:center;gap:8px">✅ pago'+
+             (souEu?' <button class="btn fantasma" style="padding:3px 10px;font-size:.68rem" onclick="abrirComprovanteVasbolao(\''+docId+'\')">ver comprovante</button>':'')+
+             '</span>')
+          :'<span style="color:var(--cinza);font-weight:800;font-size:.78rem">⏳ pendente</span>')+
+        '</div>';
+    });
+    corpo.innerHTML=html;
+  }catch(e){
+    corpo.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
+  }
+}
+function fecharVasbolaoMes(){document.getElementById('modalVasbolaoMes').classList.add('oculto');}
+async function abrirComprovanteVasbolao(docId){
+  // trava de privacidade: só o dono do próprio pagamento pode ver o comprovante dele
+  if(!docId.startsWith(eu+'_')){avisar('Você só pode ver o seu próprio comprovante.');return;}
+  try{
+    const snap=await db.collection('mensalidades').doc(docId).get();
+    if(!snap.exists||!snap.data().comprovante){avisar('Comprovante ainda não disponível.');return;}
+    window.open(snap.data().comprovante,'_blank');
+  }catch(e){avisar('Erro ao abrir o comprovante.');}
 }
 function nomeJogador(id){
   if(id===SEM_GOL)return 'Vasco não marca';
@@ -2915,7 +2995,7 @@ function mudarAba(a,semHistorico){
       else history.pushState({aba:a},'',location.pathname+novoHash);
     }
   }catch(e){}
-  const mapa={jogadores:'tabJogadores',castigos:'tabCastigos',admin:'tabAdmin'};
+  const mapa={jogadores:'tabJogadores',castigos:'tabCastigos',admin:'tabAdmin',vasbolao:'tabVasbolao'};
   Object.entries(mapa).forEach(([k,idT])=>{
     const t=document.getElementById(idT);
     if(t)t.classList.toggle('ativa',k===a);
@@ -2925,7 +3005,7 @@ function mudarAba(a,semHistorico){
 }
 window.addEventListener('popstate',()=>{
   const h=location.hash.replace('#','');
-  const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico','motivacional'];
+  const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico','motivacional','vasbolao'];
   mudarAba(validas.includes(h)?h:'jogos',true);
 });
 function atualizarMenuFixo(abaAtual){
@@ -2951,6 +3031,7 @@ function render(){
   document.getElementById('secPartidas').classList.toggle('oculto',aba!=='jogoscalendario');
   document.getElementById('secCastigos').classList.toggle('oculto',aba!=='castigos');
   document.getElementById('secAdmin').classList.toggle('oculto',aba!=='admin');
+  document.getElementById('secVasbolao').classList.toggle('oculto',aba!=='vasbolao');
   if(aba==='jogos'&&!jogoAberto)renderListaJogos();
   if(aba==='jogos'&&jogoAberto)renderDetalhe();
   if(aba==='rank')renderRank();
@@ -2960,6 +3041,7 @@ function render(){
   if(aba==='jogoscalendario')renderPartidas();
   if(aba==='castigos')renderCastigos();
   if(aba==='admin'&&souAdmin())renderAdmin();
+  if(aba==='vasbolao')renderVasbolao();
   desenharPreviasRoleta();
   atualizarLembreteAvaliar();
 }
@@ -3219,8 +3301,6 @@ function renderListaJogos(){
   const lista=jogosOrdenados();
   let html='';
 
-  html+=htmlCardMensalidade();
-
   if(souAdmin()){
     const agora=Date.now();
     const pendentes=lista.filter(([id,j])=>{
@@ -3289,7 +3369,6 @@ function renderListaJogos(){
   sec.innerHTML=html;
   atualizarCronometro();
   atualizarCronometroAvaliar();
-  carregarStatusMensalidade();
 }
 
 /* =================== DETALHE DO JOGO =================== */
@@ -4726,35 +4805,9 @@ async function renderAdmin(){
   '<div><label for="logNivel">Nível</label><select id="logNivel" onchange="buscarLogs()"><option value="">Todos</option><option value="critico">🔴 Crítico</option><option value="importante">🟡 Importante</option><option value="comum">⚪ Comum</option></select></div>'+
   '<div><label for="logTipo">Tipo</label><select id="logTipo" onchange="buscarLogs()"><option value="">Todos</option><option value="login">🔓 Login</option><option value="logout">🔒 Logout</option><option value="aba">🧭 Navegação (aba)</option><option value="clique">👆 Clique</option><option value="admin">🛠️ Ação admin</option><option value="notificacao">📣 Notificação enviada</option><option value="sistema">⚙️ Sistema (backup/deploy)</option><option value="pagamento">💰 Pagamento</option></select></div>'+
   '</div>'+
-  '<div id="listaLogs" style="margin-top:14px"></div></div></details></div>'+
-  '<div class="card"><details ontoggle="if(this.open)carregarPainelMensalidades()"><summary>💰 Mensalidades</summary><div style="margin-top:12px">'+
-  '<p class="nota-rodape" style="margin:0 0 12px">Quem já pagou a mensalidade de R$5 desse mês, confirmado automaticamente via Pix (sem taxa nenhuma). Comprovante gerado sozinho pra cada pagamento.</p>'+
-  '<div id="painelMensalidades">Carregando…</div></div></details></div>';
+  '<div id="listaLogs" style="margin-top:14px"></div></div></details></div>';
   sec.innerHTML=html;
   mudarTabNotif('biblioteca');
-}
-async function carregarPainelMensalidades(){
-  const el=document.getElementById('painelMensalidades');
-  if(!el)return;
-  const {ano,mes,nomeMes}=chaveMensalidadeAtual();
-  try{
-    const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).get();
-    const pagos={};
-    snap.forEach(doc=>{pagos[doc.data().usuario]=doc.data();});
-    const usuarios=Object.keys(dados.usuarios).sort();
-    const totalPago=usuarios.filter(u=>pagos[u]&&pagos[u].pago).length;
-    let html='<p style="font-weight:800;margin-bottom:10px">'+cap(nomeMes)+' — '+totalPago+'/'+usuarios.length+' pagaram</p>';
-    usuarios.forEach(u=>{
-      const p=pagos[u];
-      html+='<div class="mini-linha"><span class="rank-nome">'+esc(cap(u))+'</span>'+
-        (p&&p.pago?'<span style="color:var(--verde);font-weight:800;font-size:.78rem">✅ '+new Date(p.pagoEm).toLocaleDateString('pt-BR')+(p.comprovante?' · <a href="'+esc(p.comprovante)+'" target="_blank" style="color:var(--azul)">comprovante</a>':'')+'</span>'
-          :'<span style="color:var(--cinza);font-weight:800;font-size:.78rem">⏳ pendente</span>')+
-        '</div>';
-    });
-    el.innerHTML=html;
-  }catch(e){
-    el.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
-  }
 }
 function prepararLogs(){
   const campoData=document.getElementById('logData');
@@ -5146,7 +5199,7 @@ function iniciarMidiaJanela(){
       }
     }catch(e){}
     const h=location.hash.replace('#','');
-    const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico','motivacional'];
+    const validas=['rank','castigos','jogoscalendario','admin','jogadores','perfilpsicotico','motivacional','vasbolao'];
     if(validas.includes(h)){
       mudarAba(h,true);
     }else{
