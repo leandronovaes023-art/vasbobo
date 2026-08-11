@@ -14,6 +14,46 @@ function timeDoEscudo(imgSrc) {
   const m = (imgSrc || '').match(/brasoes\/60x60\/([a-z0-9-]+)\.png/i);
   return m ? m[1] : null;
 }
+// extrai um valor JSON (array ou objeto) que está embutido cru no meio do HTML/JS da página,
+// procurando a chave e "contando parênteses" até achar o fechamento correto — mais confiável
+// que regex simples, porque o valor pode ter colchetes/chaves aninhados
+function extrairJsonAposChave(html, chave) {
+  const marca = '"' + chave + '":';
+  const inicio = html.indexOf(marca);
+  if (inicio === -1) return null;
+  let i = inicio + marca.length;
+  while (html[i] === ' ') i++;
+  const abre = html[i];
+  if (abre !== '[' && abre !== '{') return null;
+  const fecha = abre === '[' ? ']' : '}';
+  let profundidade = 0, emString = false, escape = false, fim = -1;
+  for (let j = i; j < html.length; j++) {
+    const c = html[j];
+    if (emString) {
+      if (escape) escape = false;
+      else if (c === '\\') escape = true;
+      else if (c === '"') emString = false;
+      continue;
+    }
+    if (c === '"') { emString = true; continue; }
+    if (c === abre) profundidade++;
+    else if (c === fecha) { profundidade--; if (profundidade === 0) { fim = j; break; } }
+  }
+  if (fim === -1) return null;
+  try { return JSON.parse(html.slice(i, fim + 1)); } catch (e) { return null; }
+}
+// escalação titular (útil já ~30-60min antes do jogo, quando os sites publicam a lista oficial)
+function extrairEscalacaoTitular(html) {
+  const linhas = extrairJsonAposChave(html, 'mergedLineupRows');
+  if (!Array.isArray(linhas) || !linhas.length) return null;
+  const casa = [], fora = [];
+  linhas.forEach((linha) => {
+    (linha.home || []).forEach((j) => { if (j && j.name) casa.push(j.name.trim()); });
+    (linha.away || []).forEach((j) => { if (j && j.name) fora.push(j.name.trim()); });
+  });
+  if (!casa.length && !fora.length) return null;
+  return { casa, fora };
+}
 
 async function extrairUol(urlPlacar) {
   const r = await fetch(urlPlacar, {
@@ -74,6 +114,7 @@ async function extrairUol(urlPlacar) {
     placar,
     times: paresTime,
     eventos,
+    escalacaoTitular: extrairEscalacaoTitular(html),
   };
 }
 
