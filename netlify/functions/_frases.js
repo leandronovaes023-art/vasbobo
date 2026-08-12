@@ -130,6 +130,95 @@ add('saudacao', [
   '{nome}, guarda esse recado', '{nome}, presta ou perde',
 ]);
 
+/* ---- ALEATÓRIAS: fofoca/humor do grupo, 4x por dia (7h, 12h, 16h, 21h) — migrada da antiga
+   saudação de login (que só aparecia na tela, até 3x/dia). Agora vira notificação push de
+   verdade, e ganhou muito mais frase nova. Separadas por horário quando fazia sentido com o
+   conteúdo (ex.: piada de "discussão às 7h da manhã" só sai de manhã mesmo) */
+add('aleatorias', [
+  'Novaes, Douglas e Daniel já discutiram hoje — 7h da manhã, novo recorde do grupo.',
+  'Vim do futuro avisar: Daniel e Douglas vão discutir de novo amanhã, 7h da manhã. Já virou ritual religioso.',
+  'Daniel já cancelou o sócio de novo. Deve ser recorde do Vasco também.',
+  'Juan conseguiu autorização pra sair. Dia histórico, marca na parede.',
+  'O Alex já fez um scouting completo do próximo adversário antes mesmo do café.',
+  'O Douglas já abriu a Netvasco umas 20 vezes antes do meio-dia. É rotina, não vício (segundo ele).',
+], 7);
+
+add('aleatorias', [
+  'Antônio Nerd estressado mandando áudio no grupo com voz aveludada. Terapia em grupo, modo ativado.',
+  'Douglas começou a graduação em Direito só pra defender o Pedrinho tecnicamente melhor.',
+  'Novaes e Douglas na mesma sala da Estácio, cursando Direito, ambos com o mesmo objetivo: o Pedrinho.',
+  'André anuncia parceria oficial com o Pedrosa e está genuinamente feliz com isso. Alguém avisa ele.',
+  'Daniel, o Maurinho da Colina, ataca de novo com a amargura de sempre. Raio-x fiel.',
+  'Wallace escalou o Vasco Sub-93 anos: Oscar, Dudu, Rony, Sérgio Ramos, Didi, Zagallo e Evaristo de Macedo. Time imbatível, só falta a saúde dos jogadores.',
+  'Wallace pede time de ponta e endividamento do Vasco. Rumo à Série B com classe.',
+  'Leodoro já brigou e sumiu de novo. Recorde de velocidade batido.',
+  'Thiago Azevedo sumiu de novo. Ninguém sentiu falta ainda, mas vai sentir quando ele voltar falando sem parar.',
+  'Pedro bota o filho pra assistir jogo do Vasco de 2000 e desliga a TV no dia de jogo de verdade. Educação seletiva.',
+  'O Wallace repetiu de novo que o David merece a titularidade no lugar do Vegetti. Ninguém pediu, ele insiste.',
+  'O professor de química Antônio Nerd segue no laboratório tentando a fórmula pro Hinestroza voltar a jogar bola. Ciência tem limite.',
+], 12);
+
+add('aleatorias', [
+  'O Jorge já fez a bet de hoje. Mas não foi na Sportingbet. Estamos de olho, Jorge.',
+  'Daniel segue defendendo a Kappa, dizendo que é melhor que a Nike. Pelo menos não vou sofrer sozinho com essa opinião.',
+  'Daniel já comprou a camisa da Nike do Vasco escondido. Ele nunca vai admitir, mas a etiqueta não mente.',
+  'O professor Antônio Nerd está no laboratório criando uma dose pro Tchê Tchê jogar com vontade. Se der certo, patenteia.',
+  'Daniel só está esperando o PH errar uma vez pra já pedir o Puma de volta. Paciência de caçador.',
+  'Bastou o Antônio Nerd elogiar o Hinestroza uma vez pro cara desaprender a jogar. Boca aveludada, boca de túmulo.',
+  'O Velloso já comprou mais um tênis essa semana e não é da Nike. Estamos de olho.',
+  'Novaes criou mais uma foto em IA sobre o Daniel. A IA já não aguenta mais o Novaes. Nem o Daniel.',
+  'O professor Antônio Nerd tá em semana de prova, tendo que aguentar aluno bagunceiro e o Spinelli no ataque na mesma semana. Respeita o homem.',
+  'Velloso segue correndo maratona... e do Vasco também, dependendo do resultado.',
+], 16);
+
+add('aleatorias', [
+  'VASBOBO Leo Dias: Daniel pegou a bike elétrica e foi pra Ipanema ver o Renato jogar vôlei. Fonte confiável.',
+  'Daniel segue limpando a areia da praia... da boca. Vocês entenderam.',
+  'Novaes e Douglas fundam oficialmente a Liga da Justiça Guardiã do Pedro Paulo. Estatuto em anexo (não existe).',
+  'Daniel segue defendendo o Renato e odiando o Diniz. Tudo normal por aqui, mais um dia de paz.',
+  'Daniel já defendeu o Renato hoje, ontem, e vai defender amanhã. Fidelidade rara em tempos de crise.',
+  'Daniel já marcou o Novaes de novo no grupo. O WhatsApp deveria bloquear por spam, mas até o WhatsApp desistiu.',
+  'O Daniel precisa voltar pra Barreira do Vasco e encher a cara com urgência. Isso é apelo, não sugestão.',
+  'Novaes segue defendendo o Pedrinho. Como sempre. Como sempre será.',
+  'Daniel e Novaes já discutiram hoje. Confirmado, testemunhas oculares no grupo.',
+  'Antônio Nerd mandou mais um áudio estressado no grupo. Que tesão essa voz, respeitosamente falando.',
+], 21);
+
+/* ---- ALEATÓRIAS DE DIA DE JOGO: só saem quando o Vasco joga (em casa ou fora) — a função de
+   envio decide isso, não precisa marcar hora aqui, sai junto dos 4 horários fixos do dia ---- */
+add('aleatorias_jogo_casa', [
+  'Vitor já chegou em São Januário para assistir o jogo. Recorde pessoal de antecedência batido de novo.',
+  'Daniel já separou a meia do Bob Esponja para o jogo do Vasco hoje. Ritual sagrado, não questione.',
+  'Douglas já abriu a Netvasco 139 vezes hoje com a ansiedade do jogo. A internet dele merece um prêmio.',
+  'Jorge já escolheu o bar mais perto de São Januário. A gordinha já está reservada, com nome e tudo.',
+  'Juan conseguiu autorização de última hora pra ir no jogo. Milagre confirmado pela diretoria de casa.',
+  'Novaes já separou o cigarro de emergência caso alguém critique o Pedrinho hoje em São Januário.',
+  'O Alex entregou o scouting completo do adversário de hoje, com estatísticas que ninguém pediu mas todo mundo vai ler.',
+], null);
+
+add('aleatorias_jogo_fora', [
+  'Vitor lamenta não poder chegar 3 horas antes hoje porque o jogo é longe demais. Sofrimento à distância, mas ele está lá de espírito.',
+  'Douglas já garantiu a transmissão da Netvasco pro jogo de hoje fora de casa. Internet no talo.',
+  'Jorge escolheu o bar de sempre, já que hoje não dá pra ir no estádio. A gordinha viaja igual.',
+  'Antônio Nerd avisou que vai acompanhar o jogo de hoje entre um experimento e outro no laboratório.',
+  'Velloso corre com o celular na mão hoje pra não perder nenhum lance do jogo fora de casa.',
+  'Daniel separou a meia do Bob Esponja mesmo o jogo sendo fora. Fé não tem distância.',
+], null);
+
+async function garantirSeedV2(db) {
+  const marcador = db.collection('notif_frases_meta').doc('seed_v2_aleatorias');
+  const doc = await marcador.get();
+  if (doc.exists) return; // já rodou antes, não duplica
+  const NOVOS = SEED.filter((s) => s.tipo === 'aleatorias' || s.tipo === 'aleatorias_jogo_casa' || s.tipo === 'aleatorias_jogo_fora');
+  const batch = db.batch();
+  NOVOS.forEach((item) => {
+    const ref = db.collection('notif_frases').doc();
+    batch.set(ref, { ...item, ativo: true, criadoEm: Date.now() });
+  });
+  batch.set(marcador, { feito: true, quando: Date.now(), qtd: NOVOS.length });
+  await batch.commit();
+}
+
 async function garantirSeed(db) {
   const snap = await db.collection('notif_frases').limit(1).get();
   if (!snap.empty) return; // já foi semeado antes, não faz de novo
@@ -152,4 +241,4 @@ function sorteia(lista) {
   return lista.length ? lista[Math.floor(Math.random() * lista.length)].texto : null;
 }
 
-module.exports = { garantirSeed, buscarFrases, sorteia };
+module.exports = { garantirSeed, garantirSeedV2, buscarFrases, sorteia };

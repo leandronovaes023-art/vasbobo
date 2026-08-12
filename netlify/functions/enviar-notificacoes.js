@@ -7,7 +7,7 @@
 // As frases agora vivem no Firestore (coleção notif_frases, ver _frases.js), editáveis
 // pelo admin em Configurações → Notificações. Nada mais fica fixo no código.
 const { mandarPush, garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
-const { garantirSeed, buscarFrases, sorteia } = require('./_frases');
+const { garantirSeed, garantirSeedV2, buscarFrases, sorteia } = require('./_frases');
 
 const HORA = 3600000;
 
@@ -44,6 +44,7 @@ exports.handler = async () => {
   const db = admin.firestore();
   try {
   await garantirSeed(db);
+  await garantirSeedV2(db);
   const agora = new Date();
   const horaAtual = agora.getHours();
   const chaveDia = agora.toISOString().slice(0, 10);
@@ -58,6 +59,33 @@ exports.handler = async () => {
   }
 
   let enviados = 0, falhas = 0;
+
+  // busca os jogos uma vez só aqui em cima (usado tanto nas aleatórias de dia de jogo quanto
+  // nas seções mais abaixo, que já usavam isso separadamente)
+  const principalDocJogos = await db.collection('shared').doc('vasbobo_v2').get();
+  const dadosJogos = principalDocJogos.exists ? JSON.parse(principalDocJogos.data().value || '{}') : {};
+  const jogosTodos = dadosJogos.jogos || {};
+  const jogoDeHoje = Object.values(jogosTodos).find((j) => j.data === chaveDia);
+
+  // ---------- Aleatórias (fofoca/humor do grupo) — 4x por dia: 7h, 12h, 16h, 21h ----------
+  const HORAS_ALEATORIAS = [7, 12, 16, 21];
+  if (HORAS_ALEATORIAS.includes(horaAtual)) {
+    let pool = await buscarFrases(db, 'aleatorias', horaAtual);
+    if (jogoDeHoje) {
+      const tipoJogoHoje = jogoDeHoje.local === 'fora' ? 'aleatorias_jogo_fora' : 'aleatorias_jogo_casa';
+      const frasesJogo = await buscarFrases(db, tipoJogoHoje, null);
+      pool = pool.concat(frasesJogo);
+    }
+    if (pool.length) {
+      for (const usuario of usuarios) {
+        const chave = `aleatoria_${usuario}_${chaveDia}_${horaAtual}`;
+        if (await jaEnviou(db, chave)) continue;
+        const r = await mandarPush(usuario, 'VASBOBO', sorteia(pool), '/');
+        if (r.ok) enviados++; else falhas++;
+        await marcarEnviado(db, chave);
+      }
+    }
+  }
 
   // ---------- Vasbobo Acredita ----------
   const frasesMotivHora = await buscarFrases(db, 'motivacional', horaAtual);
