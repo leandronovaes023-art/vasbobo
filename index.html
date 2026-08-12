@@ -125,7 +125,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   html.trava-scroll,html.trava-scroll body{overflow:hidden!important;height:100%;overscroll-behavior:none}
 
   /* =============== revelação cinematográfica do prêmio (estilo BBB) =============== */
-  .premio-cinema{position:relative;min-height:400px;height:auto;border-radius:16px;overflow:hidden;
+  .premio-cinema{position:relative;height:340px;border-radius:16px;overflow:hidden;
     background:
       radial-gradient(circle at 50% 20%,rgba(255,224,130,.35),transparent 55%),
       radial-gradient(circle at 15% 85%,rgba(255,196,0,.25),transparent 50%),
@@ -146,13 +146,18 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .premio-contador{font-family:'Anton',sans-serif;font-size:2.3rem;color:#fff;text-shadow:0 0 16px rgba(0,0,0,.6),0 0 24px rgba(255,210,80,.6);letter-spacing:.02em;transition:none}
   .premio-contador.premio-revelado{color:#FFE067;animation:pulsarRevelado .6s ease-out;text-shadow:0 0 30px rgba(255,210,80,1),0 0 60px rgba(255,180,0,.7)}
   @keyframes pulsarRevelado{0%{transform:scale(1)}35%{transform:scale(1.32)}100%{transform:scale(1)}}
-  .premio-frase{font-size:1.06rem;font-weight:800;line-height:1.55;color:#FFFDF5;margin-top:12px;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+  .premio-frase{font-size:1.06rem;font-weight:800;line-height:1.55;color:#FFFDF5;margin-top:0;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+  #premioResultado{margin-top:12px;padding:16px;border-radius:14px;
+    background:linear-gradient(160deg,#4a3208,#7a5410 35%,#3d2a06 70%,#1f1503);border:2px solid #C99A2E;text-align:center}
+  .btn-premio{background:#1B1F25;border:1.5px solid #FFD23D;color:#FFFDF5;border-radius:8px;
+    padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap}
+  .btn-premio:active{background:#2A2010}
   .particulas-wrap{position:absolute;left:50%;top:40%;width:0;height:0}
   .particula-ouro{position:absolute;left:0;top:0;width:6px;height:6px;border-radius:50%;background:#FFD23D;
     box-shadow:0 0 6px 1px rgba(255,210,61,.8);animation:particulaVoa .9s ease-out forwards}
   @keyframes particulaVoa{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
 
-  header{border-bottom:1px solid var(--linha);background:var(--preto)}
+  header{border-bottom:1px solid var(--linha);background:var(--preto);position:sticky;top:0;z-index:380}
   .header-inner{max-width:1320px;margin:0 auto;padding:8px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
   .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none;text-transform:uppercase}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px}
@@ -218,12 +223,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:var(--carvao);border-top:1px solid var(--linha);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
-  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;
-    padding:14px 2px 11px;text-decoration:none;color:var(--cinza);font-size:.6rem;font-weight:700;
+  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;
+    padding:12px 1px 9px;text-decoration:none;color:var(--cinza);font-size:.55rem;font-weight:700;
     text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
-  .menu-fixo a .mf-icone{font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;height:30px}
+  .menu-fixo a .mf-icone{font-size:1.3rem;line-height:1;display:flex;align-items:center;justify-content:center;height:26px}
   
-  .menu-fixo a .mf-icone img{width:32px;height:32px;object-fit:contain;display:block}
+  .menu-fixo a .mf-icone img{width:27px;height:27px;object-fit:contain;display:block}
   .menu-fixo a.ativo{color:var(--branco)}
   .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--azul)}
   .menu-fixo a{position:relative}
@@ -1621,19 +1626,21 @@ async function carregarPremioMesAnimado(){
   }catch(e){}
   window._premioValorAtual=premio;
   window._premioTrocasUsadas=0;
+  // a caixa da chuva de dinheiro tem altura FIXA (não cresce) — o resultado aparece embaixo dela,
+  // numa caixa separada. Assim as notas sempre caem numa área do mesmo tamanho, sem "sumir" lá em
+  // cima quando o texto do resultado empurra tudo pra baixo
   el.innerHTML='<div class="premio-cinema" id="premioCinema">'+
-    '<div class="premio-notas" id="premioNotas">'+htmlNotasCaindo(22)+'</div>'+
-    '<div class="premio-conteudo">'+
-    '<p class="premio-contador" id="premioContador">R$ 0</p>'+
-    '<div id="premioResultado" class="oculto"></div>'+
-    '</div></div>';
+    '<div class="premio-notas" id="premioNotas">'+htmlNotasCaindo(24)+'</div>'+
+    '<div class="premio-conteudo"><p class="premio-contador" id="premioContador">R$ 0</p></div>'+
+    '</div>'+
+    '<div id="premioResultado" class="oculto"></div>';
   // continua gerando notas novas durante toda a animação, pra nunca "secar" a chuva de dinheiro
   const gerador=setInterval(()=>{
     const alvo=document.getElementById('premioNotas');
     if(!alvo){clearInterval(gerador);return;}
-    alvo.innerHTML+=htmlNotasCaindo(4,0.3);
-  },600);
-  setTimeout(()=>clearInterval(gerador),7000);
+    alvo.innerHTML+=htmlNotasCaindo(4,0.2);
+  },400);
+  setTimeout(()=>clearInterval(gerador),5200);
   girarContadorPremio(premio);
 }
 function girarContadorPremio(valorFinal){
@@ -1641,38 +1648,21 @@ function girarContadorPremio(valorFinal){
   if(!el)return;
   const aleatorio=()=>Math.floor(Math.random()*9800000)+95000;
   let intervalo;
-  // FASE 1 — começo, rápido
-  intervalo=setInterval(()=>{el.textContent=fmtReais(aleatorio());},95);
+  // FASE 1 (0—1,6s) — rapidíssimo, quase ilegível
+  intervalo=setInterval(()=>{el.textContent=fmtReais(aleatorio());},55);
   setTimeout(()=>{
     clearInterval(intervalo);
-    // FASE 2 — ultra rápido, mal dá pra ler
-    intervalo=setInterval(()=>{el.textContent=fmtReais(aleatorio());},38);
+    // FASE 2 (1,6s—3,6s) — rápido, valores bem altos, ainda dá um pouco pra ler
+    intervalo=setInterval(()=>{el.textContent=fmtReais(aleatorio());},150);
     setTimeout(()=>{
       clearInterval(intervalo);
-      // FASE 3 — desacelera progressivamente
-      let atraso=45;
-      const tickDesacelerando=()=>{
-        el.textContent=fmtReais(aleatorio());
-        atraso+=55+Math.random()*45;
-        if(atraso<1100){
-          setTimeout(tickDesacelerando,atraso);
-        }else{
-          // últimos giros, bem devagar, já "boiando" perto do valor real
-          setTimeout(()=>{
-            el.textContent=fmtReais(Math.max(0,valorFinal+Math.floor((Math.random()-0.5)*40)));
-            setTimeout(()=>{
-              // FASE 4 — revelação
-              el.textContent=fmtReais(valorFinal);
-              el.classList.add('premio-revelado');
-              dispararParticulasPremio();
-              setTimeout(mostrarResultadoPremio,500);
-            },650);
-          },550);
-        }
-      };
-      tickDesacelerando();
-    },1500);
-  },1500);
+      // revelação: para de repente no valor real
+      el.textContent=fmtReais(valorFinal);
+      el.classList.add('premio-revelado');
+      dispararParticulasPremio();
+      setTimeout(mostrarResultadoPremio,450);
+    },2000);
+  },1600);
 }
 function dispararParticulasPremio(){
   const alvo=document.getElementById('premioCinema');
@@ -1695,23 +1685,21 @@ function mostrarResultadoPremio(){
   const el=document.getElementById('premioResultado');
   if(!el)return;
   const frase=fraseAleatoriaPremio();
-  const valor=window._premioValorAtual||0;
   el.classList.remove('oculto');
   el.innerHTML=
-    '<p class="premio-frase" id="premioFraseTxt">'+esc(frase)+' <b style="color:#3DDC9A">'+fmtReais(valor)+'!</b></p>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px" id="premioBotoesTroca">'+
-    '<button class="btn fantasma" style="font-size:.72rem;padding:6px 12px" onclick="trocarPremioFrase()">🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')</button>'+
+    '<p class="premio-frase" id="premioFraseTxt">'+esc(frase)+'</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px" id="premioBotoesTroca">'+
+    '<button class="btn-premio" onclick="trocarPremioFrase()">🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')</button>'+
     '</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px">'+
-    '<button class="btn fantasma" style="font-size:.72rem;padding:6px 12px" onclick="copiarMensagemPremio()">📋 Copiar mensagem</button>'+
-    '<button class="btn fantasma" style="font-size:.72rem;padding:6px 12px" onclick="baixarPrintPremio()">📸 Baixar print</button>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px">'+
+    '<button class="btn-premio" onclick="copiarMensagemPremio()">📋 Copiar mensagem</button>'+
+    '<button class="btn-premio" onclick="baixarPrintPremio()">📸 Print da tela</button>'+
     '</div>';
 }
 function trocarPremioFrase(){
   if(window._premioTrocasUsadas>=3)return;
   window._premioTrocasUsadas++;
   const elTxt=document.getElementById('premioFraseTxt');
-  const valor=window._premioValorAtual||0;
   if(window._premioTrocasUsadas>=3){
     if(elTxt)elTxt.textContent='Somente esses 3 prêmios estão disponíveis nesse mês. Volta mês que vem pra mais!';
     const wrap=document.getElementById('premioBotoesTroca');
@@ -1719,48 +1707,48 @@ function trocarPremioFrase(){
     return;
   }
   const frase=fraseAleatoriaPremio();
-  if(elTxt)elTxt.innerHTML=esc(frase)+' <b style="color:#3DDC9A">'+fmtReais(valor)+'!</b>';
+  if(elTxt)elTxt.textContent=frase;
   const btn=document.querySelector('#premioBotoesTroca button');
   if(btn)btn.textContent='🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')';
 }
 function copiarMensagemPremio(){
   const txt=document.getElementById('premioFraseTxt');
   if(!txt)return;
-  const s=txt.textContent||'';
+  const s=(txt.textContent||'')+' '+fmtReais(window._premioValorAtual||0)+'!';
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(s).then(()=>avisar('Mensagem copiada!',true)).catch(()=>avisar('Não consegui copiar. Seleciona o texto manualmente.'));
   }else{
     avisar('Seu navegador não permite copiar automaticamente. Seleciona o texto manualmente.');
   }
 }
-function baixarPrintPremio(){
-  const txt=document.getElementById('premioFraseTxt');
-  if(!txt)return;
-  const canvas=document.createElement('canvas');
-  const largura=900,altura=560;
-  canvas.width=largura;canvas.height=altura;
-  const ctx=canvas.getContext('2d');
-  const grad=ctx.createLinearGradient(0,0,largura,altura);
-  grad.addColorStop(0,'#0B0D10');grad.addColorStop(1,'#1B1F25');
-  ctx.fillStyle=grad;ctx.fillRect(0,0,largura,altura);
-  ctx.fillStyle='#E0AC1F';ctx.font='800 30px Arial';ctx.textAlign='center';
-  ctx.fillText('🏆 BOBOBET',largura/2,80);
-  ctx.fillStyle='#F3F4F6';ctx.font='600 22px Arial';
-  const palavras=(txt.textContent||'').split(' ');
-  let linha='',y=170,linhas=[];
-  palavras.forEach(p=>{
-    const teste=linha+p+' ';
-    if(ctx.measureText(teste).width>largura-100&&linha){linhas.push(linha);linha=p+' ';}
-    else linha=teste;
+/* print de verdade da tela (não um desenho meu tentando imitar) — carrega a biblioteca html2canvas
+   só na hora que precisa, e tira uma foto real do que está desenhado na tela naquele momento */
+let _html2canvasCarregando=null;
+function garantirHtml2Canvas(){
+  if(window.html2canvas)return Promise.resolve();
+  if(_html2canvasCarregando)return _html2canvasCarregando;
+  _html2canvasCarregando=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=resolve; s.onerror=reject;
+    document.head.appendChild(s);
   });
-  linhas.push(linha);
-  linhas.forEach(l=>{ctx.fillText(l.trim(),largura/2,y);y+=36;});
-  ctx.fillStyle='#2FD08E';ctx.font='800 40px Arial';
-  ctx.fillText('R$ '+(window._premioValorAtual||0).toLocaleString('pt-BR'),largura/2,y+60);
-  const link=document.createElement('a');
-  link.download='bobobet-premio.png';
-  link.href=canvas.toDataURL('image/png');
-  link.click();
+  return _html2canvasCarregando;
+}
+async function baixarPrintPremio(){
+  const alvo=document.getElementById('premioAnimado');
+  if(!alvo)return;
+  avisar('Gerando o print…',true,2500);
+  try{
+    await garantirHtml2Canvas();
+    const canvas=await html2canvas(alvo,{backgroundColor:null,useCORS:true,scale:2});
+    const link=document.createElement('a');
+    link.download='bobobet-premio.png';
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+  }catch(e){
+    avisar('Não consegui gerar o print automático. Tenta o print nativo do seu celular (botões físicos) mesmo.');
+  }
 }
 async function carregarStatusVasbolao(){
   const el=document.getElementById('statusVasbolao');
@@ -5737,12 +5725,12 @@ function iniciarMidiaJanela(){
 })();
 </script>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:60px;height:auto"></span>Home</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:46px;height:auto"></span>Home</a>
     <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>BoboBet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/escudo-vasco.png" alt="" style="width:26px;height:auto"></span>Calendário</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/escudo-vasco.png" alt="" style="width:22px;height:auto"></span>Calendário</a>
   </nav>
 </body>
 </html>

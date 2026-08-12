@@ -174,7 +174,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .titulo-vasbobo .cruz{flex:none}
   .oculto{display:none!important}
 
-  header{border-bottom:1px solid var(--linha);background:var(--preto)}
+  header{border-bottom:1px solid var(--linha);background:var(--preto);position:sticky;top:0;z-index:380}
   .header-inner{max-width:1320px;margin:0 auto;padding:8px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
 .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none;text-transform:uppercase}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px}
@@ -228,12 +228,12 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:var(--carvao);border-top:1px solid var(--linha);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
-  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;
-    padding:14px 2px 11px;text-decoration:none;color:var(--cinza);font-size:.6rem;font-weight:700;
+  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;
+    padding:12px 1px 9px;text-decoration:none;color:var(--cinza);font-size:.55rem;font-weight:700;
     text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
-  .menu-fixo a .mf-icone{font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;height:30px}
+  .menu-fixo a .mf-icone{font-size:1.3rem;line-height:1;display:flex;align-items:center;justify-content:center;height:26px}
 
-  .menu-fixo a .mf-icone img{width:32px;height:32px;object-fit:contain;display:block}
+  .menu-fixo a .mf-icone img{width:27px;height:27px;object-fit:contain;display:block}
   .menu-fixo a.ativo{color:var(--branco)}
   .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--azul)}
   .menu-fixo a{position:relative}
@@ -706,12 +706,12 @@ window.addEventListener('scroll',()=>{
 </script>
 <button class="topo-btn" id="topoBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:60px;height:auto"></span>Home</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:46px;height:auto"></span>Home</a>
     <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>BoboBet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/escudo-vasco.png" alt="" style="width:26px;height:auto"></span>Calendário</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/escudo-vasco.png" alt="" style="width:22px;height:auto"></span>Calendário</a>
   </nav>
 <script>
 function toggleFmEdge(e){
