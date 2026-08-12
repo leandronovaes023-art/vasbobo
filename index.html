@@ -1639,12 +1639,40 @@ async function abrirMesVasbolaoAdmin(ano,mes){
     const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).get();
     const pagos={};
     snap.forEach(doc=>{pagos[doc.data().usuario]=doc.data();});
-    const usuarios=Object.keys(dados.usuarios).sort();
-    const totalPago=usuarios.filter(u=>pagos[u]&&pagos[u].pago).length;
-    let html='<p style="font-weight:800;margin-bottom:10px">'+totalPago+'/'+usuarios.length+' pagaram</p>';
+    window._vasbolaoMesAtual={ano,mes,pagos};
+    window._vasbolaoFiltroAtual='todos';
+    renderListaVasbolaoMes();
+  }catch(e){
+    corpo.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
+  }
+}
+function filtrarVasbolaoMes(filtro){
+  window._vasbolaoFiltroAtual=filtro;
+  renderListaVasbolaoMes();
+}
+function renderListaVasbolaoMes(){
+  const corpo=document.getElementById('corpoVasbolaoMes');
+  const info=window._vasbolaoMesAtual;
+  if(!info)return;
+  const {ano,mes,pagos}=info;
+  const filtro=window._vasbolaoFiltroAtual||'todos';
+  const usuarios=Object.keys(dados.usuarios).sort().filter(u=>{
+    const pagou=!!(pagos[u]&&pagos[u].pago);
+    if(filtro==='pagou')return pagou;
+    if(filtro==='naopagou')return !pagou;
+    return true;
+  });
+  const totalPago=Object.keys(dados.usuarios).filter(u=>pagos[u]&&pagos[u].pago).length;
+  const totalTodos=Object.keys(dados.usuarios).length;
+  let html='<p style="font-weight:800;margin-bottom:10px">'+totalPago+'/'+totalTodos+' pagaram</p>'+
+    '<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">'+
+    ['todos','pagou','naopagou'].map(f=>'<button class="btn fantasma'+(filtro===f?' claro':'')+'" style="padding:5px 12px;font-size:.72rem" onclick="filtrarVasbolaoMes(\''+f+'\')">'+({todos:'Todos',pagou:'✅ Só quem pagou',naopagou:'⏳ Só quem não pagou'})[f]+'</button>').join('')+
+    '</div>';
+  if(!usuarios.length){
+    html+='<div class="vazio">Ninguém nesse filtro.</div>';
+  }else{
     usuarios.forEach(u=>{
       const p=pagos[u];
-      const docId=u+'_'+ano+'_'+String(mes).padStart(2,'0');
       html+='<div class="mini-linha"><span class="rank-nome">'+esc(cap(u))+'</span>'+
         (p&&p.pago
           ?('<span style="color:var(--verde);font-weight:800;font-size:.78rem;display:flex;align-items:center;gap:8px">✅ '+new Date(p.pagoEm).toLocaleDateString('pt-BR')+
@@ -1653,11 +1681,8 @@ async function abrirMesVasbolaoAdmin(ano,mes){
           :'<span style="color:var(--cinza);font-weight:800;font-size:.78rem">⏳ pendente</span>')+
         '</div>';
     });
-    corpo.innerHTML=html;
-    window._vasbolaoMesAtual={ano,mes,pagos};
-  }catch(e){
-    corpo.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
   }
+  corpo.innerHTML=html;
 }
 function fecharVasbolaoMes(){document.getElementById('modalVasbolaoMes').classList.add('oculto');}
 function abrirComprovanteAdmin(usuario){
@@ -1780,7 +1805,7 @@ function nomeJogador(id){
 }
 function jogadoresAtivos(){
   return [...dados.jogadores].filter(p=>p.ativo!==false)
-    .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+    .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||(a.nome||'').localeCompare(b.nome||'','pt-BR'));
 }
 function souAdmin(){return eu&&dados.usuarios[eu]&&dados.usuarios[eu].admin;}
 function jogosOrdenados(){
@@ -2676,19 +2701,28 @@ async function zerarQuizSeNecessario(){
    pagaram (sem comprovante, já que não existe um de verdade). Dispara uma vez só, só pelo admin. */
 async function isentarBoboBetSeNecessario(){
   if(!souAdmin())return;
-  if(dados.config&&(dados.config.isencaoBoboBetV||0)>=1)return;
-  try{
-    const {ano,mes}=chaveVasbolaoAtual();
-    const isentos=['douglas','jorge','andre'];
-    for(const u of isentos){
-      const docId=u+'_'+ano+'_'+String(mes).padStart(2,'0');
-      await db.collection('mensalidades').doc(docId).set({
-        usuario:u, ano, mes, pago:true, pagoEm:Date.now(), valorPago:null, comprovante:null, transacaoId:null, metodo:'isento',
-      },{merge:true});
-    }
-    await mutar(()=>{ if(!dados.config)dados.config={}; dados.config.isencaoBoboBetV=1; });
-    render();
-  }catch(e){}
+  const {ano,mes}=chaveVasbolaoAtual();
+  if((dados.config&&dados.config.isencaoBoboBetV||0)<1){
+    try{
+      const isentos=['douglas','jorge','andre'];
+      for(const u of isentos){
+        const docId=u+'_'+ano+'_'+String(mes).padStart(2,'0');
+        await db.collection('mensalidades').doc(docId).set({
+          usuario:u, ano, mes, pago:true, pagoEm:Date.now(), valorPago:null, comprovante:null, transacaoId:null, metodo:'isento',
+        },{merge:true});
+      }
+      await mutar(()=>{ if(!dados.config)dados.config={}; dados.config.isencaoBoboBetV=1; });
+    }catch(e){}
+  }
+  // decisão revista: o Jorge sai da lista de isentos/pagos (voltou a precisar pagar normal)
+  if((dados.config&&dados.config.isencaoBoboBetV||0)<2){
+    try{
+      const docId='jorge_'+ano+'_'+String(mes).padStart(2,'0');
+      await db.collection('mensalidades').doc(docId).delete().catch(()=>{});
+      await mutar(()=>{ dados.config.isencaoBoboBetV=2; });
+    }catch(e){}
+  }
+  render();
 }
 async function fqAtualizarBarra(){
   const usuario=fqUsuario();
@@ -3642,30 +3676,28 @@ function botaoEscolherJogador(idCampo,valorAtual,incluirSemGol,incluirTecnico){
 }
 /* cache do HTML da lista do seletor — monta os ~29 botões (com foto) só na primeira vez, ou
    quando o elenco mudar; nas próximas aberturas, é só reaproveitar a string pronta */
-let _cacheEscolherJogador={comTecnico:null,semTecnico:null,semGol:null,versaoElenco:null};
 function htmlListaEscolherJogador(incluirTecnico,incluirSemGol){
-  const versaoAtual=(dados.jogadores||[]).length+'_'+(dados.jogadores||[]).map(p=>p.id+p.ativo).join('');
-  if(_cacheEscolherJogador.versaoElenco!==versaoAtual){
-    _cacheEscolherJogador={versaoElenco:versaoAtual,comTecnico:null,semTecnico:null};
-  }
-  const chave=incluirTecnico?'comTecnico':'semTecnico';
-  if(_cacheEscolherJogador[chave])return _cacheEscolherJogador[chave];
   let html='';
   let posAtual='';
   jogadoresAtivos().filter(p=>incluirTecnico||p.pos!=='Técnico').forEach(p=>{
-    if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div>';}
+    const pos=p.pos||'Outro';
+    if(pos!==posAtual){posAtual=pos;html+='<div class="pos-titulo" style="margin-top:10px">'+esc(pos)+'s</div>';}
     html+='<button type="button" class="jogo-item" style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:6px" onclick="selecionarJogadorModal(\''+p.id+'\')">'+
-      fotoJogador(p.id,32)+'<span class="jogo-nome" style="font-size:.88rem">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</span></button>';
+      '<span class="jog-num" style="width:26px;text-align:center;flex:none">'+(p.num||'–')+'</span><span class="jogo-nome" style="font-size:.88rem">'+esc(p.nome||'(sem nome)')+'</span></button>';
   });
-  _cacheEscolherJogador[chave]=html;
   return html;
 }
 function abrirEscolherJogador(idCampo,incluirSemGol,incluirTecnico){
   window._escolherJogadorAlvo=idCampo;
-  const semGolHtml=incluirSemGol?'<button type="button" class="jogo-item" style="width:100%;margin-bottom:8px" onclick="selecionarJogadorModal(\''+SEM_GOL+'\')"><span class="jogo-nome">Vasco não marca 😢</span></button>':'';
-  const lista=htmlListaEscolherJogador(incluirTecnico,incluirSemGol);
-  document.getElementById('corpoEscolherJogador').innerHTML=(semGolHtml+lista)||'<div class="vazio">Ninguém no elenco ainda.</div>';
-  document.getElementById('modalEscolherJogador').classList.remove('oculto');
+  try{
+    const semGolHtml=incluirSemGol?'<button type="button" class="jogo-item" style="width:100%;margin-bottom:8px" onclick="selecionarJogadorModal(\''+SEM_GOL+'\')"><span class="jogo-nome">Vasco não marca 😢</span></button>':'';
+    const lista=htmlListaEscolherJogador(incluirTecnico,incluirSemGol);
+    document.getElementById('corpoEscolherJogador').innerHTML=(semGolHtml+lista)||'<div class="vazio">Ninguém no elenco ainda.</div>';
+    document.getElementById('modalEscolherJogador').classList.remove('oculto');
+  }catch(e){
+    console.error('erro ao abrir seletor de jogador',e);
+    avisar('Deu um erro ao montar a lista de jogadores: '+(e.message||e)+'. Me avisa com essa mensagem, por favor.');
+  }
 }
 function fecharEscolherJogador(){document.getElementById('modalEscolherJogador').classList.add('oculto');}
 function selecionarJogadorModal(id){
