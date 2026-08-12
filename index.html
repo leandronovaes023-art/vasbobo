@@ -1745,10 +1745,24 @@ async function baixarPrintPremio(){
   try{
     await garantirHtml2Canvas();
     const canvas=await html2canvas(alvo,{backgroundColor:null,useCORS:true,scale:2});
-    const link=document.createElement('a');
-    link.download='bobobet-premio.png';
-    link.href=canvas.toDataURL('image/png');
-    link.click();
+    canvas.toBlob(async(blob)=>{
+      if(!blob){avisar('Não consegui gerar a imagem.');return;}
+      const arquivo=new File([blob],'bobobet-premio.png',{type:'image/png'});
+      // se o navegador permite compartilhar arquivo (WhatsApp, etc.), usa isso — é o que a
+      // maioria das pessoas espera nesse botão, em vez de baixar direto
+      if(navigator.canShare&&navigator.canShare({files:[arquivo]})){
+        try{
+          await navigator.share({files:[arquivo],title:'BoboBet',text:'Olha o prêmio do BoboBet desse mês! 💰'});
+          return;
+        }catch(e){ if(e&&e.name==='AbortError')return; /* usuário cancelou o compartilhamento, tudo bem */ }
+      }
+      // sem suporte a compartilhar arquivo: baixa a imagem (só nesse caso)
+      const link=document.createElement('a');
+      link.download='bobobet-premio.png';
+      link.href=URL.createObjectURL(blob);
+      link.click();
+      setTimeout(()=>URL.revokeObjectURL(link.href),4000);
+    },'image/png');
   }catch(e){
     avisar('Não consegui gerar o print automático. Tenta o print nativo do seu celular (botões físicos) mesmo.');
   }
