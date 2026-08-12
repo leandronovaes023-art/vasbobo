@@ -231,7 +231,7 @@ exports.handler = async () => {
           if (jProx.palpites && jProx.palpites[usuario]) continue;
           const chave = `palp_${usuario}_${idProx}_${regra.apos}`;
           if (await jaEnviou(db, chave)) continue;
-          const r = await mandarPush(usuario, 'VASBOBO', sorteia(frasesVotar) || 'Dê seu palpite!', '/');
+          const r = await mandarPush(usuario, 'VASBOBO', sorteia(frasesVotar) || 'Dê seu palpite!', `/?abrirJogo=${idProx}`);
           if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
@@ -241,7 +241,7 @@ exports.handler = async () => {
           if (jProx.palpites && jProx.palpites[usuario]) continue;
           const chave = `palp_${usuario}_${idProx}_diajogo`;
           if (await jaEnviou(db, chave)) continue;
-          const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, sorteia(frasesVotar) || 'Dê seu palpite!'), '/');
+          const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, sorteia(frasesVotar) || 'Dê seu palpite!'), `/?abrirJogo=${idProx}`);
           if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
@@ -259,7 +259,7 @@ exports.handler = async () => {
           if (jHoje.palpites && jHoje.palpites[usuario]) continue; // já votou, não precisa lembrar
           const chave = `diajogo_manha_${usuario}_${idHoje}_${horaRegra}`;
           if (await jaEnviou(db, chave)) continue;
-          const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, sorteia(frasesVotar) || 'Vai votar hoje?'), '/');
+          const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, sorteia(frasesVotar) || 'Vai votar hoje?'), `/?abrirJogo=${idHoje}`);
           if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
@@ -272,7 +272,7 @@ exports.handler = async () => {
             if (jHoje.palpites && jHoje.palpites[usuario]) continue; // já votou, não precisa lembrar
             const chave = `diajogo_2h_${usuario}_${idHoje}`;
             if (await jaEnviou(db, chave)) continue;
-            const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, `Faltam 2 horas pro jogo! ${sorteia(frasesVotar) || ''}`), '/');
+            const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, `Faltam 2 horas pro jogo! ${sorteia(frasesVotar) || ''}`), `/?abrirJogo=${idHoje}`);
             if (r.ok) enviados++; else falhas++;
             await marcarEnviado(db, chave);
           }
@@ -288,7 +288,7 @@ exports.handler = async () => {
       for (const usuario of usuarios) {
         const chave = `vespera_${usuario}_${idAmanha}`;
         if (await jaEnviou(db, chave)) continue;
-        const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_AMANHA, 'Já vai se programando.'), '/');
+        const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_AMANHA, 'Já vai se programando.'), `/?abrirJogo=${idAmanha}`);
         if (r.ok) enviados++; else falhas++;
         await marcarEnviado(db, chave);
       }

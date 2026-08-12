@@ -199,6 +199,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-hamburger.aberto{}
   .btn-hamburger{position:relative}
   .btn-hamburger.chamando-atencao{animation:hamburguerChama 1.9s ease-in-out}
+  .btn-hamburger.chamando-atencao-continuo{animation:hamburguerChama 2.6s ease-in-out infinite}
   @keyframes hamburguerChama{0%,100%{transform:scale(1) rotate(0)}15%{transform:scale(1.18) rotate(-10deg)}30%{transform:scale(1.18) rotate(9deg)}45%{transform:scale(1.12) rotate(-6deg)}60%{transform:scale(1.08) rotate(4deg)}75%{transform:scale(1.04) rotate(-2deg)}}
   .btn-hamburger::before{content:"";position:absolute;left:1px;top:50%;transform:translateY(-50%);
     width:3px;height:22px;border-radius:99px;background:var(--branco);opacity:.4;
@@ -223,12 +224,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:var(--carvao);border-top:1px solid var(--linha);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
-  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;
-    padding:12px 1px 9px;text-decoration:none;color:var(--cinza);font-size:.55rem;font-weight:700;
-    text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
-  .menu-fixo a .mf-icone{font-size:1.3rem;line-height:1;display:flex;align-items:center;justify-content:center;height:26px}
+  .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;
+    padding:9px 1px 7px;text-decoration:none;color:var(--cinza);font-size:.5rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:0;font-family:'Inter',sans-serif;position:relative}
+  .menu-fixo a .mf-icone{font-size:1.15rem;line-height:1;display:flex;align-items:center;justify-content:center;height:22px}
   
-  .menu-fixo a .mf-icone img{width:27px;height:27px;object-fit:contain;display:block}
+  .menu-fixo a .mf-icone img{width:23px;height:23px;object-fit:contain;display:block}
   .menu-fixo a.ativo{color:var(--branco)}
   .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--azul)}
   .menu-fixo a{position:relative}
@@ -3021,13 +3022,21 @@ async function sincronizarEscalacao(id){
   if(!r||!r.encontrado||!Array.isArray(r.jogadores))return;
   const ids=mapearGoleadores(r.jogadores);
   if(ids.length<7)return; // sanidade: escalação incompleta não libera votação
+  let avisarAgora=false;
   await mutar(()=>{
     const x=dados.jogos[id];
     if(x&&(!x.emCampo||!x.emCampo.length)){
       x.emCampo=ids;
       x.emCampoInfo={quando:Date.now(),fonte:r.fonte||'busca na web'};
+      avisarAgora=true;
     }
   });
+  if(avisarAgora){
+    try{
+      await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({titulo:'Já dá pra avaliar! 📝',texto:'Já sabemos quem jogou em '+nomeJogo(j).replace(/<[^>]+>/g,'')+' — avalia os jogadores e escolhe o MVP!',url:'/?avaliarJogo='+id})});
+    }catch(e){}
+  }
   render();
 }
 async function consultarTransmissaoIA(j){
@@ -3147,7 +3156,7 @@ async function sincronizarJogos(){
       try{
         const frase=escolherFraseGol(placarGolTexto);
         await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/'})});
+          body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/?abrirJogo='+id})});
       }catch(e){}
     }
     for(const s of novasSubs){
@@ -3393,20 +3402,17 @@ function toggleMenuSecundario(e){
 /* dica visual pra ensinar que a cruz de malta abre um menu com mais opções: balança e abre
    sozinha por um instante, fecha, espera, e repete mais uma vez — só na Home, só ao entrar */
 function dicaMenuSuperiorHome(){
-  if(aba!=='jogos')return;
-  const mostrar=()=>{
-    const btn=document.getElementById('btnMenuSec');
-    const el=document.getElementById('menuSecundario');
-    if(!btn||!el||aba!=='jogos')return;
-    btn.classList.add('chamando-atencao');
-    if(el.classList.contains('oculto'))toggleMenuSecundario();
-    setTimeout(()=>{
-      if(!el.classList.contains('oculto'))toggleMenuSecundario();
-      btn.classList.remove('chamando-atencao');
-    },1900);
-  };
-  setTimeout(mostrar,1500);
-  setTimeout(mostrar,8000);
+  const btn=document.getElementById('btnMenuSec');
+  const el=document.getElementById('menuSecundario');
+  if(!btn||!el)return;
+  if(aba!=='jogos'){
+    btn.classList.remove('chamando-atencao-continuo');
+    return;
+  }
+  // na Home: abre o menu e DEIXA aberto (só balança continuamente pra chamar atenção,
+  // não fecha mais sozinho — só fecha se o usuário tocar fora ou escolher uma opção)
+  btn.classList.add('chamando-atencao-continuo');
+  if(el.classList.contains('oculto'))toggleMenuSecundario();
 }
 document.addEventListener('click',(e)=>{
   const el=document.getElementById('menuSecundario');
@@ -3417,6 +3423,11 @@ function mudarAba(a,semHistorico){
   if(a!==aba)registrarLog('aba','Abriu aba: '+a);
   aba=a;jogoAberto=null;
   try{sessionStorage.setItem('vasbobo:aba',a);}catch(e){}
+  // widgets flutuantes (quiz e Vasbobo Acredita): abertos só na Home, recolhidos nas outras abas
+  const elFq=document.getElementById('fqFixo'), elFm=document.getElementById('fmFixo');
+  if(elFq)elFq.classList.toggle('recolhida',a!=='jogos');
+  if(elFm)elFm.classList.toggle('recolhida',a!=='jogos');
+  dicaMenuSuperiorHome();
   try{
     const novoHash=a==='jogos'?'':('#'+a);
     if(location.hash!==novoHash){
@@ -4301,7 +4312,7 @@ async function buscarAgora(){
     try{
       const frase=escolherFraseGol(placarGolTexto);
       await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/'})});
+        body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/?abrirJogo='+id})});
     }catch(e){}
   }
   avisar(r.encerrado?'Resultado final registrado!':'Placar parcial atualizado.',true);
@@ -5707,6 +5718,11 @@ function iniciarMidiaJanela(){
       const idJogoNotif=params.get('avaliarJogo');
       if(idJogoNotif){
         setTimeout(()=>{ if(typeof abrirJogoNaAvaliacao==='function')abrirJogoNaAvaliacao(idJogoNotif); },400);
+        history.replaceState(null,'',location.pathname+location.hash);
+      }
+      const idJogoAbrir=params.get('abrirJogo');
+      if(idJogoAbrir&&dados.jogos[idJogoAbrir]){
+        setTimeout(()=>{ if(typeof abrirJogo==='function')abrirJogo(idJogoAbrir); },400);
         history.replaceState(null,'',location.pathname+location.hash);
       }
     }catch(e){}

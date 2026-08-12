@@ -1,7 +1,7 @@
 // Recebe o aviso automático (webhook) da InfinitePay quando alguém paga a mensalidade via Pix,
 // e marca sozinho como PAGO no Firestore — ninguém do admin precisa conferir nada manualmente.
 // A InfinitePay espera receber 200 OK de volta pra considerar a notificação entregue.
-const { garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
+const { garantirFirebase, admin, registrarLogServidor, mandarPush } = require('./_push-helper');
 
 exports.handler = async (event) => {
   try {
@@ -39,6 +39,24 @@ exports.handler = async (event) => {
       nivel: 'importante',
       detalhe: `Mensalidade de ${mes}/${ano} confirmada via Pix (InfinitePay) — comprovante gerado automaticamente`,
     });
+
+    // avisa todo mundo que mais uma contribuição entrou (sem falar quem foi) — mensagem genérica
+    // sorteada de uma lista, só pra comemorar que o prêmio do mês aumentou
+    const MENSAGENS_PAGAMENTO = [
+      'Mais um VASBOBO participando do BOBOBET do mês! O prêmio milionário aumentou! 💰',
+      'Confirmado: mais uma contribuição no BOBOBET — o prêmio tá cada vez mais gigante!',
+      'Alerta de grana: acabou de entrar mais um VASBOBO no BOBOBET desse mês! 💸',
+      'O cofre do BOBOBET tá enchendo! Mais um VASBOBO confirmado.',
+      'Rachou a economia mas valeu: mais um VASBOBO no BOBOBET desse mês!',
+      'Prêmio subindo! Mais um pagamento confirmado no BOBOBET.',
+    ];
+    try {
+      const tokensSnap = await db.collection('push_tokens').get();
+      const msg = MENSAGENS_PAGAMENTO[Math.floor(Math.random() * MENSAGENS_PAGAMENTO.length)];
+      for (const doc of tokensSnap.docs) {
+        await mandarPush(doc.id, 'BOBOBET 💰', msg, '/#vasbolao', false);
+      }
+    } catch (e) { /* não deixa a confirmação do pagamento falhar por causa do broadcast */ }
 
     return { statusCode: 200, body: 'ok' };
   } catch (e) {
