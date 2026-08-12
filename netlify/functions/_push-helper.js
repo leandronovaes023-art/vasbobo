@@ -1,6 +1,5 @@
 // Helper compartilhado pra mandar push — usado tanto pelo teste manual quanto pela função agendada.
 const admin = require('firebase-admin');
-const { garantirSeed, buscarFrases, sorteia } = require('./_frases');
 
 let appInicializado = false;
 function garantirFirebase() {
@@ -14,14 +13,6 @@ function garantirFirebase() {
 
 function capitaliza(s) {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
-
-async function saudacaoPersonalizada(db, usuario) {
-  await garantirSeed(db);
-  const nome = capitaliza(usuario);
-  const opcoes = await buscarFrases(db, 'saudacao');
-  const texto = sorteia(opcoes) || '{nome}, olha só';
-  return texto.replace('{nome}', nome);
 }
 
 async function registrarLogServidor(db, { usuario, tipo, nivel, detalhe }) {
@@ -44,7 +35,8 @@ async function mandarPush(usuario, titulo, texto, url, comSaudacao = true) {
   if (!tokDoc.exists) return { ok: false, motivo: 'usuário sem token registrado (não ativou notificações ainda)' };
   const { token } = tokDoc.data();
   if (!token) return { ok: false, motivo: 'token vazio' };
-  const corpoFinal = comSaudacao ? `${await saudacaoPersonalizada(db, usuario)} ${texto}` : texto;
+  // sem saudação/frase de abertura aleatória — só o nome da pessoa antes da mensagem, direto
+  const corpoFinal = comSaudacao ? `${capitaliza(usuario)}, ${texto}` : texto;
   try {
     await admin.messaging().send({
       token,

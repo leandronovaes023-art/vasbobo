@@ -5129,8 +5129,7 @@ async function renderAdmin(){
   '<div class="grid g2" style="margin-bottom:10px">'+
   '<div><label for="filtroTipoFrase">Filtrar por tipo</label><select id="filtroTipoFrase" onchange="if(document.getElementById(&quot;detalhesListaFrases&quot;).open)carregarBibliotecaFrases()">'+
   '<option value="votar">🗳️ Votar palpite</option><option value="avaliar">🚫 Avaliar jogadores</option>'+
-  '<option value="motivacional">🎯 Vasbobo Acredita</option><option value="quiz">⚽ Quiz</option>'+
-  '<option value="saudacao">💬 Saudação (use {nome})</option></select></div>'+
+  '<option value="motivacional">🎯 Vasbobo Acredita</option><option value="quiz">⚽ Quiz</option></select></div>'+
   '<div id="campoHoraFrase" style="display:none"><label for="novaFraseHora">Hora (0-23)</label><input id="novaFraseHora" type="number" min="0" max="23"></div>'+
   '</div>'+
   '<div class="grid g2" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaFraseTexto">Nova frase</label><input id="novaFraseTexto" placeholder="Escreva a frase…"></div></div>'+
@@ -5421,7 +5420,6 @@ async function criarFraseBiblioteca(){
   const tipo=document.getElementById('filtroTipoFrase').value;
   const texto=(document.getElementById('novaFraseTexto').value||'').trim();
   if(!texto){avisar('Escreve a frase primeiro.');return;}
-  if(tipo==='saudacao'&&!texto.includes('{nome}')){avisar('Saudação precisa ter {nome} em algum lugar do texto.');return;}
   const dado={tipo,texto,ativo:true,criadoEm:Date.now(),criadoPor:eu};
   if(TIPOS_COM_HORA.includes(tipo)){
     const hora=parseInt(document.getElementById('novaFraseHora').value,10);

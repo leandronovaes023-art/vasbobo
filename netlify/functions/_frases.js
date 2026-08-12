@@ -119,16 +119,8 @@ add('avaliar', [
   'O Alex já escreveu o relatório completo do jogo. Você só precisa dar as notas.',
 ]);
 
-add('saudacao', [
-  'E aí, {nome}!!', '{nome}, o Vasco depende de você!', '{nome}, está aí?', '{nome}, Vasco é todo dia',
-  'Opa, {nome}!', '{nome}, cadê você?', '{nome}, bora!', '{nome}, presta atenção nisso aqui',
-  'Fala, {nome}!', '{nome}, olha só', '{nome}, sem enrolação', 'Vem cá, {nome}',
-  '{nome}, acorda!', '{nome}, para tudo', 'Ô {nome}, escuta', '{nome}, é sério isso',
-  '{nome}, larga o que tá fazendo', 'Psiu, {nome}', '{nome}, tô de olho em você', '{nome}, urgente',
-  '{nome}, sem desculpa dessa vez', 'Alô, {nome}?', '{nome}, o Bar da Tia te chama', '{nome}, corre aqui',
-  '{nome}, dá um tempo pra isso', 'Sério, {nome}', '{nome}, foi mal te incomodar, mas', '{nome}, uma coisinha rápida',
-  '{nome}, guarda esse recado', '{nome}, presta ou perde',
-]);
+/* saudação removida do sistema — as notificações agora vão direto com o nome da pessoa, sem
+   frase de abertura aleatória (era "E aí, Fulano!", "Fulano, olha só" etc.) */
 
 /* ---- ALEATÓRIAS: fofoca/humor do grupo, 4x por dia (7h, 12h, 16h, 21h) — migrada da antiga
    saudação de login (que só aparecia na tela, até 3x/dia). Agora vira notificação push de
