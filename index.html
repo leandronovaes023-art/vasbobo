@@ -1579,13 +1579,14 @@ function htmlVasbolaoStatusCard(){
 /* =================== REVELAÇÃO CINEMATOGRÁFICA DO PRÊMIO (estilo BBB) =================== */
 window._premioTrocasUsadas=0;
 window._premioFrasesUsadas=[];
-function htmlNotasCaindo(qtd){
+function htmlNotasCaindo(qtd,atrasoMax){
+  atrasoMax=atrasoMax===undefined?0.8:atrasoMax; // por padrão, começa a cair quase na hora — só um pouquinho escalonado
   const notas=['img/dinheiro/nota50.png','img/dinheiro/nota100.png','img/dinheiro/nota200.png'];
   let html='';
   for(let i=0;i<qtd;i++){
     const src=notas[Math.floor(Math.random()*notas.length)];
     const esq=(Math.random()*90).toFixed(1);
-    const atraso=(Math.random()*7).toFixed(2);
+    const atraso=(Math.random()*atrasoMax).toFixed(2);
     const dur=(2.2+Math.random()*2.6).toFixed(2);
     const fundo=Math.random()<0.4; // parte fica "ao fundo" (menor, mais transparente) pra dar profundidade
     const escala=fundo?(0.5+Math.random()*0.25).toFixed(2):(0.8+Math.random()*0.35).toFixed(2);
@@ -1625,7 +1626,7 @@ async function carregarPremioMesAnimado(){
   const gerador=setInterval(()=>{
     const alvo=document.getElementById('premioNotas');
     if(!alvo){clearInterval(gerador);return;}
-    alvo.innerHTML+=htmlNotasCaindo(4);
+    alvo.innerHTML+=htmlNotasCaindo(4,0.3);
   },600);
   setTimeout(()=>clearInterval(gerador),7000);
   girarContadorPremio(premio);
