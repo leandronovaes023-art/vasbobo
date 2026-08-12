@@ -122,6 +122,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .titulo-vasbobo{display:flex;justify-content:space-between;align-items:center;width:100%}
   .titulo-vasbobo .cruz{flex:none}
   .oculto{display:none!important}
+  html.trava-scroll,html.trava-scroll body{overflow:hidden!important;height:100%;overscroll-behavior:none}
+  .bbb-caindo{position:relative;height:64px;overflow:hidden;margin-bottom:4px}
+  .bbb-moeda{position:absolute;top:-30px;font-size:1.5rem;animation-name:cairMoeda;animation-timing-function:ease-in;animation-fill-mode:forwards}
+  @keyframes cairMoeda{to{transform:translateY(94px) rotate(360deg);opacity:0}}
 
   header{border-bottom:1px solid var(--linha);background:var(--preto)}
   .header-inner{max-width:1320px;margin:0 auto;padding:8px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
@@ -1556,7 +1560,49 @@ function nomeMesPt(mes){
 function htmlVasbolaoStatusCard(){
   return '<div class="card"><h2>🏆 BoboBet — sua contribuição</h2>'+
     '<p class="nota-rodape" style="margin:0 0 12px">R$10,00 por mês, via Pix. Metade (R$5) vira o prêmio do mês, a outra metade (R$5) acumula pro prêmio de fim de ano.</p>'+
+    '<div id="premioAnimado" style="margin-bottom:14px"></div>'+
     '<div id="statusVasbolao"><p class="nota-rodape" style="margin:0">Verificando...</p></div></div>';
+}
+/* animação estilo "cofre do BBB": moedas caindo + número contando até o valor final do prêmio
+   do mês (quantidade de gente que já pagou × R$5) */
+function htmlCaindoMoedas(){
+  let moedas='';
+  for(let i=0;i<9;i++){
+    const esq=(i*11)+Math.random()*6;
+    const atraso=(Math.random()*1.1).toFixed(2);
+    const dur=(1.5+Math.random()*0.9).toFixed(2);
+    moedas+='<span class="bbb-moeda" style="left:'+esq+'%;animation-delay:'+atraso+'s;animation-duration:'+dur+'s">'+(i%2?'💰':'🪙')+'</span>';
+  }
+  return '<div class="bbb-caindo">'+moedas+'</div>';
+}
+function animarContagemPremio(elId,valorFinal){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  const duracao=1800,inicio=performance.now();
+  function passo(agora){
+    const prog=Math.min(1,(agora-inicio)/duracao);
+    const facil=1-Math.pow(1-prog,3);
+    const atual=Math.round(valorFinal*facil);
+    el.textContent='R$'+atual.toLocaleString('pt-BR');
+    if(prog<1)requestAnimationFrame(passo);
+    else el.textContent='R$'+valorFinal.toLocaleString('pt-BR');
+  }
+  requestAnimationFrame(passo);
+}
+async function carregarPremioMesAnimado(){
+  const el=document.getElementById('premioAnimado');
+  if(!el)return;
+  const {ano,mes}=chaveVasbolaoAtual();
+  try{
+    const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).where('pago','==',true).get();
+    const premio=snap.size*5;
+    el.innerHTML=htmlCaindoMoedas()+
+      '<p style="text-align:center;font-size:.86rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:6px 0 2px">O Valor BoboBet <span style="color:var(--vermelho)">EXTRAORDINÁRIO FENOMENAL</span> mensal é</p>'+
+      '<p style="text-align:center;font-family:\'Anton\',sans-serif;font-size:2.2rem;color:var(--verde)" id="premioValorNum">R$0</p>';
+    animarContagemPremio('premioValorNum',premio);
+  }catch(e){
+    el.innerHTML='';
+  }
 }
 async function carregarStatusVasbolao(){
   const el=document.getElementById('statusVasbolao');
@@ -1761,9 +1807,10 @@ function htmlVasbolaoRanking(limite){
   const ordem=Object.entries(placar).filter(([u,x])=>x.pts!==0||x.exato||x.resultado||x.umtimeErrou||x.quiz)
     .sort((a,b)=>b[1].pts-a[1].pts||b[1].exato-a[1].exato);
   const lista=limite?ordem.slice(0,limite):ordem;
-  let html='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">'+
+  let html='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px">'+
     '<h2 style="margin:0;padding:0;border:none">🏆 BoboBet — '+cap(nomeMes)+'</h2>'+
-    '<button class="btn fantasma" style="padding:6px 10px;font-size:.68rem" onclick="abrirExplicacaoVasbolaoRanking()">Como funciona?</button></div>';
+    '<button class="btn fantasma" style="padding:6px 10px;font-size:.68rem" onclick="abrirExplicacaoVasbolaoRanking()">Como funciona?</button></div>'+
+    '<p class="nota-rodape" style="margin:0 0 12px;font-weight:700">💰 Prêmio do mês: <span id="premioMesSimplesValor">carregando…</span></p>';
   if(!lista.length){
     html+='<div class="vazio">Ainda não tem jogo pontuado esse mês.</div>';
   }else{
@@ -2307,7 +2354,7 @@ const ADICIONAR_P2=[
  ['p_spinelli','99','Spinelli','Centroavante'],
 ];
 const PATCH_TV_V=2;
-const PATCH_ELENCO2_V=1;
+const PATCH_ELENCO2_V=2;
 const PATCH_ZERAR_TEMPORADA_V=1;
 function migrar(){
   let mudou=false;
@@ -3607,9 +3654,8 @@ function renderListaJogos(){
   sec.innerHTML=html;
   atualizarCronometro();
   atualizarCronometroAvaliar();
+  carregarPremioMesSimples();
 }
-
-/* =================== DETALHE DO JOGO =================== */
 function renderDetalhe(){
   const sec=document.getElementById('secDetalhe');
   const j=dados.jogos[jogoAberto];
@@ -4531,10 +4577,21 @@ function renderRank(){
   sec.innerHTML=html;
   atualizarCronometroAvaliar();
 }
+async function carregarPremioMesSimples(){
+  const el=document.getElementById('premioMesSimplesValor');
+  if(!el)return;
+  const {ano,mes}=chaveVasbolaoAtual();
+  try{
+    const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).where('pago','==',true).get();
+    el.textContent='R$'+(snap.size*5).toLocaleString('pt-BR');
+  }catch(e){ el.textContent='—'; }
+}
 async function renderVasbolaoAba(){
   const sec=document.getElementById('secVasbolao');
   sec.innerHTML=htmlVasbolaoStatusCard()+htmlVasbolaoRanking();
   carregarStatusVasbolao();
+  carregarPremioMesAnimado();
+  carregarPremioMesSimples();
 }
 
 /* =================== ABA JOGADORES: dicionário da resenha =================== */
@@ -5538,6 +5595,17 @@ function iniciarMidiaJanela(){
     mostrar('login');
   }
 })();
+/* trava automática de rolagem do fundo: sempre que QUALQUER modal (.modal-sair ou .veu) estiver
+   visível, a tela de trás para de rolar junto — resolve o "fundo mexe também" ao usar um modal */
+(function(){
+  function atualizarTravaScroll(){
+    const abertos=document.querySelectorAll('.modal-sair:not(.oculto), .veu:not(.oculto)');
+    document.documentElement.classList.toggle('trava-scroll',abertos.length>0);
+  }
+  const obs=new MutationObserver(atualizarTravaScroll);
+  document.querySelectorAll('.modal-sair,.veu').forEach(el=>obs.observe(el,{attributes:true,attributeFilter:['class']}));
+  atualizarTravaScroll();
+})();
 </script>
   <nav class="menu-fixo" id="menuFixo">
     <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:60px;height:auto"></span>Home</a>
@@ -5545,7 +5613,7 @@ function iniciarMidiaJanela(){
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/icone-calendario-crvg2.png?v=2" alt=""></span>Calendário</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone">📅</span>Calendário</a>
   </nav>
 </body>
 </html>
