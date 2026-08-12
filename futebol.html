@@ -232,7 +232,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
     padding:14px 2px 11px;text-decoration:none;color:var(--cinza);font-size:.6rem;font-weight:700;
     text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
   .menu-fixo a .mf-icone{font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;height:30px}
-html.tema-claro #mfCalendario .mf-icone{background:#17171B;border-radius:50%;padding:3px}
+
   .menu-fixo a .mf-icone img{width:32px;height:32px;object-fit:contain;display:block}
   .menu-fixo a.ativo{color:var(--branco)}
   .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--azul)}
@@ -240,11 +240,8 @@ html.tema-claro #mfCalendario .mf-icone{background:#17171B;border-radius:50%;pad
   .menu-fixo a .mf-sinal{position:absolute;top:9px;right:calc(50% - 24px);width:8px;height:8px;border-radius:50%;background:var(--vermelho);border:1.5px solid var(--carvao)}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(217,174,78,.1);border:1px solid var(--ouro);color:var(--ouro);border-radius:9px;padding:8px 14px;font-size:.78rem}
-#btnInstalarApp::before{content:"";position:absolute;inset:-2px;border-radius:9px;padding:2px;
-  background:conic-gradient(from 0deg,transparent 0%,transparent 70%,#BFE0FF 82%,#FFFFFF 88%,#BFE0FF 94%,transparent 100%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
-  animation:girarBrilhoApp 2.6s linear infinite;pointer-events:none}
-@keyframes girarBrilhoApp{to{transform:rotate(360deg)}}
+#btnInstalarApp{animation:brilhoBordaApp 1.8s ease-in-out infinite}
+@keyframes brilhoBordaApp{0%,100%{box-shadow:0 0 3px 0 rgba(79,166,240,.35);border-color:var(--azul)}50%{box-shadow:0 0 13px 3px rgba(79,166,240,.9);border-color:#BFE0FF}}
 @media(max-width:480px){
   .bobo{width:62px;height:62px;border-radius:11px}
   .header-inner{gap:6px}

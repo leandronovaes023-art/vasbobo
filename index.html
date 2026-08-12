@@ -132,11 +132,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .sino-notif.ativado{color:var(--verde);animation:none!important}
   .sino-notif.balancando{animation:sinoBalanca 1.7s ease-in-out infinite}
   @keyframes sinoBalanca{0%,100%{transform:rotate(0)}12%{transform:rotate(-16deg)}24%{transform:rotate(13deg)}36%{transform:rotate(-11deg)}48%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}72%{transform:rotate(3deg)}84%{transform:rotate(-1deg)}}
-  #btnInstalarApp::before{content:"";position:absolute;inset:-2px;border-radius:9px;padding:2px;
-    background:conic-gradient(from 0deg,transparent 0%,transparent 70%,#BFE0FF 82%,#FFFFFF 88%,#BFE0FF 94%,transparent 100%);
-    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
-    animation:girarBrilhoApp 2.6s linear infinite;pointer-events:none}
-  @keyframes girarBrilhoApp{to{transform:rotate(360deg)}}
+  #btnInstalarApp{animation:brilhoBordaApp 1.8s ease-in-out infinite}
+  @keyframes brilhoBordaApp{0%,100%{box-shadow:0 0 3px 0 rgba(79,166,240,.35);border-color:var(--azul)}50%{box-shadow:0 0 13px 3px rgba(79,166,240,.9);border-color:#BFE0FF}}
   h1{font-size:clamp(1.7rem,7.5vw,2.6rem);line-height:1;text-shadow:none;width:auto}
   h1 .cruz{color:var(--vermelho);font-size:.75em;vertical-align:.06em;margin-left:4px;display:inline-block;
     animation:balancarCruz 3s ease-in-out infinite}
@@ -196,7 +193,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     padding:14px 2px 11px;text-decoration:none;color:var(--cinza);font-size:.6rem;font-weight:700;
     text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
   .menu-fixo a .mf-icone{font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;height:30px}
-  html.tema-claro #mfCalendario .mf-icone{background:#17171B;border-radius:50%;padding:3px}
+  
   .menu-fixo a .mf-icone img{width:32px;height:32px;object-fit:contain;display:block}
   .menu-fixo a.ativo{color:var(--branco)}
   .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--azul)}
@@ -3637,22 +3634,37 @@ function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
 function botaoEscolherJogador(idCampo,valorAtual,incluirSemGol,incluirTecnico){
   const jSel=valorAtual&&valorAtual!==SEM_GOL?jogadorPorId(valorAtual):null;
   const texto=valorAtual===SEM_GOL?'Vasco não marca 😢':(jSel?((jSel.num?jSel.num+' · ':'')+jSel.nome):'— escolher —');
+  const fotoTxt=jSel?fotoJogador(jSel.id,26):'';
   return '<input type="hidden" id="'+idCampo+'" value="'+esc(valorAtual||'')+'">'+
     '<button type="button" class="btn fantasma" style="width:100%;display:flex;align-items:center;gap:8px;justify-content:flex-start;text-align:left;padding:9px 12px" '+
     'onclick="abrirEscolherJogador(\''+idCampo+'\','+(incluirSemGol?'true':'false')+','+(incluirTecnico?'true':'false')+')" id="btnEsc_'+idCampo+'">'+
-    '<span id="txtEsc_'+idCampo+'">'+esc(texto)+'</span></button>';
+    '<span id="fotoEsc_'+idCampo+'">'+fotoTxt+'</span><span id="txtEsc_'+idCampo+'">'+esc(texto)+'</span></button>';
 }
-function abrirEscolherJogador(idCampo,incluirSemGol,incluirTecnico){
-  window._escolherJogadorAlvo=idCampo;
+/* cache do HTML da lista do seletor — monta os ~29 botões (com foto) só na primeira vez, ou
+   quando o elenco mudar; nas próximas aberturas, é só reaproveitar a string pronta */
+let _cacheEscolherJogador={comTecnico:null,semTecnico:null,semGol:null,versaoElenco:null};
+function htmlListaEscolherJogador(incluirTecnico,incluirSemGol){
+  const versaoAtual=(dados.jogadores||[]).length+'_'+(dados.jogadores||[]).map(p=>p.id+p.ativo).join('');
+  if(_cacheEscolherJogador.versaoElenco!==versaoAtual){
+    _cacheEscolherJogador={versaoElenco:versaoAtual,comTecnico:null,semTecnico:null};
+  }
+  const chave=incluirTecnico?'comTecnico':'semTecnico';
+  if(_cacheEscolherJogador[chave])return _cacheEscolherJogador[chave];
   let html='';
-  if(incluirSemGol)html+='<button type="button" class="jogo-item" style="width:100%;margin-bottom:8px" onclick="selecionarJogadorModal(\''+SEM_GOL+'\')"><span class="jogo-nome">Vasco não marca 😢</span></button>';
   let posAtual='';
   jogadoresAtivos().filter(p=>incluirTecnico||p.pos!=='Técnico').forEach(p=>{
     if(p.pos!==posAtual){posAtual=p.pos;html+='<div class="pos-titulo" style="margin-top:10px">'+esc(p.pos)+'s</div>';}
     html+='<button type="button" class="jogo-item" style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:6px" onclick="selecionarJogadorModal(\''+p.id+'\')">'+
-      '<span class="jog-num" style="width:26px;text-align:center;flex:none">'+(p.num||'–')+'</span><span class="jogo-nome" style="font-size:.88rem">'+esc(p.nome)+'</span></button>';
+      fotoJogador(p.id,32)+'<span class="jogo-nome" style="font-size:.88rem">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</span></button>';
   });
-  document.getElementById('corpoEscolherJogador').innerHTML=html||'<div class="vazio">Ninguém no elenco ainda.</div>';
+  _cacheEscolherJogador[chave]=html;
+  return html;
+}
+function abrirEscolherJogador(idCampo,incluirSemGol,incluirTecnico){
+  window._escolherJogadorAlvo=idCampo;
+  const semGolHtml=incluirSemGol?'<button type="button" class="jogo-item" style="width:100%;margin-bottom:8px" onclick="selecionarJogadorModal(\''+SEM_GOL+'\')"><span class="jogo-nome">Vasco não marca 😢</span></button>':'';
+  const lista=htmlListaEscolherJogador(incluirTecnico,incluirSemGol);
+  document.getElementById('corpoEscolherJogador').innerHTML=(semGolHtml+lista)||'<div class="vazio">Ninguém no elenco ainda.</div>';
   document.getElementById('modalEscolherJogador').classList.remove('oculto');
 }
 function fecharEscolherJogador(){document.getElementById('modalEscolherJogador').classList.add('oculto');}
@@ -3662,6 +3674,7 @@ function selecionarJogadorModal(id){
   document.getElementById(idCampo).value=id;
   const jSel=id!==SEM_GOL?jogadorPorId(id):null;
   document.getElementById('txtEsc_'+idCampo).textContent=id===SEM_GOL?'Vasco não marca 😢':(jSel?((jSel.num?jSel.num+' · ':'')+jSel.nome):'— escolher —');
+  document.getElementById('fotoEsc_'+idCampo).innerHTML=jSel?fotoJogador(jSel.id,26):'';
   fecharEscolherJogador();
 }
 
