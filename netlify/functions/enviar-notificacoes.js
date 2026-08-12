@@ -7,7 +7,7 @@
 // As frases agora vivem no Firestore (coleção notif_frases, ver _frases.js), editáveis
 // pelo admin em Configurações → Notificações. Nada mais fica fixo no código.
 const { mandarPush, garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
-const { garantirSeed, garantirSeedV2, buscarFrases, sorteia } = require('./_frases');
+const { garantirSeed, garantirSeedV2, garantirSeedV3, buscarFrases, sorteia } = require('./_frases');
 
 const HORA = 3600000;
 
@@ -45,6 +45,7 @@ exports.handler = async () => {
   try {
   await garantirSeed(db);
   await garantirSeedV2(db);
+  await garantirSeedV3(db);
   const agora = new Date();
   const horaAtual = agora.getHours();
   const chaveDia = agora.toISOString().slice(0, 10);
@@ -66,6 +67,40 @@ exports.handler = async () => {
   const dadosJogos = principalDocJogos.exists ? JSON.parse(principalDocJogos.data().value || '{}') : {};
   const jogosTodos = dadosJogos.jogos || {};
   const jogoDeHoje = Object.values(jogosTodos).find((j) => j.data === chaveDia);
+  const amanha = new Date(agora.getTime() + 24 * HORA);
+  const chaveAmanha = amanha.toISOString().slice(0, 10);
+  const jogoDeAmanha = Object.values(jogosTodos).find((j) => j.data === chaveAmanha);
+
+  // ---------- GOL DE TESTE (hype de pré-jogo, brincadeira avisando que é só teste) ----------
+  // véspera do jogo: 10h, 15h, 22h, dizendo "amanhã" — dia do jogo: 7h, 11h, 17h, dizendo "mais tarde"
+  const HORAS_GOL_VESPERA = [10, 15, 22];
+  const HORAS_GOL_DIA = [7, 11, 17];
+  if (jogoDeAmanha && HORAS_GOL_VESPERA.includes(horaAtual)) {
+    const pool = await buscarFrases(db, 'gol_teste', null);
+    if (pool.length) {
+      const frase = sorteia(pool);
+      for (const usuario of usuarios) {
+        const chave = `golteste_${usuario}_${chaveDia}_${horaAtual}`;
+        if (await jaEnviou(db, chave)) continue;
+        const r = await mandarPush(usuario, 'GOOOOL DO VASCO! ⚽', `${frase}! Calma, calma… só testando a notificação pra amanhã 😅`, '/');
+        if (r.ok) enviados++; else falhas++;
+        await marcarEnviado(db, chave);
+      }
+    }
+  }
+  if (jogoDeHoje && HORAS_GOL_DIA.includes(horaAtual)) {
+    const pool = await buscarFrases(db, 'gol_teste', null);
+    if (pool.length) {
+      const frase = sorteia(pool);
+      for (const usuario of usuarios) {
+        const chave = `golteste_${usuario}_${chaveDia}_${horaAtual}`;
+        if (await jaEnviou(db, chave)) continue;
+        const r = await mandarPush(usuario, 'GOOOOL DO VASCO! ⚽', `${frase}! Calma, calma… só testando a notificação pra mais tarde 😅`, '/');
+        if (r.ok) enviados++; else falhas++;
+        await marcarEnviado(db, chave);
+      }
+    }
+  }
 
   // ---------- Aleatórias (fofoca/humor do grupo) — 4x por dia: 7h, 12h, 16h, 21h ----------
   const HORAS_ALEATORIAS = [7, 12, 16, 21];

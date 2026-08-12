@@ -211,6 +211,47 @@ async function garantirSeedV2(db) {
   await batch.commit();
 }
 
+/* ---- GOL DE TESTE: hype de pré-jogo, brincando que "foi gol" e avisando que é só teste da
+   notificação — sai só na véspera (10h/15h/22h) e no dia do jogo (7h/11h/17h), tratado à parte
+   pela função de envio (não usa buscarFrases com hora, porque o mesmo texto pode sair em
+   qualquer um dos horários — só muda "amanhã" x "mais tarde" no final) ---- */
+add('gol_teste', [
+  'Puma Rodríguez de bicicleta, direto no ângulo',
+  'David de cabeça, sem chance pro goleiro',
+  'Adson de calcanhar — golaço olímpico',
+  'Andrés Gómez de fora da área, um foguete',
+  'Nuno Moreira driblou três e rolou pro gol vazio',
+  'João Vitor, contra-ataque relâmpago e categoria',
+  'Spinelli de cavadinha, estilo Neymar',
+  'Brenner, cabeçada de centroavante raiz',
+  'Robert Renan subiu pro escanteio e testou — na trave e dentro',
+  'Jair, de fora da área, sem dó',
+  'Tchê Tchê, chegando pra pegar a sobra e mandar pro fundo',
+  'Cuiabano cruzou fechado e caiu direto no gol',
+  'Johan Rojas, jogada individual, três dribles e tapinha',
+  'Lucas Piton, subiu a linha inteira e bateu cruzado',
+  'Carlos Cuesta, de cabeça em cima de escanteio',
+  'Paulo Henrique invadiu a área e tocou por cima do goleiro',
+  'Thiago Mendes, chute de longe que ninguém esperava',
+  'Ramon Rique, aproveitando rebote e mandando pra rede',
+  'Marino Hinestroza driblou o goleiro e rolou pra dentro',
+  'JP, categoria pura, encobriu o goleiro',
+]);
+
+async function garantirSeedV3(db) {
+  const marcador = db.collection('notif_frases_meta').doc('seed_v3_gol_teste');
+  const doc = await marcador.get();
+  if (doc.exists) return;
+  const NOVOS = SEED.filter((s) => s.tipo === 'gol_teste');
+  const batch = db.batch();
+  NOVOS.forEach((item) => {
+    const ref = db.collection('notif_frases').doc();
+    batch.set(ref, { ...item, ativo: true, criadoEm: Date.now() });
+  });
+  batch.set(marcador, { feito: true, quando: Date.now(), qtd: NOVOS.length });
+  await batch.commit();
+}
+
 async function garantirSeed(db) {
   const snap = await db.collection('notif_frases').limit(1).get();
   if (!snap.empty) return; // já foi semeado antes, não faz de novo
@@ -233,4 +274,4 @@ function sorteia(lista) {
   return lista.length ? lista[Math.floor(Math.random() * lista.length)].texto : null;
 }
 
-module.exports = { garantirSeed, garantirSeedV2, buscarFrases, sorteia };
+module.exports = { garantirSeed, garantirSeedV2, garantirSeedV3, buscarFrases, sorteia };

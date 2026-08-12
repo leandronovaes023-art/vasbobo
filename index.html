@@ -125,13 +125,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   html.trava-scroll,html.trava-scroll body{overflow:hidden!important;height:100%;overscroll-behavior:none}
 
   /* =============== revelação cinematográfica do prêmio (estilo BBB) =============== */
-  .premio-cinema{position:relative;height:340px;border-radius:16px;overflow:hidden;
+  .premio-cinema{position:relative;height:auto;border-radius:16px;overflow:hidden;padding:0 0 4px;
     background:
       radial-gradient(circle at 50% 20%,rgba(255,224,130,.35),transparent 55%),
       radial-gradient(circle at 15% 85%,rgba(255,196,0,.25),transparent 50%),
       radial-gradient(circle at 85% 80%,rgba(255,196,0,.22),transparent 50%),
       linear-gradient(160deg,#4a3208,#7a5410 35%,#3d2a06 70%,#1f1503);
     border:2px solid #C99A2E;box-shadow:inset 0 0 60px rgba(0,0,0,.45)}
+  .premio-zona-notas{position:relative;height:300px;overflow:hidden}
   .premio-notas{position:absolute;inset:0;overflow:hidden}
   .dinheiro-nota{position:absolute;top:-70px;width:82px;height:auto;border-radius:4px;
     box-shadow:0 3px 10px rgba(0,0,0,.5);
@@ -140,18 +141,17 @@ console.log('Firebase conectado ao Vasbobo ✓');
   @keyframes notaCaindo{
     0%{transform:translateY(0) scale(var(--escala)) rotate(0deg);opacity:0}
     10%{opacity:var(--opac)}
-    100%{transform:translateY(440px) scale(var(--escala)) rotate(var(--giro));opacity:0}
+    100%{transform:translateY(390px) scale(var(--escala)) rotate(var(--giro));opacity:0}
   }
   .premio-conteudo{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
   .premio-contador{font-family:'Anton',sans-serif;font-size:2.3rem;color:#fff;text-shadow:0 0 16px rgba(0,0,0,.6),0 0 24px rgba(255,210,80,.6);letter-spacing:.02em;transition:none}
   .premio-contador.premio-revelado{color:#FFE067;animation:pulsarRevelado .6s ease-out;text-shadow:0 0 30px rgba(255,210,80,1),0 0 60px rgba(255,180,0,.7)}
   @keyframes pulsarRevelado{0%{transform:scale(1)}35%{transform:scale(1.32)}100%{transform:scale(1)}}
   .premio-frase{font-size:1.06rem;font-weight:800;line-height:1.55;color:#FFFDF5;margin-top:0;text-shadow:0 1px 4px rgba(0,0,0,.5)}
-  #premioResultado{margin-top:12px;padding:16px;border-radius:14px;
-    background:linear-gradient(160deg,#4a3208,#7a5410 35%,#3d2a06 70%,#1f1503);border:2px solid #C99A2E;text-align:center}
-  .btn-premio{background:#1B1F25;border:1.5px solid #FFD23D;color:#FFFDF5;border-radius:8px;
+  #premioResultado{position:relative;z-index:2;padding:6px 20px 20px;text-align:center}
+  .btn-premio{background:rgba(0,0,0,.35);border:1.5px solid #FFD23D;color:#FFFDF5;border-radius:8px;
     padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap}
-  .btn-premio:active{background:#2A2010}
+  .btn-premio:active{background:rgba(0,0,0,.55)}
   .particulas-wrap{position:absolute;left:50%;top:40%;width:0;height:0}
   .particula-ouro{position:absolute;left:0;top:0;width:6px;height:6px;border-radius:50%;background:#FFD23D;
     box-shadow:0 0 6px 1px rgba(255,210,61,.8);animation:particulaVoa .9s ease-out forwards}
@@ -1626,14 +1626,16 @@ async function carregarPremioMesAnimado(){
   }catch(e){}
   window._premioValorAtual=premio;
   window._premioTrocasUsadas=0;
-  // a caixa da chuva de dinheiro tem altura FIXA (não cresce) — o resultado aparece embaixo dela,
-  // numa caixa separada. Assim as notas sempre caem numa área do mesmo tamanho, sem "sumir" lá em
-  // cima quando o texto do resultado empurra tudo pra baixo
+  // uma caixa SÓ: por dentro, uma "zona de queda" com altura fixa (onde ficam as notas + o
+  // contador), e o resultado (frase) aparece embaixo dela, mas ainda dentro da mesma caixa —
+  // assim as notas nunca ficam "perdidas" quando o resultado empurra a caixa pra baixo
   el.innerHTML='<div class="premio-cinema" id="premioCinema">'+
+    '<div class="premio-zona-notas">'+
     '<div class="premio-notas" id="premioNotas">'+htmlNotasCaindo(24)+'</div>'+
     '<div class="premio-conteudo"><p class="premio-contador" id="premioContador">R$ 0</p></div>'+
     '</div>'+
-    '<div id="premioResultado" class="oculto"></div>';
+    '<div id="premioResultado" class="oculto"></div>'+
+    '</div>';
   // continua gerando notas novas durante toda a animação, pra nunca "secar" a chuva de dinheiro
   const gerador=setInterval(()=>{
     const alvo=document.getElementById('premioNotas');
@@ -5320,6 +5322,15 @@ function htmlAgendaSistemaAuto(){
     {emoji:'📝',nome:'Avaliar jogadores / MVP',regras:[
       'Janelas depois que o resultado libera a avaliação: 0-1h, 1-2h, 8-9h, 14-15h, 20-21h e 23-24h',
       '<b style="color:var(--verde)">Já pula sozinho quem já avaliou.</b>',
+    ]},
+    {emoji:'⚽',nome:'Gol de teste (hype de pré-jogo)',regras:[
+      'Véspera do jogo (dia anterior): 10h, 15h e 22h — "Calma, só testando pra amanhã"',
+      'Dia do jogo: 7h, 11h e 17h — "Calma, só testando pra mais tarde"',
+      'Frase de gol diferente sorteada a cada vez (jogador + jogada), só sai se realmente tiver jogo marcado pra aquele dia',
+    ]},
+    {emoji:'🎲',nome:'Aleatórias (fofoca/humor do grupo)',regras:[
+      '4x por dia, fixo: 7h, 12h, 16h e 21h',
+      'Em dia de jogo do Vasco, mistura frases extras específicas de casa ou fora',
     ]},
   ];
   return topicos.map(t=>'<div style="margin-bottom:12px"><div style="font-weight:800;font-size:.82rem;margin-bottom:4px">'+t.emoji+' '+esc(t.nome)+'</div>'+
