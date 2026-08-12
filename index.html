@@ -783,10 +783,25 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
   <div class="fq-veu oculto" id="modalInstalar" onclick="if(event.target===this)document.getElementById('modalInstalar').classList.add('oculto')">
     <div class="fq-modal" style="max-width:420px">
-      <h3 style="text-align:left;margin-bottom:14px">📲 App VASBOBO</h3>
-      <p style="font-size:.86rem;line-height:1.6;margin-bottom:12px">Instale o VASBOBO no seu celular e fica igual um app.</p>
-      <p style="font-size:.8rem;line-height:1.6;margin-bottom:10px"><b>Android:</b> menu (⋮) → "Instalar app" &nbsp;|&nbsp; <b>iPhone:</b> compartilhar → "Adicionar à Tela de Início"</p>
-      <p style="font-size:.86rem;line-height:1.6;margin-bottom:14px;font-weight:700">Agora é só arrastar para a tela inicial do celular.</p>
+      <h3 style="text-align:left;margin-bottom:14px">📲 Baixar o app VASBOBO</h3>
+      <p style="font-size:.86rem;line-height:1.6;margin-bottom:14px">Instale no seu celular e fica igual um app de verdade, com ícone na tela inicial.</p>
+      <div id="passosInstalarIOS" style="margin-bottom:14px">
+        <p style="font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ouro);font-weight:800;margin-bottom:8px">📱 No iPhone (Safari)</p>
+        <ol style="margin:0 0 0 18px;padding:0;font-size:.84rem;line-height:1.9;color:var(--branco)">
+          <li>Toque no ícone de <b>compartilhar</b> (o quadrado com uma seta pra cima ↑), na barra do Safari</li>
+          <li>Role a lista e toque em <b>"Adicionar à Tela de Início"</b></li>
+          <li>Toque em <b>"Adicionar"</b> no canto de cima</li>
+        </ol>
+        <p class="nota-rodape" style="margin-top:8px">Pronto — o ícone do VASBOBO aparece na tela inicial do seu iPhone.</p>
+      </div>
+      <div id="passosInstalarAndroid" style="margin-bottom:14px">
+        <p style="font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--azul);font-weight:800;margin-bottom:8px">🤖 No Android (Chrome)</p>
+        <ol style="margin:0 0 0 18px;padding:0;font-size:.84rem;line-height:1.9;color:var(--branco)">
+          <li>Toque no menu (⋮) no canto de cima do Chrome</li>
+          <li>Toque em <b>"Instalar app"</b> ou <b>"Adicionar à tela inicial"</b></li>
+          <li>Confirma tocando em <b>"Instalar"</b></li>
+        </ol>
+      </div>
       <button class="btn" style="width:100%" onclick="document.getElementById('modalInstalar').classList.add('oculto')">Entendi</button>
     </div>
   </div>
@@ -853,6 +868,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
         }
       } else {
         document.getElementById('modalInstalar').classList.remove('oculto');
+        const ehIos=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+        const elIos=document.getElementById('passosInstalarIOS'), elAnd=document.getElementById('passosInstalarAndroid');
+        if(elIos)elIos.style.display=ehIos?'block':'none';
+        if(elAnd)elAnd.style.display=ehIos?'none':'block';
       }
     }
     window.addEventListener('appinstalled', ()=>{
@@ -1540,16 +1559,34 @@ async function carregarStatusVasbolao(){
 async function pagarVasbolao(){
   const btn=document.getElementById('btnPagarVasbolao');
   if(btn){btn.disabled=true;btn.textContent='Gerando cobrança…';}
+  // abre a aba/janela JÁ, de forma síncrona (ainda dentro do clique) — Safari/iPhone bloqueia
+  // window.open() se ele acontecer depois de um "await" (a espera parece suspeita pro navegador).
+  // Preenche o endereço dela só depois que a cobrança for gerada.
+  const janela=window.open('','_blank');
+  if(janela)janela.document.write('<body style="background:#0B0D10;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>Gerando o Pix…</p></body>');
   try{
     const r=await fetch('/.netlify/functions/mensalidade?acao=criar&usuario='+encodeURIComponent(eu));
     const info=await r.json();
-    if(info.erro||!info.url){avisar('Não consegui gerar o Pix agora. Tenta de novo em instantes.');if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}return;}
+    if(info.erro||!info.url){
+      if(janela)janela.close();
+      avisar('Não consegui gerar o Pix agora. Tenta de novo em instantes.');
+      if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}
+      return;
+    }
     registrarLog('pagamento','Gerou cobrança do BoboBet',eu,'comum');
-    window.open(info.url,'_blank');
-    avisar('Abriu a tela de pagamento numa aba nova. Não precisa mandar comprovante pra ninguém — depois de pagar, o app confirma e guarda tudo sozinho. Só volta aqui em alguns segundos.',true);
+    if(janela){
+      janela.location.href=info.url;
+      avisar('Abriu a tela de pagamento numa aba nova. Não precisa mandar comprovante pra ninguém — depois de pagar, o app confirma e guarda tudo sozinho. Só volta aqui em alguns segundos.',true);
+    }else{
+      // navegador bloqueou até a aba em branco — navega a própria página, mais garantido que insistir num popup
+      avisar('Abrindo a tela de pagamento…',true,3000);
+      location.href=info.url;
+      return;
+    }
     setTimeout(carregarStatusVasbolao,4000);
     if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}
   }catch(e){
+    if(janela)janela.close();
     avisar('Erro ao gerar a cobrança: '+(e.message||e));
     if(btn){btn.disabled=false;btn.textContent='Pagar '+VASBOLAO_VALOR_TEXTO;}
   }
