@@ -193,6 +193,7 @@ exports.handler = async () => {
       for (const horaRegra of HORAS_MANHA) {
         if (horaAtual !== horaRegra) continue;
         for (const usuario of usuarios) {
+          if (jHoje.palpites && jHoje.palpites[usuario]) continue; // já votou, não precisa lembrar
           const chave = `diajogo_manha_${usuario}_${idHoje}_${horaRegra}`;
           if (await jaEnviou(db, chave)) continue;
           const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, sorteia(frasesVotar) || 'Vai votar hoje?'), '/');
@@ -205,6 +206,7 @@ exports.handler = async () => {
         const horaAlvo = hh - 2;
         if (horaAlvo >= 0 && horaAtual === horaAlvo) {
           for (const usuario of usuarios) {
+            if (jHoje.palpites && jHoje.palpites[usuario]) continue; // já votou, não precisa lembrar
             const chave = `diajogo_2h_${usuario}_${idHoje}`;
             if (await jaEnviou(db, chave)) continue;
             const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, `Faltam 2 horas pro jogo! ${sorteia(frasesVotar) || ''}`), '/');

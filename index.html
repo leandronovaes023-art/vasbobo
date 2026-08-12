@@ -4900,6 +4900,9 @@ async function renderAdmin(){
   '<div><label for="novaMsgHora">Hora (0-23)</label><input id="novaMsgHora" type="number" min="0" max="23" placeholder="20"></div></div>'+
   '<button class="btn fantasma" onclick="criarMensagemAgendada()">+ Adicionar mensagem agendada</button>'+
   '<div id="listaMsgAgendadasItens" style="margin-top:14px">Carregando…</div>'+
+  '<details style="margin-top:16px;border-top:1px solid var(--linha);padding-top:12px" ontoggle="if(this.open)document.getElementById(\'agendaSistemaAuto\').classList.remove(\'oculto\')"><summary style="cursor:pointer;font-weight:800;font-size:.85rem">🤖 Ver a agenda automática do sistema (fixa no código)</summary>'+
+  '<div id="agendaSistemaAuto" style="margin-top:10px">'+htmlAgendaSistemaAuto()+'</div>'+
+  '</details>'+
   '</div>'+
   '<div id="notifTabAtivados" class="oculto">'+
   '<p class="nota-rodape" style="margin:0 0 10px">Quem já ativou as notificações push e está recebendo no aparelho — e quem ainda não ativou.</p>'+
@@ -5036,6 +5039,30 @@ async function buscarLogs(){
   }catch(e){
     el.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao buscar: '+esc(e.message||'')+'</div>';
   }
+}
+/* resumo da agenda automática de notificação que roda sozinha no servidor (enviar-notificacoes.js,
+   a cada 30 min) — não vem do banco, é só uma referência do que já está programado no código.
+   Cada linha já pula sozinha quem já fez a ação (ex.: já votou, já avaliou, já fez o quiz hoje). */
+function htmlAgendaSistemaAuto(){
+  const topicos=[
+    {emoji:'🎯',nome:'Vasbobo Acredita (motivacional)',regras:['Horários configuráveis na Biblioteca de frases acima — só manda pra quem ainda não abriu a frase do dia.']},
+    {emoji:'⚽',nome:'O Que Mais Entende (quiz)',regras:['Horários configuráveis na Biblioteca de frases acima — só manda pra quem ainda não respondeu as 3 perguntas do dia.']},
+    {emoji:'🗳️',nome:'Palpite',regras:[
+      '42h, 50h e 58h depois do resultado do jogo anterior sair',
+      'Dia do próprio jogo, às 8h',
+      'Dia do jogo, também às 9h e 12h',
+      '2h antes da bola rolar',
+      'Véspera (dia anterior), às 20h — só um aviso de "amanhã tem jogo", não cobra quem já votou',
+      '<b style="color:var(--verde)">Todas (menos a véspera) já pulam sozinhas quem já deu o palpite.</b>',
+    ]},
+    {emoji:'📝',nome:'Avaliar jogadores / MVP',regras:[
+      'Janelas depois que o resultado libera a avaliação: 0-1h, 1-2h, 8-9h, 14-15h, 20-21h e 23-24h',
+      '<b style="color:var(--verde)">Já pula sozinho quem já avaliou.</b>',
+    ]},
+  ];
+  return topicos.map(t=>'<div style="margin-bottom:12px"><div style="font-weight:800;font-size:.82rem;margin-bottom:4px">'+t.emoji+' '+esc(t.nome)+'</div>'+
+    '<ul style="margin:0 0 0 18px;padding:0;font-size:.78rem;color:var(--cinza);line-height:1.7">'+t.regras.map(r=>'<li>'+r+'</li>').join('')+'</ul></div>'
+  ).join('');
 }
 function mudarTabNotif(nome){
   ['biblioteca','enviar','agendadas','ativados'].forEach(t=>{
