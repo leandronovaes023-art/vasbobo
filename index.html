@@ -128,14 +128,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .premio-cinema{position:relative;min-height:280px;height:auto;border-radius:14px;overflow:hidden;
     background:radial-gradient(circle at 50% 30%,#1c2436,#080a0d 75%);border:1px solid var(--linha)}
   .premio-notas{position:absolute;inset:0;overflow:hidden}
-  .dinheiro-nota{position:absolute;top:-60px;width:58px;height:27px;border-radius:3px;
-    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.62rem;color:#fff;
-    box-shadow:0 3px 8px rgba(0,0,0,.4);letter-spacing:.02em;
+  .dinheiro-nota{position:absolute;top:-70px;width:76px;height:auto;border-radius:4px;
+    box-shadow:0 3px 10px rgba(0,0,0,.5);
     opacity:var(--opac);transform:scale(var(--escala));
     animation-name:notaCaindo;animation-timing-function:cubic-bezier(.4,0,.7,1);animation-fill-mode:forwards}
-  .nota-50{background:linear-gradient(135deg,#F0B429,#B77A08);border:1px solid rgba(255,255,255,.3)}
-  .nota-100{background:linear-gradient(135deg,#2E9E6B,#1A6B45);border:1px solid rgba(255,255,255,.3)}
-  .nota-200{background:linear-gradient(135deg,#4A7FC2,#254C82);border:1px solid rgba(255,255,255,.3)}
   @keyframes notaCaindo{
     0%{transform:translateY(0) scale(var(--escala)) rotate(0deg);opacity:0}
     10%{opacity:var(--opac)}
@@ -145,7 +141,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .premio-contador{font-family:'Anton',sans-serif;font-size:1.9rem;color:#fff;text-shadow:0 0 14px rgba(224,172,31,.5);letter-spacing:.02em;transition:none}
   .premio-contador.premio-revelado{color:var(--ouro);animation:pulsarRevelado .6s ease-out;text-shadow:0 0 26px rgba(224,172,31,.9),0 0 50px rgba(224,172,31,.5)}
   @keyframes pulsarRevelado{0%{transform:scale(1)}35%{transform:scale(1.28)}100%{transform:scale(1)}}
-  .premio-frase{font-size:.86rem;line-height:1.5;color:var(--branco);margin-top:6px}
+  .premio-frase{font-size:.86rem;line-height:1.5;color:#F3F4F6;margin-top:6px}
   .particulas-wrap{position:absolute;left:50%;top:45%;width:0;height:0}
   .particula-ouro{position:absolute;left:0;top:0;width:6px;height:6px;border-radius:50%;background:var(--ouro);
     box-shadow:0 0 6px 1px rgba(224,172,31,.8);animation:particulaVoa .9s ease-out forwards}
@@ -1584,19 +1580,19 @@ function htmlVasbolaoStatusCard(){
 window._premioTrocasUsadas=0;
 window._premioFrasesUsadas=[];
 function htmlNotasCaindo(qtd){
-  const denoms=[{c:'nota-50',t:'R$50'},{c:'nota-100',t:'R$100'},{c:'nota-200',t:'R$200'}];
+  const notas=['img/dinheiro/nota50.png','img/dinheiro/nota100.png','img/dinheiro/nota200.png'];
   let html='';
   for(let i=0;i<qtd;i++){
-    const d=denoms[Math.floor(Math.random()*denoms.length)];
-    const esq=(Math.random()*94).toFixed(1);
+    const src=notas[Math.floor(Math.random()*notas.length)];
+    const esq=(Math.random()*90).toFixed(1);
     const atraso=(Math.random()*7).toFixed(2);
     const dur=(2.2+Math.random()*2.6).toFixed(2);
     const fundo=Math.random()<0.4; // parte fica "ao fundo" (menor, mais transparente) pra dar profundidade
-    const escala=fundo?(0.55+Math.random()*0.25).toFixed(2):(0.85+Math.random()*0.35).toFixed(2);
-    const opac=fundo?0.45:0.95;
+    const escala=fundo?(0.5+Math.random()*0.25).toFixed(2):(0.8+Math.random()*0.35).toFixed(2);
+    const opac=fundo?0.5:0.95;
     const giroFinal=(Math.random()<0.5?1:-1)*(540+Math.floor(Math.random()*540));
-    html+='<span class="dinheiro-nota '+d.c+'" style="left:'+esq+'%;animation-delay:'+atraso+'s;animation-duration:'+dur+'s;'+
-      '--escala:'+escala+';--opac:'+opac+';--giro:'+giroFinal+'deg">'+d.t+'</span>';
+    html+='<img src="'+src+'" class="dinheiro-nota" style="left:'+esq+'%;animation-delay:'+atraso+'s;animation-duration:'+dur+'s;'+
+      '--escala:'+escala+';--opac:'+opac+';--giro:'+giroFinal+'deg" alt="">';
   }
   return html;
 }
@@ -1696,7 +1692,7 @@ function mostrarResultadoPremio(){
   const valor=window._premioValorAtual||0;
   el.classList.remove('oculto');
   el.innerHTML=
-    '<p class="premio-frase" id="premioFraseTxt">'+esc(frase)+' <b style="color:var(--verde)">'+fmtReais(valor)+'!</b></p>'+
+    '<p class="premio-frase" id="premioFraseTxt">'+esc(frase)+' <b style="color:#3DDC9A">'+fmtReais(valor)+'!</b></p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px" id="premioBotoesTroca">'+
     '<button class="btn fantasma" style="font-size:.72rem;padding:6px 12px" onclick="trocarPremioFrase()">🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')</button>'+
     '</div>'+
@@ -1717,7 +1713,7 @@ function trocarPremioFrase(){
     return;
   }
   const frase=fraseAleatoriaPremio();
-  if(elTxt)elTxt.innerHTML=esc(frase)+' <b style="color:var(--verde)">'+fmtReais(valor)+'!</b>';
+  if(elTxt)elTxt.innerHTML=esc(frase)+' <b style="color:#3DDC9A">'+fmtReais(valor)+'!</b>';
   const btn=document.querySelector('#premioBotoesTroca button');
   if(btn)btn.textContent='🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')';
 }
@@ -1966,7 +1962,7 @@ function htmlVasbolaoRanking(limite){
   let html='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px">'+
     '<h2 style="margin:0;padding:0;border:none">🏆 BoboBet — '+cap(nomeMes)+'</h2>'+
     '<button class="btn fantasma" style="padding:6px 10px;font-size:.68rem" onclick="abrirExplicacaoVasbolaoRanking()">Como funciona?</button></div>'+
-    '<p class="nota-rodape" style="margin:0 0 12px;font-weight:700">💰 Prêmio do mês: <span id="premioMesSimplesValor">carregando…</span></p>';
+    '<p class="nota-rodape" style="margin:0 0 12px;font-weight:700">💰 Prêmio do mês: <span id="premioMesSimplesValor'+(limite?'Home':'Full')+'">carregando…</span></p>';
   if(!lista.length){
     html+='<div class="vazio">Ainda não tem jogo pontuado esse mês.</div>';
   }else{
@@ -4704,13 +4700,16 @@ function renderRank(){
   atualizarCronometroAvaliar();
 }
 async function carregarPremioMesSimples(){
-  const el=document.getElementById('premioMesSimplesValor');
-  if(!el)return;
   const {ano,mes}=chaveVasbolaoAtual();
+  let texto='—';
   try{
     const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).where('pago','==',true).get();
-    el.textContent='R$'+(snap.size*5).toLocaleString('pt-BR');
-  }catch(e){ el.textContent='—'; }
+    texto='R$'+(snap.size*5).toLocaleString('pt-BR');
+  }catch(e){}
+  ['premioMesSimplesValorHome','premioMesSimplesValorFull'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=texto;
+  });
 }
 async function renderVasbolaoAba(){
   const sec=document.getElementById('secVasbolao');
@@ -5739,7 +5738,7 @@ function iniciarMidiaJanela(){
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone">📅</span>Calendário</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/menu/escudo-vasco.png" alt="" style="width:26px;height:auto"></span>Calendário</a>
   </nav>
 </body>
 </html>
