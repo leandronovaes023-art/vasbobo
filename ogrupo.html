@@ -60,7 +60,7 @@ let eu = "";
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>O Grupo — Vasbobo</title>
-<script>try{if(localStorage.getItem('vasbobo_tema')==='claro')document.documentElement.classList.add('tema-claro');}catch(e){}</script>
+<script>try{if(localStorage.getItem('vasbobo_tema')!=='escuro')document.documentElement.classList.add('tema-claro');}catch(e){}</script>
 <!-- Open Graph / WhatsApp preview -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://vasbobo.netlify.app/ogrupo.html">
@@ -272,16 +272,22 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
   .menu-fixo a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;
-    padding:14px 2px 11px;text-decoration:none;color:rgba(255,255,255,.68);font-size:.6rem;font-weight:700;
+    padding:14px 2px 11px;text-decoration:none;color:var(--cinza);font-size:.6rem;font-weight:700;
     text-transform:uppercase;letter-spacing:.01em;font-family:'Inter',sans-serif;position:relative}
   .menu-fixo a .mf-icone{font-size:1.5rem;line-height:1;display:flex;align-items:center;justify-content:center;height:30px}
+html.tema-claro #mfCalendario .mf-icone{background:#17171B;border-radius:50%;padding:3px}
   .menu-fixo a .mf-icone img{width:32px;height:32px;object-fit:contain;display:block}
-  .menu-fixo a.ativo{color:#fff}
+  .menu-fixo a.ativo{color:var(--branco)}
   .menu-fixo a.ativo::after{content:"";position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:18px;height:3px;border-radius:99px;background:var(--azul)}
   .menu-fixo a{position:relative}
   .menu-fixo a .mf-sinal{position:absolute;top:9px;right:calc(50% - 24px);width:8px;height:8px;border-radius:50%;background:var(--vermelho);border:1.5px solid var(--carvao)}
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(217,174,78,.1);border:1px solid var(--ouro);color:var(--ouro);border-radius:9px;padding:8px 14px;font-size:.78rem}
+#btnInstalarApp::before{content:"";position:absolute;inset:-2px;border-radius:9px;padding:2px;
+  background:conic-gradient(from 0deg,transparent 0%,transparent 70%,#BFE0FF 82%,#FFFFFF 88%,#BFE0FF 94%,transparent 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:girarBrilhoApp 2.6s linear infinite;pointer-events:none}
+@keyframes girarBrilhoApp{to{transform:rotate(360deg)}}
 .fq-veu{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000}
 .fq-veu.oculto{display:none}
 .fq-modal{background:#0B0B0E;border:1px solid rgba(255,255,255,.16);
@@ -332,7 +338,7 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
       </div>
       <div class="header-right-stack">
         <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
-          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);border:1px solid var(--azul);color:var(--branco);border-radius:6px;padding:5px 9px;cursor:pointer;font-size:.66rem;letter-spacing:.03em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:700;flex:none;white-space:nowrap">Baixar APP</button>
+          <button id="btnInstalarApp" onclick="instalarApp()" style="background:rgba(79,166,240,.16);color:var(--branco);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:800;flex:none;white-space:nowrap;position:relative;border:1.5px solid var(--azul)">Baixar APP</button>
           <div class="who">
             <b id="whoNome"></b>!
             <span class="adm oculto" id="whoAdm">admin</span>
