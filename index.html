@@ -123,9 +123,33 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .titulo-vasbobo .cruz{flex:none}
   .oculto{display:none!important}
   html.trava-scroll,html.trava-scroll body{overflow:hidden!important;height:100%;overscroll-behavior:none}
-  .bbb-caindo{position:relative;height:64px;overflow:hidden;margin-bottom:4px}
-  .bbb-moeda{position:absolute;top:-30px;font-size:1.5rem;animation-name:cairMoeda;animation-timing-function:ease-in;animation-fill-mode:forwards}
-  @keyframes cairMoeda{to{transform:translateY(94px) rotate(360deg);opacity:0}}
+
+  /* =============== revelação cinematográfica do prêmio (estilo BBB) =============== */
+  .premio-cinema{position:relative;min-height:280px;height:auto;border-radius:14px;overflow:hidden;
+    background:radial-gradient(circle at 50% 30%,#1c2436,#080a0d 75%);border:1px solid var(--linha)}
+  .premio-notas{position:absolute;inset:0;overflow:hidden}
+  .dinheiro-nota{position:absolute;top:-60px;width:58px;height:27px;border-radius:3px;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.62rem;color:#fff;
+    box-shadow:0 3px 8px rgba(0,0,0,.4);letter-spacing:.02em;
+    opacity:var(--opac);transform:scale(var(--escala));
+    animation-name:notaCaindo;animation-timing-function:cubic-bezier(.4,0,.7,1);animation-fill-mode:forwards}
+  .nota-50{background:linear-gradient(135deg,#F0B429,#B77A08);border:1px solid rgba(255,255,255,.3)}
+  .nota-100{background:linear-gradient(135deg,#2E9E6B,#1A6B45);border:1px solid rgba(255,255,255,.3)}
+  .nota-200{background:linear-gradient(135deg,#4A7FC2,#254C82);border:1px solid rgba(255,255,255,.3)}
+  @keyframes notaCaindo{
+    0%{transform:translateY(0) scale(var(--escala)) rotate(0deg);opacity:0}
+    10%{opacity:var(--opac)}
+    100%{transform:translateY(340px) scale(var(--escala)) rotate(var(--giro));opacity:0}
+  }
+  .premio-conteudo{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center}
+  .premio-contador{font-family:'Anton',sans-serif;font-size:1.9rem;color:#fff;text-shadow:0 0 14px rgba(224,172,31,.5);letter-spacing:.02em;transition:none}
+  .premio-contador.premio-revelado{color:var(--ouro);animation:pulsarRevelado .6s ease-out;text-shadow:0 0 26px rgba(224,172,31,.9),0 0 50px rgba(224,172,31,.5)}
+  @keyframes pulsarRevelado{0%{transform:scale(1)}35%{transform:scale(1.28)}100%{transform:scale(1)}}
+  .premio-frase{font-size:.86rem;line-height:1.5;color:var(--branco);margin-top:6px}
+  .particulas-wrap{position:absolute;left:50%;top:45%;width:0;height:0}
+  .particula-ouro{position:absolute;left:0;top:0;width:6px;height:6px;border-radius:50%;background:var(--ouro);
+    box-shadow:0 0 6px 1px rgba(224,172,31,.8);animation:particulaVoa .9s ease-out forwards}
+  @keyframes particulaVoa{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
 
   header{border-bottom:1px solid var(--linha);background:var(--preto)}
   .header-inner{max-width:1320px;margin:0 auto;padding:8px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
@@ -624,14 +648,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 </div>
 
-<!-- modal de escolher jogador (foto + número + nome) — usado no MVP, quem faz gol, etc. -->
-<div class="modal-sair oculto" id="modalEscolherJogador" onclick="if(event.target===this)fecharEscolherJogador()">
-  <div class="modal" style="max-width:420px;max-height:80vh;max-height:80dvh;overflow-y:auto">
-    <h3 style="text-align:left;margin-bottom:10px">Escolher jogador</h3>
-    <div id="corpoEscolherJogador"></div>
-    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn fantasma" style="flex:1" onclick="fecharEscolherJogador()">Fechar</button></div>
-  </div>
-</div>
 
 <!-- modal da escalação pré-jogo -->
 <div class="modal-sair oculto" id="modalEscalacaoPreJogo" onclick="if(event.target===this)fecharEscalacaoPreJogo()">
@@ -1557,52 +1573,192 @@ function chaveVasbolaoAtual(){
 function nomeMesPt(mes){
   return ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][mes-1]||'';
 }
+const FRASES_PREMIO_BOBOBET=["O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de pagar a bariátrica do Novaes, comprar São Januário, quitar as dívidas do Vasco e ainda sobrar dinheiro para ele continuar defendendo o Pedrinho até 2087:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de pagar toda a graduação do Douglas, financiar pós, mestrado e doutorado e ainda montar o maior escritório de advocacia do Brasil exclusivamente para defender o Pedrinho:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar todas as meias do Bob Esponja do planeta, contratar o Renato Gaúcho para a vida inteira, comprar uma bike elétrica para ir a Ipanema e ainda deixar uma verba mensal para o Daniel odiar o Diniz e cancelar o sócio do Vasco:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar todos os tênis caros do planeta, construir uma pista de corrida particular e ainda financiar o Velloso correndo uma maratona diferente por dia até 2050:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma mansão, três carros, um iate e, principalmente, garantir ao Juan dinheiro suficiente para negociar com a mulher a tão sonhada autorização para sair de casa:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar todas as “creckes” de São Januário, comprar São Januário, comprar o Vasco e ainda sobrar dinheiro para o João construir uma “crecke” particular em casa:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de financiar o maior laboratório de química do Brasil, criar a fórmula para o Hinestroza voltar a jogar bola, fazer o Tchê Tchê ter vontade e ainda comprar um microfone de ouro para preservar aquela voz aveludada:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma treta por dia, contratar uma equipe para administrar suas confusões, pagar todas as multas por perturbação da paz e ainda garantir dinheiro suficiente para o Leodoro desaparecer do grupo sempre que a merda ficar grande:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de financiar a parceria com o Pedrosa, transformar os dois em magnatas do futebol e ainda deixar dinheiro suficiente para o André continuar feliz enquanto o resto do grupo se fode:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de bancar a Faculdade de Direito do Novaes e do Douglas, abrir a maior banca jurídica da América Latina e criar a primeira divisão especializada em defender Pedrinho contra qualquer crítica:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar a Kappa, comprar a Nike, contratar o Renato Gaúcho, montar uma fábrica exclusiva de meias do Bob Esponja e ainda sobrar dinheiro para o Daniel cancelar o sócio mais 847 vezes:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar Oscar, Dudu, Rony, Sérgio Ramos, Didi, Zagallo e Evaristo de Macedo para o Vasco, comprar um elenco de ponta e ainda deixar o clube endividado o suficiente para o Wallace comemorar:", "O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de pagar a faculdade do Douglas, contratar um advogado para defender o Pedrinho, comprar todas as meias do Bob Esponja do Daniel e ainda sobrar dinheiro para o Novaes continuar brigando com os dois às 7h da manhã:", "💰 O prêmio do BOBOBET deste mês é uma fortuna tão absurda que dá para bancar a bariátrica do Novaes, comprar um jatinho para ele defender o Pedrinho de qualquer lugar do mundo e ainda deixar dinheiro suficiente para ele continuar defendendo o presidente até o fim dos tempos:", "⚖️ O prêmio do BOBOBET deste mês é uma bolada tão gigantesca que dá para pagar toda a faculdade do Douglas na Estácio, financiar sua pós, mestrado, doutorado e ainda abrir um escritório de advocacia só para defender o Pedrinho:", "⚽ O prêmio do BOBOBET deste mês é uma fortuna tão colossal que dá para contratar o Renato Gaúcho, comprar uma fábrica inteira de meias do Bob Esponja e ainda sobra dinheiro para o Daniel criticar o Pedrinho com tranquilidade pelo resto da vida:", "👟 O prêmio do BOBOBET deste mês é uma bolada tão monstruosa que dá para comprar todos os tênis caros do planeta, contratar uma equipe de fisioterapia e ainda bancar o Velloso correndo igual maratonista até os 90 anos:", "😂 O prêmio do BOBOBET deste mês é uma fortuna tão gigantesca que dá para comprar uma mansão, três carros, um iate e ainda pagar uma fortuna para a mulher do Juan finalmente autorizar a saída dele de casa:", "🏟️ O prêmio do BOBOBET deste mês é uma bolada tão absurda que dá para o João comprar TODAS as “creckes” de São Januário, colocar seu nome em cada uma delas e ainda sobrar dinheiro para comprar São Januário inteiro:", "🧪 O prêmio do BOBOBET deste mês é uma fortuna tão astronômica que dá para montar o maior laboratório de química do Brasil, comprar equipamentos até para a NASA e ainda contratar o Antonio Nerd para narrar cada reação química com sua lendária voz aveludada:", "💥 O prêmio do BOBOBET deste mês é uma bolada tão colossal que dá para o Leodoro comprar uma treta, começar uma discussão histórica, abandonar o grupo no auge da confusão e ainda desaparecer com dinheiro suficiente para ninguém conseguir encontrá-lo:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar São Januário, bancar a bariátrica do Novaes, contratar um nutricionista, dois endocrinologistas e ainda garantir dinheiro para ele defender o Pedrinho até a última gota de gordura:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar Novaes no maior investidor do Vasco, comprar ações, contratar reforços e ainda criar o Ministério da Defesa do Pedrinho, com Novaes como ministro vitalício:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de pagar a Estácio até o Douglas esquecer o que é Direito, abrir um escritório de advocacia em São Januário e contratar 200 estagiários para defender o Pedrinho no grupo:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar Douglas no advogado oficial do Pedrinho, contratar o STF inteiro e ainda recorrer de qualquer crítica feita ao presidente:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar Renato Gaúcho por 30 anos, comprar uma fábrica de meias do Bob Esponja e ainda criar um fundo de emergência para cada vez que o Daniel cancelar o sócio:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar Renato Gaúcho para o Vasco, comprar um jatinho para o Daniel acompanhar o homem e ainda pagar terapia para ele superar o trauma chamado Fernando Diniz:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar a Kappa inteira, aposentar a Nike e ainda financiar 500 camisas para o Daniel provar que realmente prefere a Kappa:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma loja de tênis inteira, contratar um personal trainer e construir uma esteira que atravesse o Rio de Janeiro — porque Velloso não pode ficar parado:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar um tênis novo para cada dia do ano, inclusive os que ainda não foram inventados, e finalmente descobrir por que ele precisa de outro se já tem 73 pares:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma casa de praia, um carro, um barco e ainda reservar uma parte para pagar a taxa de autorização da patroa toda vez que Juan quiser sair:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de garantir ao Juan liberdade financeira, liberdade geográfica e, principalmente, liberdade CONJUGAL para sair de casa sem precisar protocolar requerimento em três vias:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar todas as “creckes” de São Januário, virar dono do estoque, monopolizar o mercado e ainda sobrar dinheiro para comprar São Januário junto:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de financiar pesquisas químicas por 100 anos, criar uma cura para a falta de vontade do Tchê Tchê e ainda produzir uma fórmula que faça Hinestroza jogar bola sem precisar de intervenção divina:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar o maior estúdio de gravação do Brasil, colocar espuma acústica até no laboratório e registrar a voz aveludada do Antônio Nerd como patrimônio histórico da humanidade:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de financiar todas as tretas do Leodoro, pagar indenização para quem ele irritar e ainda comprar um celular com rastreador para descobrirmos para onde ele some depois da confusão:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma ilha particular para o Leodoro brigar sozinho, abandonar o grupo e desaparecer sem ninguém conseguir encontrá-lo:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma máquina do tempo para o Pedro voltar a 2000, assistir o Vasco campeão todos os dias e nunca mais precisar ligar a televisão nos jogos atuais:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar o time dos sonhos do Wallace, pagar salários astronômicos, fazer o Vasco gastar até o último centavo e ainda colocar o clube na Série B com orçamento de Premier League:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar o David, colocar o homem como titular absoluto, construir uma estátua para ele em São Januário e ainda pagar a multa caso Wallace mude de opinião depois de dois jogos:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar uma equipe de busca internacional, satélites da NASA e até o Scooby-Doo para finalmente descobrir onde o Thiago Azevedo está:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar a parceria entre André e Pedrosa em um império, comprar metade do futebol brasileiro e ainda deixar o André feliz o suficiente para não reclamar de absolutamente nada por cinco minutos:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de pagar terapia para o Daniel, bariátrica para o Novaes e ainda contratar um mediador profissional para impedir que os dois discutam às 7h da manhã:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de formar a maior sociedade de advogados do Vasco, contratar Renato Gaúcho como cliente, colocar Pedrinho como sócio honorário e ainda sobrar dinheiro para os três discutirem sobre tudo isso às 7h da manhã:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar São Januário, contratar o elenco inteiro, pagar a faculdade do Douglas, a bariátrica do Novaes, os tênis do Velloso, as meias do Daniel, a liberdade do Juan, as pesquisas do Antônio Nerd e ainda contratar um detetive para encontrar o Leodoro e o Thiago Azevedo:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar Novaes no maior acionista do Vasco, criar o Fundo Nacional de Defesa do Pedrinho e ainda reservar alguns milhões para ele explicar por que a culpa nunca é do presidente:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar um apartamento inteiro de gordura para o Novaes, derrubar a parede para caber e ainda financiar um documentário chamado “A Inabalável Defesa de Pedrinho”:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de fazer Douglas pagar a Estácio adiantado até a aposentadoria, comprar uma toga banhada a ouro e abrir uma vara judicial exclusiva para julgar críticas ao Pedrinho:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar Douglas no primeiro advogado brasileiro especializado em recursos, habeas corpus e mandados de segurança em favor do Pedrinho:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de instalar um outdoor gigante em Ipanema escrito “RENATO, EU ACREDITO”, comprar uma bike elétrica banhada a ouro e ainda financiar o mau humor do Maurinho da Colina por várias gerações:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de pagar uma comissão vitalícia para cada vez que Daniel disser “eu avisei”, criar um instituto de estudos sobre Renato Gaúcho e ainda deixar verba para ele reclamar do Vasco diariamente:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma praia inteira para Daniel continuar degustando areia, instalar uma estátua do Renato no calçadão e ainda contratar um segurança para proteger a meia do Bob Esponja:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar Velloso no maior patrocinador individual da indústria mundial de calçados esportivos e ainda construir uma garagem exclusivamente para guardar os tênis que ele comprou e nunca usou:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de colocar Velloso numa esteira presidencial, com fisioterapeuta, nutricionista, massagista e 14 pares de tênis esperando enquanto ele corre sem destino:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de financiar o primeiro programa brasileiro de ressocialização de maridos autorizados a sair de casa e ainda pagar o Uber de Juan sem necessidade de aprovação prévia:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar uma agenda exclusiva para Juan registrar cada saída autorizada, com direito a carimbo, protocolo, firma reconhecida e testemunhas:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar João no maior proprietário de “creckes” do continente, com franquias em cada esquina de São Januário e uma holding para administrar o império:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de João adquirir tantas “creckes” que a Receita Federal teria de criar uma nova categoria tributária só para explicar de onde veio tanto patrimônio:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de Antônio Nerd comprar uma universidade, colocar um laboratório em cada sala e passar o resto da vida tentando descobrir por que jogador de futebol não consegue acertar um passe de três metros:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de financiar um acelerador de partículas para descobrir a composição molecular da voz aveludada de Antônio Nerd e ainda publicar o resultado na Nature:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de pagar todos os salários dos alunos que Antônio Nerd vai reprovar por não saber química e ainda sobrar dinheiro para ele mandar áudio estressado em Dolby Atmos:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar Leodoro como consultor internacional de conflitos, financiar suas tretas em cinco continentes e ainda comprar um helicóptero para ele desaparecer mais rapidamente:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de montar uma central de crise exclusiva para acompanhar as confusões do Leodoro, com sirene, psicólogo e botão de emergência escrito “SAIU DO GRUPO”:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de dar ao Wallace carta branca para montar o elenco dos sonhos, contratar jogador até acabar o alfabeto e descobrir depois como pagar a folha salarial:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de colocar o Wallace como diretor de futebol por 24 horas e transformar o Vasco no clube mais rico, endividado e aleatório do planeta:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar os direitos de transmissão de todos os jogos do Vasco de 1997 a 2001 e deixar Pedro proibido de assistir futebol produzido depois disso:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de construir uma sala de cinema particular só com partidas históricas do Vasco, onde Pedro poderá finalmente criar o filho sem precisar expô-lo ao futebol atual:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar uma equipe de localização 24 horas, colocar o nome de Thiago Azevedo em outdoors pela cidade e finalmente oferecer recompensa para quem descobrir onde ele se meteu:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de transformar a parceria de André com Pedrosa em uma multinacional, abrir filiais em cinco países e deixar os dois sorrindo enquanto o grupo entra em colapso:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de fazer Jorge abrir uma casa de apostas própria, contratar os melhores analistas do mundo e finalmente parar de esconder onde fez a Bet de hoje:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de financiar a faculdade de Direito de Douglas e, ao mesmo tempo, criar um fundo para pagar as indenizações decorrentes das discussões que ele terá com Daniel:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar um estádio para Novaes defender Pedrinho dentro dele e instalar Daniel na arquibancada com microfone exclusivo para reclamar durante 90 minutos:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de contratar um terapeuta para o grupo inteiro, um advogado para cada discussão, um laboratório para Antônio Nerd, uma loja para Velloso e um local seguro para esconder o Pedrinho de Novaes e Douglas:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de comprar o Vasco, reformar São Januário, montar um CT de primeiro mundo, contratar 40 craques e ainda deixar troco para o próximo presidente fazer alguma merda:", "💰 O prêmio do BOBOBET deste mês é uma FORTUNA ASTRONÔMICA, uma BOLADA COLOSSAL capaz de colocar o Vasco no mercado de transferências, comprar três craques antes do café da manhã e ainda sobrar dinheiro para o torcedor descobrir que, mesmo assim, vai continuar sofrendo:"];
 function htmlVasbolaoStatusCard(){
   return '<div class="card"><h2>🏆 BoboBet — sua contribuição</h2>'+
     '<p class="nota-rodape" style="margin:0 0 12px">R$10,00 por mês, via Pix. Metade (R$5) vira o prêmio do mês, a outra metade (R$5) acumula pro prêmio de fim de ano.</p>'+
     '<div id="premioAnimado" style="margin-bottom:14px"></div>'+
     '<div id="statusVasbolao"><p class="nota-rodape" style="margin:0">Verificando...</p></div></div>';
 }
-/* animação estilo "cofre do BBB": moedas caindo + número contando até o valor final do prêmio
-   do mês (quantidade de gente que já pagou × R$5) */
-function htmlCaindoMoedas(){
-  let moedas='';
-  for(let i=0;i<9;i++){
-    const esq=(i*11)+Math.random()*6;
-    const atraso=(Math.random()*1.1).toFixed(2);
-    const dur=(1.5+Math.random()*0.9).toFixed(2);
-    moedas+='<span class="bbb-moeda" style="left:'+esq+'%;animation-delay:'+atraso+'s;animation-duration:'+dur+'s">'+(i%2?'💰':'🪙')+'</span>';
+/* =================== REVELAÇÃO CINEMATOGRÁFICA DO PRÊMIO (estilo BBB) =================== */
+window._premioTrocasUsadas=0;
+window._premioFrasesUsadas=[];
+function htmlNotasCaindo(qtd){
+  const denoms=[{c:'nota-50',t:'R$50'},{c:'nota-100',t:'R$100'},{c:'nota-200',t:'R$200'}];
+  let html='';
+  for(let i=0;i<qtd;i++){
+    const d=denoms[Math.floor(Math.random()*denoms.length)];
+    const esq=(Math.random()*94).toFixed(1);
+    const atraso=(Math.random()*7).toFixed(2);
+    const dur=(2.2+Math.random()*2.6).toFixed(2);
+    const fundo=Math.random()<0.4; // parte fica "ao fundo" (menor, mais transparente) pra dar profundidade
+    const escala=fundo?(0.55+Math.random()*0.25).toFixed(2):(0.85+Math.random()*0.35).toFixed(2);
+    const opac=fundo?0.45:0.95;
+    const giroFinal=(Math.random()<0.5?1:-1)*(540+Math.floor(Math.random()*540));
+    html+='<span class="dinheiro-nota '+d.c+'" style="left:'+esq+'%;animation-delay:'+atraso+'s;animation-duration:'+dur+'s;'+
+      '--escala:'+escala+';--opac:'+opac+';--giro:'+giroFinal+'deg">'+d.t+'</span>';
   }
-  return '<div class="bbb-caindo">'+moedas+'</div>';
+  return html;
 }
-function animarContagemPremio(elId,valorFinal){
-  const el=document.getElementById(elId);
-  if(!el)return;
-  const duracao=1800,inicio=performance.now();
-  function passo(agora){
-    const prog=Math.min(1,(agora-inicio)/duracao);
-    const facil=1-Math.pow(1-prog,3);
-    const atual=Math.round(valorFinal*facil);
-    el.textContent='R$'+atual.toLocaleString('pt-BR');
-    if(prog<1)requestAnimationFrame(passo);
-    else el.textContent='R$'+valorFinal.toLocaleString('pt-BR');
-  }
-  requestAnimationFrame(passo);
+function fraseAleatoriaPremio(){
+  if(window._premioFrasesUsadas.length>=FRASES_PREMIO_BOBOBET.length)window._premioFrasesUsadas=[];
+  let idx;
+  do{ idx=Math.floor(Math.random()*FRASES_PREMIO_BOBOBET.length); }while(window._premioFrasesUsadas.includes(idx));
+  window._premioFrasesUsadas.push(idx);
+  return FRASES_PREMIO_BOBOBET[idx];
 }
+function fmtReais(v){ return 'R$ '+v.toLocaleString('pt-BR'); }
 async function carregarPremioMesAnimado(){
   const el=document.getElementById('premioAnimado');
   if(!el)return;
   const {ano,mes}=chaveVasbolaoAtual();
+  let premio=0;
   try{
     const snap=await db.collection('mensalidades').where('ano','==',ano).where('mes','==',mes).where('pago','==',true).get();
-    const premio=snap.size*5;
-    el.innerHTML=htmlCaindoMoedas()+
-      '<p style="text-align:center;font-size:.86rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin:6px 0 2px">O Valor BoboBet <span style="color:var(--vermelho)">EXTRAORDINÁRIO FENOMENAL</span> mensal é</p>'+
-      '<p style="text-align:center;font-family:\'Anton\',sans-serif;font-size:2.2rem;color:var(--verde)" id="premioValorNum">R$0</p>';
-    animarContagemPremio('premioValorNum',premio);
-  }catch(e){
-    el.innerHTML='';
+    premio=snap.size*5;
+  }catch(e){}
+  window._premioValorAtual=premio;
+  window._premioTrocasUsadas=0;
+  el.innerHTML='<div class="premio-cinema" id="premioCinema">'+
+    '<div class="premio-notas" id="premioNotas">'+htmlNotasCaindo(22)+'</div>'+
+    '<div class="premio-conteudo">'+
+    '<p class="premio-contador" id="premioContador">R$ 0</p>'+
+    '<div id="premioResultado" class="oculto"></div>'+
+    '</div></div>';
+  // continua gerando notas novas durante toda a animação, pra nunca "secar" a chuva de dinheiro
+  const gerador=setInterval(()=>{
+    const alvo=document.getElementById('premioNotas');
+    if(!alvo){clearInterval(gerador);return;}
+    alvo.innerHTML+=htmlNotasCaindo(4);
+  },600);
+  setTimeout(()=>clearInterval(gerador),7000);
+  girarContadorPremio(premio);
+}
+function girarContadorPremio(valorFinal){
+  const el=document.getElementById('premioContador');
+  if(!el)return;
+  const aleatorio=()=>Math.floor(Math.random()*9800000)+95000;
+  let intervalo;
+  // FASE 1 — começo, rápido
+  intervalo=setInterval(()=>{el.textContent=fmtReais(aleatorio());},95);
+  setTimeout(()=>{
+    clearInterval(intervalo);
+    // FASE 2 — ultra rápido, mal dá pra ler
+    intervalo=setInterval(()=>{el.textContent=fmtReais(aleatorio());},38);
+    setTimeout(()=>{
+      clearInterval(intervalo);
+      // FASE 3 — desacelera progressivamente
+      let atraso=45;
+      const tickDesacelerando=()=>{
+        el.textContent=fmtReais(aleatorio());
+        atraso+=55+Math.random()*45;
+        if(atraso<1100){
+          setTimeout(tickDesacelerando,atraso);
+        }else{
+          // últimos giros, bem devagar, já "boiando" perto do valor real
+          setTimeout(()=>{
+            el.textContent=fmtReais(Math.max(0,valorFinal+Math.floor((Math.random()-0.5)*40)));
+            setTimeout(()=>{
+              // FASE 4 — revelação
+              el.textContent=fmtReais(valorFinal);
+              el.classList.add('premio-revelado');
+              dispararParticulasPremio();
+              setTimeout(mostrarResultadoPremio,500);
+            },650);
+          },550);
+        }
+      };
+      tickDesacelerando();
+    },1500);
+  },1500);
+}
+function dispararParticulasPremio(){
+  const alvo=document.getElementById('premioCinema');
+  if(!alvo)return;
+  let html='';
+  for(let i=0;i<26;i++){
+    const ang=(360/26)*i+Math.random()*10;
+    const dist=60+Math.random()*70;
+    const x=(Math.cos(ang*Math.PI/180)*dist).toFixed(0);
+    const y=(Math.sin(ang*Math.PI/180)*dist).toFixed(0);
+    html+='<span class="particula-ouro" style="--x:'+x+'px;--y:'+y+'px;animation-delay:'+(Math.random()*0.15).toFixed(2)+'s"></span>';
   }
+  const div=document.createElement('div');
+  div.className='particulas-wrap';
+  div.innerHTML=html;
+  alvo.appendChild(div);
+  setTimeout(()=>div.remove(),1600);
+}
+function mostrarResultadoPremio(){
+  const el=document.getElementById('premioResultado');
+  if(!el)return;
+  const frase=fraseAleatoriaPremio();
+  const valor=window._premioValorAtual||0;
+  el.classList.remove('oculto');
+  el.innerHTML=
+    '<p class="premio-frase" id="premioFraseTxt">'+esc(frase)+' <b style="color:var(--verde)">'+fmtReais(valor)+'!</b></p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px" id="premioBotoesTroca">'+
+    '<button class="btn fantasma" style="font-size:.72rem;padding:6px 12px" onclick="trocarPremioFrase()">🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px">'+
+    '<button class="btn fantasma" style="font-size:.72rem;padding:6px 12px" onclick="copiarMensagemPremio()">📋 Copiar mensagem</button>'+
+    '<button class="btn fantasma" style="font-size:.72rem;padding:6px 12px" onclick="baixarPrintPremio()">📸 Baixar print</button>'+
+    '</div>';
+}
+function trocarPremioFrase(){
+  if(window._premioTrocasUsadas>=3)return;
+  window._premioTrocasUsadas++;
+  const elTxt=document.getElementById('premioFraseTxt');
+  const valor=window._premioValorAtual||0;
+  if(window._premioTrocasUsadas>=3){
+    if(elTxt)elTxt.textContent='Somente esses 3 prêmios estão disponíveis nesse mês. Volta mês que vem pra mais!';
+    const wrap=document.getElementById('premioBotoesTroca');
+    if(wrap)wrap.innerHTML='';
+    return;
+  }
+  const frase=fraseAleatoriaPremio();
+  if(elTxt)elTxt.innerHTML=esc(frase)+' <b style="color:var(--verde)">'+fmtReais(valor)+'!</b>';
+  const btn=document.querySelector('#premioBotoesTroca button');
+  if(btn)btn.textContent='🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')';
+}
+function copiarMensagemPremio(){
+  const txt=document.getElementById('premioFraseTxt');
+  if(!txt)return;
+  const s=txt.textContent||'';
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(s).then(()=>avisar('Mensagem copiada!',true)).catch(()=>avisar('Não consegui copiar. Seleciona o texto manualmente.'));
+  }else{
+    avisar('Seu navegador não permite copiar automaticamente. Seleciona o texto manualmente.');
+  }
+}
+function baixarPrintPremio(){
+  const txt=document.getElementById('premioFraseTxt');
+  if(!txt)return;
+  const canvas=document.createElement('canvas');
+  const largura=900,altura=560;
+  canvas.width=largura;canvas.height=altura;
+  const ctx=canvas.getContext('2d');
+  const grad=ctx.createLinearGradient(0,0,largura,altura);
+  grad.addColorStop(0,'#0B0D10');grad.addColorStop(1,'#1B1F25');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,largura,altura);
+  ctx.fillStyle='#E0AC1F';ctx.font='800 30px Arial';ctx.textAlign='center';
+  ctx.fillText('🏆 BOBOBET',largura/2,80);
+  ctx.fillStyle='#F3F4F6';ctx.font='600 22px Arial';
+  const palavras=(txt.textContent||'').split(' ');
+  let linha='',y=170,linhas=[];
+  palavras.forEach(p=>{
+    const teste=linha+p+' ';
+    if(ctx.measureText(teste).width>largura-100&&linha){linhas.push(linha);linha=p+' ';}
+    else linha=teste;
+  });
+  linhas.push(linha);
+  linhas.forEach(l=>{ctx.fillText(l.trim(),largura/2,y);y+=36;});
+  ctx.fillStyle='#2FD08E';ctx.font='800 40px Arial';
+  ctx.fillText('R$ '+(window._premioValorAtual||0).toLocaleString('pt-BR'),largura/2,y+60);
+  const link=document.createElement('a');
+  link.download='bobobet-premio.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
 }
 async function carregarStatusVasbolao(){
   const el=document.getElementById('statusVasbolao');
@@ -3711,49 +3867,19 @@ function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
 }
 /* botão que abre um seletor visual (foto + número + nome) no lugar do <select> nativo, que não
    consegue mostrar foto dentro das opções — usado no MVP e no "quem faz gol" do palpite */
-function botaoEscolherJogador(idCampo,valorAtual,incluirSemGol,incluirTecnico){
-  const jSel=valorAtual&&valorAtual!==SEM_GOL?jogadorPorId(valorAtual):null;
-  const texto=valorAtual===SEM_GOL?'Vasco não marca 😢':(jSel?((jSel.num?jSel.num+' · ':'')+jSel.nome):'— escolher —');
-  const fotoTxt=jSel?fotoJogador(jSel.id,26):'';
-  return '<input type="hidden" id="'+idCampo+'" value="'+esc(valorAtual||'')+'">'+
-    '<button type="button" class="btn fantasma" style="width:100%;display:flex;align-items:center;gap:8px;justify-content:flex-start;text-align:left;padding:9px 12px" '+
-    'onclick="abrirEscolherJogador(\''+idCampo+'\','+(incluirSemGol?'true':'false')+','+(incluirTecnico?'true':'false')+')" id="btnEsc_'+idCampo+'">'+
-    '<span id="fotoEsc_'+idCampo+'">'+fotoTxt+'</span><span id="txtEsc_'+idCampo+'">'+esc(texto)+'</span></button>';
-}
-/* cache do HTML da lista do seletor — monta os ~29 botões (com foto) só na primeira vez, ou
-   quando o elenco mudar; nas próximas aberturas, é só reaproveitar a string pronta */
-function htmlListaEscolherJogador(incluirTecnico,incluirSemGol){
-  let html='';
+/* select nativo do navegador — simples, rápido, sem modal customizado (era assim antes das
+   fotos, e funcionava bem; voltando pra esse formato depois de bugs repetidos no seletor custom) */
+function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
+  const opts=['<option value="">— escolher —</option>'];
+  if(incluirSemGol)opts.push('<option value="'+SEM_GOL+'" '+(valorAtual===SEM_GOL?'selected':'')+'>Vasco não marca 😢</option>');
   let posAtual='';
   jogadoresAtivos().filter(p=>incluirTecnico||p.pos!=='Técnico').forEach(p=>{
     const pos=p.pos||'Outro';
-    if(pos!==posAtual){posAtual=pos;html+='<div class="pos-titulo" style="margin-top:10px">'+esc(pos)+'s</div>';}
-    html+='<button type="button" class="jogo-item" style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:6px" onclick="selecionarJogadorModal(\''+p.id+'\')">'+
-      '<span class="jog-num" style="width:26px;text-align:center;flex:none">'+(p.num||'–')+'</span><span class="jogo-nome" style="font-size:.88rem">'+esc(p.nome||'(sem nome)')+'</span></button>';
+    if(pos!==posAtual){if(posAtual)opts.push('</optgroup>');opts.push('<optgroup label="'+esc(pos)+'">');posAtual=pos;}
+    opts.push('<option value="'+p.id+'" '+(valorAtual===p.id?'selected':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome||'(sem nome)')+'</option>');
   });
-  return html;
-}
-function abrirEscolherJogador(idCampo,incluirSemGol,incluirTecnico){
-  window._escolherJogadorAlvo=idCampo;
-  try{
-    const semGolHtml=incluirSemGol?'<button type="button" class="jogo-item" style="width:100%;margin-bottom:8px" onclick="selecionarJogadorModal(\''+SEM_GOL+'\')"><span class="jogo-nome">Vasco não marca 😢</span></button>':'';
-    const lista=htmlListaEscolherJogador(incluirTecnico,incluirSemGol);
-    document.getElementById('corpoEscolherJogador').innerHTML=(semGolHtml+lista)||'<div class="vazio">Ninguém no elenco ainda.</div>';
-    document.getElementById('modalEscolherJogador').classList.remove('oculto');
-  }catch(e){
-    console.error('erro ao abrir seletor de jogador',e);
-    avisar('Deu um erro ao montar a lista de jogadores: '+(e.message||e)+'. Me avisa com essa mensagem, por favor.');
-  }
-}
-function fecharEscolherJogador(){document.getElementById('modalEscolherJogador').classList.add('oculto');}
-function selecionarJogadorModal(id){
-  const idCampo=window._escolherJogadorAlvo;
-  if(!idCampo)return;
-  document.getElementById(idCampo).value=id;
-  const jSel=id!==SEM_GOL?jogadorPorId(id):null;
-  document.getElementById('txtEsc_'+idCampo).textContent=id===SEM_GOL?'Vasco não marca 😢':(jSel?((jSel.num?jSel.num+' · ':'')+jSel.nome):'— escolher —');
-  document.getElementById('fotoEsc_'+idCampo).innerHTML=jSel?fotoJogador(jSel.id,26):'';
-  fecharEscolherJogador();
+  if(posAtual)opts.push('</optgroup>');
+  return '<select id="'+idSel+'">'+opts.join('')+'</select>';
 }
 
 function renderPalpiteCard(j,s){
@@ -3767,8 +3893,8 @@ function renderPalpiteCard(j,s){
       '<input type="number" min="0" max="20" id="ppA" value="'+(meu?meu.a:'')+'" aria-label="Gols do adversário">'+
       '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
       '<div class="grid g2" style="margin-top:12px">'+
-      '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+botaoEscolherJogador('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
-      '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+botaoEscolherJogador('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
+      '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
+      '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
       '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()"><span style="color:var(--vermelho)">✠</span> '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
       (meu?'<button class="btn fantasma" style="margin-top:8px;color:var(--vermelho)" onclick="removerMeuPalpite()">🗑️ Remover meu palpite</button>':'')+
       (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
