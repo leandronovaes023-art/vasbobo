@@ -2752,7 +2752,7 @@ async function fqRegistrarResposta(usuario,acertou){
   return estado;
 }
 let fqTimerInterval=null, fqPerguntaAtual=null, fqRespondida=false;
-const FQ_SEGUNDOS=10;
+const FQ_SEGUNDOS=15;
 function toggleFqEdge(e){
   if(e)e.stopPropagation();
   const el=document.getElementById('fqFixo');
