@@ -1589,7 +1589,6 @@ function htmlVasbolaoStatusCard(){
 }
 /* =================== REVELAÇÃO CINEMATOGRÁFICA DO PRÊMIO (estilo BBB) =================== */
 window._premioTrocasUsadas=0;
-window._premioFrasesUsadas=[];
 function htmlNotasCaindo(qtd,atrasoMax){
   atrasoMax=atrasoMax===undefined?0.15:atrasoMax; // cai praticamente junto com o início do contador, sem atraso perceptível
   const notas=['img/dinheiro/nota50.png','img/dinheiro/nota100.png','img/dinheiro/nota200.png'];
@@ -1608,11 +1607,19 @@ function htmlNotasCaindo(qtd,atrasoMax){
   }
   return html;
 }
+/* fila de verdade, salva no aparelho: cada frase mostrada vai pro final da fila e só volta a
+   aparecer depois de todas as outras passarem — não é mais só "sorteia e evita repetir na sessão" */
 function fraseAleatoriaPremio(){
-  if(window._premioFrasesUsadas.length>=FRASES_PREMIO_BOBOBET.length)window._premioFrasesUsadas=[];
-  let idx;
-  do{ idx=Math.floor(Math.random()*FRASES_PREMIO_BOBOBET.length); }while(window._premioFrasesUsadas.includes(idx));
-  window._premioFrasesUsadas.push(idx);
+  let fila=[];
+  try{fila=JSON.parse(localStorage.getItem('vasbobo_fila_premio')||'[]');}catch(e){}
+  const valida=Array.isArray(fila)&&fila.length===FRASES_PREMIO_BOBOBET.length&&fila.every(i=>Number.isInteger(i)&&i>=0&&i<FRASES_PREMIO_BOBOBET.length);
+  if(!valida){
+    fila=FRASES_PREMIO_BOBOBET.map((_,i)=>i);
+    for(let i=fila.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[fila[i],fila[j]]=[fila[j],fila[i]];}
+  }
+  const idx=fila.shift();
+  fila.push(idx);
+  try{localStorage.setItem('vasbobo_fila_premio',JSON.stringify(fila));}catch(e){}
   return FRASES_PREMIO_BOBOBET[idx];
 }
 function fmtReais(v){ return 'R$ '+v.toLocaleString('pt-BR'); }
@@ -3388,6 +3395,7 @@ function entrarNoApp(){
     if(el&&(el.tagName==='TEXTAREA'||el.tagName==='INPUT'||el.tagName==='SELECT'))return;
     if(aba==='admin')return; // painel de admin tem várias caixinhas "clique pra abrir" (logs, mensalidades, etc.) — recarregar aqui fecharia tudo sem avisar
     if(jogoAberto)return; // tela de um jogo específico (palpite, MVP, gol, avaliação) — não pode resetar seleção não salva ainda
+    if(aba==='vasbolao')return; // reiniciaria a animação do prêmio (e trocaria a frase) sem o usuário pedir
     await carregarDados();await fqSincronizarEstado();render();
   },40000);
   if(timerSync)clearInterval(timerSync);
@@ -5338,9 +5346,7 @@ function htmlAgendaSistemaAuto(){
     {emoji:'⚽',nome:'O Que Mais Entende (quiz)',regras:['Horários configuráveis na Biblioteca de frases acima — só manda pra quem ainda não respondeu as 3 perguntas do dia.']},
     {emoji:'🗳️',nome:'Palpite',regras:[
       '42h, 50h e 58h depois do resultado do jogo anterior sair',
-      'Dia do próprio jogo, às 8h',
-      'Dia do jogo, também às 9h e 12h',
-      '2h antes da bola rolar',
+      'Dia do jogo: 7h, 10h, 12h, 14h e mais 16h (jogo até 20h) ou 17h (jogo a partir de 20h30) — e mais 1h antes da bola rolar',
       'Véspera (dia anterior), às 20h — só um aviso de "amanhã tem jogo", não cobra quem já votou',
       '<b style="color:var(--verde)">Todas (menos a véspera) já pulam sozinhas quem já deu o palpite.</b>',
     ]},

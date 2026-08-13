@@ -7,7 +7,7 @@
 // As frases agora vivem no Firestore (coleção notif_frases, ver _frases.js), editáveis
 // pelo admin em Configurações → Notificações. Nada mais fica fixo no código.
 const { mandarPush, garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
-const { garantirSeed, garantirSeedV2, garantirSeedV3, buscarFrases, sorteia } = require('./_frases');
+const { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, buscarFrases, sorteia } = require('./_frases');
 
 const HORA = 3600000;
 
@@ -46,6 +46,7 @@ exports.handler = async () => {
   await garantirSeed(db);
   await garantirSeedV2(db);
   await garantirSeedV3(db);
+  await garantirSeedV4(db);
   const agora = new Date();
   const horaAtual = agora.getHours();
   const chaveDia = agora.toISOString().slice(0, 10);
@@ -236,46 +237,41 @@ exports.handler = async () => {
           await marcarEnviado(db, chave);
         }
       }
-      if (horaAtual === 8 && jProx.data === chaveDia) {
-        for (const usuario of usuarios) {
-          if (jProx.palpites && jProx.palpites[usuario]) continue;
-          const chave = `palp_${usuario}_${idProx}_diajogo`;
-          if (await jaEnviou(db, chave)) continue;
-          const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, sorteia(frasesVotar) || 'Dê seu palpite!'), `/?abrirJogo=${idProx}`);
-          if (r.ok) enviados++; else falhas++;
-          await marcarEnviado(db, chave);
-        }
-      }
     }
 
-    // ---------- Dia de jogo: 2 mensagens de manhã + 1 duas horas antes da bola rolar ----------
+    // ---------- Dia de jogo: horários fixos + 1h antes da bola rolar ----------
+    // Jogo às 19h-20h: avisa 7h/10h/12h/14h/16h + 1h antes
+    // Jogo a partir de 20h30: avisa 7h/10h/12h/14h/17h + 1h antes
     const jogoHoje = Object.entries(jogos).find(([, j]) => j.data === chaveDia && !j.resultado);
     if (jogoHoje) {
       const [idHoje, jHoje] = jogoHoje;
-      const HORAS_MANHA = [9, 12];
-      for (const horaRegra of HORAS_MANHA) {
+      let horariosFixos = [7, 10, 12, 14, 16];
+      let horaAlvo1h = null;
+      if (jHoje.hora) {
+        const [hh, mm] = jHoje.hora.split(':').map(Number);
+        const horaDecimal = hh + (mm || 0) / 60;
+        horariosFixos = horaDecimal >= 20.5 ? [7, 10, 12, 14, 17] : [7, 10, 12, 14, 16];
+        horaAlvo1h = hh - 1; // 1h antes da bola rolar
+      }
+      for (const horaRegra of horariosFixos) {
         if (horaAtual !== horaRegra) continue;
         for (const usuario of usuarios) {
           if (jHoje.palpites && jHoje.palpites[usuario]) continue; // já votou, não precisa lembrar
-          const chave = `diajogo_manha_${usuario}_${idHoje}_${horaRegra}`;
+          const chave = `diajogo_fixo_${usuario}_${idHoje}_${horaRegra}`;
           if (await jaEnviou(db, chave)) continue;
           const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, sorteia(frasesVotar) || 'Vai votar hoje?'), `/?abrirJogo=${idHoje}`);
           if (r.ok) enviados++; else falhas++;
           await marcarEnviado(db, chave);
         }
       }
-      if (jHoje.hora) {
-        const [hh] = jHoje.hora.split(':').map(Number);
-        const horaAlvo = hh - 2;
-        if (horaAlvo >= 0 && horaAtual === horaAlvo) {
-          for (const usuario of usuarios) {
-            if (jHoje.palpites && jHoje.palpites[usuario]) continue; // já votou, não precisa lembrar
-            const chave = `diajogo_2h_${usuario}_${idHoje}`;
-            if (await jaEnviou(db, chave)) continue;
-            const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, `Faltam 2 horas pro jogo! ${sorteia(frasesVotar) || ''}`), `/?abrirJogo=${idHoje}`);
-            if (r.ok) enviados++; else falhas++;
-            await marcarEnviado(db, chave);
-          }
+      if (horaAlvo1h !== null && horaAlvo1h >= 0 && horaAtual === horaAlvo1h) {
+        for (const usuario of usuarios) {
+          if (jHoje.palpites && jHoje.palpites[usuario]) continue; // já votou, não precisa lembrar
+          const chave = `diajogo_1h_${usuario}_${idHoje}`;
+          if (await jaEnviou(db, chave)) continue;
+          const r = await mandarPush(usuario, 'VASBOBO', comPrefixo(PREFIXOS_HOJE, `Falta 1 hora pro jogo! ${sorteia(frasesVotar) || ''}`), `/?abrirJogo=${idHoje}`);
+          if (r.ok) enviados++; else falhas++;
+          await marcarEnviado(db, chave);
         }
       }
     }

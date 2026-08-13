@@ -238,6 +238,49 @@ add('gol_teste', [
   'JP, categoria pura, encobriu o goleiro',
 ]);
 
+/* leva nova de frases pra "votar" — o dia de jogo agora tem muito mais horários de aviso
+   (7h/10h/12h/14h/16-17h + 1h antes), então precisava de mais variedade pra não repetir rápido */
+add('votar', [
+  'Hoje tem Vasco! O Antônio Nerd já avisou que vai acompanhar o jogo entre um experimento e outro no laboratório.',
+  'Hoje tem Vasco! O André já anunciou parceria oficial com o Pedrosa pra torcer junto hoje.',
+  'Hoje tem Vasco! O Wallace já escalou o time ideal — spoiler: não bate com o time de verdade.',
+  'Hoje tem Vasco! Se o Leodoro aparecer hoje, já vai sair brigando e sumir de novo.',
+  'Hoje tem Vasco! Ninguém sabe se o Thiago Azevedo vai aparecer hoje. Mistério nacional.',
+  'Hoje tem Vasco! O Pedro já avisou que desliga a TV assim que o jogo de verdade começar. Lógica dele, não a nossa.',
+  'Hoje tem Vasco! O Douglas já abriu a Netvasco umas 30 vezes só hoje de manhã.',
+  'Hoje tem Vasco! O Novaes já separou o cigarro de emergência caso critiquem o Pedrinho.',
+  'Hoje tem Vasco! O Daniel está decidindo se vai de Kappa ou daquela Nike que ele nunca admite que comprou.',
+  'Hoje tem Vasco! Se sobrar tempo, o Daniel pega a bike elétrica e passa em Ipanema antes do jogo.',
+  'Hoje tem Vasco! O Jorge já reservou o lugar no bar — e a gordinha também.',
+  'Hoje tem Vasco! O Vitor já está de saída pra chegar 3 horas antes, no espírito, já que hoje talvez não dê.',
+  'Hoje tem Vasco! O Juan está negociando a autorização pra sair e assistir.',
+  'Hoje tem Vasco! O Velloso vai encaixar uma corrida antes, depois ou durante — ele sempre dá um jeito.',
+  'Hoje tem Vasco! O professor Antônio Nerd já avisou a turma: hoje a prova vai ser mais curta.',
+  'Hoje tem Vasco! O Alex já entregou o scouting completo do adversário de hoje.',
+  'Hoje tem Vasco! Douglas e Novaes já estão de prontidão pra defender o Pedrinho no grupo.',
+  'Hoje tem Vasco! O Daniel já está com o discurso pronto pra defender o Renato Gaúcho, dê no que der.',
+  'Hoje tem Vasco! Se o time jogar mal, já sabemos quem o Wallace vai culpar primeiro.',
+  'Hoje tem Vasco! A tarde promete: Antônio Nerd, aula até mais tarde; você, direto pro Vasbobo.',
+  'Hoje tem Vasco! Já é oficial: ninguém vai trabalhar direito depois das 16h hoje.',
+  'Hoje tem Vasco! Faltam poucas horas — hora de fechar o palpite antes que o jogo comece de verdade.',
+  'Hoje tem Vasco! Já deu tempo de almoçar, checar a escalação e ainda não votar? Vai lá.',
+  'Hoje tem Vasco! O grupo já está mais agitado que reunião de condomínio. Aproveita e vota.',
+]);
+
+async function garantirSeedV4(db) {
+  const marcador = db.collection('notif_frases_meta').doc('seed_v4_votar_extra');
+  const doc = await marcador.get();
+  if (doc.exists) return;
+  const NOVOS = SEED.filter((s) => s.tipo === 'votar').slice(68); // só a leva nova (as 68 primeiras já foram semeadas antes)
+  const batch = db.batch();
+  NOVOS.forEach((item) => {
+    const ref = db.collection('notif_frases').doc();
+    batch.set(ref, { ...item, ativo: true, criadoEm: Date.now() });
+  });
+  batch.set(marcador, { feito: true, quando: Date.now(), qtd: NOVOS.length });
+  await batch.commit();
+}
+
 async function garantirSeedV3(db) {
   const marcador = db.collection('notif_frases_meta').doc('seed_v3_gol_teste');
   const doc = await marcador.get();
@@ -274,4 +317,4 @@ function sorteia(lista) {
   return lista.length ? lista[Math.floor(Math.random() * lista.length)].texto : null;
 }
 
-module.exports = { garantirSeed, garantirSeedV2, garantirSeedV3, buscarFrases, sorteia };
+module.exports = { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, buscarFrases, sorteia };
