@@ -7,7 +7,7 @@
 // As frases agora vivem no Firestore (coleção notif_frases, ver _frases.js), editáveis
 // pelo admin em Configurações → Notificações. Nada mais fica fixo no código.
 const { mandarPush, garantirFirebase, admin, registrarLogServidor } = require('./_push-helper');
-const { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, garantirSeedV5, buscarFrases, sorteia } = require('./_frases');
+const { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, garantirSeedV5, garantirSeedV6, buscarFrases, sorteia } = require('./_frases');
 
 const HORA = 3600000;
 
@@ -48,6 +48,7 @@ exports.handler = async () => {
   await garantirSeedV3(db);
   await garantirSeedV4(db);
   await garantirSeedV5(db);
+  await garantirSeedV6(db);
   const agora = new Date();
   const horaAtual = agora.getHours();
   const chaveDia = agora.toISOString().slice(0, 10);
