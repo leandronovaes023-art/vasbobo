@@ -5154,16 +5154,23 @@ async function renderAdmin(){
   '<button class="btn fantasma tab-notif" id="tabNotifAtivados" onclick="mudarTabNotif(\'ativados\')" style="padding:6px 14px;font-size:.78rem">🔔 Quem ativou</button>'+
   '</div>'+
   '<div id="notifTabBiblioteca">'+
-  '<p class="nota-rodape" style="margin:0 0 10px">Todas as frases usadas pelas notificações automáticas — editáveis de verdade (mudou aqui, muda em todo lugar que ela é usada).</p>'+
+  '<p class="nota-rodape" style="margin:0 0 10px">Todas as frases usadas pelas notificações automáticas, organizadas por tópico — editáveis de verdade (mudou aqui, muda em todo lugar que ela é usada).</p>'+
   '<div class="grid g2" style="margin-bottom:10px">'+
-  '<div><label for="filtroTipoFrase">Filtrar por tipo</label><select id="filtroTipoFrase" onchange="if(document.getElementById(&quot;detalhesListaFrases&quot;).open)carregarBibliotecaFrases()">'+
-  '<option value="votar">🗳️ Votar palpite</option><option value="avaliar">🚫 Avaliar jogadores</option>'+
-  '<option value="motivacional">🎯 Vasbobo Acredita</option><option value="quiz">⚽ Quiz</option></select></div>'+
+  '<div><label for="filtroTipoFrase">Criar frase nova, do tipo</label><select id="filtroTipoFrase" onchange="document.getElementById(\'campoHoraFrase\').style.display=TIPOS_COM_HORA.includes(this.value)?\'block\':\'none\'">'+
+  '<option value="votar">🗳️ Palpite (votar)</option>'+
+  '<option value="avaliar">📝 MVP + Avaliar jogadores</option>'+
+  '<option value="motivacional">🎯 Vasbobo Acredita</option>'+
+  '<option value="quiz">⚽ O Que Mais Entende (Quiz)</option>'+
+  '<option value="aleatorias">🎲 Aleatórias (fofoca geral, todo dia)</option>'+
+  '<option value="aleatorias_jogo_casa">🏟️ Dia de jogo — em casa</option>'+
+  '<option value="aleatorias_jogo_fora">🏟️ Dia de jogo — fora</option>'+
+  '<option value="gol_teste">⚽ Gol de teste</option>'+
+  '</select></div>'+
   '<div id="campoHoraFrase" style="display:none"><label for="novaFraseHora">Hora (0-23)</label><input id="novaFraseHora" type="number" min="0" max="23"></div>'+
   '</div>'+
   '<div class="grid g2" style="margin-bottom:10px"><div style="grid-column:span 2"><label for="novaFraseTexto">Nova frase</label><input id="novaFraseTexto" placeholder="Escreva a frase…"></div></div>'+
   '<button class="btn fantasma" onclick="criarFraseBiblioteca()">+ Adicionar à biblioteca</button>'+
-  '<details id="detalhesListaFrases" style="margin-top:14px" ontoggle="if(this.open)carregarBibliotecaFrases()"><summary>👀 Ver todas as frases cadastradas</summary>'+
+  '<details id="detalhesListaFrases" style="margin-top:14px" ontoggle="if(this.open)carregarBibliotecaFrases()"><summary>👀 Ver todas as frases, separadas por tópico</summary>'+
   '<div id="listaBibliotecaFrases" style="margin-top:10px">Carregando…</div>'+
   '</details>'+
   '</div>'+
@@ -5193,9 +5200,7 @@ async function renderAdmin(){
   '<div><label for="novaMsgHora">Hora (0-23)</label><input id="novaMsgHora" type="number" min="0" max="23" placeholder="20"></div></div>'+
   '<button class="btn fantasma" onclick="criarMensagemAgendada()">+ Adicionar mensagem agendada</button>'+
   '<div id="listaMsgAgendadasItens" style="margin-top:14px">Carregando…</div>'+
-  '<details style="margin-top:16px;border-top:1px solid var(--linha);padding-top:12px" ontoggle="if(this.open)document.getElementById(\'agendaSistemaAuto\').classList.remove(\'oculto\')"><summary style="cursor:pointer;font-weight:800;font-size:.85rem">🤖 Ver a agenda automática do sistema (fixa no código)</summary>'+
-  '<div id="agendaSistemaAuto" style="margin-top:10px">'+htmlAgendaSistemaAuto()+'</div>'+
-  '</details>'+
+  '<p class="nota-rodape" style="margin-top:14px">Pra ver os horários automáticos por tópico (palpite, avaliação, quiz, etc.), olha na aba 📚 Biblioteca de frases — cada tópico já mostra o horário certinho.</p>'+
   '</div>'+
   '<div id="notifTabAtivados" class="oculto">'+
   '<p class="nota-rodape" style="margin:0 0 10px">Quem já ativou as notificações push e está recebendo no aparelho — e quem ainda não ativou.</p>'+
@@ -5337,37 +5342,6 @@ async function buscarLogs(){
     el.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao buscar: '+esc(e.message||'')+'</div>';
   }
 }
-/* resumo da agenda automática de notificação que roda sozinha no servidor (enviar-notificacoes.js,
-   a cada 30 min) — não vem do banco, é só uma referência do que já está programado no código.
-   Cada linha já pula sozinha quem já fez a ação (ex.: já votou, já avaliou, já fez o quiz hoje). */
-function htmlAgendaSistemaAuto(){
-  const topicos=[
-    {emoji:'🎯',nome:'Vasbobo Acredita (motivacional)',regras:['Horários configuráveis na Biblioteca de frases acima — só manda pra quem ainda não abriu a frase do dia.']},
-    {emoji:'⚽',nome:'O Que Mais Entende (quiz)',regras:['Horários configuráveis na Biblioteca de frases acima — só manda pra quem ainda não respondeu as 3 perguntas do dia.']},
-    {emoji:'🗳️',nome:'Palpite',regras:[
-      '42h, 50h e 58h depois do resultado do jogo anterior sair',
-      'Dia do jogo: 7h, 10h, 12h, 14h e mais 16h (jogo até 20h) ou 17h (jogo a partir de 20h30) — e mais 1h antes da bola rolar',
-      'Véspera (dia anterior), às 20h — só um aviso de "amanhã tem jogo", não cobra quem já votou',
-      '<b style="color:var(--verde)">Todas (menos a véspera) já pulam sozinhas quem já deu o palpite.</b>',
-    ]},
-    {emoji:'📝',nome:'Avaliar jogadores / MVP',regras:[
-      'Janelas depois que o resultado libera a avaliação: 0-1h, 1-2h, 8-9h, 14-15h, 20-21h e 23-24h',
-      '<b style="color:var(--verde)">Já pula sozinho quem já avaliou.</b>',
-    ]},
-    {emoji:'⚽',nome:'Gol de teste (hype de pré-jogo)',regras:[
-      'Véspera do jogo (dia anterior): 10h, 15h e 22h — "Calma, só testando pra amanhã"',
-      'Dia do jogo: 7h, 11h e 17h — "Calma, só testando pra mais tarde"',
-      'Frase de gol diferente sorteada a cada vez (jogador + jogada), só sai se realmente tiver jogo marcado pra aquele dia',
-    ]},
-    {emoji:'🎲',nome:'Aleatórias (fofoca/humor do grupo)',regras:[
-      '4x por dia, fixo: 7h, 12h, 16h e 21h',
-      'Em dia de jogo do Vasco, mistura frases extras específicas de casa ou fora',
-    ]},
-  ];
-  return topicos.map(t=>'<div style="margin-bottom:12px"><div style="font-weight:800;font-size:.82rem;margin-bottom:4px">'+t.emoji+' '+esc(t.nome)+'</div>'+
-    '<ul style="margin:0 0 0 18px;padding:0;font-size:.78rem;color:var(--cinza);line-height:1.7">'+t.regras.map(r=>'<li>'+r+'</li>').join('')+'</ul></div>'
-  ).join('');
-}
 function mudarTabNotif(nome){
   ['biblioteca','enviar','agendadas','ativados'].forEach(t=>{
     const painel=document.getElementById('notifTab'+cap(t));
@@ -5402,10 +5376,19 @@ async function carregarNotifAtivados(){
     el.innerHTML='<div class="vazio" style="color:var(--vermelho)">Erro ao carregar: '+esc(e.message||'')+'</div>';
   }
 }
-const TIPOS_COM_HORA=['motivacional','quiz'];
+const TIPOS_COM_HORA=['motivacional','quiz','aleatorias'];
+/* tópicos que aparecem em Configurações → Notificações → Biblioteca — cada um agrupa um ou mais
+   "tipo" do banco, com o horário certinho de quando dispara, pra ficar bem claro e organizado */
+const TOPICOS_NOTIF=[
+  {label:'🗳️ Palpite (votar)', tipos:['votar'], horario:'42h, 50h e 58h depois do resultado do jogo anterior sair. Dia de jogo: 7h, 10h, 12h, 14h, e mais 16h (jogo até 20h) ou 17h (jogo a partir de 20h30) — e mais 1h antes da bola rolar. Véspera: 20h. Todas (menos a véspera) já pulam sozinhas quem já votou.'},
+  {label:'📝 MVP + Avaliar jogadores', tipos:['avaliar'], horario:'Depois que o resultado libera a avaliação: 0-1h, 1-2h, 8-9h, 14-15h, 20-21h e 23-24h.'},
+  {label:'🎯 Vasbobo Acredita', tipos:['motivacional'], horario:'Todo dia, fixo: 8h, 16h e 21h.'},
+  {label:'⚽ O Que Mais Entende (Quiz)', tipos:['quiz'], horario:'Todo dia, fixo: 9h, 17h e 22h.'},
+  {label:'🎲 Aleatórias (fofoca geral)', tipos:['aleatorias'], horario:'Todo dia, fixo: 7h, 12h, 16h e 21h — mesmo sem jogo marcado.'},
+  {label:'🏟️ Dia de jogo do Vasco', tipos:['aleatorias_jogo_casa','aleatorias_jogo_fora','gol_teste'], horario:'Aleatórias de casa/fora: junto com os horários fixos acima (7h/12h/16h/21h), só quando tem jogo. Gol de teste: véspera 10h/15h/22h · dia do jogo 7h/11h/17h.'},
+];
+const ROTULO_SUBTIPO={votar:'Palpite',avaliar:'MVP/Avaliar',motivacional:'Vasbobo Acredita',quiz:'Quiz',aleatorias:'Aleatórias',aleatorias_jogo_casa:'Dia de jogo — casa',aleatorias_jogo_fora:'Dia de jogo — fora',gol_teste:'Gol de teste'};
 async function carregarBibliotecaFrases(){
-  const tipo=document.getElementById('filtroTipoFrase').value;
-  document.getElementById('campoHoraFrase').style.display=TIPOS_COM_HORA.includes(tipo)?'block':'none';
   const alvo=document.getElementById('listaBibliotecaFrases');
   if(!alvo)return;
   alvo.innerHTML='Carregando…';
@@ -5416,21 +5399,31 @@ async function carregarBibliotecaFrases(){
       await fetch('/.netlify/functions/enviar-notificacoes').catch(()=>{});
       await new Promise(r=>setTimeout(r,1500));
     }
-    const snap=await db.collection('notif_frases').where('tipo','==',tipo).get();
-    if(snap.empty){alvo.innerHTML='<p class="nota-rodape">Nenhuma frase desse tipo ainda.</p>';return;}
-    const docs=snap.docs.sort((a,b)=>(a.data().hora||0)-(b.data().hora||0));
-    let h='';
-    docs.forEach(doc=>{
-      const d=doc.data();
-      h+='<div class="linha-tabela" style="align-items:flex-start" id="fraseLinha_'+doc.id+'">'+
-        '<span style="flex:1">'+(d.hora!=null?'<b>'+String(d.hora).padStart(2,'0')+'h</b> — ':'')+
-        '<span id="fraseTexto_'+doc.id+'">'+esc(d.texto)+'</span></span>'+
-        '<span style="display:flex;gap:6px;flex-wrap:wrap">'+
-        '<button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="usarFraseNoComposer(\''+esc(d.texto).replace(/'/g,"\\'")+'\')">usar essa</button>'+
-        '<button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="editarFraseBiblioteca(\''+doc.id+'\')">editar</button>'+
-        '<button class="btn-x" onclick="removerFraseBiblioteca(\''+doc.id+'\')">remover</button></span></div>';
-    });
-    alvo.innerHTML=h;
+    let html='';
+    for(const topico of TOPICOS_NOTIF){
+      let totalTopico=0, corpoTopico='';
+      for(const tipo of topico.tipos){
+        const snap=await db.collection('notif_frases').where('tipo','==',tipo).get();
+        const docs=snap.docs.sort((a,b)=>(a.data().hora||0)-(b.data().hora||0));
+        totalTopico+=docs.length;
+        if(topico.tipos.length>1)corpoTopico+='<div style="font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--cinza);margin:12px 0 4px;border-top:1px solid var(--linha);padding-top:10px">'+esc(ROTULO_SUBTIPO[tipo]||tipo)+' ('+docs.length+')</div>';
+        docs.forEach(doc=>{
+          const d=doc.data();
+          corpoTopico+='<div class="linha-tabela" style="align-items:flex-start" id="fraseLinha_'+doc.id+'">'+
+            '<span style="flex:1">'+(d.hora!=null?'<b>'+String(d.hora).padStart(2,'0')+'h</b> — ':'')+
+            '<span id="fraseTexto_'+doc.id+'">'+esc(d.texto)+'</span></span>'+
+            '<span style="display:flex;gap:6px;flex-wrap:wrap">'+
+            '<button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="usarFraseNoComposer(\''+esc(d.texto).replace(/'/g,"\\'")+'\')">usar essa</button>'+
+            '<button class="btn fantasma" style="padding:4px 10px;font-size:.7rem" onclick="editarFraseBiblioteca(\''+doc.id+'\')">editar</button>'+
+            '<button class="btn-x" onclick="removerFraseBiblioteca(\''+doc.id+'\')">remover</button></span></div>';
+        });
+      }
+      html+='<div class="card" style="margin-bottom:10px;padding:16px"><details><summary style="cursor:pointer">'+topico.label+' — <b style="color:var(--verde)">'+totalTopico+' frase'+(totalTopico===1?'':'s')+'</b></summary>'+
+        '<p class="nota-rodape" style="margin:10px 0 4px">⏰ '+topico.horario+'</p>'+
+        (corpoTopico||'<p class="nota-rodape">Nenhuma frase ainda.</p>')+
+        '</details></div>';
+    }
+    alvo.innerHTML=html;
   }catch(e){ alvo.innerHTML='<p class="nota-rodape">Erro ao carregar.</p>'; console.error(e); }
 }
 async function editarFraseBiblioteca(id){
