@@ -353,6 +353,58 @@ const TEXTOS_V4_ANTIGOS = [
   'Hoje tem Vasco! Já deu tempo de almoçar, checar a escalação e ainda não votar? Vai lá.',
   'Hoje tem Vasco! O grupo já está mais agitado que reunião de condomínio. Aproveita e vota.',
 ];
+
+/* leva V7 — 30 frases novas pra "aleatórias de dia de jogo" (casa e fora), sem repetir as
+   piadas já usadas nas levas anteriores, cobrindo todo o elenco de perfis */
+const NOVAS_ALEATORIAS_JOGO_V7 = [
+  'O Novaes já está de olho no grupo, pronto pra reagir a qualquer comentário sobre o Pedrinho.',
+  'Se alguém xingar o Pedrinho hoje, o Novaes já sabe: é motivo de guerra.',
+  'O Daniel já separou a pochete colorida pro jogo de hoje.',
+  'Aposta que o Daniel vai postar figurinha antes, durante e depois do jogo?',
+  'O Daniel jura que hoje ele finalmente vai concordar com o Douglas. Ninguém acredita.',
+  'O Douglas já tem uma matéria pronta defendendo o Diniz, seja qual for o resultado de hoje.',
+  'Aposto que o Douglas já compartilhou uma notícia da Netvasco hoje que ninguém pediu pra ler.',
+  'O Antônio Nerd promete: hoje ele não manda áudio estressado no grupo. Ninguém acredita nessa promessa.',
+  'Se o experimento de química falhar, o professor Antônio Nerd promete assistir o jogo inteiro sem reclamar. Duvidamos.',
+  'O André já está de prontidão pra brigar com qualquer um que citar o nome do Pedrosa hoje.',
+  'Se aparecer figurinha estranha no grupo hoje, já sabe quem vai surtar primeiro: o André.',
+  'O Wallace já tem uma crítica pronta pra qualquer coisa que sair errado hoje.',
+  'Aposto que o Wallace vai comparar o time de hoje com o Vasco Sub-93 de novo.',
+  'O Leodoro está craque em aparecer do nada — hoje pode ser um desses dias.',
+  'Se o Leodoro sumir logo depois do jogo, já sabemos: treta cumprida, missão dada.',
+  'Ninguém viu o Thiago Azevedo essa semana. Hoje pode ser o dia do retorno triunfal.',
+  'Se o Thiago Azevedo aparecer hoje, prepara: ele vem com discurso guardado.',
+  'O Pedro só aparece em dia de jogo — hoje é dia dele brilhar (ou sumir de novo).',
+  'Se o Vasco perder, o Pedro já sabe: vai xingar o lateral e sumir até o próximo jogo.',
+  'O Jorge já escolheu a mesa perto da TV — visão perfeita pra gritar GOLE.',
+  'Aposto que o Jorge vai brindar antes até do primeiro gol.',
+  'O Vitor jura que hoje é o dia que ele volta a ir aos jogos. Aguardamos confirmação.',
+  'Se o Vitor aparecer hoje, é bom avisar: ele ainda lembra de chegar 3 horas antes.',
+  'O Juan já está contando as horas pra sair de casa hoje.',
+  'Se a coleira digital do Juan permitir, ele promete ficar até o fim do jogo.',
+  'O Velloso promete: hoje ele nem compra tênis novo, só assiste o jogo. Vamos ver.',
+  'Aposto que o Velloso corre uns quilômetros antes de sentar pra assistir o jogo hoje.',
+  'O Alex já entregou a análise do adversário — silenciosa, mas certeira como sempre.',
+  'Se alguém quiser saber o resultado antes, é só perguntar pro Alex. Ele sempre acerta.',
+  'O Luiz já está cogitando o churrasco de comemoração — ou de consolo — pro final do jogo.',
+];
+add('aleatorias_jogo_casa', NOVAS_ALEATORIAS_JOGO_V7, null);
+add('aleatorias_jogo_fora', NOVAS_ALEATORIAS_JOGO_V7, null);
+
+async function garantirSeedV7(db) {
+  const marcador = db.collection('notif_frases_meta').doc('seed_v7_aleatorias_jogo_extra');
+  const doc = await marcador.get();
+  if (doc.exists) return;
+  const NOVOS = SEED.filter((s) => (s.tipo === 'aleatorias_jogo_casa' || s.tipo === 'aleatorias_jogo_fora') && NOVAS_ALEATORIAS_JOGO_V7.includes(s.texto));
+  const batch = db.batch();
+  NOVOS.forEach((item) => {
+    const ref = db.collection('notif_frases').doc();
+    batch.set(ref, { ...item, ativo: true, criadoEm: Date.now() });
+  });
+  batch.set(marcador, { feito: true, quando: Date.now(), qtd: NOVOS.length });
+  await batch.commit();
+}
+
 async function garantirSeedV6(db) {
   const marcador = db.collection('notif_frases_meta').doc('seed_v6_reorganiza_diajogo');
   const doc = await marcador.get();
@@ -432,4 +484,4 @@ function sorteia(lista) {
   return lista.length ? lista[Math.floor(Math.random() * lista.length)].texto : null;
 }
 
-module.exports = { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, garantirSeedV5, garantirSeedV6, buscarFrases, sorteia };
+module.exports = { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, garantirSeedV5, garantirSeedV6, garantirSeedV7, buscarFrases, sorteia };
