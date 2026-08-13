@@ -267,6 +267,53 @@ add('votar', [
   'Hoje tem Vasco! O grupo já está mais agitado que reunião de condomínio. Aproveita e vota.',
 ]);
 
+/* leva V5 — a partir do perfil detalhado enviado pelo usuário (arquivo PERFIL_USUARIO.md),
+   com foco especial em Pedro, Leodoro e Jorge, mas cobrindo o grupo todo */
+add('votar', [
+  'Hoje tem Vasco! O Pedro já saiu da toca — ele só aparece mesmo em dia de jogo.',
+  'Hoje tem Vasco! O filho do Pedro já deve estar gritando "Edmundo!" antes até da bola rolar.',
+  'Hoje tem Vasco! O Pedro já separou o vídeo do gol do Romário em 2000 pra reprisar depois, ganhando ou perdendo.',
+  'Hoje tem Vasco! Se perder, nem liga pro Pedro — ele já vai sumir até o próximo jogo.',
+  'Hoje tem Vasco! O Leodoro já xingou o Daniel hoje. Nem precisou de motivo.',
+  'Hoje tem Vasco! O Leodoro já arrumou treta no grupo de manhã e sumiu antes do café.',
+  'Hoje tem Vasco! Aposta quanto tempo o Leodoro demora pra aparecer, xingar alguém e sumir de novo hoje?',
+  'Hoje tem Vasco! O Leodoro tá quieto demais hoje... deve estar guardando energia pra treta pré-jogo.',
+  'Hoje tem Vasco! O Jorge já tá no bar, cerveja na mão e de olho na gordinha.',
+  'Hoje tem Vasco! Pergunta pro Jorge quantas ele já tomou — aposto que ele nem lembra mais.',
+  'Hoje tem Vasco! O Jorge já gritou "GOLE!" antes até da bola rolar.',
+  'Hoje tem Vasco! A gordinha do Jorge já sabe: hoje é dia de jogo, ele não sai do bar.',
+  'Hoje tem Vasco! O Novaes já tá de prontidão — qualquer crítica ao Pedrinho hoje, ele entra em campo (de verdade).',
+  'Hoje tem Vasco! O Novaes já acendeu o primeiro cigarro do dia defendendo o Pedrinho antes mesmo do jogo.',
+  'Hoje tem Vasco! O Daniel já separou a meia do Bob Esponja e a pochete colorida pro jogo de hoje.',
+  'Hoje tem Vasco! Se perguntarem quem mais entende de futebol, o Daniel já tem a resposta pronta (e errada).',
+  'Hoje tem Vasco! O Douglas já deve ter aberto a NetVasco umas 20 vezes só hoje de manhã.',
+  'Hoje tem Vasco! O Douglas já está montando a defesa do Diniz pro pós-jogo, ganhando ou perdendo.',
+  'Hoje tem Vasco! O Antônio Nerd já avisou a turma que a aula de química hoje vai ser resumida.',
+  'Hoje tem Vasco! Se o Vasco perder, prepara o ouvido — vem áudio estressado de voz aveludada por aí.',
+  'Hoje tem Vasco! O Vitor jura que hoje é o dia que ele volta a São Januário. Duvido.',
+  'Hoje tem Vasco! O Velloso vai encaixar uma corrida antes do jogo — ele sempre dá um jeito.',
+  'Hoje tem Vasco! Aposto que o Velloso já comprou tênis novo essa semana só de ansiedade pelo jogo.',
+  'Hoje tem Vasco! O Juan já conseguiu autorização pra sair — hoje é dia de liberdade.',
+  'Hoje tem Vasco! Se o Pedrosa falar besteira hoje, o André já tá pronto pra brigar por aí.',
+  'Hoje tem Vasco! Ninguém sabe se o Thiago Azevedo vai aparecer hoje — mas se aparecer, não para de falar.',
+  'Hoje tem Vasco! O Alex já deve ter mandado a análise do adversário de hoje, curta e certeira como sempre.',
+  'Hoje tem Vasco! O Luiz já tá cogitando marcar churrasco no Tropi depois do jogo — vitória ou não.',
+]);
+
+async function garantirSeedV5(db) {
+  const marcador = db.collection('notif_frases_meta').doc('seed_v5_votar_perfis');
+  const doc = await marcador.get();
+  if (doc.exists) return;
+  const NOVOS = SEED.filter((s) => s.tipo === 'votar').slice(92); // só a leva mais nova (68 + 24 já semeadas antes)
+  const batch = db.batch();
+  NOVOS.forEach((item) => {
+    const ref = db.collection('notif_frases').doc();
+    batch.set(ref, { ...item, ativo: true, criadoEm: Date.now() });
+  });
+  batch.set(marcador, { feito: true, quando: Date.now(), qtd: NOVOS.length });
+  await batch.commit();
+}
+
 async function garantirSeedV4(db) {
   const marcador = db.collection('notif_frases_meta').doc('seed_v4_votar_extra');
   const doc = await marcador.get();
@@ -317,4 +364,4 @@ function sorteia(lista) {
   return lista.length ? lista[Math.floor(Math.random() * lista.length)].texto : null;
 }
 
-module.exports = { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, buscarFrases, sorteia };
+module.exports = { garantirSeed, garantirSeedV2, garantirSeedV3, garantirSeedV4, garantirSeedV5, buscarFrases, sorteia };
