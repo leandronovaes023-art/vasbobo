@@ -3661,7 +3661,7 @@ function htmlCastigoRodadaBox(){
     '<svg class="roleta-svg-mini" viewBox="0 0 300 300"></svg>'+
     '</div><div style="text-align:center"><div class="badge-audio">🎙️ Áudio mínimo de 30 segundos</div></div></div>';
 }
-function htmlRodadaBox(){
+function htmlRodadaBox(semTitulo){
   const agora=Date.now();
   const rod=jogoDaRodada();
   let usarRodada=false,rid=null,rj=null;
@@ -3675,9 +3675,9 @@ function htmlRodadaBox(){
   if(usarRodada){
     const aoVivo=statusJogo(rj)==='andamento';
     const tabela=tabelaRodada(rj);
-    let html='<div class="selo-destaque" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px">'+
+    let html=(semTitulo?'':('<div class="selo-destaque" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px">'+
       '<span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+
-      '</div>'+
+      '</div>'))+
       '<div class="rodada-box">'+
       '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer;margin-bottom:8px">'+
       '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
@@ -4736,14 +4736,20 @@ async function reativarJogador(pid){
 
 /* =================== RANKING =================== */
 /* ranking geral do quiz "O Que Mais Entende de Futebol" — card reutilizável (aba Ranking e aba O Que Mais Entende) */
+let mostrarRankingQuiz=false;
+function toggleRankingQuiz(){ mostrarRankingQuiz=!mostrarRankingQuiz; renderRank(); }
 function htmlRankingQuizTotal(){
   const ordem=rankingQuizTotal(ESTADO_QUIZ);
-  return '<div class="card" style="margin-bottom:0"><h2 style="display:flex;align-items:center;gap:8px">⚽ Ranking do Quiz</h2>'+
-    '<p class="nota-rodape" style="margin:0 0 10px">Pontos de quem mais acerta o "O Que Mais Entende de Futebol", desde o início.</p>'+
-    (ordem.length?ordem.map((x,i)=>'<div class="rank-linha '+(i===0?'lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span>'+
+  let html='<div class="card" style="margin-bottom:0"><div style="cursor:pointer" onclick="toggleRankingQuiz()">'+
+    '<h2 style="margin-bottom:2px">Ranking do Quiz</h2>'+
+    '<p class="nota-rodape" style="margin:0">'+(mostrarRankingQuiz?'Toque pra recolher':'Toque para expandir')+'</p></div>';
+  if(mostrarRankingQuiz){
+    html+='<div style="margin-top:10px">'+(ordem.length?ordem.map((x,i)=>'<div class="rank-linha '+(i===0?'lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span>'+
       '<span class="rank-nome">'+esc(x.u)+(x.u===eu?' (você)':'')+'</span>'+
       '<span class="rank-pts">'+x.pts+' pt'+(x.pts===1?'':'s')+'</span></div>').join(''):
-      '<div class="vazio">Ninguém pontuou no quiz ainda. Toque no selo lá em cima e seja o primeiro!</div>')+'</div>';
+      '<div class="vazio">Ninguém pontuou no quiz ainda. Seja o primeiro!</div>')+'</div>';
+  }
+  return html+'</div>';
 }
 let mostrarRankingGeral=true;
 let mostrarRankingRodadaBox=false;
@@ -4821,11 +4827,13 @@ function renderRank(){
   }
   html+='</div>';
 
-  // 2) RANKING DA RODADA — recolhido por padrão, só título + dica
+  // 2) RANKING DA RODADA — recolhido por padrão, só título + jogo em questão + dica
+  const rodadaAtual=jogoDaRodada();
   html+='<div class="card" style="margin-bottom:0">'+
-    '<div style="cursor:pointer" onclick="toggleRankingRodadaBox()"><h2 style="margin-bottom:2px">⚔️ Ranking da Rodada</h2>'+
-    '<p class="nota-rodape" style="margin:0">'+(mostrarRankingRodadaBox?'Toque pra recolher':'Toque para expandir')+'</p></div>'+
-    (mostrarRankingRodadaBox?('<div style="margin-top:10px">'+htmlRodadaBox()+'</div>'):'')+
+    '<div style="cursor:pointer" onclick="toggleRankingRodadaBox()"><h2 style="margin-bottom:2px">Ranking da Rodada</h2>'+
+    (rodadaAtual?('<p style="margin:0;font-size:.84rem;font-weight:700;color:var(--branco)">'+nomeJogo(rodadaAtual[1])+'</p>'):'')+
+    '<p class="nota-rodape" style="margin:2px 0 0">'+(mostrarRankingRodadaBox?'Toque pra recolher':'Toque para expandir')+'</p></div>'+
+    (mostrarRankingRodadaBox?('<div style="margin-top:10px">'+htmlRodadaBox(true)+'</div>'):'')+
     '</div>';
 
   // 3) COROA DO REI / HALL DO RIBAMAR — recolhido por padrão
@@ -5902,7 +5910,7 @@ function iniciarMidiaJanela(){
     <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>BoboBet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/futebol.html" id="mfQuiz"><span class="mf-icone">🎯</span>O Que Mais Entende</a>
+    <a href="/futebol.html" id="mfQuiz"><span class="mf-icone"><img src="img/embed/icone-quiz-menu.png" alt="" style="width:24px;height:24px;object-fit:contain;border-radius:50%"></span>O Que Mais Entende</a>
   </nav>
 </body>
 </html>
