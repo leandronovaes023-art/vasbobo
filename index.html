@@ -237,7 +237,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(217,174,78,.1);border:1px solid var(--ouro);color:var(--ouro);border-radius:9px;padding:8px 14px;font-size:.78rem}
 
-  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;padding:20px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   .card h2{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;font-size:.96rem;letter-spacing:.05em;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--linha);text-shadow:none}
   .vazio{color:var(--cinza);text-align:center;padding:26px 16px;border:1px dashed var(--linha);border-radius:12px;line-height:1.6}
   .nota-rodape{color:var(--cinza);font-size:.76rem;line-height:1.6;margin-top:8px}
@@ -1572,25 +1572,6 @@ function placarTexto(j,usarParcial){
 }
 function jogadorPorId(id){return (dados.jogadores||[]).find(p=>p.id===id);}
 /* card simples e direto do quiz, dentro do fluxo normal da Home — substitui a aba flutuante */
-async function carregarQuizHome(){
-  const corpo=document.getElementById('quizHomeCorpo');
-  if(!corpo||!eu)return;
-  try{
-    const estado=await fqLerEstado();
-    ESTADO_QUIZ=estado;
-    const status=fqStatusDia(estado,eu);
-    const feito=status.respondidas>=3;
-    if(feito){
-      corpo.innerHTML='<p style="margin:0;font-size:.86rem">✅ Você já respondeu hoje ('+status.acertos+'/'+status.respondidas+' certas). Volta amanhã pra mais!</p>';
-    }else{
-      corpo.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
-        '<p style="margin:0;font-size:.86rem">'+status.respondidas+'/3 respondidas hoje — cada acerto vale ponto na rodada.</p>'+
-        '<button class="btn" style="padding:7px 16px;font-size:.82rem;flex:none" onclick="fqAbrirQuiz()">Responder agora</button></div>';
-    }
-  }catch(e){
-    corpo.innerHTML='<p class="nota-rodape" style="margin:0">Não consegui carregar o quiz agora.</p>';
-  }
-}
 /* =================== BOBOBET (R$10/mês via Pix, sem taxa, usando InfinitePay) =================== */
 /* R$10 = R$5 vira prêmio do mês + R$5 acumula pro prêmio de fim de ano */
 const VASBOLAO_VALOR_TEXTO='R$10,00';
@@ -3895,7 +3876,6 @@ function renderListaJogos(){
   atualizarCronometro();
   atualizarCronometroAvaliar();
   carregarPremioMesSimples();
-  carregarQuizHome();
 }
 function renderDetalhe(){
   const sec=document.getElementById('secDetalhe');
@@ -4753,8 +4733,12 @@ function htmlRankingQuizTotal(){
       '<span class="rank-pts">'+x.pts+' pt'+(x.pts===1?'':'s')+'</span></div>').join(''):
       '<div class="vazio">Ninguém pontuou no quiz ainda. Toque no selo lá em cima e seja o primeiro!</div>')+'</div>';
 }
-let mostrarRankingGeral=false;
+let mostrarRankingGeral=true;
+let mostrarRankingRodadaBox=false;
+let mostrarCoroaRibamar=false;
 function toggleRankingGeral(){ mostrarRankingGeral=!mostrarRankingGeral; renderRank(); }
+function toggleRankingRodadaBox(){ mostrarRankingRodadaBox=!mostrarRankingRodadaBox; renderRank(); }
+function toggleCoroaRibamar(){ mostrarCoroaRibamar=!mostrarCoroaRibamar; renderRank(); }
 function renderRank(){
   const sec=document.getElementById('secRank');
   const placar={};
@@ -4791,15 +4775,15 @@ function renderRank(){
   });
   const ordem=Object.entries(placar).sort((a,b)=>b[1].pts-a[1].pts||b[1].exato-a[1].exato||b[1].resultado-a[1].resultado);
 
-  let html='<div class="rank-grid">'+
-  '<div class="card" style="margin-bottom:0">'+
-  '<div class="rodada-box" style="margin-bottom:12px">'+tooltipPontuacao()+'</div>'+
-  htmlRodadaBox()+
-  htmlCastigoRodadaBox()+
-  '<button class="btn fantasma" style="width:100%;margin-top:12px" onclick="toggleRankingGeral()">'+
-    (mostrarRankingGeral?'▲ Esconder ranking geral':'Clique e veja o ranking geral ▾')+'</button>';
+  let html='<div class="rank-grid">';
+
+  // 1) RANKING GERAL — aparece completo por padrão; toque no título pra recolher
+  html+='<div class="card" style="margin-bottom:0">'+
+    '<div style="cursor:pointer" onclick="toggleRankingGeral()"><h2 style="margin-bottom:2px">🏆 Ranking Geral</h2>'+
+    '<p class="nota-rodape" style="margin:0 0 8px">'+(mostrarRankingGeral?'Toque pra recolher':'Tabela de pontuação · Toque para expandir')+'</p></div>'+
+    (mostrarRankingGeral?('<div style="margin-bottom:8px">'+tooltipPontuacao()+'</div>'):'');
   if(mostrarRankingGeral){
-    html+='<div style="margin-top:10px">'+ordem.map(([u,x],i)=>{
+    html+='<div>'+ordem.map(([u,x],i)=>{
       const partes=[];
       if(x.exato)partes.push(x.exato+' exato'+(x.exato>1?'s':''));
       if(x.resultado)partes.push(x.resultado+' acertou o resultado');
@@ -4825,23 +4809,43 @@ function renderRank(){
   }
   html+='</div>';
 
+  // 2) RANKING DA RODADA — recolhido por padrão, só título + dica
+  html+='<div class="card" style="margin-bottom:0">'+
+    '<div style="cursor:pointer" onclick="toggleRankingRodadaBox()"><h2 style="margin-bottom:2px">⚔️ Ranking da Rodada</h2>'+
+    '<p class="nota-rodape" style="margin:0">'+(mostrarRankingRodadaBox?'Toque pra recolher':'Toque para expandir')+'</p></div>'+
+    (mostrarRankingRodadaBox?('<div style="margin-top:10px">'+htmlRodadaBox()+'</div>'):'')+
+    '</div>';
+
+  // 3) COROA DO REI / HALL DO RIBAMAR — recolhido por padrão
   const reis=ordem.filter(([u,x])=>x.reis>0).sort((a,b)=>b[1].reis-a[1].reis);
   const ribas=ordem.filter(([u,x])=>x.ribas>0).sort((a,b)=>b[1].ribas-a[1].ribas);
-  html+='<div class="card" style="margin-bottom:0"><div class="grid g2">'+
-    '<div><div style="text-align:center;margin-bottom:10px">'+iconRei(64)+
-      '<h2 style="margin:8px 0 2px;padding:0;border:none">Coroa do Rei</h2>'+
-      '<p class="nota-rodape" style="margin:0 0 10px">Quem mais vezes terminou a rodada com a coroa na cabeça.</p></div>'+
-    (reis.length?reis.map(([u,x],i)=>'<div class="rank-linha '+(i===0?'lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span><span class="rank-nome">'+esc(u)+(u===eu?' (você)':'')+'</span><span class="rank-pts" style="display:flex;align-items:center;gap:5px">'+iconRei(20)+' Rei ×'+x.reis+'</span></div>').join(''):'<div class="vazio">O trono está vago. Alguém vai reinar na primeira rodada!</div>')+
-    '</div>'+
-    '<div style="border-left:1px solid rgba(23,23,27,.14);padding-left:16px">'+
-      '<div style="text-align:center;margin-bottom:10px">'+iconRiba(64)+
-      '<h2 style="margin:8px 0 2px;padding:0;border:none">Hall do Ribamar</h2>'+
-      '<p class="nota-rodape" style="margin:0 0 10px">Quem mais vezes fechou a rodada em último.</p></div>'+
-    (ribas.length?ribas.map(([u,x],i)=>'<div class="rank-linha"><span class="rank-pos">'+(i+1)+'º</span><span class="rank-nome">'+esc(u)+(u===eu?' (você)':'')+'</span><span class="rank-pts" style="color:var(--laranja);display:flex;align-items:center;gap:5px">'+iconRiba(20)+' Ribamar ×'+x.ribas+'</span></div>').join(''):'<div class="vazio">Ninguém pagou mico ainda. Questão de tempo…</div>')+
-    '</div>'+
-  '</div></div>';
+  html+='<div class="card" style="margin-bottom:0">'+
+    '<div style="cursor:pointer" onclick="toggleCoroaRibamar()"><h2 style="margin-bottom:2px">'+ICON_REI+' Coroa do Rei & Hall do Ribamar</h2>'+
+    '<p class="nota-rodape" style="margin:0">'+(mostrarCoroaRibamar?'Toque pra recolher':'Toque para expandir')+'</p></div>';
+  if(mostrarCoroaRibamar){
+    html+='<div class="grid g2" style="margin-top:10px">'+
+      '<div><div style="text-align:center;margin-bottom:10px">'+iconRei(64)+
+        '<h2 style="margin:8px 0 2px;padding:0;border:none">Coroa do Rei</h2>'+
+        '<p class="nota-rodape" style="margin:0 0 10px">Quem mais vezes terminou a rodada com a coroa na cabeça.</p></div>'+
+      (reis.length?reis.map(([u,x],i)=>'<div class="rank-linha '+(i===0?'lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span><span class="rank-nome">'+esc(u)+(u===eu?' (você)':'')+'</span><span class="rank-pts" style="display:flex;align-items:center;gap:5px">'+iconRei(20)+' Rei ×'+x.reis+'</span></div>').join(''):'<div class="vazio">O trono está vago. Alguém vai reinar na primeira rodada!</div>')+
+      '</div>'+
+      '<div style="border-left:1px solid rgba(23,23,27,.14);padding-left:16px">'+
+        '<div style="text-align:center;margin-bottom:10px">'+iconRiba(64)+
+        '<h2 style="margin:8px 0 2px;padding:0;border:none">Hall do Ribamar</h2>'+
+        '<p class="nota-rodape" style="margin:0 0 10px">Quem mais vezes fechou a rodada em último.</p></div>'+
+      (ribas.length?ribas.map(([u,x],i)=>'<div class="rank-linha"><span class="rank-pos">'+(i+1)+'º</span><span class="rank-nome">'+esc(u)+(u===eu?' (você)':'')+'</span><span class="rank-pts" style="color:var(--laranja);display:flex;align-items:center;gap:5px">'+iconRiba(20)+' Ribamar ×'+x.ribas+'</span></div>').join(''):'<div class="vazio">Ninguém pagou mico ainda. Questão de tempo…</div>')+
+      '</div>'+
+    '</div>';
+  }
+  html+='</div>';
 
-  html+=htmlRankingQuizTotal()+'</div>';
+  // 4) RANKING DO QUIZ
+  html+=htmlRankingQuizTotal();
+
+  // 5) CASTIGO DA RODADA — sempre por último
+  html+='<div class="card" style="margin-bottom:0">'+htmlCastigoRodadaBox()+'</div>';
+
+  html+='</div>';
   sec.innerHTML=html;
   atualizarCronometroAvaliar();
 }
