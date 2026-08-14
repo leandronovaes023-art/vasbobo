@@ -1097,7 +1097,9 @@ const JOGOS_INICIAIS=[
  ['g260816','Santos','casa','2026-08-16','16:00','Campeonato Brasileiro',''],
  ['g260820','Club Olimpia','fora','2026-08-20','19:00','CONMEBOL Sudamericana','Volta'],
  ['g260823','Palmeiras','fora','2026-08-23','16:00','Campeonato Brasileiro',''],
+ ['g260826','Vitória','casa','2026-08-26','21:30','Copa do Brasil','Ida'],
  ['g260829','Cruzeiro','casa','2026-08-29',null,'Campeonato Brasileiro',''],
+ ['g260902','Vitória','fora','2026-09-02','21:30','Copa do Brasil','Volta'],
  ['g260905','Fluminense','fora','2026-09-05',null,'Campeonato Brasileiro',''],
  ['g260912','Grêmio','fora','2026-09-12',null,'Campeonato Brasileiro',''],
  ['g260919','Coritiba','casa','2026-09-19',null,'Campeonato Brasileiro',''],
@@ -2528,6 +2530,7 @@ const ADICIONAR_P2=[
  ['p_spinelli','99','Spinelli','Centroavante'],
 ];
 const PATCH_TV_V=2;
+const PATCH_JOGOS_FALTANTES_V=1;
 const PATCH_ELENCO2_V=2;
 const PATCH_ZERAR_TEMPORADA_V=1;
 function migrar(){
@@ -2570,6 +2573,18 @@ function migrar(){
     if(dados.jogos.g260820&&!dados.jogos.g260820.ondeAssistir)dados.jogos.g260820.ondeAssistir='Paramount+';
     if(dados.jogos.g260823&&!dados.jogos.g260823.ondeAssistir)dados.jogos.g260823.ondeAssistir='Globo e Premiere';
     dados.patchTvV=PATCH_TV_V;
+    mudou=true;
+  }
+  /* garante que TODOS os jogos da lista JOGOS_INICIAIS (o calendário oficial) existam no banco —
+     cobre qualquer jogo que ainda esteja faltando (ex.: os dois contra o Vitória na Copa do
+     Brasil), sem nunca sobrescrever um jogo que já existe (preserva resultado/palpites/avaliações) */
+  if((dados.patchJogosFaltantesV||0)<PATCH_JOGOS_FALTANTES_V){
+    JOGOS_INICIAIS.forEach(([id,adversario,local,data,hora,competicao,fase])=>{
+      if(!dados.jogos[id]){
+        dados.jogos[id]={adversario,local,data,hora,competicao,fase,resultado:null,goleadores:[],palpites:{},avaliacoes:{}};
+      }
+    });
+    dados.patchJogosFaltantesV=PATCH_JOGOS_FALTANTES_V;
     mudou=true;
   }
   Object.values(dados.jogos).forEach(j=>{
