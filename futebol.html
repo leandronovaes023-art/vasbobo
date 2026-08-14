@@ -410,6 +410,15 @@ function sairSatelite(){
 </script>
 
 <main>
+  <div class="card">
+    <div id="fqStats" class="fq-stats">
+      <div class="fq-stat"><b id="fqHoje">0/3</b><span>Hoje</span></div>
+      <div class="fq-stat"><b id="fqTotal">0</b><span>Pontos no total</span></div>
+    </div>
+    <button class="fq-btn" id="fqBtnResponder" onclick="fqAbrirQuiz()">🧠 Responder agora</button>
+    <p id="fqStatusSimples" style="margin-top:10px;font-size:.86rem;color:var(--branco)"></p>
+  </div>
+
   <div class="fq-banner-wrap">
     <img class="fq-banner" src="img/embed/asset3.jpg" alt="O Que Mais Entende de Futebol">
   </div>
@@ -419,14 +428,9 @@ function sairSatelite(){
   </div>
 
   <div class="card">
-    <div id="fqStats" class="fq-stats">
-      <div class="fq-stat"><b id="fqHoje">0/3</b><span>Hoje</span></div>
-      <div class="fq-stat"><b id="fqTotal">0</b><span>Pontos no total</span></div>
-    </div>
-    <button class="fq-btn" id="fqBtnResponder" onclick="fqAbrirQuiz()">🧠 Responder agora</button>
     <ul class="fq-regras">
       <li>Você tem <b>3 respostas válidas por dia</b>, a partir das 6h da manhã.</li>
-      <li>Cada pergunta tem <b>10 segundos</b> para ser respondida — se o tempo acabar, ela é pulada e não conta nas suas 3 do dia.</li>
+      <li>Cada pergunta tem <b>15 segundos</b> para ser respondida — se o tempo acabar, ela é pulada e não conta nas suas 3 do dia.</li>
       <li>Cada resposta certa vale <b>1 ponto</b>, que soma no ranking do jogo mais próximo que ainda não começou. Quando esse jogo começa, as respostas seguintes já valem pro jogo seguinte.</li>
       <li>Se você errar, a resposta certa <b>não é revelada</b> — só se ficou certo ou errado.</li>
     </ul>
@@ -684,6 +688,14 @@ async function fqAtualizarPainel(){
   if(btn){
     if(status.respondidas>=3){ btn.textContent='✅ Você já respondeu hoje'; btn.disabled=true; }
     else{ btn.textContent='🧠 Responder agora'; btn.disabled=false; }
+  }
+  const elStatus=document.getElementById('fqStatusSimples');
+  if(elStatus){
+    if(status.respondidas>=3){
+      elStatus.textContent='✅ Você já respondeu hoje ('+status.acertos+'/'+status.respondidas+' certas). Volta amanhã pra mais!';
+    }else{
+      elStatus.textContent='Ainda falta responder '+(3-status.respondidas)+' de 3 hoje.';
+    }
   }
   fqRenderRankingTotal(estado);
 }
