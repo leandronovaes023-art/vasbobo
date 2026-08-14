@@ -3889,9 +3889,11 @@ function renderDetalhe(){
   const ne=r?(casa?r.v:r.a):'–', nd=r?(casa?r.a:r.v):'–';
 
   let html='<button class="btn" onclick="voltarLista()" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;width:auto">← Voltar à Tela Principal</button>'+
-  '<div class="card"><div class="jogo-nome" style="font-size:1.25rem;margin-bottom:6px">'+(r?(pe+' '+ne+' <span class="x">×</span> '+nd+' '+pd):(pe+' <span class="x">×</span> '+pd))+'</div>'+
-  '<div class="meta" style="font-size:.86rem">'+fmtData(j)+' · '+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+' · '+(casa?'São Januário':'Fora de casa')+'</div>'+
-  (j.ondeAssistir?'<div style="margin-top:6px">'+badgeTransmissao(j,true)+'</div>':'');
+  '<div class="card"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'+
+    nomeJogoComEscudos(j,26,'1.1em')+
+    '<b style="font-size:.8rem;color:var(--branco);white-space:nowrap;margin-top:4px">'+fmtData(j)+(j.hora?'h':'')+'</b>'+
+  '</div>'+
+  '<div class="info-linha" style="font-size:.82rem;margin-top:6px"><b style="color:var(--branco)">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</b> · '+(casa?'São Januário':'Fora de casa')+'</div>';
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
   if(j.resultado&&souAdmin())html+='<div class="auto-info">⚽ Placar registrado em '+(j.resultadoEm?new Date(j.resultadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'sem data registrada')+(j.fonteAuto?' (via '+esc(j.fonteAuto.fonte||'busca automática')+')':' (lançado manualmente)')+'. <span class="adm">admin</span></div>';
@@ -3958,12 +3960,11 @@ function renderPalpiteCard(j,s){
       '<input type="number" min="0" max="20" id="ppA" value="'+(meu?meu.a:'')+'" aria-label="Gols do adversário">'+
       '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
       '<div class="grid g2" style="margin-top:12px">'+
-      '<div><label for="ppMvp">Seu MVP da partida (+'+PTS_MVP+' pts se a galera concordar)</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
-      '<div><label for="ppGol">Quem faz gol? (+'+PTS_GOL+' pts se acertar)</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
+      '<div><label for="ppMvp">Seu MVP da partida</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
+      '<div><label for="ppGol">Quem faz gol?</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
       '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()"><span style="color:var(--vermelho)">✠</span> '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
       (meu?'<button class="btn fantasma" style="margin-top:8px;color:var(--vermelho)" onclick="removerMeuPalpite()">🗑️ Remover meu palpite</button>':'')+
       (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
-      '<p class="nota-rodape" style="margin-bottom:6px">Palpites fecham '+FECHA_PALPITE_MIN+' minutos antes da bola rolar. Placar, MVP e gol são obrigatórios pra salvar.</p>'+
       tooltipPontuacao();
   }else if(meu){
     html+='<p style="font-size:.92rem">Seu palpite: <b class="display">Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>';
