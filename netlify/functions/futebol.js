@@ -151,11 +151,25 @@ function resumirEvento(ev) {
     liga: ev.strLeague,
     mandante: ev.strHomeTeam,
     visitante: ev.strAwayTeam,
+    escudoMandante: ev.strHomeTeamBadge || null,
+    escudoVisitante: ev.strAwayTeamBadge || null,
     golsMandante: ev.intHomeScore !== null && ev.intHomeScore !== undefined ? Number(ev.intHomeScore) : null,
     golsVisitante: ev.intAwayScore !== null && ev.intAwayScore !== undefined ? Number(ev.intAwayScore) : null,
     encerrado: statusEncerrado(ev),
     estadio: ev.strVenue || null,
   };
+}
+
+async function acaoEscudoTime(params, res) {
+  const nome = (params.nome || '').trim();
+  if (!nome) return res(400, { erro: 'Informe "nome".' });
+  try {
+    const r = await chamarApi(`/searchteams.php?t=${encodeURIComponent(nome)}`);
+    const time = (r && r.teams && r.teams[0]) || null;
+    res(200, { escudo: time ? (time.strTeamBadge || null) : null });
+  } catch (e) {
+    res(200, { escudo: null });
+  }
 }
 
 async function acaoProximos(res) {
@@ -281,6 +295,7 @@ exports.handler = async (event) => {
     else if (params.acao === 'detalhe') await acaoDetalhe(params, capturar);
     else if (params.acao === 'escalacaoPreJogo') await acaoEscalacaoPreJogo(params, capturar);
     else if (params.acao === 'hoje') await acaoHoje(params, capturar);
+    else if (params.acao === 'escudoTime') await acaoEscudoTime(params, capturar);
     else return responder(400, { erro: 'Use ?acao=proximos, ?acao=detalhe, ?acao=escalacaoPreJogo ou ?acao=hoje' });
     return responder(resultado.statusCode, resultado.body);
   } catch (e) {
