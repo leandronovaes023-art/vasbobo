@@ -220,7 +220,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;white-space:nowrap}
   .tab.ativa{background:var(--branco);color:var(--preto)}
   .tab:focus-visible,button:focus-visible{outline:none}
-  main{max-width:1320px;margin:0 auto;padding:6px 20px 102px}
+  main{max-width:1320px;margin:0 auto;padding:6px 8px 102px}
   .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:var(--carvao);border-top:1px solid var(--linha);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
@@ -237,7 +237,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(217,174,78,.1);border:1px solid var(--ouro);color:var(--ouro);border-radius:9px;padding:8px 14px;font-size:.78rem}
 
-  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:16px;padding:20px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   .icone-piscando{animation:piscarChamativo 1.8s ease-in-out infinite}
   @keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(224,172,31,.6)}50%{opacity:.75;transform:scale(1.12);box-shadow:0 0 0 5px rgba(224,172,31,0)}}
   .btn-toque-expandir{display:block;width:100%;background:var(--carvao2);border:1.5px solid var(--linha);color:var(--branco);
@@ -285,7 +285,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .modal .acoes{display:flex;gap:10px;justify-content:flex-end}
 
   .destaque{border:1px solid var(--linha);background:var(--carvao)}
-  .selo-destaque{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--branco);font-weight:900;margin-bottom:5px}
+  .selo-destaque{font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--branco);font-weight:900;margin-bottom:4px}
   .selo-destaque .cruz{color:var(--vermelho)}
   .dest-grid{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:16px;align-items:start}
   @media(max-width:1180px){.dest-grid{grid-template-columns:1fr 1fr}}
@@ -3693,25 +3693,26 @@ function htmlRodadaBox(semTitulo){
   if(usarRodada){
     const aoVivo=statusJogo(rj)==='andamento';
     const tabela=tabelaRodada(rj);
-    let html=(semTitulo?'':('<div class="selo-destaque" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'+
+    let html=(semTitulo?'':('<div class="selo-destaque">'+
       '<span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+
       '</div>'))+
       '<div class="rodada-box" style="width:100%">'+
-      '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer;margin-bottom:8px">'+
-      '<div style="margin-top:6px">'+nomeJogoComEscudos(rj,40,'1.1em')+'</div>'+
-      '<div style="margin-top:8px">'+htmlInfoDireitaJogo(rj,true)+'</div>'+
-      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px">'+
+      '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer">'+
+      '<div style="margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
+        nomeJogoComEscudos(rj,48,'1.25em')+htmlInfoDireitaJogo(rj)+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px">'+
       '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Toque para avaliar</span>'+
       (rj.resultado&&!pontuacaoLiberada(rj)&&rj.resultadoEm?'<span style="font-size:.7rem;color:var(--branco)">Avaliação fecha em <b id="cronoAvaliar" data-prazo="'+(rj.resultadoEm+PRAZO_AVALIAR_MS)+'" style="color:var(--branco)">…</b></span>':'')+
       '</div>'+
       '</div>';
     if(rj.resultado&&rj.palpites&&rj.palpites[eu]&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
-      html+='<button class="jogo-item" style="background:rgba(224,41,59,.1);border-color:var(--vermelho);margin-bottom:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
+      html+='<button class="jogo-item" style="background:rgba(224,41,59,.1);border-color:var(--vermelho);margin-top:10px" onclick="abrirJogoNaAvaliacao(\''+rid+'\')">'+
         '<span><span class="jogo-nome" style="color:var(--vermelho);text-transform:uppercase;white-space:nowrap;font-size:.92rem">VOCÊ AINDA NÃO AVALIOU A SELEVASCO</span>'+
         '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada. <b style="color:var(--vermelho)">Penalidade -2 pontos</b></div></span></button>';
     }
     if(rj.resultado&&!pontuacaoLiberada(rj)){
-      html+='<p class="nota-rodape" style="margin:0 0 8px"><b>⏳ Pontuação provisória — aguardando todos avaliarem.</b></p>';
+      html+='<p class="nota-rodape" style="margin:10px 0 8px"><b>Pontuação provisória — aguardando avaliações.</b></p>';
       if(tabela.length){
         const ordenada=tabela.slice().sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
         const top5=ordenada.slice(0,5), resto=ordenada.slice(5);
@@ -3728,8 +3729,8 @@ function htmlRodadaBox(semTitulo){
         };
         html+=top5.map(linhaP).join('');
         if(resto.length){
-          html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">'+(mostrarRankingRodadaHome?'▲ Ver menos':'▾ Ver mais '+resto.length+' Vasbobo'+(resto.length===1?'':'s'))+'</button>';
           if(mostrarRankingRodadaHome)html+=resto.map(linhaP).join('');
+          else html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▾ Ver mais '+resto.length+' Vasbobo'+(resto.length===1?'':'s')+'</button>';
         }
       }
       html+='<button class="btn-toque-expandir" style="margin-top:8px" onclick="mudarAba(\'rank\')">🏆 Ver ranking geral completo</button>';
@@ -3851,18 +3852,19 @@ function renderListaJogos(){
       chamada='Veja como a galera se saiu.';
       rotuloBtn='Abrir jogo';
     }
-    html+='<div class="card destaque"><div class="selo-destaque" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">'+
-      '<span><span class="cruz">✠</span> Jogo em destaque</span>'+htmlBadgeEscalacao(id,j,true)+
+    html+='<div class="card destaque"><div class="selo-destaque">'+
+      '<span><span class="cruz">✠</span> Jogo em destaque</span>'+
       '</div>'+
       '<div class="rodada-box" style="width:100%">'+
-      '<div style="margin-top:6px">'+nomeJogoComEscudos(j,44,'1.2em')+'</div>'+
-      '<div style="margin-top:8px">'+htmlInfoDireitaJogo(j,true)+'</div>'+
-      (j.ondeAssistir?'<div style="margin-top:8px">'+badgeTransmissao(j)+'</div>':'')+
-      (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
-        '<p style="font-size:.84rem;margin:8px 0 10px;color:var(--branco)">'+chamada+'</p>')+
+      '<div style="margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
+        nomeJogoComEscudos(j,52,'1.3em')+htmlInfoDireitaJogo(j)+
+      '</div>'+
+      (j.ondeAssistir?'<div style="margin-top:10px">'+badgeTransmissao(j)+'</div>':'')+
+      (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
+        '<p style="font-size:.84rem;margin:10px 0 10px;color:var(--branco)">'+chamada+'</p>')+
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><button class="btn" '+corBtn+' style="padding:7px 14px;font-size:.82rem" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
       '</div></div>';
-    html+='<div class="card" style="margin-top:-8px">'+htmlRodadaBox()+'</div>';
+    html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
     html+=htmlVasbolaoRanking(5);
     html+='<div class="card">'+htmlCastigoRodadaBox()+'</div>';
   }
@@ -3910,11 +3912,9 @@ function renderDetalhe(){
   const ne=r?(casa?r.v:r.a):'–', nd=r?(casa?r.a:r.v):'–';
 
   let html='<button class="btn" onclick="voltarLista()" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;width:auto">← Voltar à Tela Principal</button>'+
-  '<div class="card"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap">'+
-    nomeJogoComEscudos(j,36,'1.15em')+
-    '<b style="font-size:.8rem;color:var(--branco);white-space:nowrap;margin-top:4px">'+fmtData(j)+(j.hora?'h':'')+'</b>'+
-  '</div>'+
-  '<div class="info-linha" style="font-size:.82rem;margin-top:6px"><b style="color:var(--branco)">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</b> · '+(casa?'São Januário':'Fora de casa')+'</div>';
+  '<div class="card"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'+
+    nomeJogoComEscudos(j,44,'1.2em')+htmlInfoDireitaJogo(j)+
+  '</div>';
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
   if(j.resultado&&souAdmin())html+='<div class="auto-info">⚽ Placar registrado em '+(j.resultadoEm?new Date(j.resultadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'sem data registrada')+(j.fonteAuto?' (via '+esc(j.fonteAuto.fonte||'busca automática')+')':' (lançado manualmente)')+'. <span class="adm">admin</span></div>';
@@ -4657,20 +4657,26 @@ function escudoLocalPara(nomeTime){
 }
 /* "Vasco × Santos" com o escudo de cada time acima do nome, proporcional, respeitando quem é
    mandante/visitante — usado em toda tela que mostra "Vasco x Adversário" */
+function nomeCompeticaoLimpo(comp){
+  return (comp||'').replace(/^conmebol\s+/i,'').trim();
+}
 function htmlInfoDireitaJogo(j,linhaUnica){
+  const comp=nomeCompeticaoLimpo(j.competicao);
   if(linhaUnica){
-    return '<div style="font-size:.72rem;color:var(--cinza);text-transform:uppercase;letter-spacing:.02em;line-height:1.5">'+
-      '<b style="color:var(--branco)">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</b> · '+fmtData(j)+(j.hora?'h':'')+' · '+(j.local==='fora'?'Fora de casa':'São Januário')+
+    return '<div style="font-size:.76rem;color:var(--cinza);line-height:1.55">'+
+      '<div style="font-weight:800;color:var(--branco);font-size:.86rem">'+esc(comp)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
+      '<div style="text-transform:uppercase">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
+      '<div>'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
     '</div>';
   }
   return '<div style="text-align:right;flex:none">'+
-    '<div style="font-weight:800;font-size:.74rem;text-transform:uppercase;color:var(--branco);letter-spacing:.01em">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
-    '<div style="font-size:.68rem;color:var(--cinza);text-transform:uppercase;margin-top:2px">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
-    '<div style="font-size:.68rem;color:var(--cinza);text-transform:uppercase">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+    '<div style="font-weight:800;font-size:.86rem;color:var(--branco)">'+esc(comp)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
+    '<div style="font-size:.72rem;color:var(--cinza);text-transform:uppercase;margin-top:2px">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
+    '<div style="font-size:.72rem;color:var(--cinza)">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
   '</div>';
 }
 function nomeJogoComEscudos(j,tamEscudo,tamFonte){
-  tamEscudo=tamEscudo||44; tamFonte=tamFonte||'1.2em';
+  tamEscudo=tamEscudo||52; tamFonte=tamFonte||'1.3em';
   const tamAdversario=Math.round(tamEscudo*0.8); // Vasco sempre maior que o escudo do adversário
   const casa=j.local!=='fora';
   const nomeCasa=casa?'Vasco':j.adversario, nomeFora=casa?j.adversario:'Vasco';
@@ -4678,13 +4684,18 @@ function nomeJogoComEscudos(j,tamEscudo,tamFonte){
   const escCasa=casa?ESCUDO_VASCO:escAdv, escFora=casa?escAdv:ESCUDO_VASCO;
   const tamCasa=casa?tamEscudo:tamAdversario, tamFora=casa?tamAdversario:tamEscudo;
   const pesoCasa=casa?'900':'400', pesoFora=casa?'400':'900';
-  const coluna=(escUrl,nome,peso,tam)=>'<span style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;vertical-align:middle;flex:none">'+
+  // as duas colunas têm a MESMA altura de escudo reservada (a do maior, sempre o Vasco) — o escudo
+  // menor do adversário fica alinhado embaixo dessa área, garantindo que os DOIS nomes comecem
+  // exatamente na mesma linha, não importa o tamanho do escudo de cada um
+  const coluna=(escUrl,nome,peso,tam)=>'<span style="display:inline-flex;flex-direction:column;align-items:center;gap:3px;vertical-align:middle;flex:none">'+
+    '<span style="height:'+tamEscudo+'px;display:flex;align-items:flex-end;justify-content:center">'+
     (escUrl?'<img src="'+esc(escUrl)+'" alt="" style="width:'+tam+'px;height:'+tam+'px;object-fit:contain;flex:none" onerror="this.style.display=\'none\'">':'')+
-    '<span style="font-weight:'+peso+';font-size:'+tamFonte+';white-space:nowrap">'+esc(nome)+'</span></span>';
+    '</span>'+
+    '<span style="font-weight:'+peso+';font-size:'+tamFonte+';white-space:nowrap;line-height:1">'+esc(nome)+'</span></span>';
   const r=j.resultado||j.parcial;
-  const meio=r?('<span style="font-weight:900;font-size:'+tamFonte+';margin-top:'+(Math.round(tamEscudo*0.3))+'px;white-space:nowrap;flex:none">'+(casa?r.v:r.a)+' × '+(casa?r.a:r.v)+'</span>')
-              :('<span style="color:var(--cinza);margin-top:'+(Math.round(tamEscudo*0.3))+'px;flex:none;font-size:'+tamFonte+'">×</span>');
-  return '<span style="display:flex;align-items:flex-start;justify-content:flex-start;gap:10px;flex-wrap:nowrap;white-space:nowrap">'+coluna(escCasa,nomeCasa,pesoCasa,tamCasa)+meio+coluna(escFora,nomeFora,pesoFora,tamFora)+'</span>';
+  const meio=r?('<span style="font-weight:900;font-size:'+tamFonte+';white-space:nowrap;flex:none;align-self:flex-end;margin-bottom:calc('+tamFonte+' * 0.15)">'+(casa?r.v:r.a)+' × '+(casa?r.a:r.v)+'</span>')
+              :('<span style="color:var(--cinza);flex:none;font-size:'+tamFonte+';align-self:flex-end;margin-bottom:calc('+tamFonte+' * 0.15)">×</span>');
+  return '<span style="display:flex;align-items:flex-start;justify-content:flex-start;gap:12px;flex-wrap:nowrap;white-space:nowrap">'+coluna(escCasa,nomeCasa,pesoCasa,tamCasa)+meio+coluna(escFora,nomeFora,pesoFora,tamFora)+'</span>';
 }
 
 async function salvarTransmissao(){
