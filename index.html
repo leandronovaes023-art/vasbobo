@@ -1991,8 +1991,10 @@ function htmlVasbolaoRanking(limite){
       if(x.quiz)partes.push('+'+x.quiz+' quiz');
       if(x.reis)partes.push(x.reis+'x rei (+'+(x.reis*PTS_BONUS_REIZINHO)+')');
       if(x.ribas)partes.push(x.ribas+'x ribamar ('+(x.ribas*PTS_PENALIDADE_RIBAMAR)+')');
+      const ptsJogo=x.pts-(x.quiz||0);
+      const linhaSeparada=x.quiz?('<div class="rank-detalhe" style="margin-top:1px;font-weight:700;color:var(--branco)">🎯 Jogo: '+ptsJogo+' pts · 🧠 Quiz: +'+x.quiz+' pts</div>'):'';
       return '<div class="rank-linha'+(i===0&&x.pts>0?' lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span>'+
-        '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+'<div class="rank-detalhe">'+(partes.join(' · ')||'sem pontos ainda')+'</div></span>'+
+        '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+linhaSeparada+'<div class="rank-detalhe">'+(partes.join(' · ')||'sem pontos ainda')+'</div></span>'+
         '<span class="rank-pts">'+x.pts+' pts</span></div>';
     }).join('');
   }
@@ -3521,6 +3523,13 @@ function jogoDestaque(){
   const lista=jogosOrdenados();
   const agora=new Date();
   for(const [id,j] of lista){if(statusJogo(j)==='andamento')return [id,j];}
+  // prioridade 2: jogo com avaliação pendente (ainda dentro do prazo) que EU ainda não avaliei —
+  // isso é mais urgente que mostrar o próximo jogo futuro
+  for(const [id,j] of lista){
+    if(statusJogo(j)!=='avaliar')continue;
+    const jaAvaliei=j.avaliacoes&&j.avaliacoes[eu]&&Object.keys(j.avaliacoes[eu]).length;
+    if(!jaAvaliei)return [id,j];
+  }
   for(const [id,j] of lista){
     if(j.resultado)continue;
     const ini=inicioJogo(j)||new Date(j.data+'T23:59');
@@ -3786,7 +3795,34 @@ function renderListaJogos(){
     const [id,j]=dest;
     const s=statusJogo(j);
     const [cls,txt]=textoSelo(s);
-    const chamada=s==='aberto'?'Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar':s==='andamento'?'Bola rolando! Placar atualizando e avaliação libera no apito final':s==='avaliar'?'Fim de jogo: hora de dar as notas e soltar o verbo':'Veja como a galera se saiu';
+    const jaVotei=!!(j.palpites&&j.palpites[eu]);
+    const jaAvaliei=!!(j.avaliacoes&&j.avaliacoes[eu]&&Object.keys(j.avaliacoes[eu]).length);
+    let chamada,rotuloBtn,corBtn='';
+    if(s==='aberto'){
+      if(jaVotei){
+        const meu=j.palpites[eu];
+        chamada='✅ Seu palpite já está registrado: <b>'+meu.golsVasco+' x '+meu.golsAdv+'</b>. Pode alterar até fechar.';
+        rotuloBtn='Ver/alterar palpite';
+      }else{
+        chamada='Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar.';
+        rotuloBtn='⚽ Dar meu palpite';
+      }
+    }else if(s==='andamento'){
+      chamada='🔴 Bola rolando! Placar atualizando ao vivo — avaliação libera no apito final.';
+      rotuloBtn='Ver ao vivo';
+    }else if(s==='avaliar'){
+      if(jaAvaliei){
+        chamada='✅ Você já avaliou! Falta só o resto da galera terminar.';
+        rotuloBtn='Ver avaliação';
+      }else{
+        chamada='⭐ Fim de jogo: avalie os jogadores e escolha o MVP antes que o prazo feche.';
+        rotuloBtn='⭐ Avaliar agora';
+        corBtn='style="background:var(--ouro);color:#1a1400;border-color:var(--ouro)"';
+      }
+    }else{
+      chamada='Veja como a galera se saiu.';
+      rotuloBtn='Abrir jogo';
+    }
     html+='<div class="card destaque"><div class="selo-destaque" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px">'+
       '<span><span class="cruz">✠</span> Jogo em destaque</span>'+htmlBadgeEscalacao(id,j)+
       '</div>'+
@@ -3799,8 +3835,8 @@ function renderListaJogos(){
         (j.ondeAssistir?'<div class="info-linha" style="text-transform:none">'+badgeTransmissao(j)+'</div>':'')+
       '</div>'+
       (s==='aberto'&&j.hora?'<div class="cronometro" id="cronoDest" data-jogo="'+id+'">…</div>':'')+
-      '<p style="font-size:.9rem;margin:10px 0 12px;color:var(--branco)">'+chamada+'.</p>'+
-      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> Abrir jogo</button><span class="selo '+cls+'">'+txt+'</span></div>'+
+      '<p style="font-size:.9rem;margin:10px 0 12px;color:var(--branco)">'+chamada+'</p>'+
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn" '+corBtn+' onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'">'+txt+'</span></div>'+
       '</div>'+htmlRodadaBox()+'</div></div>';
     html+=htmlVasbolaoRanking(5);
     html+='<div class="card">'+htmlCastigoRodadaBox()+'</div>';
@@ -4697,8 +4733,10 @@ function renderRank(){
       if(x.ribas)partes.push(x.ribas+'x ribamar da rodada ('+(x.ribas*PTS_PENALIDADE_RIBAMAR)+')');
       const resumo=partes.length?partes.join(' · '):'ainda sem pontos';
       const idSeguro=('rk_'+u).replace(/[^a-zA-Z0-9_]/g,'');
+      const ptsJogo=x.pts-(x.quiz||0);
+      const linhaSeparada=x.quiz?('<div class="rank-detalhe" style="margin-top:1px">🎯 Jogo: '+ptsJogo+' pts · 🧠 Quiz: +'+x.quiz+' pts</div>'):'';
       return '<div class="rank-linha '+(i===0&&x.pts>0?'lider':'')+'" style="cursor:pointer" onclick="document.getElementById(\''+idSeguro+'\').classList.toggle(\'oculto\')"><span class="rank-pos">'+(i+1)+'º</span>'+
-      '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+' <small style="color:var(--cinza)">▾ toque pra ver</small></span>'+
+      '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+' <small style="color:var(--cinza)">▾ toque pra ver</small>'+linhaSeparada+'</span>'+
       '<span class="rank-pts">'+x.pts+' pts</span>'+
       '<div id="'+idSeguro+'" class="oculto" style="grid-column:1/-1;margin-top:6px;padding-top:8px;border-top:1px solid var(--linha)">'+
       '<div class="rank-detalhe">'+x.palpites+' palpites · '+resumo+'</div>'+
