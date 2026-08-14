@@ -205,15 +205,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
     width:3px;height:22px;border-radius:99px;background:var(--branco);opacity:.4;
     animation:pulsarAbaMenu 2.2s ease-in-out infinite;pointer-events:none}
   @keyframes pulsarAbaMenu{0%,100%{opacity:.32;height:18px}50%{opacity:.95;height:28px}}
-  .menu-secundario{position:absolute;top:13px;left:68px;z-index:410;
+  .menu-secundario{position:absolute;top:16px;left:58px;z-index:410;
     background:none;border-radius:0;
-    padding:0;box-shadow:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;align-items:center;
-    height:46px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 80px);-webkit-overflow-scrolling:touch;
+    padding:0;box-shadow:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:5px;align-items:center;
+    height:32px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 70px);-webkit-overflow-scrolling:touch;
     scrollbar-width:none;-ms-overflow-style:none}
   .menu-secundario::-webkit-scrollbar{display:none;height:0}
   .menu-secundario.oculto{display:none}
-  .menu-secundario .tab{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);text-align:center;padding:8px 14px;border-radius:8px;
-    font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
+  .menu-secundario .tab{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);text-align:center;padding:5px 9px;border-radius:7px;
+    font-size:.64rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
     display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
   .menu-secundario .tab:hover{border-color:var(--azul)}
   nav::-webkit-scrollbar{display:none}
@@ -295,7 +295,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:8px 8px}
+  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:6px 6px}
   .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
     letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
@@ -824,11 +824,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
         </div>
       </div>
     </div>
-  <div class="fq-edge oculto" id="fqFixo" title="O Que Mais Entende de Futebol">
-    <button class="fq-edge-seta" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
+  <div class="fq-edge fq-edge-esq" id="fqFixo" title="O Que Mais Entende de Futebol" style="bottom:auto;top:52vh">
     <div class="fq-edge-corpo" onclick="fqAbrirQuiz()">
-      <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol">
+      <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol" class="icone-piscando">
     </div>
+    <button class="fq-edge-seta fq-edge-seta-esq" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">›</button>
   </div>
   </header>
   <div class="lembrete-avaliar oculto" id="lembreteAvaliar" style="position:fixed" onclick="if(this.classList.contains('recolhido'))toggleLembreteRecolhido(event)">
@@ -940,7 +940,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz4.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <a href="/ogrupo.html" class="tab">🍻 O Grupo</a>
-      <a href="/#jogoscalendario" class="tab" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario',true);toggleMenuSecundario();return false;}"><img src="img/escudos/vasco.png" alt="" style="width:16px;vertical-align:-0.2em"> Calendário</a>
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos',true);toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores',true);toggleMenuSecundario()">🗣️ Jogadores</button>
       <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico',true);toggleMenuSecundario()">🧠 Perfil Psicótico</button>
@@ -3413,11 +3412,10 @@ function entrarNoApp(){
       history.replaceState(null,'',location.pathname); // limpa o link da barra de endereço
     }
   }catch(e){}
-  // abas flutuantes (quiz/motivacional) ocultadas por enquanto — o quiz agora tem um card
-  // simples e direto na Home; deixa comentado aqui em vez de apagar, pra reativar fácil se quiser
-  // document.getElementById('fqFixo').classList.remove('oculto');
-  // const fmEl=document.getElementById('fmFixo');
-  // if(fmEl)fmEl.classList.remove('oculto');
+  // botão flutuante do quiz volta a aparecer (lado esquerdo, na altura do "ver ranking completo");
+  // motivacional continua oculto por enquanto
+  const fqEl=document.getElementById('fqFixo');
+  if(fqEl)fqEl.classList.remove('oculto');
   fqAtualizarBarra();
   zerarQuizSeNecessario();
   isentarBoboBetSeNecessario();
@@ -3463,12 +3461,19 @@ function dicaMenuSuperiorHome(){
   if(!btn||!el)return;
   if(aba!=='jogos'){
     btn.classList.remove('chamando-atencao-continuo');
+    if(!el.classList.contains('oculto')){el.classList.add('oculto');btn.classList.remove('aberto');}
     return;
   }
-  // na Home: abre o menu e DEIXA aberto (só balança continuamente pra chamar atenção,
-  // não fecha mais sozinho — só fecha se o usuário tocar fora ou escolher uma opção)
+  // na Home: balança continuamente pra chamar atenção, E mostra as opções por 3s ao entrar —
+  // depois esconde de novo sozinho (mas o balançar continua pra sempre, lembrando que dá pra tocar ali)
   btn.classList.add('chamando-atencao-continuo');
   if(el.classList.contains('oculto'))toggleMenuSecundario();
+  clearTimeout(window._dicaMenuTimeout);
+  window._dicaMenuTimeout=setTimeout(()=>{
+    const elAtual=document.getElementById('menuSecundario');
+    const btnAtual=document.getElementById('btnMenuSec');
+    if(elAtual&&!elAtual.classList.contains('oculto')){elAtual.classList.add('oculto');if(btnAtual)btnAtual.classList.remove('aberto');}
+  },3000);
 }
 document.addEventListener('click',(e)=>{
   const el=document.getElementById('menuSecundario');
@@ -3715,7 +3720,7 @@ function htmlRodadaBox(semTitulo){
       '<div class="rodada-box" style="width:100%">'+
       '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer">'+
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
-        nomeJogoComEscudos(rj,38,'.95rem')+htmlInfoDireitaJogo(rj,true)+
+        nomeJogoComEscudos(rj,42,'.95rem')+htmlInfoDireitaJogo(rj,true)+
       '</div>'+
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px">'+
       '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Toque para avaliar</span>'+
@@ -3728,17 +3733,18 @@ function htmlRodadaBox(semTitulo){
         '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada. <b style="color:var(--vermelho)">Penalidade -2 pontos</b></div></span></button>';
     }
     if(rj.resultado&&!pontuacaoLiberada(rj)){
-      html+='<p class="nota-rodape" style="margin:10px 0 8px"><b>Pontuação provisória — aguardando avaliações.</b></p>';
+      html+='<p class="nota-rodape" style="margin:10px 0 2px"><b>Pontuação provisória — aguardando avaliações.</b></p>'+
+        '<p style="margin:0 0 8px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4</p>';
       if(tabela.length){
         const ordenada=tabela.slice().sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
-        const top5=ordenada.slice(0,5), resto=ordenada.slice(5);
+        const top5=ordenada.slice(0,4), resto=ordenada.slice(4);
         const linhaP=l=>{
           const participou=!!(rj.palpites&&rj.palpites[l.u]);
           const ok=avaliou(rj,l.u);
           const prazoVenceu=rj.resultadoEm&&(Date.now()-rj.resultadoEm)>=PRAZO_AVALIAR_MS;
           const mostraPenalidade=participou&&!ok&&prazoVenceu&&!rj.isentoPenalidade;
           const status=!participou?'⚪ sem palpite':(ok?'✅ avaliou':'❌ não avaliou'+(mostraPenalidade?' -2pts':''));
-          return '<div class="mini-linha"><span><b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+
+          return '<div class="mini-linha"><span><b class="rank-nome" style="font-size:.94em">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+
             ' <span style="font-size:.72rem;font-weight:800;white-space:nowrap;color:'+(!participou?'var(--cinza)':(ok?'var(--verde)':'var(--vermelho)'))+'">'+
             status+
             '</span></span><span class="pt">'+l.pts+' pt'+(l.pts===1?'':'s')+' *</span></div>';
@@ -3873,7 +3879,7 @@ function renderListaJogos(){
       '</div>'+
       '<div class="rodada-box" style="width:100%">'+
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
-        nomeJogoComEscudos(j,54,'1.2rem')+htmlInfoDireitaJogo(j)+
+        nomeJogoComEscudos(j,60,'1.2rem')+htmlInfoDireitaJogo(j)+
       '</div>'+
       (j.ondeAssistir?'<div style="margin-top:10px">'+badgeTransmissao(j)+'</div>':'')+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
@@ -3881,7 +3887,6 @@ function renderListaJogos(){
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><button class="btn" '+corBtn+' style="padding:7px 14px;font-size:.82rem" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
-    html+=htmlVasbolaoRanking(5);
     html+='<div class="card">'+htmlCastigoRodadaBox()+'</div>';
   }
 
@@ -4703,9 +4708,9 @@ function nomeJogoComEscudos(j,tamEscudo,tamFonte){
     '<div style="grid-column:1;grid-row:1">'+imgTag(escCasa)+'</div>'+
     '<div style="grid-column:2;grid-row:1"></div>'+
     '<div style="grid-column:3;grid-row:1">'+imgTag(escFora)+'</div>'+
-    '<div style="grid-column:1;grid-row:2;font-weight:'+pesoCasa+';font-size:'+tamFonte+';white-space:nowrap;line-height:1">'+esc(nomeCasa)+'</div>'+
-    '<div style="grid-column:2;grid-row:2;font-weight:900;font-size:'+tamFonte+';white-space:nowrap;color:'+(r?'var(--branco)':'var(--cinza)')+'">'+meioTxt+'</div>'+
-    '<div style="grid-column:3;grid-row:2;font-weight:'+pesoFora+';font-size:'+tamFonte+';white-space:nowrap;line-height:1">'+esc(nomeFora)+'</div>'+
+    '<div style="grid-column:1;grid-row:2;font-weight:'+pesoCasa+';font-size:'+tamFonte+';white-space:nowrap;line-height:1;align-self:baseline">'+esc(nomeCasa)+'</div>'+
+    '<div style="grid-column:2;grid-row:2;font-weight:900;font-size:'+tamFonte+';white-space:nowrap;line-height:1;align-self:baseline;color:'+(r?'var(--branco)':'var(--cinza)')+'">'+meioTxt+'</div>'+
+    '<div style="grid-column:3;grid-row:2;font-weight:'+pesoFora+';font-size:'+tamFonte+';white-space:nowrap;line-height:1;align-self:baseline">'+esc(nomeFora)+'</div>'+
   '</div>';
 }
 
@@ -5964,7 +5969,7 @@ function iniciarMidiaJanela(){
     <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao',true);return false;}"><span class="mf-icone">💰</span>BoboBet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank',true);return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/futebol.html" id="mfQuiz"><span class="mf-icone"><img src="img/embed/icone-quiz-menu.png" alt="" class="icone-piscando" style="width:24px;height:24px;object-fit:contain;border-radius:50%"></span>O Que Mais Entende</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario',true);return false;}"><span class="mf-icone"><img src="img/escudos/vasco.png" alt="" style="width:22px;height:auto"></span>Calendário</a>
   </nav>
 </body>
 </html>
