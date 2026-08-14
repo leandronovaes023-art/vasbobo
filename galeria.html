@@ -220,7 +220,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
     width:3px;height:22px;border-radius:99px;background:var(--branco);opacity:.4;
     animation:pulsarAbaMenu 2.2s ease-in-out infinite;pointer-events:none}
   @keyframes pulsarAbaMenu{0%,100%{opacity:.32;height:18px}50%{opacity:.95;height:28px}}
-  .menu-secundario{position:absolute;top:22px;left:98px;z-index:410;
+  .menu-secundario{position:absolute;top:13px;left:68px;z-index:410;
     background:none;border-radius:0;
     padding:0;box-shadow:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;align-items:center;
     height:46px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 110px);-webkit-overflow-scrolling:touch;
@@ -371,10 +371,11 @@ function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
   <div class="linha-menu-topo">
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz4.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
+      <a href="/ogrupo.html" class="tab">🍻 O Grupo</a>
+      <a href="/#jogoscalendario" class="tab"><img src="img/escudos/vasco.png" alt="" style="width:16px;vertical-align:-0.2em"> Calendário</a>
       <a href="/#castigos" class="tab"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</a>
       <a href="/#jogadores" class="tab">🗣️ Jogadores</a>
-      <a href="/#perfilpsicotico" class="tab">🧠 Perfil Psicótico</a>
-      <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
+      <a href="/#perfilpsicotico" class="tab oculto">🧠 Perfil Psicótico</a>
       <a href="/#motivacional" class="tab oculto" data-tab="admin">📣 Motivacional</a>
       <a href="/#admin" class="tab oculto" data-tab="admin">⚙️ Configurações</a>
     </div>
@@ -751,9 +752,8 @@ window.addEventListener('scroll',()=>{
     <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:46px;height:auto"></span>Home</a>
     <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>BoboBet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
-    <a href="/ogrupo.html" id="mfGrupo"><span class="mf-icone">🍻</span>O Grupo</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');return false;}"><span class="mf-icone"><img src="img/escudos/vasco.png" alt="" style="width:22px;height:auto"></span>Calendário</a>
+    <a href="/futebol.html" id="mfQuiz"><span class="mf-icone">🎯</span>O Que Mais Entende</a>
   </nav>
 <script>
 function toggleFqEdge(e){
