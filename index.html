@@ -212,7 +212,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     scrollbar-width:none;-ms-overflow-style:none}
   .menu-secundario::-webkit-scrollbar{display:none;height:0}
   .menu-secundario.oculto{display:none}
-  .menu-secundario.menu-piscando .tab{animation:menuPiscarChama 0.6s ease-in-out 5}
+  .menu-secundario.menu-piscando .tab{animation:menuPiscarChama 0.6s ease-in-out 8}
   @keyframes menuPiscarChama{0%,100%{opacity:1;border-color:var(--linha)}50%{opacity:.55;border-color:var(--vermelho)}}
   .menu-secundario .tab{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);text-align:center;padding:5px 9px;border-radius:7px;
     font-size:.64rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
@@ -297,7 +297,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:5px 5px}
+  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:4px 5px}
   .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
     letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
@@ -432,7 +432,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
 
   /* janela de mídia flutuante */
-  .midia-janela{position:fixed;right:6px;bottom:calc(62px + env(safe-area-inset-bottom,0));width:min(115px,32vw);height:18vh;max-height:165px;
+  .midia-janela{position:fixed;right:6px;bottom:calc(50px + env(safe-area-inset-bottom,0));width:min(115px,32vw);height:18vh;max-height:165px;
     background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;overflow:hidden;
     box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:395;display:flex;flex-direction:column}
   .midia-top{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;
@@ -533,7 +533,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .castigo-item.pendente{border-color:var(--vermelho);background:rgba(224,41,59,.05)}
   .castigo-item.pendente .ci-texto{color:var(--vermelho);font-style:italic}
 
-  .topo-btn{position:fixed;left:14px;bottom:calc(62px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
+  .topo-btn{position:fixed;left:14px;bottom:calc(50px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
     background:var(--branco);color:var(--preto);border:none;font-size:1.15rem;cursor:pointer;
     box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:400;display:none;align-items:center;justify-content:center}
   .topo-btn.on{display:flex}
@@ -546,8 +546,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
 .fq-edge-esq{right:auto;left:0;top:auto;bottom:150px;transform:none;border-radius:0 12px 12px 0;border-right:1px solid var(--linha);border-left:none;box-shadow:3px 0 12px rgba(0,0,0,.35)}
 .fq-edge-esq .fq-edge-corpo{font-size:1.4rem!important;padding:1px 0 1px 1px!important;max-width:76px!important}
 .fq-edge-esq.recolhida .fq-edge-corpo{max-width:0!important;padding:0!important}
-.fq-edge-seta-esq{transform:scaleX(-1);padding:12px 6px!important}
-.fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(1)}
+.fq-edge-seta-esq{transform:scaleX(1);padding:12px 6px!important}
+.fq-edge-esq.recolhida .fq-edge-seta-esq{transform:scaleX(-1)}
 .lembrete-avaliar{position:fixed;left:8px;bottom:92px;z-index:850;width:max-content;max-width:min(92vw,340px);background:var(--carvao2);color:#fff;
   border-radius:9px;padding:5px 9px;font-size:.66rem;line-height:1.3;box-shadow:0 8px 24px rgba(0,0,0,.35);
   border:1px solid var(--vermelho)}
@@ -826,7 +826,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
         </div>
       </div>
     </div>
-  <div class="fq-edge fq-edge-esq" id="fqFixo" title="O Que Mais Entende de Futebol" style="bottom:auto;top:44vh">
+  <div class="fq-edge fq-edge-esq" id="fqFixo" title="O Que Mais Entende de Futebol" style="bottom:auto;top:40vh">
     <div class="fq-edge-corpo" onclick="fqAbrirQuiz()">
       <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol" class="icone-piscando">
     </div>
@@ -3477,7 +3477,7 @@ function dicaMenuSuperiorHome(){
     const elAtual=document.getElementById('menuSecundario');
     const btnAtual=document.getElementById('btnMenuSec');
     if(elAtual&&!elAtual.classList.contains('oculto')){elAtual.classList.add('oculto');elAtual.classList.remove('menu-piscando');if(btnAtual)btnAtual.classList.remove('aberto');}
-  },3000);
+  },5000);
 }
 document.addEventListener('click',(e)=>{
   const el=document.getElementById('menuSecundario');
@@ -3683,23 +3683,8 @@ function escolherFraseGol(placarTexto){
   return base+' '+placarTexto;
 }
 function htmlCastigoRodadaBox(){
-  const rod=jogoDaRodada();
-  let textoIntro='Depois que a rodada acaba e os VASBOBOS avaliam os jogadores, sai o resultado final — e o pior gira essa roleta:';
-  let cabecalhoExtra='';
-  if(rod){
-    const [,rj]=rod;
-    const ativo=statusJogo(rj)==='andamento'||(rj.resultadoEm&&(Date.now()-rj.resultadoEm)<(PRAZO_AVALIAR_MS+PRAZO_EXTRA_RESULTADO_MS));
-    if(ativo){
-      const prem=premiacaoJogo(rj);
-      if(prem&&prem.ribas.length){
-        const nome=cap(prem.ribas[0]);
-        textoIntro=FRASES_CASTIGO_PENDENTE[Math.floor(Math.random()*FRASES_CASTIGO_PENDENTE.length)](nome);
-        cabecalhoExtra=' <span style="display:inline-flex;align-items:center;gap:6px;margin-left:6px">'+fotoUsuario(prem.ribas[0],26)+'<span style="font-size:.82rem;font-weight:700">'+esc(nome)+'</span></span>';
-      }
-    }
-  }
-  return '<div class="rodada-box"><h3><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span>'+cabecalhoExtra+'</h3>'+
-    '<p class="nota-rodape" style="margin:0 0 10px">'+esc(textoIntro)+'</p>'+
+  return '<div class="rodada-box"><h3 style="margin-bottom:2px"><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span></h3>'+
+    '<p class="nota-rodape" style="margin:0 0 10px">O pior gira a roleta e terá sua foto exposta:</p>'+
     '<div class="roleta-wrap-mini"><div class="roleta-ponteiro-mini">▼</div>'+
     '<svg class="roleta-svg-mini" viewBox="0 0 300 300"></svg>'+
     '</div><div style="text-align:center"><div class="badge-audio">🎙️ Áudio mínimo de 30 segundos</div></div></div>';
@@ -5973,7 +5958,7 @@ function iniciarMidiaJanela(){
     <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao',true);return false;}"><span class="mf-icone">💰</span>BoboBet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank',true);return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario',true);return false;}"><span class="mf-icone"><img src="img/escudos/vasco.png" alt="" style="width:22px;height:auto"></span>Calendário</a>
+    <a href="/#jogoscalendario" id="mfCalendario" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario',true);return false;}"><span class="mf-icone"><img src="img/escudos/vasco.png" alt=""></span>Calendário</a>
   </nav>
 </body>
 </html>
