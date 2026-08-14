@@ -158,11 +158,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   @keyframes particulaVoa{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
 
   header{border-bottom:1px solid var(--linha);background:var(--preto);position:sticky;top:0;z-index:380}
-  .header-inner{max-width:1320px;margin:0 auto;padding:8px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
+  .header-inner{max-width:1320px;margin:0 auto;padding:5px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
   .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none;text-transform:uppercase}
-  .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px}
+  .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px}
   .sino-notif{background:none;border:none;color:var(--branco);
-    width:34px;height:34px;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;transform-origin:50% 15%}
+    width:26px;height:26px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;transform-origin:50% 15%}
   .sino-notif.ativado{color:var(--verde);animation:none!important}
   .sino-notif.balancando{animation:sinoBalanca 1.7s ease-in-out infinite}
   @keyframes sinoBalanca{0%,100%{transform:rotate(0)}12%{transform:rotate(-16deg)}24%{transform:rotate(13deg)}36%{transform:rotate(-11deg)}48%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}72%{transform:rotate(3deg)}84%{transform:rotate(-1deg)}}
@@ -819,18 +819,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
             <button onclick="pedirConfirmacaoSair()" style="background:none;border:none;color:var(--cinza);padding:4px 2px;cursor:pointer;font-size:.72rem;text-decoration:underline;text-transform:none;letter-spacing:0;font-family:'Inter',sans-serif;font-weight:600">Sair</button>
           </div>
         </div>
-        <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end">
-          <span style="font-size:.82rem;color:var(--ouro);letter-spacing:.03em;white-space:nowrap;font-weight:800">Ativar →</span>
+        <div style="display:flex;gap:2px;align-items:center;justify-content:flex-end">
+          <span style="font-size:.68rem;color:var(--ouro);letter-spacing:.02em;white-space:nowrap;font-weight:800">Ativar →</span>
           <button id="btnNotificacao" onclick="pedirPermissaoNotificacao()" class="sino-notif balancando" aria-label="Ativar notificações" title="Ativar notificações">🔔</button>
         </div>
       </div>
     </div>
-  <div class="fq-edge fq-edge-esq" id="fqFixo" title="O Que Mais Entende de Futebol" style="bottom:auto;top:40vh" data-pos-auto="1">
-    <div class="fq-edge-corpo" onclick="fqAbrirQuiz()">
-      <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol" class="icone-piscando">
-    </div>
-    <button class="fq-edge-seta fq-edge-seta-esq" onclick="toggleFqEdge(event)" aria-label="Recolher ou expandir">‹</button>
-  </div>
   </header>
   <div class="lembrete-avaliar oculto" id="lembreteAvaliar" style="position:fixed" onclick="if(this.classList.contains('recolhido'))toggleLembreteRecolhido(event)">
     <div class="lembrete-corpo" id="lembreteAvaliarCorpo" onclick="if(!lembreteJogoId)return;abrirJogoNaAvaliacao(lembreteJogoId)">
@@ -3715,7 +3709,6 @@ function htmlRodadaBox(semTitulo){
       '</div>'+
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px">'+
       '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Toque para avaliar</span>'+
-      (rj.resultado&&!pontuacaoLiberada(rj)&&rj.resultadoEm?'<span style="font-size:.7rem;color:var(--branco)">Avaliação fecha em <b id="cronoAvaliar" data-prazo="'+(rj.resultadoEm+PRAZO_AVALIAR_MS)+'" style="color:var(--branco)">…</b></span>':'')+
       '</div>'+
       '</div>';
     if(rj.resultado&&rj.palpites&&rj.palpites[eu]&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
@@ -3872,12 +3865,17 @@ function renderListaJogos(){
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
         nomeJogoComEscudos(j,60,'1.2rem')+htmlInfoDireitaJogo(j)+
       '</div>'+
-      (j.ondeAssistir?'<div style="margin-top:10px">'+badgeTransmissao(j)+'</div>':'')+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
         '<p style="font-size:.84rem;margin:10px 0 10px;color:var(--branco)">'+chamada+'</p>')+
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><button class="btn" '+corBtn+' style="padding:7px 14px;font-size:.82rem" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
+    html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+
+      '<div style="display:flex;align-items:center;gap:10px;width:100%">'+
+      '<img src="img/embed/icone-quiz-menu.png" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:50%;flex:none">'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:900;font-size:.8rem;text-transform:uppercase;letter-spacing:.02em">O Que Mais Entende de Futebol</div>'+
+      '<div id="quizCardHomeStatus" style="font-size:.76rem;color:var(--cinza);margin-top:1px">Carregando…</div></div>'+
+      '</div></div>';
     html+='<div class="card">'+htmlCastigoRodadaBox()+'</div>';
   }
 
@@ -3911,19 +3909,24 @@ function renderListaJogos(){
   atualizarCronometro();
   atualizarCronometroAvaliar();
   carregarPremioMesSimples();
-  posicionarBotaoQuizFlutuante();
+  carregarQuizCardHome();
 }
-/* mede de verdade onde a caixa do Castigo da Rodada está na tela (em vez de chutar % de altura)
-   e posiciona o botão flutuante do quiz um pouco acima dela, sem tampar o título */
-function posicionarBotaoQuizFlutuante(){
-  const alvo=document.getElementById('caixaCastigoRodada');
-  const btn=document.getElementById('fqFixo');
-  if(!alvo||!btn)return;
-  requestAnimationFrame(()=>{
-    const topo=alvo.getBoundingClientRect().top;
-    const posicao=Math.max(120,topo-105); // folga acima do título do Castigo da Rodada, nunca cola demais no topo
-    btn.style.top=posicao+'px';
-  });
+/* card simples do quiz na Home — uma linha só, direto ao ponto */
+async function carregarQuizCardHome(){
+  const el=document.getElementById('quizCardHomeStatus');
+  if(!el||!eu)return;
+  try{
+    const estado=await fqLerEstado();
+    ESTADO_QUIZ=estado;
+    const status=fqStatusDia(estado,eu);
+    if(status.respondidas>=3){
+      el.innerHTML='<span style="color:var(--verde);font-weight:800">✅ Respondido hoje</span> — acertou '+status.acertos+' de 3. Volta amanhã pra mais!';
+    }else{
+      el.innerHTML='Faltam <b style="color:var(--branco)">'+(3-status.respondidas)+' de 3</b> perguntas de hoje.';
+    }
+  }catch(e){
+    el.textContent='Toque pra responder o quiz do dia.';
+  }
 }
 function renderDetalhe(){
   const sec=document.getElementById('secDetalhe');
@@ -4692,6 +4695,7 @@ function htmlInfoDireitaJogo(j,pequeno){
     '<div style="font-weight:800;font-size:'+fonteComp+';color:var(--branco);line-height:1.25">'+esc(comp)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
     '<div style="font-size:'+fonteResto+';color:var(--cinza);text-transform:uppercase;margin-top:2px">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
     '<div style="font-size:'+fonteResto+';color:var(--cinza)">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+    (j.ondeAssistir?'<div style="font-size:'+fonteResto+';color:var(--azul);margin-top:2px;white-space:nowrap">📺 '+esc(j.ondeAssistir)+'</div>':'')+
   '</div>';
 }
 function nomeJogoComEscudos(j,tamEscudo,tamFonte){
