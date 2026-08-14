@@ -135,6 +135,8 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .page-title{padding:18px 22px;background:var(--carvao);border:1px solid var(--linha);border-radius:14px}
 
 .card{background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:18px;margin-top:16px;backdrop-filter:blur(8px)}
+.icone-piscando{animation:piscarChamativo 1.8s ease-in-out infinite}
+@keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.75;transform:scale(1.12)}}
 .btn-buscar{width:100%;background:var(--branco);color:var(--preto);border:none;border-radius:11px;
   padding:16px;font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .btn-buscar:hover{filter:brightness(1.12)}
@@ -957,7 +959,7 @@ window.addEventListener('scroll',()=>{
     <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>BoboBet</a>
     <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/hoje.html" id="mfHoje" class="ativo"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
-    <a href="/futebol.html" id="mfQuiz"><span class="mf-icone"><img src="img/embed/icone-quiz-menu.png" alt="" style="width:24px;height:24px;object-fit:contain;border-radius:50%"></span>O Que Mais Entende</a>
+    <a href="/futebol.html" id="mfQuiz"><span class="mf-icone"><img src="img/embed/icone-quiz-menu.png" alt="" class="icone-piscando" style="width:24px;height:24px;object-fit:contain;border-radius:50%"></span>O Que Mais Entende</a>
   </nav>
 <script>
 function toggleFqEdge(e){
