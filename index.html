@@ -3921,7 +3921,7 @@ function posicionarBotaoQuizFlutuante(){
   if(!alvo||!btn)return;
   requestAnimationFrame(()=>{
     const topo=alvo.getBoundingClientRect().top;
-    const posicao=Math.max(120,topo-130); // folga acima do título do Castigo da Rodada, nunca cola demais no topo
+    const posicao=Math.max(120,topo-105); // folga acima do título do Castigo da Rodada, nunca cola demais no topo
     btn.style.top=posicao+'px';
   });
 }
