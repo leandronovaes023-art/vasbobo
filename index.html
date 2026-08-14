@@ -239,7 +239,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
   .card{background:var(--carvao);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
   .icone-piscando{animation:piscarChamativo 1.8s ease-in-out infinite}
-  @keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(224,172,31,.6)}50%{opacity:.75;transform:scale(1.12);box-shadow:0 0 0 5px rgba(224,172,31,0)}}
+  @keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(224,41,59,.7)}50%{opacity:.7;transform:scale(1.12);box-shadow:0 0 0 5px rgba(224,41,59,0)}}
   .btn-toque-expandir{display:block;width:100%;background:var(--carvao2);border:1.5px solid var(--linha);color:var(--branco);
     border-radius:10px;padding:9px 14px;margin-top:8px;font-size:.76rem;font-weight:800;text-align:center;cursor:pointer;font-family:'Inter',sans-serif}
   .btn-toque-expandir:active{background:var(--linha)}
@@ -295,7 +295,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:12px 14px}
+  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:12px 10px}
   .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
     letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
@@ -940,12 +940,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz4.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <a href="/ogrupo.html" class="tab">🍻 O Grupo</a>
-      <a href="/#jogoscalendario" class="tab" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario');toggleMenuSecundario();return false;}"><img src="img/escudos/vasco.png" alt="" style="width:16px;vertical-align:-0.2em"> Calendário</a>
-      <button class="tab" id="tabCastigos" onclick="mudarAba('castigos');toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
-      <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores');toggleMenuSecundario()">🗣️ Jogadores</button>
-      <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico');toggleMenuSecundario()">🧠 Perfil Psicótico</button>
-      <button class="tab oculto" id="tabMotivacional" onclick="mudarAba('motivacional');toggleMenuSecundario()">📣 Motivacional</button>
-      <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin');toggleMenuSecundario()">⚙️ Configurações</button>
+      <a href="/#jogoscalendario" class="tab" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogoscalendario',true);toggleMenuSecundario();return false;}"><img src="img/escudos/vasco.png" alt="" style="width:16px;vertical-align:-0.2em"> Calendário</a>
+      <button class="tab" id="tabCastigos" onclick="mudarAba('castigos',true);toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
+      <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores',true);toggleMenuSecundario()">🗣️ Jogadores</button>
+      <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico',true);toggleMenuSecundario()">🧠 Perfil Psicótico</button>
+      <button class="tab oculto" id="tabMotivacional" onclick="mudarAba('motivacional',true);toggleMenuSecundario()">📣 Motivacional</button>
+      <button class="tab oculto" id="tabAdmin" onclick="mudarAba('admin',true);toggleMenuSecundario()">⚙️ Configurações</button>
     </div>
   </div>
   <div class="bar-teste oculto" id="barTeste"><div>⚠️ <b>Modo teste ativo:</b> palpites e avaliações liberados fora de hora para você experimentar. Desligue em Configurações antes do uso valendo.</div></div>
@@ -3463,6 +3463,7 @@ document.addEventListener('click',(e)=>{
 function mudarAba(a,semHistorico){
   if(a!==aba)registrarLog('aba','Abriu aba: '+a);
   aba=a;jogoAberto=null;
+  window.scrollTo({top:0});
   try{sessionStorage.setItem('vasbobo:aba',a);}catch(e){}
   // widgets flutuantes (quiz e Vasbobo Acredita): abertos só na Home, recolhidos nas outras abas
   const elFq=document.getElementById('fqFixo'), elFm=document.getElementById('fmFixo');
@@ -3694,12 +3695,12 @@ function htmlRodadaBox(semTitulo){
     const aoVivo=statusJogo(rj)==='andamento';
     const tabela=tabelaRodada(rj);
     let html=(semTitulo?'':('<div class="selo-destaque">'+
-      '<span>Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+
+      '<span><span class="cruz">✠</span> Ranking da Rodada</span>'+(aoVivo?'<span class="vivo">● AO VIVO</span>':'')+
       '</div>'))+
       '<div class="rodada-box" style="width:100%">'+
       '<div onclick="abrirJogoNaAvaliacao(\''+rid+'\')" style="cursor:pointer">'+
       '<div style="margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
-        nomeJogoComEscudos(rj,48,'1.25em')+htmlInfoDireitaJogo(rj)+
+        nomeJogoComEscudos(rj,34,'1rem','.8rem')+htmlInfoDireitaJogo(rj,true)+
       '</div>'+
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px">'+
       '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Toque para avaliar</span>'+
@@ -3857,7 +3858,7 @@ function renderListaJogos(){
       '</div>'+
       '<div class="rodada-box" style="width:100%">'+
       '<div style="margin-top:4px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
-        nomeJogoComEscudos(j,52,'1.3em')+htmlInfoDireitaJogo(j)+
+        nomeJogoComEscudos(j,52,'1.3rem','1rem')+htmlInfoDireitaJogo(j)+
       '</div>'+
       (j.ondeAssistir?'<div style="margin-top:10px">'+badgeTransmissao(j)+'</div>':'')+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
@@ -3913,7 +3914,7 @@ function renderDetalhe(){
 
   let html='<button class="btn" onclick="voltarLista()" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;width:auto">← Voltar à Tela Principal</button>'+
   '<div class="card"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'+
-    nomeJogoComEscudos(j,44,'1.2em')+htmlInfoDireitaJogo(j)+
+    nomeJogoComEscudos(j,44,'1.15rem','.9rem')+htmlInfoDireitaJogo(j)+
   '</div>';
   if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
@@ -4660,42 +4661,41 @@ function escudoLocalPara(nomeTime){
 function nomeCompeticaoLimpo(comp){
   return (comp||'').replace(/^conmebol\s+/i,'').trim();
 }
-function htmlInfoDireitaJogo(j,linhaUnica){
+function htmlInfoDireitaJogo(j,pequeno){
   const comp=nomeCompeticaoLimpo(j.competicao);
-  if(linhaUnica){
-    return '<div style="font-size:.76rem;color:var(--cinza);line-height:1.55">'+
-      '<div style="font-weight:800;color:var(--branco);font-size:.86rem">'+esc(comp)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
-      '<div style="text-transform:uppercase">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
-      '<div>'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
-    '</div>';
-  }
-  return '<div style="text-align:right;flex:none">'+
-    '<div style="font-weight:800;font-size:.86rem;color:var(--branco)">'+esc(comp)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
-    '<div style="font-size:.72rem;color:var(--cinza);text-transform:uppercase;margin-top:2px">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
-    '<div style="font-size:.72rem;color:var(--cinza)">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
+  const fonteComp=pequeno?'.72rem':'.86rem', fonteResto=pequeno?'.62rem':'.72rem';
+  return '<div style="text-align:right;flex:none;max-width:52%">'+
+    '<div style="font-weight:800;font-size:'+fonteComp+';color:var(--branco);line-height:1.25">'+esc(comp)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
+    '<div style="font-size:'+fonteResto+';color:var(--cinza);text-transform:uppercase;margin-top:2px">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
+    '<div style="font-size:'+fonteResto+';color:var(--cinza)">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
   '</div>';
 }
-function nomeJogoComEscudos(j,tamEscudo,tamFonte){
-  tamEscudo=tamEscudo||52; tamFonte=tamFonte||'1.3em';
-  const tamAdversario=Math.round(tamEscudo*0.8); // Vasco sempre maior que o escudo do adversário
+function nomeJogoComEscudos(j,tamEscudo,tamFonteCasa,tamFonteAdv){
+  tamEscudo=tamEscudo||52;
+  tamFonteCasa=tamFonteCasa||'1.3em';
+  tamFonteAdv=tamFonteAdv||'1.05em';
+  const tamAdversario=Math.round(tamEscudo*0.68); // Vasco sempre bem maior que o escudo do adversário
   const casa=j.local!=='fora';
   const nomeCasa=casa?'Vasco':j.adversario, nomeFora=casa?j.adversario:'Vasco';
   const escAdv=escudoLocalPara(j.adversario)||j.escudoAdversario||'';
   const escCasa=casa?ESCUDO_VASCO:escAdv, escFora=casa?escAdv:ESCUDO_VASCO;
   const tamCasa=casa?tamEscudo:tamAdversario, tamFora=casa?tamAdversario:tamEscudo;
+  const fonteCasaFinal=casa?tamFonteCasa:tamFonteAdv, fonteForaFinal=casa?tamFonteAdv:tamFonteCasa;
   const pesoCasa=casa?'900':'400', pesoFora=casa?'400':'900';
-  // as duas colunas têm a MESMA altura de escudo reservada (a do maior, sempre o Vasco) — o escudo
-  // menor do adversário fica alinhado embaixo dessa área, garantindo que os DOIS nomes comecem
-  // exatamente na mesma linha, não importa o tamanho do escudo de cada um
-  const coluna=(escUrl,nome,peso,tam)=>'<span style="display:inline-flex;flex-direction:column;align-items:center;gap:3px;vertical-align:middle;flex:none">'+
-    '<span style="height:'+tamEscudo+'px;display:flex;align-items:flex-end;justify-content:center">'+
-    (escUrl?'<img src="'+esc(escUrl)+'" alt="" style="width:'+tam+'px;height:'+tam+'px;object-fit:contain;flex:none" onerror="this.style.display=\'none\'">':'')+
-    '</span>'+
-    '<span style="font-weight:'+peso+';font-size:'+tamFonte+';white-space:nowrap;line-height:1">'+esc(nome)+'</span></span>';
   const r=j.resultado||j.parcial;
-  const meio=r?('<span style="font-weight:900;font-size:'+tamFonte+';white-space:nowrap;flex:none;align-self:flex-end;margin-bottom:calc('+tamFonte+' * 0.15)">'+(casa?r.v:r.a)+' × '+(casa?r.a:r.v)+'</span>')
-              :('<span style="color:var(--cinza);flex:none;font-size:'+tamFonte+';align-self:flex-end;margin-bottom:calc('+tamFonte+' * 0.15)">×</span>');
-  return '<span style="display:flex;align-items:flex-start;justify-content:flex-start;gap:12px;flex-wrap:nowrap;white-space:nowrap">'+coluna(escCasa,nomeCasa,pesoCasa,tamCasa)+meio+coluna(escFora,nomeFora,pesoFora,tamFora)+'</span>';
+  const meioTxt=r?((casa?r.v:r.a)+' × '+(casa?r.a:r.v)):'×';
+  const imgTag=(url,tam)=>url?'<img src="'+esc(url)+'" alt="" style="width:'+tam+'px;height:'+tam+'px;object-fit:contain" onerror="this.style.display=\'none\'">':'';
+  /* grade única (mesmas linhas pros dois lados) — garante que os DOIS escudos fiquem na mesma
+     "reta" de baixo (linha 1) e os DOIS nomes comecem exatamente na mesma altura (linha 2),
+     não importa a diferença de tamanho entre escudo/nome do Vasco e do adversário */
+  return '<div style="display:inline-grid;grid-template-columns:auto auto auto;align-items:end;justify-items:center;column-gap:10px;row-gap:4px">'+
+    '<div style="grid-column:1;grid-row:1">'+imgTag(escCasa,tamCasa)+'</div>'+
+    '<div style="grid-column:2;grid-row:1"></div>'+
+    '<div style="grid-column:3;grid-row:1">'+imgTag(escFora,tamFora)+'</div>'+
+    '<div style="grid-column:1;grid-row:2;font-weight:'+pesoCasa+';font-size:'+fonteCasaFinal+';white-space:nowrap;line-height:1">'+esc(nomeCasa)+'</div>'+
+    '<div style="grid-column:2;grid-row:2;font-weight:900;font-size:'+tamFonteAdv+';white-space:nowrap;color:'+(r?'var(--branco)':'var(--cinza)')+'">'+meioTxt+'</div>'+
+    '<div style="grid-column:3;grid-row:2;font-weight:'+pesoFora+';font-size:'+fonteForaFinal+';white-space:nowrap;line-height:1">'+esc(nomeFora)+'</div>'+
+  '</div>';
 }
 
 async function salvarTransmissao(){
@@ -4873,7 +4873,7 @@ function renderRank(){
   // 2) RANKING DA RODADA — recolhido por padrão, só título + jogo em questão + dica
   const rodadaAtual=jogoDaRodada();
   html+='<div class="card" style="margin-bottom:0">'+
-    '<div style="cursor:pointer" onclick="toggleRankingRodadaBox()"><h2 style="margin-bottom:2px">Ranking da Rodada</h2>'+
+    '<div style="cursor:pointer" onclick="toggleRankingRodadaBox()"><h2 style="margin-bottom:2px"><span class="cruz">✠</span> Ranking da Rodada</h2>'+
     (rodadaAtual?('<p style="margin:0 0 4px;font-size:.84rem;font-weight:700;color:var(--branco)">'+nomeJogo(rodadaAtual[1])+'</p>'):'')+
     '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:2px">'+(mostrarRankingRodadaBox?'▲ Toque pra recolher':'▾ Toque para expandir')+'</button></div>'+
     (mostrarRankingRodadaBox?('<div style="margin-top:10px">'+htmlRodadaBox(true)+'</div>'):'')+
@@ -5949,9 +5949,9 @@ function iniciarMidiaJanela(){
 })();
 </script>
   <nav class="menu-fixo" id="menuFixo">
-    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos');return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:46px;height:auto"></span>Home</a>
-    <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao');return false;}"><span class="mf-icone">💰</span>BoboBet</a>
-    <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank');return false;}"><span class="mf-icone">🏆</span>Ranking</a>
+    <a href="/" id="mfHome" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('jogos',true);return false;}"><span class="mf-icone"><img src="img/menu/icone-home2.png" alt="" style="width:46px;height:auto"></span>Home</a>
+    <a href="/#vasbolao" id="mfVasbolao" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('vasbolao',true);return false;}"><span class="mf-icone">💰</span>BoboBet</a>
+    <a href="/#rank" id="mfRank" onclick="if(location.pathname==='/'||location.pathname==='/index.html'){if(typeof mudarAba==='function')mudarAba('rank',true);return false;}"><span class="mf-icone">🏆</span>Ranking</a>
     <a href="/hoje.html" id="mfHoje"><span class="mf-icone"><img src="img/menu/icone-quemjogahoje.png" alt=""></span>Quem joga hoje</a>
     <a href="/futebol.html" id="mfQuiz"><span class="mf-icone"><img src="img/embed/icone-quiz-menu.png" alt="" class="icone-piscando" style="width:24px;height:24px;object-fit:contain;border-radius:50%"></span>O Que Mais Entende</a>
   </nav>

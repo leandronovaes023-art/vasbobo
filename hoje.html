@@ -136,7 +136,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 
 .card{background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:18px;margin-top:16px;backdrop-filter:blur(8px)}
 .icone-piscando{animation:piscarChamativo 1.8s ease-in-out infinite}
-@keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.75;transform:scale(1.12)}}
+@keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(224,41,59,.7)}50%{opacity:.7;transform:scale(1.12);box-shadow:0 0 0 5px rgba(224,41,59,0)}}
 .btn-buscar{width:100%;background:var(--branco);color:var(--preto);border:none;border-radius:11px;
   padding:16px;font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
 .btn-buscar:hover{filter:brightness(1.12)}

@@ -268,7 +268,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   cursor:pointer;padding:12px 9px;line-height:1;font-family:inherit;transition:transform .25s ease;transform:scaleX(1)}
 .fq-edge.recolhida .fq-edge-seta{transform:scaleX(-1)}
 .icone-piscando{animation:piscarChamativo 1.8s ease-in-out infinite}
-@keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.75;transform:scale(1.12)}}
+@keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(224,41,59,.7)}50%{opacity:.7;transform:scale(1.12);box-shadow:0 0 0 5px rgba(224,41,59,0)}}
 </style>
 <script>
 function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
