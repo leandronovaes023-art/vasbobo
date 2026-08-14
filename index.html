@@ -212,6 +212,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
     scrollbar-width:none;-ms-overflow-style:none}
   .menu-secundario::-webkit-scrollbar{display:none;height:0}
   .menu-secundario.oculto{display:none}
+  .menu-secundario.menu-piscando .tab{animation:menuPiscarChama 0.6s ease-in-out 5}
+  @keyframes menuPiscarChama{0%,100%{opacity:1;border-color:var(--linha)}50%{opacity:.55;border-color:var(--vermelho)}}
   .menu-secundario .tab{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);text-align:center;padding:5px 9px;border-radius:7px;
     font-size:.64rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
     display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
@@ -295,7 +297,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:6px 6px}
+  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:5px 5px}
   .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
     letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
@@ -315,7 +317,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rx-diag{font-size:.76rem;color:#3A331F;line-height:1.6;background:rgba(224,41,59,.06);padding:8px 12px;border-radius:6px}
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
-  .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;padding:5px 0;border-bottom:1px solid var(--linha)}
+  .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;padding:2px 0;border-bottom:1px solid var(--linha)}
   .mini-linha-ultimo{margin:0 -10px;padding:7px 10px;border-radius:8px;border-bottom:none}
   .mini-linha-ultimo .rank-nome{color:var(--laranja);font-weight:900}
   .mini-linha-ultimo .pt{color:var(--laranja);font-weight:900}
@@ -824,7 +826,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
         </div>
       </div>
     </div>
-  <div class="fq-edge fq-edge-esq" id="fqFixo" title="O Que Mais Entende de Futebol" style="bottom:auto;top:52vh">
+  <div class="fq-edge fq-edge-esq" id="fqFixo" title="O Que Mais Entende de Futebol" style="bottom:auto;top:44vh">
     <div class="fq-edge-corpo" onclick="fqAbrirQuiz()">
       <img src="img/embed/asset2.png" alt="O Que Mais Entende de Futebol" class="icone-piscando">
     </div>
@@ -940,6 +942,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz4.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <a href="/ogrupo.html" class="tab">🍻 O Grupo</a>
+      <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos',true);toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores',true);toggleMenuSecundario()">🗣️ Jogadores</button>
       <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico',true);toggleMenuSecundario()">🧠 Perfil Psicótico</button>
@@ -3464,15 +3467,16 @@ function dicaMenuSuperiorHome(){
     if(!el.classList.contains('oculto')){el.classList.add('oculto');btn.classList.remove('aberto');}
     return;
   }
-  // na Home: balança continuamente pra chamar atenção, E mostra as opções por 3s ao entrar —
-  // depois esconde de novo sozinho (mas o balançar continua pra sempre, lembrando que dá pra tocar ali)
+  // na Home: balança continuamente pra chamar atenção, E mostra as opções piscando por 3s ao
+  // entrar — depois esconde de novo sozinha (mas o balançar da cruz continua pra sempre)
   btn.classList.add('chamando-atencao-continuo');
   if(el.classList.contains('oculto'))toggleMenuSecundario();
+  el.classList.add('menu-piscando');
   clearTimeout(window._dicaMenuTimeout);
   window._dicaMenuTimeout=setTimeout(()=>{
     const elAtual=document.getElementById('menuSecundario');
     const btnAtual=document.getElementById('btnMenuSec');
-    if(elAtual&&!elAtual.classList.contains('oculto')){elAtual.classList.add('oculto');if(btnAtual)btnAtual.classList.remove('aberto');}
+    if(elAtual&&!elAtual.classList.contains('oculto')){elAtual.classList.add('oculto');elAtual.classList.remove('menu-piscando');if(btnAtual)btnAtual.classList.remove('aberto');}
   },3000);
 }
 document.addEventListener('click',(e)=>{
@@ -3752,7 +3756,7 @@ function htmlRodadaBox(semTitulo){
         html+=top5.map(linhaP).join('');
         if(resto.length){
           if(mostrarRankingRodadaHome)html+=resto.map(linhaP).join('');
-          else html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▾ Ver mais '+resto.length+' Vasbobo'+(resto.length===1?'':'s')+'</button>';
+          else html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▲ Ver mais '+resto.length+' Vasbobo'+(resto.length===1?'':'s')+'</button>';
         }
       }
       html+='<button class="btn-toque-expandir" style="margin-top:8px" onclick="mudarAba(\'rank\')">🏆 Ver ranking geral completo</button>';
@@ -4548,7 +4552,7 @@ function renderPartidas(){
 
   // --- Jogos: só o mais recente encerrado + link pra ver todo o histórico — card recolhido por padrão ---
   html+='<div class="card"><div style="cursor:pointer" onclick="toggleJogosRecentes()"><h2 style="margin-bottom:2px">🗂️ Jogos</h2>'+
-    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarJogosRecentes?'▲ Toque pra recolher':'▾ Toque para expandir')+'</button></div>';
+    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarJogosRecentes?'▾ Toque pra recolher':'▲ Toque para expandir')+'</button></div>';
   if(mostrarJogosRecentes){
   if(!encerrados.length){
     html+='<div class="vazio">Nenhum jogo encerrado ainda.</div>';
@@ -4704,7 +4708,7 @@ function nomeJogoComEscudos(j,tamEscudo,tamFonte){
   /* grade única (mesmas linhas pros dois lados) — garante que os DOIS escudos fiquem na mesma
      "reta" de baixo (linha 1) e os DOIS nomes comecem exatamente na mesma altura (linha 2).
      Escudos e fonte do MESMO tamanho pros dois times (padrão do Vasco pros dois) */
-  return '<div style="display:inline-grid;grid-template-columns:auto auto auto;align-items:end;justify-items:center;column-gap:10px;row-gap:4px">'+
+  return '<div style="display:inline-grid;grid-template-columns:auto auto auto;align-items:end;justify-items:center;column-gap:10px;row-gap:0px">'+
     '<div style="grid-column:1;grid-row:1">'+imgTag(escCasa)+'</div>'+
     '<div style="grid-column:2;grid-row:1"></div>'+
     '<div style="grid-column:3;grid-row:1">'+imgTag(escFora)+'</div>'+
@@ -4799,7 +4803,7 @@ function htmlRankingQuizTotal(){
   const ordem=rankingQuizTotal(ESTADO_QUIZ);
   let html='<div class="card" style="margin-bottom:0"><div style="cursor:pointer" onclick="toggleRankingQuiz()">'+
     '<h2 style="margin-bottom:2px">Ranking do Quiz</h2>'+
-    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarRankingQuiz?'▲ Toque pra recolher':'▾ Toque para expandir')+'</button></div>';
+    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarRankingQuiz?'▾ Toque pra recolher':'▲ Toque para expandir')+'</button></div>';
   if(mostrarRankingQuiz){
     html+='<div style="margin-top:10px">'+(ordem.length?ordem.map((x,i)=>'<div class="rank-linha '+(i===0?'lider':'')+'"><span class="rank-pos">'+(i+1)+'º</span>'+
       '<span class="rank-nome">'+esc(x.u)+(x.u===eu?' (você)':'')+'</span>'+
@@ -4858,7 +4862,7 @@ function renderRank(){
   // 1) RANKING GERAL — aparece completo por padrão; toque no título pra recolher
   html+='<div class="card" style="margin-bottom:0">'+
     '<div style="cursor:pointer" onclick="toggleRankingGeral()"><h2 style="margin-bottom:2px">🏆 Ranking Geral</h2>'+
-    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarRankingGeral?'▲ Toque pra recolher':'▾ Toque para expandir')+'</button></div>';
+    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarRankingGeral?'▾ Toque pra recolher':'▲ Toque para expandir')+'</button></div>';
   if(mostrarRankingGeral){
     html+='<div style="margin-top:10px">'+ordem.map(([u,x],i)=>{
       const partes=[];
@@ -4876,7 +4880,7 @@ function renderRank(){
       const ptsJogo=x.pts-(x.quiz||0);
       const linhaSeparada=x.quiz?('<div class="rank-detalhe" style="margin-top:1px">🎯 Jogo: '+ptsJogo+' pts · 🧠 Quiz: +'+x.quiz+' pts</div>'):'';
       return '<div class="rank-linha '+(i===0&&x.pts>0?'lider':'')+'" style="cursor:pointer" onclick="document.getElementById(\''+idSeguro+'\').classList.toggle(\'oculto\')"><span class="rank-pos">'+(i+1)+'º</span>'+
-      '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+' <small style="color:var(--cinza)">▾ toque pra ver</small>'+linhaSeparada+'</span>'+
+      '<span><span class="rank-nome">'+esc(u)+'</span>'+(u===eu?' (você)':'')+' <small style="color:var(--cinza)">▲ toque pra ver</small>'+linhaSeparada+'</span>'+
       '<span class="rank-pts">'+x.pts+' pts</span>'+
       '<div id="'+idSeguro+'" class="oculto" style="grid-column:1/-1;margin-top:6px;padding-top:8px;border-top:1px solid var(--linha)">'+
       '<div class="rank-detalhe">'+x.palpites+' palpites · '+resumo+'</div>'+
@@ -4891,7 +4895,7 @@ function renderRank(){
   html+='<div class="card" style="margin-bottom:0">'+
     '<div style="cursor:pointer" onclick="toggleRankingRodadaBox()"><h2 style="margin-bottom:2px"><span class="cruz">✠</span> Ranking da Rodada</h2>'+
     (rodadaAtual?('<p style="margin:0 0 4px;font-size:.84rem;font-weight:700;color:var(--branco)">'+nomeJogo(rodadaAtual[1])+'</p>'):'')+
-    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:2px">'+(mostrarRankingRodadaBox?'▲ Toque pra recolher':'▾ Toque para expandir')+'</button></div>'+
+    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:2px">'+(mostrarRankingRodadaBox?'▾ Toque pra recolher':'▲ Toque para expandir')+'</button></div>'+
     (mostrarRankingRodadaBox?('<div style="margin-top:10px">'+htmlRodadaBox(true)+'</div>'):'')+
     '</div>';
 
@@ -4900,7 +4904,7 @@ function renderRank(){
   const ribas=ordem.filter(([u,x])=>x.ribas>0).sort((a,b)=>b[1].ribas-a[1].ribas);
   html+='<div class="card" style="margin-bottom:0">'+
     '<div style="cursor:pointer" onclick="toggleCoroaRibamar()"><h2 style="margin-bottom:2px">'+ICON_REI+' Coroa do Rei & Hall do Ribamar</h2>'+
-    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarCoroaRibamar?'▲ Toque pra recolher':'▾ Toque para expandir')+'</button></div>';
+    '<button class="btn-toque-expandir" style="width:auto;display:inline-block;margin-top:4px">'+(mostrarCoroaRibamar?'▾ Toque pra recolher':'▲ Toque para expandir')+'</button></div>';
   if(mostrarCoroaRibamar){
     html+='<div class="grid g2" style="margin-top:10px">'+
       '<div><div style="text-align:center;margin-bottom:10px">'+iconRei(64)+
