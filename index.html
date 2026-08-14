@@ -2779,7 +2779,7 @@ function toggleFqEdge(e){
   if(!el)return;
   el.classList.toggle('recolhida');
   const seta=el.querySelector('.fq-edge-seta');
-  if(seta)seta.textContent=el.classList.contains('recolhida')?'›':'‹';
+  if(seta)seta.textContent='‹';
 }
 function toggleFmEdge(e){
   if(e)e.stopPropagation();
@@ -3921,7 +3921,7 @@ function posicionarBotaoQuizFlutuante(){
   if(!alvo||!btn)return;
   requestAnimationFrame(()=>{
     const topo=alvo.getBoundingClientRect().top;
-    const posicao=Math.max(120,topo-72); // 72px de folga acima do título, nunca cola demais no topo
+    const posicao=Math.max(120,topo-130); // folga acima do título do Castigo da Rodada, nunca cola demais no topo
     btn.style.top=posicao+'px';
   });
 }
