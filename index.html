@@ -3792,9 +3792,12 @@ function htmlRodadaBox(semTitulo){
       html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--ouro)">Confira o G4</span> <span style="color:#9A430B">· Último Colocado</span></p>';
       const top4=linhas.slice(0,4), resto=linhas.slice(4,-1), ultima=linhas.length>4?linhas[linhas.length-1]:null;
       html+=top4.join('');
-      if(resto.length){
-        if(mostrarRankingRodadaHome)html+=resto.join('');
-        else html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▲ Ver mais '+resto.length+' Vasbobo'+(resto.length===1?'':'s')+'</button>';
+      if(mostrarRankingRodadaHome){
+        html+=resto.join('');
+        if(ultima)html+=ultima;
+      }else{
+        if(ultima)html+=ultima;
+        if(resto.length)html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▲ Ver todos os Vasbobos</button>';
       }
       if(ultima)html+=ultima;
       if(!rj.resultado)html+='<p class="nota-rodape" style="margin:6px 0 0">* pontos parciais, mudando em tempo real com o placar.</p>';
