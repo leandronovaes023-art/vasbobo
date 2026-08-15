@@ -1362,7 +1362,9 @@ function podePalpitar(j){
 function tempoDeAvaliar(j){
   if(modoTeste())return true;
   const s=statusJogo(j);
-  return s==='avaliar'||s==='encerrado';
+  if(s!=='avaliar'&&s!=='encerrado')return false;
+  if(prazoAvaliarVenceu(j))return false; // prazo de 24h já passou — não aceita mais avaliação, ponto final
+  return true;
 }
 /* só quem realmente participou da rodada (deu palpite com placar + MVP + quem fez gol) pode avaliar os jogadores dela */
 function participouDaRodada(j){
@@ -3707,8 +3709,8 @@ function htmlRodadaBox(semTitulo){
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
         nomeJogoComEscudos(rj,42,'.95rem')+htmlInfoDireitaJogo(rj,true)+
       '</div>'+
-      '<div style="display:flex;justify-content:flex-end;margin-top:6px">'+
-      '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Avalie os jogadores</span>'+
+      '<div style="display:flex;justify-content:flex-start;margin-top:6px">'+
+      (pontuacaoLiberada(rj)?'':'<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Avalie os jogadores</span>')+
       '</div>'+
       '</div>';
     if(rj.resultado&&rj.palpites&&rj.palpites[eu]&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
@@ -3748,28 +3750,32 @@ function htmlRodadaBox(semTitulo){
       const grupos=agruparPorPontos(tabela);
       html+=grupos.map((g,i)=>{
         const ehUltimo=i===grupos.length-1&&grupos.length>1;
-        return g.nomes.map(nome=>'<div class="mini-linha'+(ehUltimo?' mini-linha-ultimo':'')+'"><span>'+(i+1)+'º <b class="rank-nome">'+esc(cap(nome))+'</b>'+(nome===eu?' (você)':'')+'</span><span class="pt">'+g.pts+' pt'+(g.pts===1?'':'s')+(rj.resultado?'':' *')+'</span></div>').join('');
+        const ehPrimeiro=i===0;
+        return g.nomes.map(nome=>'<div class="mini-linha'+(ehUltimo?' mini-linha-ultimo':'')+'" style="padding:3px 0'+(ehPrimeiro?';color:var(--ouro)':'')+'"><span>'+(i+1)+'º <b class="rank-nome" style="font-size:.86em'+(ehPrimeiro?';color:var(--ouro)':'')+'">'+esc(cap(nome))+'</b>'+(ehPrimeiro?' '+ICON_REI:'')+(nome===eu?' (você)':'')+'</span><span class="pt"'+(ehPrimeiro?' style="color:var(--ouro)"':'')+'>'+g.pts+' pt'+(g.pts===1?'':'s')+(rj.resultado?'':' *')+'</span></div>').join('');
       }).join('');
       if(!rj.resultado)html+='<p class="nota-rodape" style="margin:6px 0 0">* pontos parciais, mudando em tempo real com o placar.</p>';
       const prem=premiacaoJogo(rj);
       if(prem){
-        html+='<div class="premio-g"><div class="premio-titulo" style="color:var(--ouro);display:flex;align-items:center;gap:6px;font-weight:900">Reizinho da rodada '+ICON_REI+'</div>'+
-          '<div class="premio-nome" style="color:var(--ouro);display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.reis.map(u=>fotoUsuario(u,48)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
-          '<div class="premio-sub">'+prem.max+' pts — coroa na cabeça, moral no grupo e zoação liberada até o próximo apito.</div>'+
-          (prem.ribas.length?'<div class="premio-titulo" style="color:var(--laranja);margin-top:12px;display:flex;align-items:center;gap:6px">Ribamar da rodada '+ICON_RIBA+'</div>'+
-          '<div class="premio-nome" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+prem.ribas.map(u=>fotoUsuario(u,48)+'<span>'+esc(cap(u))+'</span>').join(' & ')+'</div>'+
-          '<div class="premio-sub">'+prem.min+' pt'+(prem.min===1?'':'s')+' — errou até o hino. Agora a roleta do castigo te espera.</div>':'')+
-          '<div class="premio-sub" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--linha);opacity:.75">'+nomeJogoComPlacar(rj)+' · '+fmtData(rj)+'</div>'+
+        html+='<div class="premio-g" style="margin-top:6px;padding-top:8px">'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">'+
+          '<div><div class="premio-titulo" style="color:var(--ouro);justify-content:center;font-weight:900">Reizinho '+ICON_REI+'</div>'+
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">'+prem.reis.map(u=>fotoUsuario(u,44)+'<span style="color:var(--ouro);font-weight:800;font-size:.86rem">'+esc(cap(u))+'</span>').join('')+'</div>'+
+          '<div class="premio-sub" style="font-size:.68rem;margin-top:2px">'+prem.max+' pts</div></div>'+
+          (prem.ribas.length?('<div><div class="premio-titulo" style="color:var(--laranja);justify-content:center">Ribamar '+ICON_RIBA+'</div>'+
+          '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">'+prem.ribas.map(u=>fotoUsuario(u,44)+'<span style="color:var(--laranja);font-weight:800;font-size:.86rem">'+esc(cap(u))+'</span>').join('')+'</div>'+
+          '<div class="premio-sub" style="font-size:.68rem;margin-top:2px">'+prem.min+' pt'+(prem.min===1?'':'s')+'</div></div>'):'<div></div>')+
+          '</div>'+
+          '<div style="display:flex;justify-content:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--linha)">'+nomeJogoComEscudos(rj,18,'.66rem')+'</div>'+
           '</div>';
       }else if(tabela.length){
         const lider=tabela[0], ultimo=tabela[tabela.length-1];
         const empatados=lider.pts===ultimo.pts;
-        html+='<div class="chips-coroa" style="margin-top:10px"><span class="chip-coroa">'+esc(cap(lider.u))+' '+ICON_REI+'</span>'+
+        html+='<div class="chips-coroa" style="margin-top:8px"><span class="chip-coroa">'+esc(cap(lider.u))+' '+ICON_REI+'</span>'+
           (empatados?'':'<span class="chip-coroa riba">'+esc(cap(ultimo.u))+' '+ICON_RIBA+'</span>')+'</div>'+
-          '<p class="nota-rodape" style="margin:8px 0 0">Se fechar assim agora, é quem leva a coroa e quem gira a roleta.</p>';
+          '<p class="nota-rodape" style="margin:6px 0 0">Se fechar assim agora, é quem leva a coroa e quem gira a roleta.</p>';
       }
     }
-    html+='<p class="nota-rodape" style="margin:10px 0 0;cursor:pointer;text-decoration:underline" onclick="mudarAba(\'rank\')">Clique e veja o ranking geral</p>';
+    html+='<p class="nota-rodape" style="margin:8px 0 0;cursor:pointer;text-decoration:underline" onclick="mudarAba(\'rank\')">Clique e veja o ranking geral</p>';
     return html+'</div>';
   }
   /* --- próximo jogo: quem já confirmou o palpite + ranking pelo quiz --- */
