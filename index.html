@@ -519,9 +519,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
     max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
     box-shadow:0 24px 70px rgba(0,0,0,.4)}
   .modal-banner .emoji-grande{font-size:2.6rem;margin-bottom:10px}
-  .modal-banner h3{font-family:'Anton',sans-serif;font-size:1.3rem;text-transform:uppercase;line-height:1.2;margin-bottom:8px;color:var(--preto)}
-  .modal-banner p{color:var(--cinza);font-size:.85rem;margin-bottom:16px}
-  .modal-banner button{width:100%;background:var(--preto);color:#FFF;border:none;border-radius:10px;padding:12px;
+  .modal-banner h3{font-family:'Anton',sans-serif;font-size:1.3rem;text-transform:uppercase;line-height:1.2;margin-bottom:8px;color:#17171B}
+  .modal-banner p{color:#5B6169;font-size:.85rem;margin-bottom:16px}
+  .modal-banner button{width:100%;background:#17171B;color:#FFF;border:none;border-radius:10px;padding:12px;
     font-family:'Inter',sans-serif;font-weight:800;font-size:.85rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
 
   .castigo-item{background:var(--carvao);border:1px solid var(--linha);border-radius:12px;padding:14px 16px;
@@ -2155,7 +2155,20 @@ function fotoAlvoCastigo(texto,px){
 let filaCastigosPendentes=[];
 let castigoAtualJogoId=null;
 let castigoAtualTexto=null;
-const sessaoBannersVistos=new Set();
+/* controla quais banners de rodada já foram vistos — salvo no aparelho (não só na sessão em
+   memória), pra não mostrar de novo se a pessoa fechar e abrir o app de novo */
+function carregarBannersVistos(){
+  try{return new Set(JSON.parse(localStorage.getItem('vasbobo_banners_vistos')||'[]'));}catch(e){return new Set();}
+}
+function salvarBannerVisto(chave){
+  const s=carregarBannersVistos();
+  s.add(chave);
+  try{
+    const arr=[...s].slice(-60); // guarda só os últimos 60, pra não crescer pra sempre
+    localStorage.setItem('vasbobo_banners_vistos',JSON.stringify(arr));
+  }catch(e){}
+}
+const sessaoBannersVistos=carregarBannersVistos();
 const FRASES_ZOACAO_PERDEDOR=[
   'Errou tanto que até o Ribamar tá orgulhoso. Bora girar.',
   'Foi mal, mas foi muito mal mesmo. Hora de pagar o preço.',
@@ -2390,6 +2403,7 @@ function fecharBannerRodada(){
   document.getElementById('veuBannerRodada').classList.remove('on');
   if(bannerRodadaAtual){
     sessaoBannersVistos.add(bannerRodadaAtual.id+'__'+eu);
+    salvarBannerVisto(bannerRodadaAtual.id+'__'+eu);
     bannerRodadaAtual=null;
   }
   verificarPendenciasRodada();
@@ -3681,7 +3695,20 @@ function escolherFraseGol(placarTexto){
   return base+' '+placarTexto;
 }
 function htmlCastigoRodadaBox(){
-  return '<div class="rodada-box" id="caixaCastigoRodada"><h3 style="margin-bottom:2px"><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span></h3>'+
+  const rod=jogoDaRodada();
+  let fotoPior='';
+  if(rod){
+    const [,rj]=rod;
+    if(rj.resultado){
+      const prem=premiacaoJogo(rj);
+      if(prem&&prem.ribas.length)fotoPior=fotoUsuario(prem.ribas[0],44);
+    }
+  }
+  return '<div class="rodada-box" id="caixaCastigoRodada">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'+
+    '<h3 style="margin-bottom:2px"><span><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigo da Rodada</span></h3>'+
+    (fotoPior?'<div style="flex:none">'+fotoPior+'</div>':'')+
+    '</div>'+
     '<p class="nota-rodape" style="margin:0 0 10px">O pior gira a roleta e terá sua foto exposta:</p>'+
     '<div class="roleta-wrap-mini"><div class="roleta-ponteiro-mini">▼</div>'+
     '<svg class="roleta-svg-mini" viewBox="0 0 300 300"></svg>'+
@@ -3720,7 +3747,7 @@ function htmlRodadaBox(semTitulo){
     }
     if(rj.resultado&&!pontuacaoLiberada(rj)){
       html+='<p class="nota-rodape" style="margin:10px 0 2px"><b>Pontuação provisória — aguardando avaliações.</b></p>'+
-        '<p style="margin:0 0 8px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4</p>';
+        '<p style="margin:0 0 8px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4 e o Último Colocado</p>';
       if(tabela.length){
         const ordenada=tabela.slice().sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
         const top5=ordenada.slice(0,4), resto=ordenada.slice(4);
@@ -3756,7 +3783,7 @@ function htmlRodadaBox(semTitulo){
           linhas.push('<div class="mini-linha'+(ehUltimoGrupo?' mini-linha-ultimo':'')+'" style="padding:1px 0'+(ehPrimeiro?';color:var(--ouro)':'')+'"><span>'+(i+1)+'º <b class="rank-nome" style="font-size:.86em'+(ehPrimeiro?';color:var(--ouro)':'')+'">'+esc(cap(nome))+'</b>'+(ehPrimeiro?' '+ICON_REI:'')+(nome===eu?' (você)':'')+'</span><span class="pt"'+(ehPrimeiro?' style="color:var(--ouro)"':'')+'>'+g.pts+' pt'+(g.pts===1?'':'s')+(rj.resultado?'':' *')+'</span></div>');
         });
       });
-      html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4</p>';
+      html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4 e o Último Colocado</p>';
       const top4=linhas.slice(0,4), resto=linhas.slice(4,-1), ultima=linhas.length>4?linhas[linhas.length-1]:null;
       html+=top4.join('');
       if(resto.length){
@@ -3768,15 +3795,16 @@ function htmlRodadaBox(semTitulo){
       const prem=premiacaoJogo(rj);
       if(prem){
         html+='<div class="premio-g" style="margin-top:4px;padding-top:6px">'+
-          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">'+
-          '<div><div class="premio-titulo" style="color:var(--ouro);justify-content:center;font-weight:900">Reizinho '+ICON_REI+'</div>'+
+          '<div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:10px;align-items:center">'+
+          '<div style="display:flex;align-items:center;justify-content:center;height:100%"><span style="font-weight:900;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;color:var(--cinza)">Rodada</span></div>'+
+          '<div style="text-align:center"><div class="premio-titulo" style="color:var(--ouro);justify-content:center;font-weight:900">Reizinho '+ICON_REI+'</div>'+
           '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">'+prem.reis.map(u=>fotoUsuario(u,44)+'<span style="color:var(--ouro);font-weight:800;font-size:.86rem">'+esc(cap(u))+'</span>').join('')+'</div>'+
           '<div class="premio-sub" style="font-size:.68rem;margin-top:2px">'+prem.max+' pts</div></div>'+
-          (prem.ribas.length?('<div><div class="premio-titulo" style="color:var(--laranja);justify-content:center">Ribamar '+ICON_RIBA+'</div>'+
+          (prem.ribas.length?('<div style="text-align:center"><div class="premio-titulo" style="color:var(--laranja);justify-content:center">Ribamar '+ICON_RIBA+'</div>'+
           '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">'+prem.ribas.map(u=>fotoUsuario(u,44)+'<span style="color:var(--laranja);font-weight:800;font-size:.86rem">'+esc(cap(u))+'</span>').join('')+'</div>'+
           '<div class="premio-sub" style="font-size:.68rem;margin-top:2px">'+prem.min+' pt'+(prem.min===1?'':'s')+'</div></div>'):'<div></div>')+
           '</div>'+
-          '<div style="display:flex;justify-content:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--linha)">'+nomeJogoComEscudos(rj,18,'.66rem')+'</div>'+
+          '<div style="display:flex;justify-content:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--linha)">'+nomeJogoComEscudos(rj,14,'.6rem')+'</div>'+
           '</div>';
       }else if(tabela.length){
         const lider=tabela[0], ultimo=tabela[tabela.length-1];
