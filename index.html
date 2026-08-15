@@ -317,7 +317,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rx-diag{font-size:.76rem;color:#3A331F;line-height:1.6;background:rgba(224,41,59,.06);padding:8px 12px;border-radius:6px}
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
-  .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;padding:2px 0;border-bottom:1px solid var(--linha)}
+  .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;padding:1px 0;border-bottom:1px solid var(--linha)}
   .mini-linha-ultimo{margin:0 -10px;padding:7px 10px;border-radius:8px;border-bottom:none}
   .mini-linha-ultimo .rank-nome{color:var(--laranja);font-weight:900}
   .mini-linha-ultimo .pt{color:var(--laranja);font-weight:900}
@@ -977,7 +977,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   </div>
 
   <!-- Banner de vencedor / salvo (não bloqueante, some sozinho ao clicar) -->
-  <div class="veu-banner" id="veuBannerRodada">
+  <div class="veu-banner" id="veuBannerRodada" onclick="if(event.target===this)fecharBannerRodada()">
     <div class="modal-banner">
       <div class="emoji-grande" id="bannerEmoji"></div>
       <h3 id="bannerTitulo"></h3>
@@ -3748,15 +3748,26 @@ function htmlRodadaBox(semTitulo){
       html+='<p class="nota-rodape" style="margin:0">Ninguém palpitou neste jogo. Rodada sem rei nem bobo.</p>';
     }else{
       const grupos=agruparPorPontos(tabela);
-      html+=grupos.map((g,i)=>{
-        const ehUltimo=i===grupos.length-1&&grupos.length>1;
+      const linhas=[];
+      grupos.forEach((g,i)=>{
+        const ehUltimoGrupo=i===grupos.length-1&&grupos.length>1;
         const ehPrimeiro=i===0;
-        return g.nomes.map(nome=>'<div class="mini-linha'+(ehUltimo?' mini-linha-ultimo':'')+'" style="padding:3px 0'+(ehPrimeiro?';color:var(--ouro)':'')+'"><span>'+(i+1)+'º <b class="rank-nome" style="font-size:.86em'+(ehPrimeiro?';color:var(--ouro)':'')+'">'+esc(cap(nome))+'</b>'+(ehPrimeiro?' '+ICON_REI:'')+(nome===eu?' (você)':'')+'</span><span class="pt"'+(ehPrimeiro?' style="color:var(--ouro)"':'')+'>'+g.pts+' pt'+(g.pts===1?'':'s')+(rj.resultado?'':' *')+'</span></div>').join('');
-      }).join('');
+        g.nomes.forEach(nome=>{
+          linhas.push('<div class="mini-linha'+(ehUltimoGrupo?' mini-linha-ultimo':'')+'" style="padding:1px 0'+(ehPrimeiro?';color:var(--ouro)':'')+'"><span>'+(i+1)+'º <b class="rank-nome" style="font-size:.86em'+(ehPrimeiro?';color:var(--ouro)':'')+'">'+esc(cap(nome))+'</b>'+(ehPrimeiro?' '+ICON_REI:'')+(nome===eu?' (você)':'')+'</span><span class="pt"'+(ehPrimeiro?' style="color:var(--ouro)"':'')+'>'+g.pts+' pt'+(g.pts===1?'':'s')+(rj.resultado?'':' *')+'</span></div>');
+        });
+      });
+      html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4</p>';
+      const top4=linhas.slice(0,4), resto=linhas.slice(4,-1), ultima=linhas.length>4?linhas[linhas.length-1]:null;
+      html+=top4.join('');
+      if(resto.length){
+        if(mostrarRankingRodadaHome)html+=resto.join('');
+        else html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▲ Ver mais '+resto.length+' Vasbobo'+(resto.length===1?'':'s')+'</button>';
+      }
+      if(ultima)html+=ultima;
       if(!rj.resultado)html+='<p class="nota-rodape" style="margin:6px 0 0">* pontos parciais, mudando em tempo real com o placar.</p>';
       const prem=premiacaoJogo(rj);
       if(prem){
-        html+='<div class="premio-g" style="margin-top:6px;padding-top:8px">'+
+        html+='<div class="premio-g" style="margin-top:4px;padding-top:6px">'+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">'+
           '<div><div class="premio-titulo" style="color:var(--ouro);justify-content:center;font-weight:900">Reizinho '+ICON_REI+'</div>'+
           '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">'+prem.reis.map(u=>fotoUsuario(u,44)+'<span style="color:var(--ouro);font-weight:800;font-size:.86rem">'+esc(cap(u))+'</span>').join('')+'</div>'+
