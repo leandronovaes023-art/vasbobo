@@ -297,7 +297,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:4px 5px}
+  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:3px 5px}
   .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
     letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
@@ -318,7 +318,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .rodada-box h3{font-family:'Inter',sans-serif;font-weight:800;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;text-shadow:none}
   .rodada-box h3 span.vivo{color:var(--verde);font-size:.6rem;letter-spacing:.16em}
   .mini-linha{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;padding:1px 0;border-bottom:1px solid var(--linha)}
-  .mini-linha-ultimo{margin:0 -10px;padding:7px 10px;border-radius:8px;border-bottom:none}
+  .mini-linha-ultimo{margin:0 -5px;padding:5px 5px;border-radius:8px;border-bottom:none}
   .mini-linha-ultimo .rank-nome{color:var(--laranja);font-weight:900}
   .mini-linha-ultimo .pt{color:var(--laranja);font-weight:900}
   .mini-linha:last-child{border-bottom:none}
@@ -513,7 +513,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-confirmar-castigo.on{display:block}
 
   .veu-banner{position:fixed;inset:0;background:rgba(23,23,27,.7);display:none;align-items:center;
-    justify-content:center;padding:20px;z-index:88}
+    justify-content:center;padding:20px;z-index:700}
   .veu-banner.on{display:flex}
   .modal-banner{background:#FFF;border-radius:18px;padding:34px 30px;max-width:480px;width:100%;text-align:center;
     max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
@@ -1334,6 +1334,12 @@ function confirmar(msg){
     sim.onclick=()=>fechar(true);
     nao.onclick=()=>fechar(false);
   });
+}
+function fmtDataPadrao(j){
+  const d=new Date(j.data+'T12:00:00');
+  const dias=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+  const meses=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  return dias[d.getDay()]+' · '+String(d.getDate()).padStart(2,'0')+' '+meses[d.getMonth()]+(j.hora?' · '+j.hora:' · A DEFINIR');
 }
 function fmtData(j){
   const d=new Date(j.data+'T12:00:00');
@@ -3747,7 +3753,7 @@ function htmlRodadaBox(semTitulo){
     }
     if(rj.resultado&&!pontuacaoLiberada(rj)){
       html+='<p class="nota-rodape" style="margin:10px 0 2px"><b>Pontuação provisória — aguardando avaliações.</b></p>'+
-        '<p style="margin:0 0 8px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4 e o Último Colocado</p>';
+        '<p style="margin:0 0 8px;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--ouro)">Confira o G4</span> <span style="color:#9A430B">· Último Colocado</span></p>';
       if(tabela.length){
         const ordenada=tabela.slice().sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
         const top5=ordenada.slice(0,4), resto=ordenada.slice(4);
@@ -3783,7 +3789,7 @@ function htmlRodadaBox(semTitulo){
           linhas.push('<div class="mini-linha'+(ehUltimoGrupo?' mini-linha-ultimo':'')+'" style="padding:1px 0'+(ehPrimeiro?';color:var(--ouro)':'')+'"><span>'+(i+1)+'º <b class="rank-nome" style="font-size:.86em'+(ehPrimeiro?';color:var(--ouro)':'')+'">'+esc(cap(nome))+'</b>'+(ehPrimeiro?' '+ICON_REI:'')+(nome===eu?' (você)':'')+'</span><span class="pt"'+(ehPrimeiro?' style="color:var(--ouro)"':'')+'>'+g.pts+' pt'+(g.pts===1?'':'s')+(rj.resultado?'':' *')+'</span></div>');
         });
       });
-      html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;color:var(--ouro);text-transform:uppercase;letter-spacing:.03em">Confira o G4 e o Último Colocado</p>';
+      html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--ouro)">Confira o G4</span> <span style="color:#9A430B">· Último Colocado</span></p>';
       const top4=linhas.slice(0,4), resto=linhas.slice(4,-1), ultima=linhas.length>4?linhas[linhas.length-1]:null;
       html+=top4.join('');
       if(resto.length){
@@ -3794,17 +3800,16 @@ function htmlRodadaBox(semTitulo){
       if(!rj.resultado)html+='<p class="nota-rodape" style="margin:6px 0 0">* pontos parciais, mudando em tempo real com o placar.</p>';
       const prem=premiacaoJogo(rj);
       if(prem){
-        html+='<div class="premio-g" style="margin-top:4px;padding-top:6px">'+
-          '<div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:10px;align-items:center">'+
-          '<div style="display:flex;align-items:center;justify-content:center;height:100%"><span style="font-weight:900;font-size:.66rem;text-transform:uppercase;letter-spacing:.03em;color:var(--cinza)">Rodada</span></div>'+
-          '<div style="text-align:center"><div class="premio-titulo" style="color:var(--ouro);justify-content:center;font-weight:900">Reizinho '+ICON_REI+'</div>'+
+        html+='<div class="premio-g" style="margin-top:2px;padding-top:4px;border-top:none">'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">'+
+          '<div><div class="premio-titulo" style="color:var(--ouro);justify-content:center;font-weight:900">Reizinho '+ICON_REI+'</div>'+
           '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">'+prem.reis.map(u=>fotoUsuario(u,44)+'<span style="color:var(--ouro);font-weight:800;font-size:.86rem">'+esc(cap(u))+'</span>').join('')+'</div>'+
           '<div class="premio-sub" style="font-size:.68rem;margin-top:2px">'+prem.max+' pts</div></div>'+
-          (prem.ribas.length?('<div style="text-align:center"><div class="premio-titulo" style="color:var(--laranja);justify-content:center">Ribamar '+ICON_RIBA+'</div>'+
+          (prem.ribas.length?('<div><div class="premio-titulo" style="color:var(--laranja);justify-content:center">Ribamar '+ICON_RIBA+'</div>'+
           '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:6px">'+prem.ribas.map(u=>fotoUsuario(u,44)+'<span style="color:var(--laranja);font-weight:800;font-size:.86rem">'+esc(cap(u))+'</span>').join('')+'</div>'+
           '<div class="premio-sub" style="font-size:.68rem;margin-top:2px">'+prem.min+' pt'+(prem.min===1?'':'s')+'</div></div>'):'<div></div>')+
           '</div>'+
-          '<div style="display:flex;justify-content:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--linha)">'+nomeJogoComEscudos(rj,14,'.6rem')+'</div>'+
+          '<div style="display:flex;justify-content:center;margin-top:8px">'+nomeJogoComEscudos(rj,14,'.6rem')+'</div>'+
           '</div>';
       }else if(tabela.length){
         const lider=tabela[0], ultimo=tabela[tabela.length-1];
@@ -3885,7 +3890,7 @@ function renderListaJogos(){
         rotuloBtn='Ver/alterar palpite';
       }else{
         chamada='Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar.';
-        rotuloBtn='⚽ Dar meu palpite';
+        rotuloBtn='Dar meu palpite';
       }
     }else if(s==='andamento'){
       chamada='🔴 Bola rolando! Placar atualizando ao vivo — avaliação libera no apito final.';
@@ -3910,9 +3915,9 @@ function renderListaJogos(){
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
         nomeJogoComEscudos(j,60,'1.2rem')+htmlInfoDireitaJogo(j)+
       '</div>'+
-      (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
-        '<p style="font-size:.84rem;margin:10px 0 10px;color:var(--branco)">'+chamada+'</p>')+
-      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px"><button class="btn" '+corBtn+' style="padding:7px 14px;font-size:.82rem" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
+      (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
+        '<p style="font-size:.84rem;margin:6px 0 6px;color:var(--branco)">'+chamada+'</p>')+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px"><button class="btn" '+corBtn+' style="padding:5px 12px;font-size:.76rem" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
     html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+
@@ -4735,10 +4740,10 @@ function nomeCompeticaoLimpo(comp){
 }
 function htmlInfoDireitaJogo(j,pequeno){
   const comp=nomeCompeticaoLimpo(j.competicao);
-  const fonteComp=pequeno?'.72rem':'.86rem', fonteResto=pequeno?'.62rem':'.72rem';
+  const fonteComp=pequeno?'.72rem':'.86rem', fonteData=pequeno?'.68rem':'.8rem', fonteResto=pequeno?'.62rem':'.72rem';
   return '<div style="text-align:right;flex:none;max-width:52%">'+
     '<div style="font-weight:800;font-size:'+fonteComp+';color:var(--branco);line-height:1.25">'+esc(comp)+(j.fase?' ('+esc(j.fase)+')':'')+'</div>'+
-    '<div style="font-size:'+fonteResto+';color:var(--cinza);text-transform:uppercase;margin-top:2px">'+fmtData(j)+(j.hora?'h':'')+'</div>'+
+    '<div style="font-size:'+fonteData+';font-weight:800;color:var(--cinza);margin-top:2px">'+fmtDataPadrao(j)+'</div>'+
     '<div style="font-size:'+fonteResto+';color:var(--cinza)">'+(j.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
     (j.ondeAssistir?'<div style="font-size:'+fonteResto+';color:var(--azul);margin-top:2px;white-space:nowrap;display:flex;align-items:center;gap:3px;justify-content:flex-end">'+SVG_TV_CRUZ+esc(j.ondeAssistir)+'</div>':'')+
   '</div>';
