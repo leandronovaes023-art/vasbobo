@@ -132,7 +132,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       radial-gradient(circle at 85% 80%,rgba(255,196,0,.22),transparent 50%),
       linear-gradient(160deg,#4a3208,#7a5410 35%,#3d2a06 70%,#1f1503);
     border:2px solid #C99A2E;box-shadow:inset 0 0 60px rgba(0,0,0,.45)}
-  .premio-zona-notas{position:relative;height:220px;overflow:hidden}
+  .premio-zona-notas{position:relative;height:170px;overflow:hidden}
   .premio-notas{position:absolute;inset:0;overflow:hidden}
   .dinheiro-nota{position:absolute;top:-70px;width:82px;height:auto;border-radius:4px;
     box-shadow:0 3px 10px rgba(0,0,0,.5);
@@ -148,7 +148,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .premio-contador.premio-revelado{color:#FFE067;animation:pulsarRevelado .6s ease-out;text-shadow:0 0 30px rgba(255,210,80,1),0 0 60px rgba(255,180,0,.7)}
   @keyframes pulsarRevelado{0%{transform:scale(1)}35%{transform:scale(1.32)}100%{transform:scale(1)}}
   .premio-frase{font-size:1.06rem;font-weight:800;line-height:1.55;color:#FFFDF5;margin-top:0;text-shadow:0 1px 4px rgba(0,0,0,.5)}
-  #premioResultado{position:relative;z-index:2;padding:6px 20px 20px;text-align:center}
+  #premioResultado{position:relative;z-index:2;padding:2px 20px 14px;text-align:center}
   .btn-premio{background:rgba(0,0,0,.35);border:1.5px solid #FFD23D;color:#FFFDF5;border-radius:8px;
     padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap}
   .btn-premio:active{background:rgba(0,0,0,.55)}
@@ -196,8 +196,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-hamburger{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .btn-hamburger:active img{animation:tremerMenu .35s ease}
   @keyframes tremerMenu{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
-  @keyframes cruzBatimento{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}}
-  .cruz-batendo{animation:cruzBatimento .5s ease-in-out}
+  @keyframes cruzBatimento{
+    0%{transform:translate(-50%,-50%) scale(1)}
+    8%{transform:translate(-50%,-50%) scale(1.18)}
+    16%{transform:translate(-50%,-50%) scale(1)}
+    24%{transform:translate(-50%,-50%) scale(1.24)}
+    34%{transform:translate(-50%,-50%) scale(1)}
+    100%{transform:translate(-50%,-50%) scale(1)}
+  }
+  .cruz-batendo{animation:cruzBatimento .9s ease-in-out}
   .btn-hamburger.aberto{}
   .btn-hamburger{position:relative}
   .btn-hamburger.chamando-atencao{animation:hamburguerChama 1.9s ease-in-out}
@@ -207,17 +214,17 @@ console.log('Firebase conectado ao Vasbobo ✓');
     width:3px;height:22px;border-radius:99px;background:var(--branco);opacity:.4;
     animation:pulsarAbaMenu 2.2s ease-in-out infinite;pointer-events:none}
   @keyframes pulsarAbaMenu{0%,100%{opacity:.32;height:18px}50%{opacity:.95;height:28px}}
-  .menu-secundario{position:absolute;top:13px;left:48px;z-index:410;
+  .menu-secundario{position:absolute;top:11px;left:48px;z-index:410;
     background:none;border-radius:0;
     padding:0;box-shadow:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:5px;align-items:center;
-    height:32px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 70px);-webkit-overflow-scrolling:touch;
+    height:38px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 70px);-webkit-overflow-scrolling:touch;
     scrollbar-width:none;-ms-overflow-style:none}
   .menu-secundario::-webkit-scrollbar{display:none;height:0}
   .menu-secundario.oculto{display:none}
   .menu-secundario.menu-piscando .tab{animation:menuPiscarChama 0.6s ease-in-out 8}
   @keyframes menuPiscarChama{0%,100%{opacity:1;border-color:var(--linha)}50%{opacity:.55;border-color:var(--vermelho)}}
-  .menu-secundario .tab{background:rgba(128,128,128,.1);border:1px solid rgba(128,128,128,.18);color:var(--branco);text-align:center;padding:4px 8px;border-radius:6px;
-    font-size:.6rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
+  .menu-secundario .tab{background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.08);color:#17171B;text-align:center;padding:6px 9px;border-radius:6px;
+    font-size:.68rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
     display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
   .menu-secundario .tab:hover{border-color:var(--azul)}
   nav::-webkit-scrollbar{display:none}
@@ -828,7 +835,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       </div>
     </div>
   </header>
-  <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:#0B0D10;pointer-events:none">
+  <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:none;pointer-events:none">
     <img id="cruzEntradaClara" src="img/menu/cruz-entrada-3d.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
     <img id="cruzEntradaFinal" src="img/menu/icone-menu-cruz4.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
   </div>
@@ -3308,7 +3315,7 @@ async function fazerLogin(){
   if(h!==u.hash){avisar('Senha incorreta.');return;}
   eu=login;
   try{localStorage.setItem(CHAVE_SESSAO,login);}catch(e){}
-  entrarNoApp();
+  entrarNoApp(true);
 }
 async function confirmarNovaSenha(){
   const s1=document.getElementById('ns1').value,s2=document.getElementById('ns2').value;
@@ -3320,7 +3327,7 @@ async function confirmarNovaSenha(){
   if(!ok)return;
   try{localStorage.setItem(CHAVE_SESSAO,eu);}catch(e){}
   avisar('Senha criada. Bem-vindo ao Vasbobo!',true);
-  entrarNoApp();
+  entrarNoApp(true);
 }
 /* =================== NOTIFICAÇÕES PUSH =================== */
 // IMPORTANTE: troque essa chave pela VAPID key gerada no Firebase Console
@@ -3418,7 +3425,7 @@ function atualizarBotaoNotificacao(){
 // notificação push de verdade, no tópico "aleatorias" (netlify/functions/_frases.js),
 // enviada automaticamente 4x por dia (7h, 12h, 16h, 21h) por enviar-notificacoes.js.
 // Isso alcança todo mundo com notificação ativada, mesmo sem abrir o app.
-function entrarNoApp(){
+function entrarNoApp(loginNovo){
   registrarLog('login','Entrou no app');
   carregarFrasesGol();
   setTimeout(precarregarFotosJogadores, 800);
@@ -3453,7 +3460,7 @@ function entrarNoApp(){
   zerarQuizSeNecessario();
   isentarBoboBetSeNecessario();
   atualizarBotaoNotificacao();
-  animarEntradaCruz();
+  if(loginNovo)animarEntradaCruz();
   if('Notification' in window&&Notification.permission==='granted')ativarOuvintePrimeiroPlano();
   timerTick=setInterval(async()=>{
     const el=document.activeElement;
@@ -3500,19 +3507,20 @@ function animarEntradaCruz(){
   const final=document.getElementById('cruzEntradaFinal');
   const btnReal=document.getElementById('btnMenuSec');
   if(!overlay||!clara||!final||!btnReal)return;
+  const tamanhoGrande=Math.min(window.innerWidth*0.72,340)+'px';
   overlay.style.display='flex';
   btnReal.style.visibility='hidden';
   clara.style.opacity='0';final.style.opacity='0';
-  clara.style.left='50%';clara.style.top='50%';clara.style.width='170px';clara.style.transform='translate(-50%,-50%) scale(1)';
+  clara.style.left='50%';clara.style.top='50%';clara.style.width=tamanhoGrande;clara.style.transform='translate(-50%,-50%) scale(1)';
   clara.style.transition='none';
   requestAnimationFrame(()=>{
-    clara.style.transition='opacity .4s ease';
+    clara.style.transition='opacity .3s ease';
     clara.style.opacity='1';
   });
-  // 3 batimentos, tipo coração
-  setTimeout(()=>{clara.classList.add('cruz-batendo');},450);
-  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},950);
-  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},1450);
+  // batimento de coração de verdade (dois toques rápidos + pausa, repetindo) — ritmo mais
+  // rápido, total de aproximadamente 3s pra animação inteira
+  setTimeout(()=>{clara.classList.add('cruz-batendo');},300);
+  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},1150);
   // diminui + sobe até a altura/posição real do botão do menu, se transformando nele
   setTimeout(()=>{
     const alvo=btnReal.getBoundingClientRect();
@@ -3520,18 +3528,18 @@ function animarEntradaCruz(){
     const larguraAlvo=imgAlvo?imgAlvo.getBoundingClientRect().width:46;
     const cxAlvo=alvo.left+alvo.width/2, cyAlvo=alvo.top+alvo.height/2;
     clara.classList.remove('cruz-batendo');
-    clara.style.transition='left 1s cubic-bezier(.4,0,.2,1),top 1s cubic-bezier(.4,0,.2,1),width 1s cubic-bezier(.4,0,.2,1),transform 1s cubic-bezier(.4,0,.2,1)';
+    clara.style.transition='left .7s cubic-bezier(.4,0,.2,1),top .7s cubic-bezier(.4,0,.2,1),width .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)';
     clara.style.left=cxAlvo+'px';clara.style.top=cyAlvo+'px';clara.style.width=larguraAlvo+'px';
     // troca suave (crossfade) pra imagem final do botão, perto do fim do movimento
     final.style.left=cxAlvo+'px';final.style.top=cyAlvo+'px';final.style.width=larguraAlvo+'px';
     final.style.transform='translate(-50%,-50%) scale(1)';
     setTimeout(()=>{
-      final.style.transition='opacity .5s ease';
-      clara.style.transition=clara.style.transition+',opacity .5s ease';
+      final.style.transition='opacity .4s ease';
+      clara.style.transition=clara.style.transition+',opacity .4s ease';
       final.style.opacity='1';
       clara.style.opacity='0';
-    },650);
-  },2000);
+    },450);
+  },2100);
   // termina: esconde a camada de animação, mostra o botão de verdade, batimento pequeno e abre o menu
   setTimeout(()=>{
     overlay.style.display='none';
@@ -3540,8 +3548,8 @@ function animarEntradaCruz(){
     setTimeout(()=>{
       btnReal.classList.remove('chamando-atencao');
       dicaMenuSuperiorHome();
-    },500);
-  },3100);
+    },400);
+  },2950);
 }
 function dicaMenuSuperiorHome(){
   const btn=document.getElementById('btnMenuSec');
@@ -3552,17 +3560,9 @@ function dicaMenuSuperiorHome(){
     if(!el.classList.contains('oculto')){el.classList.add('oculto');btn.classList.remove('aberto');}
     return;
   }
-  // na Home: balança continuamente pra chamar atenção, E mostra as opções piscando por 3s ao
-  // entrar — depois esconde de novo sozinha (mas o balançar da cruz continua pra sempre)
+  // na Home: abre o menu e deixa aberto, sem piscar e sem sumir sozinho
   btn.classList.add('chamando-atencao-continuo');
   if(el.classList.contains('oculto'))toggleMenuSecundario();
-  el.classList.add('menu-piscando');
-  clearTimeout(window._dicaMenuTimeout);
-  window._dicaMenuTimeout=setTimeout(()=>{
-    const elAtual=document.getElementById('menuSecundario');
-    const btnAtual=document.getElementById('btnMenuSec');
-    if(elAtual&&!elAtual.classList.contains('oculto')){elAtual.classList.add('oculto');elAtual.classList.remove('menu-piscando');if(btnAtual)btnAtual.classList.remove('aberto');}
-  },5000);
 }
 document.addEventListener('click',(e)=>{
   const el=document.getElementById('menuSecundario');
@@ -3985,7 +3985,7 @@ function renderListaJogos(){
       '</div>'+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
         '<p style="font-size:.84rem;margin:6px 0 6px;color:var(--branco)">'+chamada+'</p>')+
-      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px"><button class="btn" '+corBtn+' style="padding:5px 12px;font-size:.76rem" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px"><button class="btn" '+corBtn+' style="padding:5px 12px;font-size:.76rem;display:inline-flex;align-items:center;gap:5px" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho);display:inline-flex;align-items:center;line-height:1">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
     html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+

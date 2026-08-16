@@ -210,16 +210,16 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
     width:3px;height:22px;border-radius:99px;background:var(--branco);opacity:.4;
     animation:pulsarAbaMenu 2.2s ease-in-out infinite;pointer-events:none}
   @keyframes pulsarAbaMenu{0%,100%{opacity:.32;height:18px}50%{opacity:.95;height:28px}}
-  .menu-secundario{position:absolute;top:13px;left:48px;z-index:410;
+  .menu-secundario{position:absolute;top:11px;left:48px;z-index:410;
     background:none;border-radius:0;
-    padding:0;box-shadow:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:6px;align-items:center;
-    height:46px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 110px);-webkit-overflow-scrolling:touch;
+    padding:0;box-shadow:none;display:flex;flex-direction:row;flex-wrap:nowrap;gap:5px;align-items:center;
+    height:38px;overflow-x:auto;overflow-y:hidden;max-width:calc(100vw - 70px);-webkit-overflow-scrolling:touch;
     scrollbar-width:none;-ms-overflow-style:none}
   .menu-secundario::-webkit-scrollbar{display:none;height:0}
   .menu-secundario.oculto{display:none}
-  .menu-secundario .tab{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);text-align:center;padding:8px 14px;border-radius:8px;
-    font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
-    display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+  .menu-secundario .tab{background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.08);color:#17171B;text-align:center;padding:6px 9px;border-radius:6px;
+    font-size:.68rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
+    display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
   .menu-secundario .tab:hover{background:#fff}
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
   .tab.ativa{background:var(--branco);color:var(--preto)}
