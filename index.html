@@ -132,7 +132,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       radial-gradient(circle at 85% 80%,rgba(255,196,0,.22),transparent 50%),
       linear-gradient(160deg,#4a3208,#7a5410 35%,#3d2a06 70%,#1f1503);
     border:2px solid #C99A2E;box-shadow:inset 0 0 60px rgba(0,0,0,.45)}
-  .premio-zona-notas{position:relative;height:300px;overflow:hidden}
+  .premio-zona-notas{position:relative;height:220px;overflow:hidden}
   .premio-notas{position:absolute;inset:0;overflow:hidden}
   .dinheiro-nota{position:absolute;top:-70px;width:82px;height:auto;border-radius:4px;
     box-shadow:0 3px 10px rgba(0,0,0,.5);
@@ -141,9 +141,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   @keyframes notaCaindo{
     0%{transform:translateY(0) scale(var(--escala)) rotate(0deg);opacity:0}
     10%{opacity:var(--opac)}
-    100%{transform:translateY(390px) scale(var(--escala)) rotate(var(--giro));opacity:0}
+    100%{transform:translateY(280px) scale(var(--escala)) rotate(var(--giro));opacity:0}
   }
-  .premio-conteudo{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+  .premio-conteudo{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center}
   .premio-contador{font-family:'Anton',sans-serif;font-size:2.3rem;color:#fff;text-shadow:0 0 16px rgba(0,0,0,.6),0 0 24px rgba(255,210,80,.6);letter-spacing:.02em;transition:none}
   .premio-contador.premio-revelado{color:#FFE067;animation:pulsarRevelado .6s ease-out;text-shadow:0 0 30px rgba(255,210,80,1),0 0 60px rgba(255,180,0,.7)}
   @keyframes pulsarRevelado{0%{transform:scale(1)}35%{transform:scale(1.32)}100%{transform:scale(1)}}
@@ -196,6 +196,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-hamburger{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .btn-hamburger:active img{animation:tremerMenu .35s ease}
   @keyframes tremerMenu{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
+  @keyframes cruzBatimento{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}}
+  .cruz-batendo{animation:cruzBatimento .5s ease-in-out}
   .btn-hamburger.aberto{}
   .btn-hamburger{position:relative}
   .btn-hamburger.chamando-atencao{animation:hamburguerChama 1.9s ease-in-out}
@@ -214,8 +216,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .menu-secundario.oculto{display:none}
   .menu-secundario.menu-piscando .tab{animation:menuPiscarChama 0.6s ease-in-out 8}
   @keyframes menuPiscarChama{0%,100%{opacity:1;border-color:var(--linha)}50%{opacity:.55;border-color:var(--vermelho)}}
-  .menu-secundario .tab{background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);text-align:center;padding:5px 9px;border-radius:7px;
-    font-size:.64rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
+  .menu-secundario .tab{background:rgba(128,128,128,.1);border:1px solid rgba(128,128,128,.18);color:var(--branco);text-align:center;padding:4px 8px;border-radius:6px;
+    font-size:.6rem;font-weight:700;text-transform:none;letter-spacing:0;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;
     display:flex;align-items:center;justify-content:center;white-space:nowrap;flex:none}
   .menu-secundario .tab:hover{border-color:var(--azul)}
   nav::-webkit-scrollbar{display:none}
@@ -826,6 +828,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
       </div>
     </div>
   </header>
+  <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:#0B0D10;pointer-events:none">
+    <img id="cruzEntradaClara" src="img/menu/cruz-entrada-3d.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
+    <img id="cruzEntradaFinal" src="img/menu/icone-menu-cruz4.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
+  </div>
   <div class="lembrete-avaliar oculto" id="lembreteAvaliar" style="position:fixed" onclick="if(this.classList.contains('recolhido'))toggleLembreteRecolhido(event)">
     <div class="lembrete-corpo" id="lembreteAvaliarCorpo" onclick="if(!lembreteJogoId)return;abrirJogoNaAvaliacao(lembreteJogoId)">
       <span id="lembreteAvaliarTexto"></span>
@@ -1704,15 +1710,21 @@ function dispararParticulasPremio(){
   alvo.appendChild(div);
   setTimeout(()=>div.remove(),1600);
 }
+/* pega só a parte única/engraçada da frase, cortando a introdução repetida
+   ("...capaz de..." ou "...dá para...") — a introdução fixa já é mostrada separada */
+function partUnicaFrasePremio(frase){
+  const m=frase.match(/^.*?(?:capaz de |dá para )(.*)$/s);
+  return m?m[1]:frase;
+}
 function mostrarResultadoPremio(){
   const el=document.getElementById('premioResultado');
   if(!el)return;
   const frase=fraseAleatoriaPremio();
   el.classList.remove('oculto');
   el.innerHTML=
-    '<p class="premio-frase" id="premioFraseTxt">'+esc(frase)+'</p>'+
+    '<p class="premio-frase" id="premioFraseTxt">O prêmio do BOBOBET do mês é uma <b>FORTUNA COLOSSAL</b>, capaz de <span id="premioFraseParte">'+esc(partUnicaFrasePremio(frase))+'</span></p>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px" id="premioBotoesTroca">'+
-    '<button class="btn-premio" onclick="trocarPremioFrase()">🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')</button>'+
+    '<button class="btn-premio" onclick="trocarPremioFrase()">🔁 Trocar de prêmio</button>'+
     '</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px">'+
     '<button class="btn-premio" onclick="copiarMensagemPremio()">📋 Copiar mensagem</button>'+
@@ -1730,9 +1742,9 @@ function trocarPremioFrase(){
     return;
   }
   const frase=fraseAleatoriaPremio();
-  if(elTxt)elTxt.textContent=frase;
+  if(elTxt)elTxt.innerHTML='O prêmio do BOBOBET do mês é uma <b>FORTUNA COLOSSAL</b>, capaz de <span id="premioFraseParte">'+esc(partUnicaFrasePremio(frase))+'</span>';
   const btn=document.querySelector('#premioBotoesTroca button');
-  if(btn)btn.textContent='🔁 Trocar de prêmio ('+(3-window._premioTrocasUsadas)+' restante'+((3-window._premioTrocasUsadas)===1?'':'s')+')';
+  if(btn)btn.textContent='🔁 Trocar de prêmio';
 }
 function copiarMensagemPremio(){
   const txt=document.getElementById('premioFraseTxt');
@@ -3441,7 +3453,7 @@ function entrarNoApp(){
   zerarQuizSeNecessario();
   isentarBoboBetSeNecessario();
   atualizarBotaoNotificacao();
-  dicaMenuSuperiorHome();
+  animarEntradaCruz();
   if('Notification' in window&&Notification.permission==='granted')ativarOuvintePrimeiroPlano();
   timerTick=setInterval(async()=>{
     const el=document.activeElement;
@@ -3449,6 +3461,7 @@ function entrarNoApp(){
     if(aba==='admin')return; // painel de admin tem várias caixinhas "clique pra abrir" (logs, mensalidades, etc.) — recarregar aqui fecharia tudo sem avisar
     if(jogoAberto)return; // tela de um jogo específico (palpite, MVP, gol, avaliação) — não pode resetar seleção não salva ainda
     if(aba==='vasbolao')return; // reiniciaria a animação do prêmio (e trocaria a frase) sem o usuário pedir
+    if(mostrarRankingGeral||mostrarRankingRodadaBox||mostrarCoroaRibamar||mostrarRankingQuiz||mostrarJogosRecentes||mostrarRankingRodadaHome||mostrarTodosEncerrados)return; // tem alguma caixinha aberta pelo usuário — não fecha sem avisar
     await carregarDados();await fqSincronizarEstado();render();
   },40000);
   if(timerSync)clearInterval(timerSync);
@@ -3476,6 +3489,60 @@ function toggleMenuSecundario(e){
 }
 /* dica visual pra ensinar que a cruz de malta abre um menu com mais opções: balança e abre
    sozinha por um instante, fecha, espera, e repete mais uma vez — só na Home, só ao entrar */
+/* animação de entrada da cruz de malta — só na primeira vez que a pessoa entra na Home depois
+   do login (não repete a cada refresh comum, só quando realmente entrou/logou agora) */
+let _cruzEntradaJaRodou=false;
+function animarEntradaCruz(){
+  if(_cruzEntradaJaRodou)return;
+  _cruzEntradaJaRodou=true;
+  const overlay=document.getElementById('cruzEntradaOverlay');
+  const clara=document.getElementById('cruzEntradaClara');
+  const final=document.getElementById('cruzEntradaFinal');
+  const btnReal=document.getElementById('btnMenuSec');
+  if(!overlay||!clara||!final||!btnReal)return;
+  overlay.style.display='flex';
+  btnReal.style.visibility='hidden';
+  clara.style.opacity='0';final.style.opacity='0';
+  clara.style.left='50%';clara.style.top='50%';clara.style.width='170px';clara.style.transform='translate(-50%,-50%) scale(1)';
+  clara.style.transition='none';
+  requestAnimationFrame(()=>{
+    clara.style.transition='opacity .4s ease';
+    clara.style.opacity='1';
+  });
+  // 3 batimentos, tipo coração
+  setTimeout(()=>{clara.classList.add('cruz-batendo');},450);
+  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},950);
+  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},1450);
+  // diminui + sobe até a altura/posição real do botão do menu, se transformando nele
+  setTimeout(()=>{
+    const alvo=btnReal.getBoundingClientRect();
+    const imgAlvo=btnReal.querySelector('img');
+    const larguraAlvo=imgAlvo?imgAlvo.getBoundingClientRect().width:46;
+    const cxAlvo=alvo.left+alvo.width/2, cyAlvo=alvo.top+alvo.height/2;
+    clara.classList.remove('cruz-batendo');
+    clara.style.transition='left 1s cubic-bezier(.4,0,.2,1),top 1s cubic-bezier(.4,0,.2,1),width 1s cubic-bezier(.4,0,.2,1),transform 1s cubic-bezier(.4,0,.2,1)';
+    clara.style.left=cxAlvo+'px';clara.style.top=cyAlvo+'px';clara.style.width=larguraAlvo+'px';
+    // troca suave (crossfade) pra imagem final do botão, perto do fim do movimento
+    final.style.left=cxAlvo+'px';final.style.top=cyAlvo+'px';final.style.width=larguraAlvo+'px';
+    final.style.transform='translate(-50%,-50%) scale(1)';
+    setTimeout(()=>{
+      final.style.transition='opacity .5s ease';
+      clara.style.transition=clara.style.transition+',opacity .5s ease';
+      final.style.opacity='1';
+      clara.style.opacity='0';
+    },650);
+  },2000);
+  // termina: esconde a camada de animação, mostra o botão de verdade, batimento pequeno e abre o menu
+  setTimeout(()=>{
+    overlay.style.display='none';
+    btnReal.style.visibility='visible';
+    btnReal.classList.add('chamando-atencao');
+    setTimeout(()=>{
+      btnReal.classList.remove('chamando-atencao');
+      dicaMenuSuperiorHome();
+    },500);
+  },3100);
+}
 function dicaMenuSuperiorHome(){
   const btn=document.getElementById('btnMenuSec');
   const el=document.getElementById('menuSecundario');
@@ -3837,24 +3904,22 @@ function htmlRodadaBox(semTitulo){
     pts:(ESTADO_QUIZ.porJogo&&ESTADO_QUIZ.porJogo[u+'|'+chaveJQuiz])||0
   })).filter(x=>x.confirmado||x.pts>0)
     .sort((a,b)=>b.pts-a.pts||(b.confirmado-a.confirmado)||a.u.localeCompare(b.u));
-  let html='<div class="rodada-box"><h3 style="margin-bottom:2px"><span>Ranking da Rodada</span></h3>'+
-    '<div onclick="abrirJogo(\''+did+'\')" style="cursor:pointer;margin-bottom:8px">'+
-    '<div style="font-size:1.15rem;font-weight:800;color:var(--branco);text-transform:uppercase;line-height:1.3">'+nomeJogo(dj)+'</div>'+
-    '<div class="meta" style="margin-top:2px">'+fmtData(dj)+'</div>'+
-    '<div class="info-linha">'+esc(dj.competicao)+(dj.fase?' ('+esc(dj.fase)+')':'')+'</div>'+
-    '<div class="info-linha">'+(dj.local==='fora'?'Fora de casa':'São Januário')+'</div>'+
-    '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-top:6px"><span style="color:var(--vermelho)">✠</span> Toque para abrir</span>'+
+  let html='<div class="selo-destaque"><span>Ranking da Rodada</span></div>'+
+    '<div class="rodada-box" style="width:100%">'+
+    '<div onclick="abrirJogo(\''+did+'\')" style="cursor:pointer">'+
+    '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
+      nomeJogoComEscudos(dj,42,'.95rem')+htmlInfoDireitaJogo(dj,true)+
+    '</div>'+
+    '<div style="display:flex;justify-content:flex-start;margin-top:6px"><span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Toque para abrir</span></div>'+
     '</div>';
   if(linhasRodada.length){
     html+=linhasRodada.map((l,i)=>'<div class="mini-linha"><span>'+(i+1)+'º <b class="rank-nome">'+esc(cap(l.u))+'</b>'+(l.u===eu?' (você)':'')+
       (l.confirmado?' <span class="palp-ok" style="font-size:.68rem;font-weight:800;background:rgba(46,138,69,.14);color:var(--verde);border-radius:99px;padding:1px 8px;white-space:nowrap">palpite ✔️</span>':'')+
       '</span><span class="pt">'+l.pts+' pt'+(l.pts===1?'':'s')+' no quiz</span></div>').join('');
-    html+='<p class="nota-rodape" style="margin:8px 0 0">Os pontos do quiz "O Que Mais Entende de Futebol" já contam aqui e somam ao placar quando o jogo rolar.</p>';
   }else{
     html+='<p class="nota-rodape" style="margin:0 0 6px">Ninguém palpitou nem pontuou no quiz ainda. Chega na frente e pressiona a galera!</p>';
   }
-  html+='<p class="nota-rodape" style="margin:12px 0 6px">Assim que a bola rolar, o ranking vai atualizar em tempo real para descobrir quem é o Reizinho e o Ribamar da Rodada:</p>'+
-    '<div class="chips-coroa"><span class="chip-coroa">Reizinho '+ICON_REI+'</span><span class="chip-coroa riba">Ribamar '+ICON_RIBA+'</span></div>';
+  html+='<div class="chips-coroa" style="margin-top:10px"><span class="chip-coroa">Reizinho '+ICON_REI+'</span><span class="chip-coroa riba">Ribamar '+ICON_RIBA+'</span></div>';
   return html+'</div>';
 }
 function renderListaJogos(){
