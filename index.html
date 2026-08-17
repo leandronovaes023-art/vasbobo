@@ -388,6 +388,15 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .aval-controles-v{display:flex;flex-direction:column;gap:10px;margin-top:10px}
   .btn-mic{background:#1E8A4C;color:#fff;border:1.5px solid #1E8A4C;border-radius:20px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;align-self:flex-start}
   .btn-ok-comentario{background:#fff;color:#17171B;border:1.5px solid #17171B;border-radius:8px;padding:0 14px;height:36px;font-weight:800;font-size:.76rem;cursor:pointer;flex:none}
+  .btn-elogio-critica{flex:1;padding:8px;border-radius:9px;font-weight:800;font-size:.78rem;cursor:pointer;font-family:'Inter',sans-serif;border:1.5px solid var(--linha);background:var(--carvao2);color:var(--branco)}
+  .btn-elogio-critica.ativo-elogio{background:rgba(46,138,69,.16);border-color:var(--verde);color:var(--verde)}
+  .btn-elogio-critica.ativo-critica{background:rgba(224,41,59,.14);border-color:var(--vermelho);color:var(--vermelho)}
+  .frases-scroller-wrap{display:flex;align-items:center;gap:4px;margin-top:6px}
+  .frases-scroller{display:flex;gap:6px;overflow-x:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding:2px 0}
+  .frases-scroller::-webkit-scrollbar{display:none;height:0}
+  .frase-chip{flex:none;background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);border-radius:99px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif}
+  .frase-chip:active{background:var(--linha)}
+  .frases-seta{flex:none;width:26px;height:26px;border-radius:50%;background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center}
   .notas-botoes{display:flex;flex-wrap:nowrap;gap:4px;margin-top:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
   .notas-botoes::-webkit-scrollbar{display:none}
   .btn-nota{width:28px;height:28px;min-width:28px;border-radius:7px;border:1px solid var(--linha);background:var(--carvao2);color:var(--branco);font-weight:800;cursor:pointer;font-family:'Inter',sans-serif;font-size:.78rem;flex:none}
@@ -2200,6 +2209,19 @@ const FRASES_ZOACAO_PERDEDOR=[
   'Última colocação com louvor. A roleta te aguarda.',
   'Ninguém te salva dessa. Gira aí.',
   'Zerou no palpite e agora vai zerar a vergonha também.',
+];
+/* comentários pré-escolhidos pra avaliação de jogador — elogio ou crítica, um toque e já registra */
+const FRASES_ELOGIO_JOGADOR=[
+  'Seu lindo','Seu gostoso','Nunca critiquei','Toma meu salário','Te amo','Meu ídolo','Você é foda',
+  'Meu homem','Meu príncipe','Meu herói','Casa comigo','Eu te perdoo tudo','Eu te venero','Que homem',
+  'Nasceu pra isso','Deus abençoe seus pés','Vai ser convocado','Nível seleção','Não erra nem sem querer'
+];
+const FRASES_CRITICA_JOGADOR=[
+  'Seu filho da puta','Você é um merda','Seu lixo','Some do Vasco','Seu animal','Vai tomar no cu',
+  'Seu burro','Seu jumento','Seu desgraçado','Inimigo do futebol','Bagre desgraçado','Pede pra sair',
+  'Não dá mais','Eu não aguento você','Rescinde o contrato','Aposenta','Esquece o futebol','Que animal',
+  'Pelo amor de Deus','Até minha avó fazia isso melhor','Até o Daniel faria melhor','Você é pior que o Novaes',
+  'Nem o Antônio erraria isso','Some igual o Vitor some do estádio','Roubaram o uniforme de um jogador de verdade'
 ];
 const FRASES_RIBAMAR_ORGULHO=[
   'Ribamar tá radiante com você — sua pontaria em {jogo} deixou ele orgulhoso. Gira a roleta, que dessa vez não tem replay.',
@@ -4265,7 +4287,7 @@ function renderAvaliacaoCard(j,s){
     }
     const botoesNota=temNota?
       '<div class="nota-escolhida">Sua nota: <b>'+fmtNota(minha.nota)+'</b> <button type="button" class="btn fantasma" style="padding:4px 12px;font-size:.72rem" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'\')">↺ Desfazer</button></div>':
-      '<div class="notas-botoes">'+Array.from({length:10},(_,i)=>i+1).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+
+      '<div class="notas-botoes">'+Array.from({length:11},(_,i)=>i).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+
       '<button type="button" class="btn-nota btn-na" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'NA\')" title="Jogou pouco / sem nota definida">N/A</button></div>';
     const comentarios=coletarComentarios(j,p.id);
     html+='<div class="aval-bloco" id="jogb_'+p.id+'"><div class="aval-topo">'+
@@ -4273,6 +4295,8 @@ function renderAvaliacaoCard(j,s){
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
       '<span class="media-chip '+(media&&media.media!==null?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'<small id="votos_'+p.id+'">'+(media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos')+'</small></span></span></div>'+
       botoesNota+
+      '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn-elogio-critica" id="btnElogio_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'elogio\')">😍 Elogio</button><button type="button" class="btn-elogio-critica" id="btnCritica_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'critica\')">😡 Crítica</button></div>'+
+      '<div id="frasesRapidas_'+p.id+'" class="oculto"></div>'+
       '<div class="aval-controles-v">'+
       '<div style="display:flex;gap:8px;align-items:center" id="comWrap_'+p.id+'"'+((minha.com||'')?' style="display:none"':'')+'>'+
       '<input id="comInput_'+p.id+'" placeholder="Seu comentário sobre ele nesta partida…" value="'+esc(minha.com||'')+'" maxlength="280" style="flex:1" onkeydown="if(event.key===\'Enter\'){event.preventDefault();confirmarComentario(\''+p.id+'\');}">'+
@@ -4414,6 +4438,48 @@ function toggleJogadorExpandido(pid){
   if(jogadoresExpandidos.has(pid))jogadoresExpandidos.delete(pid);
   else jogadoresExpandidos.add(pid);
   render();
+}
+/* mostra/esconde o carrossel de comentários pré-escolhidos (elogio ou crítica) pro jogador pid */
+function toggleFrasesRapidas(pid,tipo){
+  const wrap=document.getElementById('frasesRapidas_'+pid);
+  const btnE=document.getElementById('btnElogio_'+pid), btnC=document.getElementById('btnCritica_'+pid);
+  if(!wrap)return;
+  const jaAberto=!wrap.classList.contains('oculto')&&wrap.dataset.tipo===tipo;
+  if(jaAberto){
+    wrap.classList.add('oculto');
+    if(btnE)btnE.classList.remove('ativo-elogio');
+    if(btnC)btnC.classList.remove('ativo-critica');
+    return;
+  }
+  const frases=tipo==='elogio'?FRASES_ELOGIO_JOGADOR:FRASES_CRITICA_JOGADOR;
+  wrap.dataset.tipo=tipo;
+  wrap.innerHTML='<div class="frases-scroller-wrap">'+
+    '<button type="button" class="frases-seta" onclick="rolarFrasesRapidas(\''+pid+'\',-1)">‹</button>'+
+    '<div class="frases-scroller" id="frasesScroller_'+pid+'">'+
+    frases.map(f=>'<button type="button" class="frase-chip" onclick="selecionarFraseRapida(\''+pid+'\',\''+esc(f).replace(/'/g,"\\'")+'\')">'+esc(f)+'</button>').join('')+
+    '</div>'+
+    '<button type="button" class="frases-seta" onclick="rolarFrasesRapidas(\''+pid+'\',1)">›</button>'+
+    '</div>';
+  wrap.classList.remove('oculto');
+  if(btnE)btnE.classList.toggle('ativo-elogio',tipo==='elogio');
+  if(btnC)btnC.classList.toggle('ativo-critica',tipo==='critica');
+}
+function rolarFrasesRapidas(pid,direcao){
+  const el=document.getElementById('frasesScroller_'+pid);
+  if(el)el.scrollBy({left:direcao*160,behavior:'smooth'});
+}
+async function selecionarFraseRapida(pid,frase){
+  await salvarAvaliacao(pid,'com',frase);
+  const wrap=document.getElementById('frasesRapidas_'+pid);
+  if(wrap)wrap.classList.add('oculto');
+  const btnE=document.getElementById('btnElogio_'+pid), btnC=document.getElementById('btnCritica_'+pid);
+  if(btnE)btnE.classList.remove('ativo-elogio');
+  if(btnC)btnC.classList.remove('ativo-critica');
+  const input=document.getElementById('comInput_'+pid);
+  if(input)input.value=frase;
+  const comWrap=document.getElementById('comWrap_'+pid), reg=document.getElementById('comRegistrado_'+pid);
+  if(comWrap)comWrap.style.display='none';
+  if(reg)reg.style.display='flex';
 }
 async function confirmarComentario(pid){
   const input=document.getElementById('comInput_'+pid);
