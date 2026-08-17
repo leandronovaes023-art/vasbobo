@@ -196,9 +196,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-hamburger{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .btn-hamburger:active img{animation:tremerMenu .35s ease}
   @keyframes tremerMenu{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
-  .titulo-vasbobo-3d{font-family:'Anton',sans-serif;font-size:min(16vw,78px);letter-spacing:.05em;color:#fff;
-    -webkit-text-stroke:1.5px #000;
-    text-shadow:1px 1px 0 #000,2px 2px 0 #000,3px 3px 0 #000,4px 4px 0 #000,5px 5px 0 #000,6px 6px 0 #000,7px 7px 0 #000,8px 8px 14px rgba(0,0,0,.55)}
+  .titulo-vasbobo-3d{font-family:'Anton',sans-serif;font-size:min(15vw,68px);letter-spacing:.04em;color:#111;
+    -webkit-text-stroke:3px #000;
+    text-shadow:1px 1px 0 #555,2px 2px 0 #4a4a4a,3px 3px 0 #3f3f3f,4px 4px 0 #333,5px 5px 0 #292929,6px 6px 10px rgba(0,0,0,.4)}
   @keyframes cruzBatimento{
     0%{transform:translate(-50%,-50%) scale(1)}
     8%{transform:translate(-50%,-50%) scale(1.18)}
@@ -398,6 +398,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .frases-scroller{display:flex;gap:6px;overflow-x:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding:2px 0}
   .frases-scroller::-webkit-scrollbar{display:none;height:0}
   .frase-chip{flex:none;background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);border-radius:99px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif}
+  .frase-chip-marcada{background:var(--azul);border-color:var(--azul);color:#fff}
   .frase-chip:active{background:var(--linha)}
   .frases-seta{flex:none;width:26px;height:26px;border-radius:50%;background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center}
   .notas-botoes{display:flex;flex-wrap:nowrap;gap:4px;margin-top:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;-ms-overflow-style:none}
@@ -847,9 +848,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
       </div>
     </div>
   </header>
-  <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:#0B0D10;pointer-events:none;overflow:hidden">
-    <img id="cruzEntradaEscudo" src="img/embed/escudo-vasco-fundo.png" alt="" style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:min(88vw,420px);height:auto;opacity:0;transition:opacity .5s ease">
-    <div id="cruzEntradaTitulo" style="position:absolute;top:6%;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s ease">
+  <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:#FFFFFF;pointer-events:none;overflow:hidden">
+    <img id="cruzEntradaEscudo" src="img/embed/escudo-vasco-fundo.png" alt="" style="position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);width:min(94vw,480px);height:auto;opacity:0;transition:opacity .5s ease">
+    <div id="cruzEntradaTitulo" style="position:absolute;top:3%;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s ease">
       <span class="titulo-vasbobo-3d">VASBOBO</span>
     </div>
     <img id="cruzEntradaClara" src="img/menu/cruz-entrada-3d.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
@@ -3552,7 +3553,7 @@ function animarEntradaCruz(){
   // não chute) e nasce a cruz grande exatamente ali, pequena, crescendo até o tamanho final
   setTimeout(()=>{
     const r=escudo.getBoundingClientRect();
-    const cxNascimento=r.left+r.width*0.5215, cyNascimento=r.top+r.height*0.4835;
+    const cxNascimento=r.left+r.width*0.558, cyNascimento=r.top+r.height*0.4842;
     clara.style.left=cxNascimento+'px';clara.style.top=cyNascimento+'px';
     clara.style.width='26px';clara.style.transform='translate(-50%,-50%) scale(1)';
     clara.style.transition='none';
@@ -4307,7 +4308,7 @@ function renderAvaliacaoCard(j,s){
       html+='<div class="aval-bloco" style="padding:10px 14px" id="jogb_'+p.id+'">'+
         '<div class="aval-topo" style="cursor:pointer" onclick="toggleJogadorExpandido(\''+p.id+'\')"><span class="aval-nome" style="display:flex;align-items:center;gap:8px">'+fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span></span>'+
         '<span style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--cinza)"><b style="color:var(--branco)">Nota '+fmtNota(minha.nota)+'</b>'+((minha.com||'').length?' · registrado ✓':'')+'</span></div>'+
-        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn-elogio-critica" id="btnElogio_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'elogio\')">😍 Elogio</button><button type="button" class="btn-elogio-critica" id="btnCritica_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'critica\')">😡 Crítica</button></div>'+
+        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn-elogio-critica" id="btnElogio_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'elogio\')">Elogio</button><button type="button" class="btn-elogio-critica" id="btnCritica_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'critica\')">Crítica</button></div>'+
         '<div id="frasesRapidas_'+p.id+'" class="oculto"></div>'+
         '</div>';
       return;
@@ -4322,7 +4323,7 @@ function renderAvaliacaoCard(j,s){
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
       '<span class="media-chip '+(media&&media.media!==null?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'<small id="votos_'+p.id+'">'+(media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos')+'</small></span></span></div>'+
       botoesNota+
-      '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn-elogio-critica" id="btnElogio_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'elogio\')">😍 Elogio</button><button type="button" class="btn-elogio-critica" id="btnCritica_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'critica\')">😡 Crítica</button></div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn-elogio-critica" id="btnElogio_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'elogio\')">Elogio</button><button type="button" class="btn-elogio-critica" id="btnCritica_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'critica\')">Crítica</button></div>'+
       '<div id="frasesRapidas_'+p.id+'" class="oculto"></div>'+
       '<div class="aval-controles-v">'+
       '<div style="display:flex;gap:8px;align-items:center" id="comWrap_'+p.id+'"'+((minha.com||'')?' style="display:none"':'')+'>'+
@@ -4331,7 +4332,8 @@ function renderAvaliacaoCard(j,s){
       '</div>'+
       '<div id="comRegistrado_'+p.id+'" class="salvo-tick on" style="display:'+((minha.com||'')?'flex':'none')+';align-items:center;font-size:.82rem;color:var(--cinza);gap:8px">'+
       ((minha.com||'').indexOf('🎙️')===0||(minha.com||'').indexOf('🎙️')>=0?'🎙️ Áudio registrado':'✓ Comentário registrado')+
-      ' <button type="button" onclick="reabrirComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--azul);text-decoration:underline;cursor:pointer;font-size:.78rem">editar</button></div>'+
+      ' <button type="button" onclick="reabrirComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--azul);text-decoration:underline;cursor:pointer;font-size:.78rem">editar</button>'+
+      ' <button type="button" onclick="removerComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--vermelho);text-decoration:underline;cursor:pointer;font-size:.78rem">remover</button></div>'+
       '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+' <span style="font-size:.72rem;font-weight:700">Gravar áudio</span></button>'+
       '</div>'+
       (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
@@ -4467,6 +4469,7 @@ function toggleJogadorExpandido(pid){
   render();
 }
 /* mostra/esconde o carrossel de comentários pré-escolhidos (elogio ou crítica) pro jogador pid */
+const _frasesSelecionadas={}; // pid -> Set de frases marcadas, antes de enviar
 function toggleFrasesRapidas(pid,tipo){
   const wrap=document.getElementById('frasesRapidas_'+pid);
   const btnE=document.getElementById('btnElogio_'+pid), btnC=document.getElementById('btnCritica_'+pid);
@@ -4478,32 +4481,51 @@ function toggleFrasesRapidas(pid,tipo){
     if(btnC)btnC.classList.remove('ativo-critica');
     return;
   }
+  if(!_frasesSelecionadas[pid])_frasesSelecionadas[pid]=new Set();
   const frases=tipo==='elogio'?FRASES_ELOGIO_JOGADOR:FRASES_CRITICA_JOGADOR;
   wrap.dataset.tipo=tipo;
-  wrap.innerHTML='<div class="frases-scroller-wrap">'+
-    '<button type="button" class="frases-seta" onclick="rolarFrasesRapidas(\''+pid+'\',-1)">‹</button>'+
-    '<div class="frases-scroller" id="frasesScroller_'+pid+'">'+
-    frases.map(f=>'<button type="button" class="frase-chip" onclick="selecionarFraseRapida(\''+pid+'\',\''+esc(f).replace(/'/g,"\\'")+'\')">'+esc(f)+'</button>').join('')+
-    '</div>'+
-    '<button type="button" class="frases-seta" onclick="rolarFrasesRapidas(\''+pid+'\',1)">›</button>'+
-    '</div>';
+  renderFrasesRapidas(pid,tipo,frases);
   wrap.classList.remove('oculto');
   if(btnE)btnE.classList.toggle('ativo-elogio',tipo==='elogio');
   if(btnC)btnC.classList.toggle('ativo-critica',tipo==='critica');
+}
+function renderFrasesRapidas(pid,tipo,frases){
+  const wrap=document.getElementById('frasesRapidas_'+pid);
+  if(!wrap)return;
+  const sel=_frasesSelecionadas[pid]||new Set();
+  wrap.innerHTML='<div class="frases-scroller-wrap">'+
+    '<button type="button" class="frases-seta" onclick="rolarFrasesRapidas(\''+pid+'\',-1)">‹</button>'+
+    '<div class="frases-scroller" id="frasesScroller_'+pid+'">'+
+    frases.map(f=>'<button type="button" class="frase-chip'+(sel.has(f)?' frase-chip-marcada':'')+'" onclick="marcarFraseRapida(\''+pid+'\',\''+esc(f).replace(/'/g,"\\'")+'\',\''+tipo+'\')">'+(sel.has(f)?'✓ ':'')+esc(f)+'</button>').join('')+
+    '</div>'+
+    '<button type="button" class="frases-seta" onclick="rolarFrasesRapidas(\''+pid+'\',1)">›</button>'+
+    '</div>'+
+    (sel.size?'<button type="button" class="btn" style="width:100%;margin-top:8px;padding:9px" onclick="enviarFrasesRapidas(\''+pid+'\')">Enviar ('+sel.size+' selecionado'+(sel.size===1?'':'s')+')</button>':'');
 }
 function rolarFrasesRapidas(pid,direcao){
   const el=document.getElementById('frasesScroller_'+pid);
   if(el)el.scrollBy({left:direcao*160,behavior:'smooth'});
 }
-async function selecionarFraseRapida(pid,frase){
-  await salvarAvaliacao(pid,'com',frase);
+function marcarFraseRapida(pid,frase,tipo){
+  if(!_frasesSelecionadas[pid])_frasesSelecionadas[pid]=new Set();
+  const sel=_frasesSelecionadas[pid];
+  if(sel.has(frase))sel.delete(frase);else sel.add(frase);
+  const frases=tipo==='elogio'?FRASES_ELOGIO_JOGADOR:FRASES_CRITICA_JOGADOR;
+  renderFrasesRapidas(pid,tipo,frases);
+}
+async function enviarFrasesRapidas(pid){
+  const sel=_frasesSelecionadas[pid];
+  if(!sel||!sel.size)return;
+  const texto=Array.from(sel).join(' · ');
+  await salvarAvaliacao(pid,'com',texto);
+  sel.clear();
   const wrap=document.getElementById('frasesRapidas_'+pid);
   if(wrap)wrap.classList.add('oculto');
   const btnE=document.getElementById('btnElogio_'+pid), btnC=document.getElementById('btnCritica_'+pid);
   if(btnE)btnE.classList.remove('ativo-elogio');
   if(btnC)btnC.classList.remove('ativo-critica');
   const input=document.getElementById('comInput_'+pid);
-  if(input)input.value=frase;
+  if(input)input.value=texto;
   const comWrap=document.getElementById('comWrap_'+pid), reg=document.getElementById('comRegistrado_'+pid);
   if(comWrap)comWrap.style.display='none';
   if(reg)reg.style.display='flex';
@@ -4525,6 +4547,14 @@ function reabrirComentario(pid){
   const input=document.getElementById('comInput_'+pid);
   if(input)input.focus();
 }
+async function removerComentario(pid){
+  await salvarAvaliacao(pid,'com','');
+  const input=document.getElementById('comInput_'+pid);
+  if(input)input.value='';
+  const wrap=document.getElementById('comWrap_'+pid), reg=document.getElementById('comRegistrado_'+pid);
+  if(wrap)wrap.style.display='flex';
+  if(reg)reg.style.display='none';
+}
 async function salvarAvaliacao(pid,campo,valor){
   const id=jogoAberto;
   const ok=await mutar(()=>{
@@ -4544,18 +4574,9 @@ async function salvarAvaliacao(pid,campo,valor){
   if(elV)elV.textContent=media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos';
   if(tick){tick.classList.add('on');setTimeout(()=>tick.classList.remove('on'),1600);}
   if(campo==='nota'&&valor!==''){
+    const scrollAntes=window.scrollY;
     render();
-    setTimeout(()=>{
-      const lista=jogadoresParaAvaliar(j);
-      const minhas=(j.avaliacoes||{})[eu]||{};
-      const proximo=lista.find(p2=>{
-        if(p2.id===pid)return false;
-        const m=minhas[p2.id]||{};
-        return !(m.nota!==undefined&&m.nota!==null&&m.nota!=='');
-      });
-      const alvo=proximo?document.getElementById('jogb_'+proximo.id):null;
-      if(alvo)alvo.scrollIntoView({behavior:'smooth',block:'center'});
-    },80);
+    requestAnimationFrame(()=>window.scrollTo({top:scrollAntes}));
   }else if(campo==='nota'){
     render();
   }
