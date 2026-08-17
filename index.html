@@ -196,6 +196,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-hamburger{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .btn-hamburger:active img{animation:tremerMenu .35s ease}
   @keyframes tremerMenu{0%,100%{transform:rotate(0)}20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(3deg)}}
+  .titulo-vasbobo-3d{font-family:'Anton',sans-serif;font-size:min(16vw,78px);letter-spacing:.05em;color:#fff;
+    -webkit-text-stroke:1.5px #000;
+    text-shadow:1px 1px 0 #000,2px 2px 0 #000,3px 3px 0 #000,4px 4px 0 #000,5px 5px 0 #000,6px 6px 0 #000,7px 7px 0 #000,8px 8px 14px rgba(0,0,0,.55)}
   @keyframes cruzBatimento{
     0%{transform:translate(-50%,-50%) scale(1)}
     8%{transform:translate(-50%,-50%) scale(1.18)}
@@ -845,12 +848,10 @@ console.log('Firebase conectado ao Vasbobo ✓');
     </div>
   </header>
   <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:#0B0D10;pointer-events:none;overflow:hidden">
-    <img src="img/embed/fachada-saojanuario.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.32">
-    <div style="position:absolute;inset:0;background:rgba(11,13,16,.35)"></div>
-    <div id="cruzEntradaTitulo" style="position:absolute;top:9%;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s ease">
-      <span style="font-family:'Anton',sans-serif;font-size:min(15vw,74px);color:#fff;letter-spacing:.03em;text-shadow:0 4px 18px rgba(0,0,0,.6)">VASBOBO</span>
+    <img id="cruzEntradaEscudo" src="img/embed/escudo-vasco-fundo.png" alt="" style="position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);width:min(88vw,420px);height:auto;opacity:0;transition:opacity .5s ease">
+    <div id="cruzEntradaTitulo" style="position:absolute;top:6%;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s ease">
+      <span class="titulo-vasbobo-3d">VASBOBO</span>
     </div>
-    <video id="cruzEntradaVideo" src="img/embed/entrada-video.mp4" muted loop playsinline autoplay style="position:absolute;bottom:6%;left:50%;transform:translateX(-50%);width:min(84vw,420px);border-radius:14px;opacity:0;transition:opacity .6s ease;box-shadow:0 10px 40px rgba(0,0,0,.5)"></video>
     <img id="cruzEntradaClara" src="img/menu/cruz-entrada-3d.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
     <img id="cruzEntradaFinal" src="img/menu/icone-menu-cruz4.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
   </div>
@@ -3534,29 +3535,40 @@ function animarEntradaCruz(){
   const final=document.getElementById('cruzEntradaFinal');
   const btnReal=document.getElementById('btnMenuSec');
   const titulo=document.getElementById('cruzEntradaTitulo');
-  const video=document.getElementById('cruzEntradaVideo');
-  if(!overlay||!clara||!final||!btnReal)return;
-  const tamanhoGrande=Math.min(window.innerWidth*0.62,300)+'px';
+  const escudo=document.getElementById('cruzEntradaEscudo');
+  if(!overlay||!clara||!final||!btnReal||!escudo)return;
+  const tamanhoGrande=Math.min(window.innerWidth*0.62,300);
   overlay.style.display='flex';
   btnReal.style.visibility='hidden';
   clara.style.opacity='0';final.style.opacity='0';
-  clara.style.left='50%';clara.style.top='47%';clara.style.width=tamanhoGrande;clara.style.transform='translate(-50%,-50%) scale(1)';
+  escudo.style.opacity='0';
   clara.style.transition='none';
-  if(video){video.currentTime=0;video.play().catch(()=>{});}
+  // mostra o escudo e o título primeiro
   requestAnimationFrame(()=>{
-    clara.style.transition='opacity .3s ease';
-    clara.style.opacity='1';
+    escudo.style.opacity='1';
     if(titulo)titulo.style.opacity='1';
-    if(video)video.style.opacity='1';
   });
+  // depois que o escudo aparece, calcula onde fica a cruz vermelha DELE na tela (medida real,
+  // não chute) e nasce a cruz grande exatamente ali, pequena, crescendo até o tamanho final
+  setTimeout(()=>{
+    const r=escudo.getBoundingClientRect();
+    const cxNascimento=r.left+r.width*0.5215, cyNascimento=r.top+r.height*0.4835;
+    clara.style.left=cxNascimento+'px';clara.style.top=cyNascimento+'px';
+    clara.style.width='26px';clara.style.transform='translate(-50%,-50%) scale(1)';
+    clara.style.transition='none';
+    void clara.offsetWidth;
+    clara.style.transition='opacity .35s ease, width .8s cubic-bezier(.34,1.2,.64,1)';
+    clara.style.opacity='1';
+    clara.style.width=tamanhoGrande+'px';
+  },550);
   // batimento de coração de verdade (dois toques rápidos + pausa, repetindo) — ritmo mais
   // rápido, total de aproximadamente 3s pra animação inteira
-  setTimeout(()=>{clara.classList.add('cruz-batendo');},300);
-  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},1150);
+  setTimeout(()=>{clara.classList.add('cruz-batendo');},1450);
+  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},2300);
   // diminui + sobe até a altura/posição real do botão do menu, se transformando nele
   setTimeout(()=>{
     if(titulo)titulo.style.opacity='0';
-    if(video)video.style.opacity='0';
+    escudo.style.opacity='0';
     const alvo=btnReal.getBoundingClientRect();
     const imgAlvo=btnReal.querySelector('img');
     const larguraAlvo=imgAlvo?imgAlvo.getBoundingClientRect().width:46;
@@ -3573,18 +3585,17 @@ function animarEntradaCruz(){
       final.style.opacity='1';
       clara.style.opacity='0';
     },450);
-  },2100);
+  },3250);
   // termina: esconde a camada de animação, mostra o botão de verdade, batimento pequeno e abre o menu
   setTimeout(()=>{
     overlay.style.display='none';
-    if(video)video.pause();
     btnReal.style.visibility='visible';
     btnReal.classList.add('chamando-atencao');
     setTimeout(()=>{
       btnReal.classList.remove('chamando-atencao');
       dicaMenuSuperiorHome();
     },400);
-  },2950);
+  },3750);
 }
 function dicaMenuSuperiorHome(){
   const btn=document.getElementById('btnMenuSec');
