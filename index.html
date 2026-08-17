@@ -849,7 +849,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     </div>
   </header>
   <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:#FFFFFF;pointer-events:none;overflow:hidden">
-    <img id="cruzEntradaEscudo" src="img/embed/escudo-vasco-fundo.png" alt="" style="position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);width:min(94vw,480px);height:auto;opacity:0;transition:opacity .5s ease">
+    <img id="cruzEntradaEscudo" src="img/embed/escudo-vasco-fundo.png" alt="" style="position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);width:min(80vw,460px);height:auto;opacity:0;transition:opacity .5s ease">
     <div id="cruzEntradaTitulo" style="position:absolute;top:3%;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s ease">
       <span class="titulo-vasbobo-3d">VASBOBO</span>
     </div>
@@ -3538,35 +3538,40 @@ function animarEntradaCruz(){
   const titulo=document.getElementById('cruzEntradaTitulo');
   const escudo=document.getElementById('cruzEntradaEscudo');
   if(!overlay||!clara||!final||!btnReal||!escudo)return;
-  const tamanhoGrande=Math.min(window.innerWidth*0.62,300);
+  const tamanhoGigante=Math.min(window.innerWidth*0.92,window.innerHeight*0.85,540);
   overlay.style.display='flex';
   btnReal.style.visibility='hidden';
-  clara.style.opacity='0';final.style.opacity='0';
+  clara.style.opacity='0';final.style.opacity='0';clara.style.filter='drop-shadow(0 0 0 rgba(0,0,0,0))';
   escudo.style.opacity='0';
   clara.style.transition='none';
-  // mostra o escudo e o título primeiro
+  // mostra o escudo (~80% da tela) e o título primeiro, fundo branco puro
   requestAnimationFrame(()=>{
     escudo.style.opacity='1';
     if(titulo)titulo.style.opacity='1';
   });
   // depois que o escudo aparece, calcula onde fica a cruz vermelha DELE na tela (medida real,
-  // não chute) e nasce a cruz grande exatamente ali, pequena, crescendo até o tamanho final
+  // não chute) e nasce a cruz 3D exatamente ali, pequena, crescendo de forma lenta e contínua
+  // até ficar gigante — como se avançasse na direção do espectador (sombra crescendo junto)
   setTimeout(()=>{
     const r=escudo.getBoundingClientRect();
     const cxNascimento=r.left+r.width*0.558, cyNascimento=r.top+r.height*0.4842;
     clara.style.left=cxNascimento+'px';clara.style.top=cyNascimento+'px';
-    clara.style.width='26px';clara.style.transform='translate(-50%,-50%) scale(1)';
+    clara.style.width='20px';clara.style.transform='translate(-50%,-50%) scale(1)';
     clara.style.transition='none';
     void clara.offsetWidth;
-    clara.style.transition='opacity .35s ease, width .8s cubic-bezier(.34,1.2,.64,1)';
+    clara.style.transition='opacity .4s ease, width 1.7s cubic-bezier(.22,.61,.36,1), filter 1.7s ease';
     clara.style.opacity='1';
-    clara.style.width=tamanhoGrande+'px';
-  },550);
-  // batimento de coração de verdade (dois toques rápidos + pausa, repetindo) — ritmo mais
-  // rápido, total de aproximadamente 3s pra animação inteira
-  setTimeout(()=>{clara.classList.add('cruz-batendo');},1450);
-  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},2300);
+    clara.style.width=tamanhoGigante+'px';
+    clara.style.filter='drop-shadow(0 18px 34px rgba(0,0,0,.35))';
+  },600);
+  // batimento de coração de verdade (duas pulsações por batida, 3 batidas), só depois que a
+  // cruz já terminou de crescer e chegou no tamanho máximo
+  const inicioBatimentos=600+1700+150;
+  setTimeout(()=>{clara.classList.add('cruz-batendo');},inicioBatimentos);
+  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},inicioBatimentos+900);
+  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},inicioBatimentos+1800);
   // diminui + sobe até a altura/posição real do botão do menu, se transformando nele
+  const inicioTransicao=inicioBatimentos+2750;
   setTimeout(()=>{
     if(titulo)titulo.style.opacity='0';
     escudo.style.opacity='0';
@@ -3575,8 +3580,9 @@ function animarEntradaCruz(){
     const larguraAlvo=imgAlvo?imgAlvo.getBoundingClientRect().width:46;
     const cxAlvo=alvo.left+alvo.width/2, cyAlvo=alvo.top+alvo.height/2;
     clara.classList.remove('cruz-batendo');
-    clara.style.transition='left .7s cubic-bezier(.4,0,.2,1),top .7s cubic-bezier(.4,0,.2,1),width .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)';
+    clara.style.transition='left .8s cubic-bezier(.4,0,.2,1),top .8s cubic-bezier(.4,0,.2,1),width .8s cubic-bezier(.4,0,.2,1),transform .8s cubic-bezier(.4,0,.2,1),filter .8s ease';
     clara.style.left=cxAlvo+'px';clara.style.top=cyAlvo+'px';clara.style.width=larguraAlvo+'px';
+    clara.style.filter='drop-shadow(0 3px 6px rgba(0,0,0,.35))';
     // troca suave (crossfade) pra imagem final do botão, perto do fim do movimento
     final.style.left=cxAlvo+'px';final.style.top=cyAlvo+'px';final.style.width=larguraAlvo+'px';
     final.style.transform='translate(-50%,-50%) scale(1)';
@@ -3585,8 +3591,8 @@ function animarEntradaCruz(){
       clara.style.transition=clara.style.transition+',opacity .4s ease';
       final.style.opacity='1';
       clara.style.opacity='0';
-    },450);
-  },3250);
+    },500);
+  },inicioTransicao);
   // termina: esconde a camada de animação, mostra o botão de verdade, batimento pequeno e abre o menu
   setTimeout(()=>{
     overlay.style.display='none';
@@ -3596,7 +3602,7 @@ function animarEntradaCruz(){
       btnReal.classList.remove('chamando-atencao');
       dicaMenuSuperiorHome();
     },400);
-  },3750);
+  },inicioTransicao+950);
 }
 function dicaMenuSuperiorHome(){
   const btn=document.getElementById('btnMenuSec');
