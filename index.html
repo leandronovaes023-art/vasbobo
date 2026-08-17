@@ -4293,9 +4293,12 @@ function renderAvaliacaoCard(j,s){
     const media=mediaJogadorNoJogo(j,p.id);
     const temNota=minha.nota!==undefined&&minha.nota!==null&&minha.nota!=='';
     if(temNota&&!jogadoresExpandidos.has(p.id)){
-      html+='<div class="aval-bloco" style="padding:10px 14px;cursor:pointer" onclick="toggleJogadorExpandido(\''+p.id+'\')" id="jogb_'+p.id+'">'+
-        '<div class="aval-topo"><span class="aval-nome" style="display:flex;align-items:center;gap:8px">'+fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span></span>'+
-        '<span style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--cinza)"><b style="color:var(--branco)">Nota '+fmtNota(minha.nota)+'</b>'+((minha.com||'').length?' · registrado ✓':'')+'</span></div></div>';
+      html+='<div class="aval-bloco" style="padding:10px 14px" id="jogb_'+p.id+'">'+
+        '<div class="aval-topo" style="cursor:pointer" onclick="toggleJogadorExpandido(\''+p.id+'\')"><span class="aval-nome" style="display:flex;align-items:center;gap:8px">'+fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span></span>'+
+        '<span style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--cinza)"><b style="color:var(--branco)">Nota '+fmtNota(minha.nota)+'</b>'+((minha.com||'').length?' · registrado ✓':'')+'</span></div>'+
+        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn-elogio-critica" id="btnElogio_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'elogio\')">😍 Elogio</button><button type="button" class="btn-elogio-critica" id="btnCritica_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'critica\')">😡 Crítica</button></div>'+
+        '<div id="frasesRapidas_'+p.id+'" class="oculto"></div>'+
+        '</div>';
       return;
     }
     const botoesNota=temNota?
