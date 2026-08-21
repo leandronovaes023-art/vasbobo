@@ -4103,7 +4103,7 @@ function renderDetalhe(){
   '<div class="card"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'+
     nomeJogoComEscudos(j,46,'1.1rem')+htmlInfoDireitaJogo(j)+
   '</div>';
-  if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" style="margin-top:10px">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
+  if(j.resultado&&(j.goleadores||[]).length)html+='<p class="nota-rodape" id="linhaGolsVasco" style="margin-top:10px;transition:background-color .3s">⚽ Gols do Vasco: <b>'+j.goleadores.map(g=>esc(nomeJogador(g))).join(', ')+'</b></p>';
   if(j.fonteAuto&&souAdmin())html+='<div class="auto-info">⚙️ Resultado registrado automaticamente em '+new Date(j.fonteAuto.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' via busca na web (fonte: '+esc(j.fonteAuto.fonte)+'). <span class="adm">admin</span></div>';
   if(j.resultado&&souAdmin())html+='<div class="auto-info">⚽ Placar registrado em '+(j.resultadoEm?new Date(j.resultadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'sem data registrada')+(j.fonteAuto?' (via '+esc(j.fonteAuto.fonte||'busca automática')+')':' (lançado manualmente)')+'. <span class="adm">admin</span></div>';
   if(j.emCampoInfo&&souAdmin())html+='<div class="auto-info">📋 Lista de quem entrou em campo registrada em '+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' ('+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span></div>';
@@ -4720,10 +4720,23 @@ async function lancarResultado(){
    mundo, sem precisar de nenhum passo extra */
 async function salvarGoleadoresCorrigidos(id){
   const gols=[...document.querySelectorAll('.chkGolEdit:checked')].map(c=>c.value);
+  const nomesNovos=gols.map(g=>nomeJogador(g));
   await mutar(()=>{const j=dados.jogos[id];if(j)j.goleadores=gols;});
-  registrarLog('admin','Corrigiu goleadores de '+id+': '+(gols.length?gols.map(g=>nomeJogador(g)).join(', '):'nenhum'));
-  avisar('Goleadores atualizados — pontos recalculados na hora!',true);
+  registrarLog('admin','Corrigiu goleadores de '+id+': '+(gols.length?nomesNovos.join(', '):'nenhum'));
   render();
+  // confirmação visual impossível de duvidar: rola até a linha "Gols do Vasco" já atualizada
+  // e pisca ela com destaque, além do aviso — pra nunca mais restar dúvida se salvou de verdade
+  setTimeout(()=>{
+    const linha=document.getElementById('linhaGolsVasco');
+    if(linha){
+      linha.scrollIntoView({behavior:'smooth',block:'center'});
+      linha.style.backgroundColor='rgba(46,138,69,.35)';
+      linha.style.borderRadius='8px';
+      linha.style.padding='6px 10px';
+      setTimeout(()=>{linha.style.backgroundColor='transparent';},1800);
+    }
+  },100);
+  avisar('Goleadores atualizados: '+(nomesNovos.length?nomesNovos.join(', '):'nenhum')+' — pontos de todo mundo já recalculados.',true);
 }
 async function reabrirResultado(){
   if(!(await confirmar('Remover o resultado e reabrir o jogo?')))return;
