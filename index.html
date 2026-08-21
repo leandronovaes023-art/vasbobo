@@ -2105,15 +2105,17 @@ function pontosPalpite(p,j,usarParcial){
   return {base,aproximacao,bonusGol,bonusMvp,total:base+bonusGol+bonusMvp,parcial:!j.resultado,exato,acertouResultado:exato||acertouResultado};
 }
 /* Descreve, em português e com o valor exato de cada critério, como o total de pontos foi formado. */
+/* descrição padronizada, sempre nas mesmas 3 categorias (Placar · Gol · MVP), nessa ordem —
+   fácil de comparar entre pessoas, sem ícone nenhum, só texto direto e o valor de cada parte */
 function descricaoPontosPalpite(pts){
-  const bs=[];
-  if(pts.exato)bs.push('🎯 placar exato (+'+PTS_EXATO+')');
-  else if(pts.acertouResultado)bs.push('✅ acertou o resultado (+'+PTS_RESULTADO+')'+(pts.aproximacao?' · 📈 aproximação (+'+pts.aproximacao+')':''));
-  else if(pts.base===PTS_UMTIME_ERROU)bs.push('🤏 cravou o placar de um time (+'+PTS_UMTIME_ERROU+')');
-  else bs.push('❌ errou tudo (+0)');
-  if(pts.bonusGol)bs.push('⚽ acertou o gol (+'+PTS_GOL+')');
-  if(pts.bonusMvp)bs.push('⭐ acertou o MVP (+'+PTS_MVP+')');
-  return bs;
+  let placar;
+  if(pts.exato)placar='Placar exato +'+PTS_EXATO;
+  else if(pts.acertouResultado)placar='Resultado certo +'+(PTS_RESULTADO+pts.aproximacao)+(pts.aproximacao?' (com aproximação)':'');
+  else if(pts.base===PTS_UMTIME_ERROU)placar='Cravou 1 time +'+PTS_UMTIME_ERROU;
+  else placar='Placar errado +0';
+  const gol='Gol '+(pts.bonusGol?'certo +'+PTS_GOL:'errado +0');
+  const mvp='MVP '+(pts.bonusMvp?'certo +'+PTS_MVP:'errado +0');
+  return [placar,gol,mvp];
 }
 function mvpDaGalera(j){
   const acum={};
@@ -4190,7 +4192,7 @@ function renderPalpiteCard(j,s){
         let ptsHtml='';
         if(pts&&(j.resultado||j.parcial)){
           const cls=pts.exato?'p5':pts.acertouResultado?'p2':'p0';
-          ptsHtml='<span class="pontos '+cls+'">'+pts.total+' pt'+(pts.total===1?'':'s')+(pts.parcial?' *':'')+'</span>';
+          ptsHtml='<span class="pontos '+cls+'">Total: '+pts.total+' pt'+(pts.total===1?'':'s')+(pts.parcial?' *':'')+'</span>';
           const bs=descricaoPontosPalpite(pts);
           if(bs.length)ptsHtml+=' <span class="bonus">'+bs.join(' · ')+'</span>';
         }
