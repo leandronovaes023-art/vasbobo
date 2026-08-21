@@ -4597,6 +4597,13 @@ function renderAdminJogo(j,s){
   }else{
     html+='<p class="nota-rodape" style="margin:0 0 8px">Placar registrado em: <b>'+(j.resultadoEm?new Date(j.resultadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'sem data registrada')+'</b>'+(j.fonteAuto?' (via '+esc(j.fonteAuto.fonte||'busca automática')+')':' (lançado manualmente)')+'</p>'+
     '<button class="btn fantasma" onclick="reabrirResultado()">Corrigir resultado / reabrir</button>';
+    const golsAtuais=j.goleadores||[];
+    const golsChecksEdit=jogadoresAtivos().map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0"><input type="checkbox" style="width:auto" value="'+p.id+'" class="chkGolEdit" '+(golsAtuais.includes(p.id)?'checked':'')+'>'+fotoJogador(p.id,26)+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>').join('');
+    html+='<details style="margin-top:14px" open><summary><b>⚽ Quem fez o(s) gol(s) do Vasco</b> — confira e corrija se precisar</summary>'+
+      '<p class="nota-rodape" style="margin:8px 0">Marcados agora: '+(golsAtuais.length?golsAtuais.map(id=>esc(nomeJogador(id))).join(', '):'<i>ninguém marcado</i>')+'. A busca automática às vezes erra o nome — confira sempre.</p>'+
+      '<div class="grid g3" style="margin-top:6px">'+golsChecksEdit+'</div>'+
+      '<button class="btn claro" style="margin-top:12px" onclick="salvarGoleadoresCorrigidos(\''+jogoAberto+'\')">Salvar goleadores e recalcular pontos</button>'+
+      '</details>';
   }
   const marcados=j.emCampo||[];
   const listaCampo=[...dados.jogadores].filter(p=>p.ativo!==false||marcados.includes(p.id))
@@ -4622,9 +4629,12 @@ function renderAdminJogo(j,s){
   return html;
 }
 async function buscarAgora(){
-  avisar('Buscando placar na web… (leva alguns segundos)',true);
   const id=jogoAberto;
   const j=dados.jogos[id];
+  if(j&&j.resultado){
+    if(!(await confirmar('Esse jogo já tem resultado lançado (com os goleadores que você conferiu). Buscar de novo na web PODE SOBRESCREVER o placar e os goleadores com o que a busca automática encontrar — que às vezes erra o nome de quem fez o gol. Tem certeza que quer sobrescrever?')))return;
+  }
+  avisar('Buscando placar na web… (leva alguns segundos)',true);
   let r=null;
   try{r=await consultarPlacarIA(j);}catch(e){}
   if(!r||!r.encontrado){avisar('Não encontrei placar confiável ainda. Tente de novo em alguns minutos ou lance manualmente.');return;}
@@ -4702,6 +4712,17 @@ async function lancarResultado(){
   const id=jogoAberto;
   await mutar(()=>{const j=dados.jogos[id];if(j){j.resultado={v:+v,a:+a};j.resultadoEm=Date.now();j.goleadores=gols;j.parcial=null;}});
   avisar('Resultado lançado. Pontos calculados!',true);
+  render();
+}
+/* corrige quem fez o(s) gol(s) SEM precisar reabrir/relançar o resultado inteiro — atualiza
+   j.goleadores na hora, e como todo o ranking (da rodada e geral) é sempre recalculado em
+   tempo real a partir desse dado, a correção já vale instantaneamente pra pontuação de todo
+   mundo, sem precisar de nenhum passo extra */
+async function salvarGoleadoresCorrigidos(id){
+  const gols=[...document.querySelectorAll('.chkGolEdit:checked')].map(c=>c.value);
+  await mutar(()=>{const j=dados.jogos[id];if(j)j.goleadores=gols;});
+  registrarLog('admin','Corrigiu goleadores de '+id+': '+(gols.length?gols.map(g=>nomeJogador(g)).join(', '):'nenhum'));
+  avisar('Goleadores atualizados — pontos recalculados na hora!',true);
   render();
 }
 async function reabrirResultado(){
