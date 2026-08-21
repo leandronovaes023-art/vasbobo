@@ -2119,9 +2119,11 @@ function mvpDaGalera(j){
   const acum={};
   Object.values(j.avaliacoes||{}).forEach(porJog=>{
     Object.entries(porJog).forEach(([pid,av])=>{
-      if(av.nota===undefined||av.nota===null||av.nota==='')return;
+      if(av.nota===undefined||av.nota===null||av.nota===''||av.nota==='NA')return;
+      const n=+av.nota;
+      if(isNaN(n))return; // proteção extra — nunca deixa um valor inválido corromper a soma
       if(!acum[pid])acum[pid]={s:0,n:0};
-      acum[pid].s+=+av.nota;acum[pid].n++;
+      acum[pid].s+=n;acum[pid].n++;
     });
   });
   let melhor=null;
