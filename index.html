@@ -4728,6 +4728,7 @@ async function buscarAgora(){
         body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/?abrirJogo='+id})});
     }catch(e){}
   }
+  if(r.encerrado)registrarLog('admin','Buscou/sobrescreveu resultado de '+id+' via web: Vasco '+r.gols_vasco+' x '+r.gols_adversario+'. Goleadores (auto): '+((r.goleadores_vasco||[]).join(', ')||'nenhum'));
   avisar(r.encerrado?'Resultado final registrado!':'Placar parcial atualizado.',true);
   render();
 }
@@ -4775,6 +4776,7 @@ async function lancarResultado(){
   if(!(await confirmar('Lançar o resultado encerra o jogo e calcula os pontos. Confirmar?')))return;
   const id=jogoAberto;
   await mutar(()=>{const j=dados.jogos[id];if(j){j.resultado={v:+v,a:+a};j.resultadoEm=Date.now();j.goleadores=gols;j.parcial=null;}});
+  registrarLog('admin','Lançou resultado de '+id+': Vasco '+v+' x '+a+'. Goleadores: '+(gols.length?gols.map(g=>nomeJogador(g)).join(', '):'nenhum'));
   avisar('Resultado lançado. Pontos calculados!',true);
   render();
 }
@@ -4805,7 +4807,10 @@ async function salvarGoleadoresCorrigidos(id){
 async function reabrirResultado(){
   if(!(await confirmar('Remover o resultado e reabrir o jogo?')))return;
   const id=jogoAberto;
+  const j0=dados.jogos[id];
+  const resultadoAntigo=j0&&j0.resultado?('Vasco '+j0.resultado.v+' x '+j0.resultado.a):'sem resultado';
   await mutar(()=>{const j=dados.jogos[id];if(j){j.resultado=null;j.resultadoEm=null;j.goleadores=[];j.fonteAuto=null;}});
+  registrarLog('admin','Reabriu/removeu resultado de '+id+' (era: '+resultadoAntigo+')');
   render();
 }
 async function salvarDataHora(){
