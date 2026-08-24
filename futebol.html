@@ -152,8 +152,11 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   border:1px solid rgba(255,255,255,.28);color:#F2F0EA;border-radius:9px;padding:10px 14px;
   cursor:pointer;font-size:.85rem;font-family:'Inter',sans-serif}
 .fq-opcao:hover:not(:disabled){border-color:#F2F0EA}
-.fq-opcao:disabled{opacity:.6;cursor:default}
-.fq-opcao.selecionada{border-color:#F2F0EA;background:rgba(255,255,255,.1)}
+.fq-opcao:disabled{cursor:default}
+.fq-opcao.selecionada{border-color:#2E8B57;background:rgba(46,139,87,.22);opacity:1}
+.fq-opcao.errada{border-color:#C0392B;background:rgba(192,57,43,.22);opacity:1}
+.fq-opcao.gabarito{border-color:#2E8B57;background:rgba(46,139,87,.22);opacity:1}
+.fq-opcao:disabled:not(.selecionada):not(.errada):not(.gabarito){opacity:.45}
 .fq-feedback{text-align:center;font-weight:800;margin-top:8px}
 .fq-fechar{width:100%;background:#0B0B0E;color:#F2F0EA;border:1px solid rgba(255,255,255,.3);border-radius:9px;padding:10px;
   margin-top:10px;cursor:pointer;font-weight:700;font-family:'Inter',sans-serif;
@@ -434,7 +437,7 @@ function sairSatelite(){
       <li>Você tem <b>3 respostas válidas por dia</b>, a partir das 6h da manhã.</li>
       <li>Cada pergunta tem <b>15 segundos</b> para ser respondida — se o tempo acabar, ela é pulada e não conta nas suas 3 do dia.</li>
       <li>Cada resposta certa vale <b>1 ponto</b>, que soma no ranking do jogo mais próximo que ainda não começou. Quando esse jogo começa, as respostas seguintes já valem pro jogo seguinte.</li>
-      <li>Se você errar, a resposta certa <b>não é revelada</b> — só se ficou certo ou errado.</li>
+      <li>Se você errar, a resposta certa <b>aparece na hora</b> — é um jeito de aprender enquanto joga.</li>
     </ul>
   </div>
 
@@ -567,6 +570,7 @@ async function fqRegistrarResposta(usuario, acertou){
 
 /* ===== Fluxo de resposta (10s por pergunta) ===== */
 let fqTimerInterval=null, fqPerguntaAtual=null, fqRespondida=false;
+let fqTokenPergunta=0; // muda a cada pergunta nova — protege contra resposta atrasada (rede lenta) escrevendo na tela errada depois que o usuário já saiu/trocou de pergunta
 const FQ_SEGUNDOS=10;
 
 async function fqAbrirQuiz(){
@@ -600,6 +604,7 @@ async function fqProximaPergunta(estadoAtual){
   const estado = estadoAtual || await fqLerEstado();
   fqPerguntaAtual = fqEscolherPergunta(estado, usuario);
   fqRespondida = false;
+  fqTokenPergunta++;
   fqRenderPergunta();
   document.getElementById('fqModal').classList.remove('oculto');
   fqIniciarTimer();
@@ -638,9 +643,13 @@ function fqIniciarTimer(){
 async function fqTempoEsgotado(){
   if(fqRespondida)return;
   fqRespondida=true;
-  document.querySelectorAll('#fqOpcoes button').forEach(b=>b.disabled=true);
+  const q=fqPerguntaAtual;
+  document.querySelectorAll('#fqOpcoes button').forEach((b,idx)=>{
+    b.disabled=true;
+    if(q.alternativas[idx]===q.resposta_correta)b.classList.add('gabarito');
+  });
   const fb=document.getElementById('fqFeedback');
-  if(fb)fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏱️ Tempo esgotado! Essa não contou — bora pra próxima.</p>'+
+  if(fb)fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏱️ Tempo esgotado! Essa não contou. A resposta certa era: <b>'+fqEsc(q.resposta_correta)+'</b></p>'+
     '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
 }
 async function fqResponder(i){
@@ -649,18 +658,35 @@ async function fqResponder(i){
   clearInterval(fqTimerInterval);
   const usuario=fqUsuario();
   const q=fqPerguntaAtual;
+  const tokenDestaPergunta=fqTokenPergunta; // trava essa resposta na pergunta atual — se o usuário
+  // fechar e reabrir o quiz antes da gravação terminar, essa resposta atrasada não pode mais
+  // mexer na tela (que já é de outra pergunta a essa altura)
   const acertou = q.alternativas[i]===q.resposta_correta;
   document.querySelectorAll('#fqOpcoes button').forEach((b,idx)=>{
     b.disabled=true;
-    if(idx===i)b.classList.add('selecionada');
+    if(idx===i)b.classList.add(acertou?'selecionada':'errada');
+    if(q.alternativas[idx]===q.resposta_correta)b.classList.add('gabarito');
   });
-  const estado = await fqRegistrarResposta(usuario, acertou);
-  const status = fqStatusDia(estado, usuario);
+  // feedback aparece NA HORA, sem esperar a gravação no banco (que pode demorar com internet
+  // ruim) — resolve o 'travamento' de não saber se o toque realmente registrou
   const fb=document.getElementById('fqFeedback');
-  fb.innerHTML='<p class="fq-feedback" style="color:'+(acertou?'#2E8B57':'#F2F0EA')+'">'+
-    (acertou?'✅ Você acertou! +1 ponto':'❌ Você errou!')+'</p>'+
-    '<p style="text-align:center;color:#9B9BA4;font-size:.78rem">'+status.respondidas+'/3 hoje</p>'+
-    '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> '+(status.respondidas>=3?'Fechar':'Próxima pergunta')+'</button>';
+  if(fb){
+    fb.innerHTML='<p class="fq-feedback" style="color:'+(acertou?'#2E8B57':'#C0392B')+'">'+
+      (acertou?'✅ Você acertou! +1 ponto':'❌ Você errou! A resposta certa era: <b>'+fqEsc(q.resposta_correta)+'</b>')+'</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.78rem" id="fqFeedbackContador">salvando…</p>'+
+      '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
+  }
+  const estado = await fqRegistrarResposta(usuario, acertou).catch(()=>null);
+  if(tokenDestaPergunta!==fqTokenPergunta)return; // usuário já saiu dessa pergunta — não mexe mais na tela
+  const contador=document.getElementById('fqFeedbackContador');
+  if(!estado){
+    if(contador)contador.textContent='Não deu pra confirmar o salvamento — mas sua resposta ficou registrada aqui na tela.';
+    return;
+  }
+  const status = fqStatusDia(estado, usuario);
+  if(contador)contador.textContent=status.respondidas+'/3 hoje';
+  const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
+  if(btnContinuar&&status.respondidas>=3)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
   fqAtualizarPainel();
 }
 async function fqContinuarOuFechar(){
@@ -672,6 +698,7 @@ async function fqContinuarOuFechar(){
 }
 function fqFecharModal(){
   clearInterval(fqTimerInterval);
+  fqTokenPergunta++; // invalida qualquer resposta pendente dessa pergunta que ainda esteja sendo salva
   document.getElementById('fqModal').classList.add('oculto');
 }
 
