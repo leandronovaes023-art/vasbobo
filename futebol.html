@@ -508,14 +508,14 @@ async function fqLerEstado(){
     const snap = await dbFut.collection('shared').doc('vasbobo_quiz').get();
     if(snap.exists){
       const v = snap.data();
-      return {diario: v.diario||{}, porJogo: v.porJogo||{}};
+      return {diario: v.diario||{}, porJogo: v.porJogo||{}, vistas: v.vistas||{}, filasPorUsuario: v.filasPorUsuario||{}};
     }
   }catch(e){}
-  return {diario:{}, porJogo:{}};
+  return {diario:{}, porJogo:{}, vistas:{}, filasPorUsuario:{}};
 }
 async function fqSalvarEstado(estado){
   try{
-    await dbFut.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, atualizadoEm:Date.now()});
+    await dbFut.collection('shared').doc('vasbobo_quiz').set({diario:estado.diario, porJogo:estado.porJogo, vistas:estado.vistas||{}, filasPorUsuario:estado.filasPorUsuario||{}, atualizadoEm:Date.now()});
     return true;
   }catch(e){ return false; }
 }
@@ -593,25 +593,62 @@ function fqMostrarEsgotado(){
     '<button class="fq-fechar" onclick="fqFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
   modal.classList.remove('oculto');
 }
-/* escolhe uma pergunta ainda não vista por esse usuário; se ele já viu todas, reinicia o ciclo */
-function fqEscolherPergunta(estado, usuario){
-  const vistas=new Set(fqVistasUsuario(estado,usuario));
-  let disponiveis=FQ_PERGUNTAS.filter(q=>!vistas.has(q.id));
-  if(!disponiveis.length)disponiveis=FQ_PERGUNTAS;
-  return disponiveis[Math.floor(Math.random()*disponiveis.length)];
+function fqEmbaralhar(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+/* o banco de perguntas tem várias cópias da MESMA pergunta, só com a ordem das alternativas
+   embaralhada diferente (ex.: 7 ids diferentes pra "Em que local foi fundado o Vasco?") — sem
+   agrupar por texto, a fila deixava passar como se fossem perguntas novas mesmo repetindo o
+   conteúdo. Agrupa tudo pelo texto da pergunta, e cada "pergunta de verdade" só sai de novo
+   depois que todas as outras já saíram — sorteando qual cópia (ordem de alternativas) usar. */
+function fqGruposUnicos(){
+  const grupos={};
+  FQ_PERGUNTAS.forEach(q=>{
+    const chave=(q.pergunta||'').trim();
+    if(!grupos[chave])grupos[chave]=[];
+    grupos[chave].push(q.id);
+  });
+  return grupos;
+}
+/* fila individual, por pessoa: quando uma pergunta sai pra alguém, ela vai pro FINAL da fila
+   DAQUELA pessoa — só volta a poder sair pra ela de novo depois que todas as outras da fila
+   dela já tiverem passado. */
+async function fqEscolherPergunta(estadoIgnorado, usuario){
+  const estado=await fqLerEstado(); // lê sempre fresco, pra não competir com outra aba/pessoa
+  const grupos=fqGruposUnicos();
+  const textosUnicos=Object.keys(grupos);
+  if(!estado.filasPorUsuario)estado.filasPorUsuario={};
+  let fila=estado.filasPorUsuario[usuario];
+  if(!fila||!fila.length){
+    fila=fqEmbaralhar(textosUnicos);
+  }else{
+    const jaNaFila=new Set(fila);
+    const novas=textosUnicos.filter(t=>!jaNaFila.has(t));
+    if(novas.length)fila=fila.concat(fqEmbaralhar(novas));
+  }
+  const textoEscolhido=fila.shift();
+  fila.push(textoEscolhido);
+  estado.filasPorUsuario[usuario]=fila;
+  const variantes=grupos[textoEscolhido]||[];
+  const id=variantes[Math.floor(Math.random()*variantes.length)]||variantes[0];
+  if(!estado.vistas)estado.vistas={};
+  if(!estado.vistas[usuario])estado.vistas[usuario]=[];
+  if(estado.vistas[usuario].indexOf(id)===-1)estado.vistas[usuario].push(id);
+  await fqSalvarEstado(estado);
+  return FQ_PERGUNTAS.find(q=>q.id===id)||FQ_PERGUNTAS[0];
 }
 async function fqProximaPergunta(estadoAtual){
   await fqCarregarPerguntas();
   if(!FQ_PERGUNTAS.length){ alert('Não consegui carregar as perguntas agora. Tente de novo em instantes.'); return; }
   const usuario=fqUsuario();
-  const estado = estadoAtual || await fqLerEstado();
-  fqPerguntaAtual = fqEscolherPergunta(estado, usuario);
+  fqPerguntaAtual = await fqEscolherPergunta(null, usuario);
   fqRespondida = false;
   fqTokenPergunta++;
   fqRenderPergunta();
   document.getElementById('fqModal').classList.remove('oculto');
   fqIniciarTimer();
-  fqRegistrarVista(usuario, fqPerguntaAtual.id);
 }
 function fqRenderPergunta(){
   const q=fqPerguntaAtual;
