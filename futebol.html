@@ -162,6 +162,8 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   margin-top:10px;cursor:pointer;font-weight:700;font-family:'Inter',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px}
 .fq-fechar:hover{border-color:#F2F0EA}
+.fq-pular{display:block;width:100%;background:none;border:none;color:#9B9BA4;font-size:.78rem;
+  text-decoration:underline;cursor:pointer;font-family:'Inter',sans-serif;padding:6px;margin-top:2px}
 .fq-fechar .cruz-btn{color:var(--verde);font-size:1.1em}
 
 .topo-btn{position:fixed;left:14px;bottom:calc(96px + env(safe-area-inset-bottom,0));width:44px;height:44px;border-radius:50%;
@@ -417,7 +419,7 @@ function sairSatelite(){
 <main>
   <div class="card">
     <div id="fqStats" class="fq-stats">
-      <div class="fq-stat"><b id="fqHoje">0/3</b><span>Hoje</span></div>
+      <div class="fq-stat"><b id="fqHoje">0/5</b><span>Hoje</span></div>
       <div class="fq-stat"><b id="fqTotal">0</b><span>Pontos no total</span></div>
     </div>
     <button class="fq-btn" id="fqBtnResponder" onclick="fqAbrirQuiz()">🧠 Responder agora</button>
@@ -434,7 +436,7 @@ function sairSatelite(){
 
   <div class="card">
     <ul class="fq-regras">
-      <li>Você tem <b>3 respostas válidas por dia</b>, a partir das 6h da manhã.</li>
+      <li>Você tem <b>5 respostas por dia</b> (pular também conta), a partir das 6h da manhã.</li>
       <li>Cada pergunta tem <b>15 segundos</b> para ser respondida — se o tempo acabar, ela é pulada e não conta nas suas 3 do dia.</li>
       <li>Cada resposta certa vale <b>1 ponto</b>, que soma no ranking do jogo mais próximo que ainda não começou. Quando esse jogo começa, as respostas seguintes já valem pro jogo seguinte.</li>
       <li>Se você errar, a resposta certa <b>aparece na hora</b> — é um jeito de aprender enquanto joga.</li>
@@ -571,14 +573,15 @@ async function fqRegistrarResposta(usuario, acertou){
 /* ===== Fluxo de resposta (10s por pergunta) ===== */
 let fqTimerInterval=null, fqPerguntaAtual=null, fqRespondida=false;
 let fqTokenPergunta=0; // muda a cada pergunta nova — protege contra resposta atrasada (rede lenta) escrevendo na tela errada depois que o usuário já saiu/trocou de pergunta
-const FQ_SEGUNDOS=10;
+const FQ_SEGUNDOS=15;
+const FQ_LIMITE_DIARIO=5; // pular também conta nesse limite
 
 async function fqAbrirQuiz(){
   const usuario = fqUsuario();
   if(!usuario){ alert('Faça login para responder.'); return; }
   const estado = await fqLerEstado();
   const status = fqStatusDia(estado, usuario);
-  if(status.respondidas>=3){ fqMostrarEsgotado(); return; }
+  if(status.respondidas>=FQ_LIMITE_DIARIO){ fqMostrarEsgotado(); return; }
   await fqProximaPergunta(estado);
 }
 function fqMostrarEsgotado(){
@@ -622,6 +625,7 @@ function fqRenderPergunta(){
     '<div class="fq-nivel">'+fqEsc(q.nivel||'')+'</div>'+
     '<div class="fq-pergunta">'+fqEsc(q.pergunta)+'</div>'+
     '<div id="fqOpcoes">'+opcoes+'</div>'+
+    '<button class="fq-pular" onclick="fqPular()" id="fqBtnPular">Pular essa pergunta →</button>'+
     '<div id="fqFeedback"></div>';
 }
 function fqIniciarTimer(){
@@ -648,9 +652,41 @@ async function fqTempoEsgotado(){
     b.disabled=true;
     if(q.alternativas[idx]===q.resposta_correta)b.classList.add('gabarito');
   });
+  const btnPularT=document.getElementById('fqBtnPular');
+  if(btnPularT)btnPularT.style.display='none';
   const fb=document.getElementById('fqFeedback');
   if(fb)fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏱️ Tempo esgotado! Essa não contou. A resposta certa era: <b>'+fqEsc(q.resposta_correta)+'</b></p>'+
     '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
+}
+/* pular conta como uma das 5 do dia, mas NÃO mostra a resposta certa — só quem tenta de
+   verdade e erra é que aprende o gabarito */
+async function fqPular(){
+  if(fqRespondida)return;
+  fqRespondida=true;
+  clearInterval(fqTimerInterval);
+  const usuario=fqUsuario();
+  const tokenDestaPergunta=fqTokenPergunta;
+  document.querySelectorAll('#fqOpcoes button').forEach(b=>b.disabled=true);
+  const btnPular=document.getElementById('fqBtnPular');
+  if(btnPular)btnPular.style.display='none';
+  const fb=document.getElementById('fqFeedback');
+  if(fb){
+    fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏭️ Pergunta pulada — sem resposta certa revelada.</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.78rem" id="fqFeedbackContador">salvando…</p>'+
+      '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
+  }
+  const estado = await fqRegistrarResposta(usuario, false).catch(()=>null);
+  if(tokenDestaPergunta!==fqTokenPergunta)return;
+  const contador=document.getElementById('fqFeedbackContador');
+  if(!estado){
+    if(contador)contador.textContent='Não deu pra confirmar o salvamento — mas ficou registrado aqui na tela.';
+    return;
+  }
+  const status = fqStatusDia(estado, usuario);
+  if(contador)contador.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje';
+  const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
+  if(btnContinuar&&status.respondidas>=FQ_LIMITE_DIARIO)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
+  fqAtualizarPainel();
 }
 async function fqResponder(i){
   if(fqRespondida)return;
@@ -667,6 +703,8 @@ async function fqResponder(i){
     if(idx===i)b.classList.add(acertou?'selecionada':'errada');
     if(q.alternativas[idx]===q.resposta_correta)b.classList.add('gabarito');
   });
+  const btnPularR=document.getElementById('fqBtnPular');
+  if(btnPularR)btnPularR.style.display='none';
   // feedback aparece NA HORA, sem esperar a gravação no banco (que pode demorar com internet
   // ruim) — resolve o 'travamento' de não saber se o toque realmente registrou
   const fb=document.getElementById('fqFeedback');
@@ -684,16 +722,16 @@ async function fqResponder(i){
     return;
   }
   const status = fqStatusDia(estado, usuario);
-  if(contador)contador.textContent=status.respondidas+'/3 hoje';
+  if(contador)contador.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje';
   const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
-  if(btnContinuar&&status.respondidas>=3)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
+  if(btnContinuar&&status.respondidas>=FQ_LIMITE_DIARIO)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
   fqAtualizarPainel();
 }
 async function fqContinuarOuFechar(){
   const usuario=fqUsuario();
   const estado = await fqLerEstado();
   const status = fqStatusDia(estado, usuario);
-  if(status.respondidas>=3){ fqFecharModal(); fqAtualizarPainel(); return; }
+  if(status.respondidas>=FQ_LIMITE_DIARIO){ fqFecharModal(); fqAtualizarPainel(); return; }
   await fqProximaPergunta(estado);
 }
 function fqFecharModal(){
@@ -711,19 +749,19 @@ async function fqAtualizarPainel(){
   const total = fqPontosTotal(estado, usuario);
   const elHoje=document.getElementById('fqHoje');
   const elTotal=document.getElementById('fqTotal');
-  if(elHoje)elHoje.textContent=status.respondidas+'/3';
+  if(elHoje)elHoje.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO;
   if(elTotal)elTotal.textContent=total;
   const btn=document.getElementById('fqBtnResponder');
   if(btn){
-    if(status.respondidas>=3){ btn.textContent='✅ Você já respondeu hoje'; btn.disabled=true; }
+    if(status.respondidas>=FQ_LIMITE_DIARIO){ btn.textContent='✅ Você já respondeu hoje'; btn.disabled=true; }
     else{ btn.textContent='🧠 Responder agora'; btn.disabled=false; }
   }
   const elStatus=document.getElementById('fqStatusSimples');
   if(elStatus){
-    if(status.respondidas>=3){
+    if(status.respondidas>=FQ_LIMITE_DIARIO){
       elStatus.textContent='✅ Você já respondeu hoje ('+status.acertos+'/'+status.respondidas+' certas). Volta amanhã pra mais!';
     }else{
-      elStatus.textContent='Ainda falta responder '+(3-status.respondidas)+' de 3 hoje.';
+      elStatus.textContent='Ainda falta responder '+(FQ_LIMITE_DIARIO-status.respondidas)+' de '+FQ_LIMITE_DIARIO+' hoje.';
     }
   }
   fqRenderRankingTotal(estado);

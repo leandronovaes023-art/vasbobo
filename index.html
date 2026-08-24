@@ -622,9 +622,14 @@ console.log('Firebase conectado ao Vasbobo ✓');
   border:1px solid rgba(255,255,255,.28);color:#F2F0EA;border-radius:9px;padding:10px 14px;
   cursor:pointer;font-size:.85rem;font-family:'Inter',sans-serif}
 .fq-opcao:hover:not(:disabled){border-color:#F2F0EA}
-.fq-opcao:disabled{opacity:.6;cursor:default}
-.fq-opcao.selecionada{border-color:#F2F0EA;background:rgba(255,255,255,.1)}
+.fq-opcao:disabled{cursor:default}
+.fq-opcao.selecionada{border-color:#2E8B57;background:rgba(46,139,87,.22);opacity:1}
+.fq-opcao.errada{border-color:#C0392B;background:rgba(192,57,43,.22);opacity:1}
+.fq-opcao.gabarito{border-color:#2E8B57;background:rgba(46,139,87,.22);opacity:1}
+.fq-opcao:disabled:not(.selecionada):not(.errada):not(.gabarito){opacity:.45}
 .fq-feedback{text-align:center;font-weight:800;margin-top:8px}
+.fq-pular{display:block;width:100%;background:none;border:none;color:#9B9BA4;font-size:.78rem;
+  text-decoration:underline;cursor:pointer;font-family:'Inter',sans-serif;padding:6px;margin-top:2px}
 .fq-fechar{width:100%;background:#0B0B0E;color:#F2F0EA;border:1px solid rgba(255,255,255,.3);border-radius:9px;padding:10px;
   margin-top:10px;cursor:pointer;font-weight:700;font-family:'Inter',sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px}
@@ -2840,7 +2845,9 @@ async function fqRegistrarResposta(usuario,acertou){
   return estado;
 }
 let fqTimerInterval=null, fqPerguntaAtual=null, fqRespondida=false;
+let fqTokenPergunta=0;
 const FQ_SEGUNDOS=15;
+const FQ_LIMITE_DIARIO=5; // pular também conta nesse limite
 function toggleFqEdge(e){
   if(e)e.stopPropagation();
   const el=document.getElementById('fqFixo');
@@ -2860,14 +2867,14 @@ async function fqAbrirQuiz(){
   const estado=await fqLerEstado();
   ESTADO_QUIZ=estado;
   const status=fqStatusDia(estado,usuario);
-  if(status.respondidas>=3){fqMostrarEsgotado();return;}
+  if(status.respondidas>=FQ_LIMITE_DIARIO){fqMostrarEsgotado();return;}
   await fqProximaPergunta();
 }
 function fqMostrarEsgotado(){
   const modal=document.getElementById('fqModal');
   const corpo=document.getElementById('fqModalCorpo');
   corpo.innerHTML='<div class="fq-titulo">🧠 O QUE MAIS ENTENDE DE FUTEBOL</div>'+
-    '<p style="text-align:center;font-weight:800;margin-top:14px">Você já respondeu suas 3 perguntas de hoje.</p>'+
+    '<p style="text-align:center;font-weight:800;margin-top:14px">Você já respondeu suas '+FQ_LIMITE_DIARIO+' perguntas de hoje.</p>'+
     '<p style="text-align:center;color:#B9B9C2;font-size:.85rem">Volte amanhã a partir das 6h para responder mais.</p>'+
     '<button class="fq-fechar" onclick="fqFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
   modal.classList.remove('oculto');
@@ -2926,6 +2933,7 @@ async function fqProximaPergunta(){
   const usuario=fqUsuario();
   fqPerguntaAtual=await fqEscolherPergunta(usuario);
   fqRespondida=false;
+  fqTokenPergunta++;
   fqRenderPergunta();
   document.getElementById('fqModal').classList.remove('oculto');
   fqIniciarTimer();
@@ -2938,7 +2946,9 @@ function fqRenderPergunta(){
     '<div class="fq-barra"><div class="fq-barra-fill" id="fqBarra" style="width:100%"></div></div>'+
     '<div class="fq-nivel">'+fqEsc(q.nivel||'')+'</div>'+
     '<div class="fq-pergunta">'+fqEsc(q.pergunta)+'</div>'+
-    '<div id="fqOpcoes">'+opcoes+'</div><div id="fqFeedback"></div>';
+    '<div id="fqOpcoes">'+opcoes+'</div>'+
+    '<button class="fq-pular" onclick="fqPular()" id="fqBtnPular">Pular essa pergunta →</button>'+
+    '<div id="fqFeedback"></div>';
 }
 function fqIniciarTimer(){
   let restante=FQ_SEGUNDOS;
@@ -2955,29 +2965,80 @@ function fqIniciarTimer(){
 async function fqTempoEsgotado(){
   if(fqRespondida)return;
   fqRespondida=true;
-  document.querySelectorAll('#fqOpcoes button').forEach(b=>b.disabled=true);
+  const q=fqPerguntaAtual;
+  document.querySelectorAll('#fqOpcoes button').forEach((b,idx)=>{
+    b.disabled=true;
+    if(q.alternativas[idx]===q.resposta_correta)b.classList.add('gabarito');
+  });
+  const btnPularT=document.getElementById('fqBtnPular');
+  if(btnPularT)btnPularT.style.display='none';
   const fb=document.getElementById('fqFeedback');
-  if(fb)fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏱️ Tempo esgotado! Essa não contou — bora pra próxima.</p>'+
+  if(fb)fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏱️ Tempo esgotado! Essa não contou. A resposta certa era: <b>'+fqEsc(q.resposta_correta)+'</b></p>'+
     '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
+}
+/* pular conta como uma das do dia, mas NÃO mostra a resposta certa */
+async function fqPular(){
+  if(fqRespondida)return;
+  fqRespondida=true;
+  clearInterval(fqTimerInterval);
+  const usuario=fqUsuario();
+  const tokenDestaPergunta=fqTokenPergunta;
+  document.querySelectorAll('#fqOpcoes button').forEach(b=>b.disabled=true);
+  const btnPular=document.getElementById('fqBtnPular');
+  if(btnPular)btnPular.style.display='none';
+  const fb=document.getElementById('fqFeedback');
+  if(fb){
+    fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏭️ Pergunta pulada — sem resposta certa revelada.</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.78rem" id="fqFeedbackContador">salvando…</p>'+
+      '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
+  }
+  const estado=await fqRegistrarResposta(usuario,false).catch(()=>null);
+  if(tokenDestaPergunta!==fqTokenPergunta)return;
+  const contador=document.getElementById('fqFeedbackContador');
+  if(!estado){
+    if(contador)contador.textContent='Não deu pra confirmar o salvamento — mas ficou registrado aqui na tela.';
+    return;
+  }
+  ESTADO_QUIZ=estado;
+  const status=fqStatusDia(estado,usuario);
+  if(contador)contador.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje';
+  const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
+  if(btnContinuar&&status.respondidas>=FQ_LIMITE_DIARIO)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
+  fqAtualizarBarra();
 }
 async function fqResponder(i){
   if(fqRespondida)return;
   fqRespondida=true;
   clearInterval(fqTimerInterval);
   const usuario=fqUsuario(), q=fqPerguntaAtual;
+  const tokenDestaPergunta=fqTokenPergunta;
   const acertou=q.alternativas[i]===q.resposta_correta;
   document.querySelectorAll('#fqOpcoes button').forEach((b,idx)=>{
     b.disabled=true;
-    if(idx===i)b.classList.add('selecionada');
+    if(idx===i)b.classList.add(acertou?'selecionada':'errada');
+    if(q.alternativas[idx]===q.resposta_correta)b.classList.add('gabarito');
   });
-  const estado=await fqRegistrarResposta(usuario,acertou);
+  const btnPularR=document.getElementById('fqBtnPular');
+  if(btnPularR)btnPularR.style.display='none';
+  const fb=document.getElementById('fqFeedback');
+  if(fb){
+    fb.innerHTML='<p class="fq-feedback" style="color:'+(acertou?'#2E8B57':'#C0392B')+'">'+
+      (acertou?'✅ Você acertou! +1 ponto':'❌ Você errou! A resposta certa era: <b>'+fqEsc(q.resposta_correta)+'</b>')+'</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.78rem" id="fqFeedbackContador">salvando…</p>'+
+      '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
+  }
+  const estado=await fqRegistrarResposta(usuario,acertou).catch(()=>null);
+  if(tokenDestaPergunta!==fqTokenPergunta)return;
+  const contador=document.getElementById('fqFeedbackContador');
+  if(!estado){
+    if(contador)contador.textContent='Não deu pra confirmar o salvamento — mas sua resposta ficou registrada aqui na tela.';
+    return;
+  }
   ESTADO_QUIZ=estado;
   const status=fqStatusDia(estado,usuario);
-  const fb=document.getElementById('fqFeedback');
-  fb.innerHTML='<p class="fq-feedback" style="color:'+(acertou?'#2E8B57':'#F2F0EA')+'">'+
-    (acertou?'✅ Você acertou! +1 ponto':'❌ Você errou!')+'</p>'+
-    '<p style="text-align:center;color:#9B9BA4;font-size:.78rem">'+status.respondidas+'/3 hoje</p>'+
-    '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> '+(status.respondidas>=3?'Fechar':'Próxima pergunta')+'</button>';
+  if(contador)contador.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje';
+  const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
+  if(btnContinuar&&status.respondidas>=FQ_LIMITE_DIARIO)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
   fqAtualizarBarra();
 }
 async function fqContinuarOuFechar(){
@@ -2985,11 +3046,12 @@ async function fqContinuarOuFechar(){
   const estado=await fqLerEstado();
   ESTADO_QUIZ=estado;
   const status=fqStatusDia(estado,usuario);
-  if(status.respondidas>=3){fqFecharModal();fqAtualizarBarra();return;}
+  if(status.respondidas>=FQ_LIMITE_DIARIO){fqFecharModal();fqAtualizarBarra();return;}
   await fqProximaPergunta();
 }
 function fqFecharModal(){
   clearInterval(fqTimerInterval);
+  fqTokenPergunta++;
   document.getElementById('fqModal').classList.add('oculto');
 }
 async function zerarQuizSeNecessario(){
@@ -3039,9 +3101,9 @@ async function fqAtualizarBarra(){
   if(!usuario)return;
   await fqSincronizarEstado();
   const status=fqStatusDia(ESTADO_QUIZ,usuario);
-  const feito=status.respondidas>=3;
-  if(elFixo)elFixo.title=feito?'O Que Mais Entende de Futebol — você já respondeu hoje':'O Que Mais Entende de Futebol — toque para responder ('+status.respondidas+'/3 hoje)';
-  if(elSub)elSub.textContent=feito?'Você já respondeu hoje ✓':(status.respondidas+'/3 hoje · toque para responder');
+  const feito=status.respondidas>=FQ_LIMITE_DIARIO;
+  if(elFixo)elFixo.title=feito?'O Que Mais Entende de Futebol — você já respondeu hoje':'O Que Mais Entende de Futebol — toque para responder ('+status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje)';
+  if(elSub)elSub.textContent=feito?'Você já respondeu hoje ✓':(status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje · toque para responder');
   const mfFut=document.getElementById('mfFutebol');
   if(mfFut){
     let sinal=mfFut.querySelector('.mf-sinal');
@@ -4081,10 +4143,10 @@ async function carregarQuizCardHome(){
     const estado=await fqLerEstado();
     ESTADO_QUIZ=estado;
     const status=fqStatusDia(estado,eu);
-    if(status.respondidas>=3){
-      el.innerHTML='<span style="color:var(--verde);font-weight:800">✅ Respondido hoje</span> — acertou '+status.acertos+' de 3. Volta amanhã pra mais!';
+    if(status.respondidas>=FQ_LIMITE_DIARIO){
+      el.innerHTML='<span style="color:var(--verde);font-weight:800">✅ Respondido hoje</span> — acertou '+status.acertos+' de '+status.respondidas+'. Volta amanhã pra mais!';
     }else{
-      el.innerHTML='Faltam <b style="color:var(--branco)">'+(3-status.respondidas)+' de 3</b> perguntas de hoje.';
+      el.innerHTML='Faltam <b style="color:var(--branco)">'+(FQ_LIMITE_DIARIO-status.respondidas)+' de '+FQ_LIMITE_DIARIO+'</b> perguntas de hoje.';
     }
   }catch(e){
     el.textContent='Toque pra responder o quiz do dia.';
