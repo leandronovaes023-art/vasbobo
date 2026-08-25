@@ -524,6 +524,14 @@ function fqStatusDia(estado, usuario){
   const chave = usuario+'|'+fqChaveDia();
   return estado.diario[chave] || {respondidas:0, puladas:0, acertos:0};
 }
+/* o quiz do dia acaba quando bate QUALQUER um dos dois limites: 3 respondidas de verdade,
+   OU 5 no total somando respondidas+puladas (pular/tempo esgotado). Faltava essa segunda trava
+   — só travava pelas respondidas, então tempo esgotado repetido (sem nunca responder de
+   verdade) deixava o quiz mostrando pergunta sem fim. */
+function fqQuizAcabouHoje(status){
+  const total=(status.respondidas||0)+(status.puladas||0);
+  return status.respondidas>=FQ_MAX_RESPONDIDAS || total>=FQ_LIMITE_DIARIO;
+}
 function fqPontosTotal(estado, usuario){
   let total=0;
   Object.keys(estado.porJogo).forEach(k=>{
@@ -618,7 +626,7 @@ async function fqAbrirQuiz(){
   if(!usuario){ alert('Faça login para responder.'); return; }
   const estado = await fqLerEstado();
   const status = fqStatusDia(estado, usuario);
-  if(status.respondidas>=FQ_MAX_RESPONDIDAS){ fqMostrarEsgotado(); return; }
+  if(fqQuizAcabouHoje(status)){ fqMostrarEsgotado(); return; }
   await fqProximaPergunta(estado);
 }
 function fqMostrarEsgotado(){
@@ -696,10 +704,15 @@ function fqRenderPergunta(status){
     '<button class="fq-opcao" onclick="fqResponder('+i+')">'+fqEsc(op)+'</button>'
   ).join('');
   const podePular=!status||(status.puladas||0)<FQ_MAX_PULADAS;
+  // essa é a última pergunta possível hoje? (total já em 4 antes dela — ela é a 5ª e definitiva,
+  // não importa se acerta, erra, pula ou o tempo esgota, não vem mais nenhuma depois)
+  const totalAntes=status?(status.respondidas||0)+(status.puladas||0):0;
+  const ehUltima=status&&totalAntes>=FQ_LIMITE_DIARIO-1;
   corpo.innerHTML =
     '<div class="fq-topo"><div class="fq-titulo">✠ O QUE MAIS ENTENDE</div><div class="fq-timer" id="fqTimer">'+FQ_SEGUNDOS+'</div></div>'+
     '<div class="fq-barra"><div class="fq-barra-fill" id="fqBarra" style="width:100%"></div></div>'+
     '<div class="fq-nivel">'+fqEsc(q.nivel||'')+'</div>'+
+    (ehUltima?'<p style="color:#C0392B;font-weight:800;font-size:.8rem;margin:2px 0 6px">🔴 Última pergunta de hoje — capricha!</p>':'')+
     '<div class="fq-pergunta">'+fqEsc(q.pergunta)+'</div>'+
     '<div id="fqOpcoes">'+opcoes+'</div>'+
     (podePular?'<button class="fq-pular" onclick="fqPular()" id="fqBtnPular">Pular essa pergunta →</button>':'')+
@@ -774,7 +787,7 @@ async function fqPular(){
   const status = fqStatusDia(estado, usuario);
   if(contador)contador.textContent=status.respondidas+'/'+FQ_MAX_RESPONDIDAS+' respondidas · '+status.puladas+'/'+FQ_MAX_PULADAS+' puladas';
   const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
-  if(btnContinuar&&status.respondidas>=FQ_MAX_RESPONDIDAS)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
+  if(btnContinuar&&fqQuizAcabouHoje(status))btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
   fqAtualizarPainel();
 }
 async function fqResponder(i){
@@ -817,14 +830,14 @@ async function fqResponder(i){
   const status = fqStatusDia(estado, usuario);
   if(contador)contador.textContent=status.respondidas+'/'+FQ_MAX_RESPONDIDAS+' respondidas · '+status.puladas+'/'+FQ_MAX_PULADAS+' puladas';
   const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
-  if(btnContinuar&&status.respondidas>=FQ_MAX_RESPONDIDAS)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
+  if(btnContinuar&&fqQuizAcabouHoje(status))btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
   fqAtualizarPainel();
 }
 async function fqContinuarOuFechar(){
   const usuario=fqUsuario();
   const estado = await fqLerEstado();
   const status = fqStatusDia(estado, usuario);
-  if(status.respondidas>=FQ_MAX_RESPONDIDAS){ fqFecharModal(); fqAtualizarPainel(); return; }
+  if(fqQuizAcabouHoje(status)){ fqFecharModal(); fqAtualizarPainel(); return; }
   await fqProximaPergunta(estado);
 }
 function fqFecharModal(){
@@ -846,12 +859,12 @@ async function fqAtualizarPainel(){
   if(elTotal)elTotal.textContent=total;
   const btn=document.getElementById('fqBtnResponder');
   if(btn){
-    if(status.respondidas>=FQ_MAX_RESPONDIDAS){ btn.textContent='✅ Você já respondeu hoje'; btn.disabled=true; }
+    if(fqQuizAcabouHoje(status)){ btn.textContent='✅ Você já respondeu hoje'; btn.disabled=true; }
     else{ btn.textContent='🧠 Responder agora'; btn.disabled=false; }
   }
   const elStatus=document.getElementById('fqStatusSimples');
   if(elStatus){
-    if(status.respondidas>=FQ_MAX_RESPONDIDAS){
+    if(fqQuizAcabouHoje(status)){
       elStatus.textContent='✅ Você já respondeu hoje ('+status.acertos+'/'+status.respondidas+' certas). Volta amanhã pra mais!';
     }else{
       const pulRestantes=Math.max(0,FQ_MAX_PULADAS-(status.puladas||0));
