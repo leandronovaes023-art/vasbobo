@@ -419,7 +419,7 @@ function sairSatelite(){
 <main>
   <div class="card">
     <div id="fqStats" class="fq-stats">
-      <div class="fq-stat"><b id="fqHoje">0/5</b><span>Hoje</span></div>
+      <div class="fq-stat"><b id="fqHoje">0/3</b><span>Hoje</span></div>
       <div class="fq-stat"><b id="fqTotal">0</b><span>Pontos no total</span></div>
     </div>
     <button class="fq-btn" id="fqBtnResponder" onclick="fqAbrirQuiz()">🧠 Responder agora</button>
@@ -436,7 +436,8 @@ function sairSatelite(){
 
   <div class="card">
     <ul class="fq-regras">
-      <li>Você tem <b>5 respostas por dia</b> (pular também conta), a partir das 6h da manhã.</li>
+      <li>Você tem <b>3 perguntas pra responder por dia</b>, a partir das 6h da manhã.</li>
+      <li>Não quer responder uma? Pode <b>pular até 2 vezes</b> por dia — o pulo não conta como resposta.</li>
       <li>Cada pergunta tem <b>15 segundos</b> para ser respondida — se o tempo acabar, ela é pulada e não conta nas suas 3 do dia.</li>
       <li>Cada resposta certa vale <b>1 ponto</b>, que soma no ranking do jogo mais próximo que ainda não começou. Quando esse jogo começa, as respostas seguintes já valem pro jogo seguinte.</li>
       <li>Se você errar, a resposta certa <b>aparece na hora</b> — é um jeito de aprender enquanto joga.</li>
@@ -521,7 +522,7 @@ async function fqSalvarEstado(estado){
 }
 function fqStatusDia(estado, usuario){
   const chave = usuario+'|'+fqChaveDia();
-  return estado.diario[chave] || {respondidas:0, acertos:0};
+  return estado.diario[chave] || {respondidas:0, puladas:0, acertos:0};
 }
 function fqPontosTotal(estado, usuario){
   let total=0;
@@ -552,36 +553,72 @@ async function fqRegistrarVista(usuario,id){
   }
   return estado;
 }
+/* GRAVAÇÃO ATÔMICA (transação de verdade do Firestore, não "ler depois escrever") — garante que,
+   mesmo com toques rápidos ou duas abas abertas ao mesmo tempo, o contador nunca fique errado
+   nem passe do limite. O próprio limite (3 respondidas) é reforçado DENTRO da transação — se já
+   bateu o teto, a gravação simplesmente não acontece, não importa o que a tela achava que sabia. */
 async function fqRegistrarResposta(usuario, acertou){
-  const estado = await fqLerEstado();
-  const chaveDia = usuario+'|'+fqChaveDia();
-  if(!estado.diario[chaveDia]) estado.diario[chaveDia]={respondidas:0,acertos:0};
-  estado.diario[chaveDia].respondidas++;
-  if(acertou){
-    estado.diario[chaveDia].acertos++;
-    const jogoAlvo = await fqJogoAtual();
-    if(jogoAlvo){
-      const chaveJ = usuario+'|'+fqChaveJogo(jogoAlvo);
-      if(!estado.porJogo) estado.porJogo={};
-      estado.porJogo[chaveJ] = (estado.porJogo[chaveJ]||0)+1;
+  const ref = dbFut.collection('shared').doc('vasbobo_quiz');
+  const jogoAlvo = acertou ? await fqJogoAtual() : null;
+  let resultado=null;
+  await dbFut.runTransaction(async (tx)=>{
+    const snap = await tx.get(ref);
+    const v = snap.exists ? snap.data() : {};
+    const diario = v.diario||{};
+    const chaveDia = usuario+'|'+fqChaveDia();
+    const atual = diario[chaveDia]||{respondidas:0,puladas:0,acertos:0};
+    if(atual.respondidas>=FQ_MAX_RESPONDIDAS){
+      resultado={diario, porJogo:v.porJogo||{}, vistas:v.vistas||{}, filasPorUsuario:v.filasPorUsuario||{}, bloqueado:true};
+      return;
     }
-  }
-  await fqSalvarEstado(estado);
-  return estado;
+    atual.respondidas=(atual.respondidas||0)+1;
+    if(acertou)atual.acertos=(atual.acertos||0)+1;
+    diario[chaveDia]=atual;
+    const porJogo=v.porJogo||{};
+    if(acertou&&jogoAlvo){
+      const chaveJ=usuario+'|'+fqChaveJogo(jogoAlvo);
+      porJogo[chaveJ]=(porJogo[chaveJ]||0)+1;
+    }
+    const novo={diario, porJogo, vistas:v.vistas||{}, filasPorUsuario:v.filasPorUsuario||{}, atualizadoEm:Date.now()};
+    tx.set(ref, novo);
+    resultado=novo;
+  });
+  return resultado;
+}
+/* pular (ou deixar o tempo esgotar) também usa transação — e agora conta de verdade pro limite
+   de 2 puladas por dia, fechando a brecha que permitia tentativas infinitas via tempo esgotado */
+async function fqRegistrarPulada(usuario){
+  const ref = dbFut.collection('shared').doc('vasbobo_quiz');
+  let resultado=null;
+  await dbFut.runTransaction(async (tx)=>{
+    const snap = await tx.get(ref);
+    const v = snap.exists ? snap.data() : {};
+    const diario = v.diario||{};
+    const chaveDia = usuario+'|'+fqChaveDia();
+    const atual = diario[chaveDia]||{respondidas:0,puladas:0,acertos:0};
+    atual.puladas=(atual.puladas||0)+1;
+    diario[chaveDia]=atual;
+    const novo={diario, porJogo:v.porJogo||{}, vistas:v.vistas||{}, filasPorUsuario:v.filasPorUsuario||{}, atualizadoEm:Date.now()};
+    tx.set(ref, novo);
+    resultado=novo;
+  });
+  return resultado;
 }
 
 /* ===== Fluxo de resposta (10s por pergunta) ===== */
 let fqTimerInterval=null, fqPerguntaAtual=null, fqRespondida=false;
 let fqTokenPergunta=0; // muda a cada pergunta nova — protege contra resposta atrasada (rede lenta) escrevendo na tela errada depois que o usuário já saiu/trocou de pergunta
 const FQ_SEGUNDOS=15;
-const FQ_LIMITE_DIARIO=5; // pular também conta nesse limite
+const FQ_MAX_RESPONDIDAS=3; // meta obrigatória de perguntas respondidas por dia
+const FQ_MAX_PULADAS=2;     // pular (ou deixar o tempo esgotar) conta aqui, não nas respondidas
+const FQ_LIMITE_DIARIO=FQ_MAX_RESPONDIDAS+FQ_MAX_PULADAS; // 5 no total, na pior das hipóteses
 
 async function fqAbrirQuiz(){
   const usuario = fqUsuario();
   if(!usuario){ alert('Faça login para responder.'); return; }
   const estado = await fqLerEstado();
   const status = fqStatusDia(estado, usuario);
-  if(status.respondidas>=FQ_LIMITE_DIARIO){ fqMostrarEsgotado(); return; }
+  if(status.respondidas>=FQ_MAX_RESPONDIDAS){ fqMostrarEsgotado(); return; }
   await fqProximaPergunta(estado);
 }
 function fqMostrarEsgotado(){
@@ -643,26 +680,29 @@ async function fqProximaPergunta(estadoAtual){
   await fqCarregarPerguntas();
   if(!FQ_PERGUNTAS.length){ alert('Não consegui carregar as perguntas agora. Tente de novo em instantes.'); return; }
   const usuario=fqUsuario();
+  const estado = estadoAtual || await fqLerEstado();
+  const status = fqStatusDia(estado, usuario);
   fqPerguntaAtual = await fqEscolherPergunta(null, usuario);
   fqRespondida = false;
   fqTokenPergunta++;
-  fqRenderPergunta();
+  fqRenderPergunta(status);
   document.getElementById('fqModal').classList.remove('oculto');
   fqIniciarTimer();
 }
-function fqRenderPergunta(){
+function fqRenderPergunta(status){
   const q=fqPerguntaAtual;
   const corpo=document.getElementById('fqModalCorpo');
   const opcoes = q.alternativas.map((op,i)=>
     '<button class="fq-opcao" onclick="fqResponder('+i+')">'+fqEsc(op)+'</button>'
   ).join('');
+  const podePular=!status||(status.puladas||0)<FQ_MAX_PULADAS;
   corpo.innerHTML =
     '<div class="fq-topo"><div class="fq-titulo">✠ O QUE MAIS ENTENDE</div><div class="fq-timer" id="fqTimer">'+FQ_SEGUNDOS+'</div></div>'+
     '<div class="fq-barra"><div class="fq-barra-fill" id="fqBarra" style="width:100%"></div></div>'+
     '<div class="fq-nivel">'+fqEsc(q.nivel||'')+'</div>'+
     '<div class="fq-pergunta">'+fqEsc(q.pergunta)+'</div>'+
     '<div id="fqOpcoes">'+opcoes+'</div>'+
-    '<button class="fq-pular" onclick="fqPular()" id="fqBtnPular">Pular essa pergunta →</button>'+
+    (podePular?'<button class="fq-pular" onclick="fqPular()" id="fqBtnPular">Pular essa pergunta →</button>':'')+
     '<div id="fqFeedback"></div>';
 }
 function fqIniciarTimer(){
@@ -681,10 +721,14 @@ function fqIniciarTimer(){
     }
   },1000);
 }
+/* tempo esgotado agora CONTA de verdade (como pulada) — fecha a brecha que permitia tentativas
+   infinitas simplesmente deixando o relógio zerar sem escolher nada */
 async function fqTempoEsgotado(){
   if(fqRespondida)return;
   fqRespondida=true;
   const q=fqPerguntaAtual;
+  const usuario=fqUsuario();
+  const tokenDestaPergunta=fqTokenPergunta;
   document.querySelectorAll('#fqOpcoes button').forEach((b,idx)=>{
     b.disabled=true;
     if(q.alternativas[idx]===q.resposta_correta)b.classList.add('gabarito');
@@ -692,11 +736,19 @@ async function fqTempoEsgotado(){
   const btnPularT=document.getElementById('fqBtnPular');
   if(btnPularT)btnPularT.style.display='none';
   const fb=document.getElementById('fqFeedback');
-  if(fb)fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏱️ Tempo esgotado! Essa não contou. A resposta certa era: <b>'+fqEsc(q.resposta_correta)+'</b></p>'+
+  if(fb)fb.innerHTML='<p class="fq-feedback" style="color:#B9B9C2">⏱️ Tempo esgotado! Essa não contou como resposta. A resposta certa era: <b>'+fqEsc(q.resposta_correta)+'</b></p>'+
+    '<p style="text-align:center;color:#9B9BA4;font-size:.78rem" id="fqFeedbackContador">salvando…</p>'+
     '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
+  const estado=await fqRegistrarPulada(usuario).catch(()=>null);
+  if(tokenDestaPergunta!==fqTokenPergunta)return;
+  const contador=document.getElementById('fqFeedbackContador');
+  if(!estado){ if(contador)contador.textContent='Não deu pra confirmar o salvamento.'; return; }
+  const status=fqStatusDia(estado,usuario);
+  if(contador)contador.textContent=status.respondidas+'/'+FQ_MAX_RESPONDIDAS+' respondidas · '+status.puladas+'/'+FQ_MAX_PULADAS+' puladas';
+  fqAtualizarPainel();
 }
-/* pular conta como uma das 5 do dia, mas NÃO mostra a resposta certa — só quem tenta de
-   verdade e erra é que aprende o gabarito */
+/* pular usa contador PRÓPRIO (puladas), separado das respondidas — máximo 2 por dia. Não mostra
+   a resposta certa — só quem tenta de verdade e erra (ou o tempo esgota) vê o gabarito */
 async function fqPular(){
   if(fqRespondida)return;
   fqRespondida=true;
@@ -712,7 +764,7 @@ async function fqPular(){
       '<p style="text-align:center;color:#9B9BA4;font-size:.78rem" id="fqFeedbackContador">salvando…</p>'+
       '<button class="fq-fechar" onclick="fqContinuarOuFechar()"><span class="cruz-btn">✠</span> Continuar</button>';
   }
-  const estado = await fqRegistrarResposta(usuario, false).catch(()=>null);
+  const estado = await fqRegistrarPulada(usuario).catch(()=>null);
   if(tokenDestaPergunta!==fqTokenPergunta)return;
   const contador=document.getElementById('fqFeedbackContador');
   if(!estado){
@@ -720,9 +772,9 @@ async function fqPular(){
     return;
   }
   const status = fqStatusDia(estado, usuario);
-  if(contador)contador.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje';
+  if(contador)contador.textContent=status.respondidas+'/'+FQ_MAX_RESPONDIDAS+' respondidas · '+status.puladas+'/'+FQ_MAX_PULADAS+' puladas';
   const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
-  if(btnContinuar&&status.respondidas>=FQ_LIMITE_DIARIO)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
+  if(btnContinuar&&status.respondidas>=FQ_MAX_RESPONDIDAS)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
   fqAtualizarPainel();
 }
 async function fqResponder(i){
@@ -758,17 +810,21 @@ async function fqResponder(i){
     if(contador)contador.textContent='Não deu pra confirmar o salvamento — mas sua resposta ficou registrada aqui na tela.';
     return;
   }
+  if(estado.bloqueado){
+    if(contador)contador.textContent='Essa não contou — você já tinha batido o limite de '+FQ_MAX_RESPONDIDAS+' respondidas hoje (talvez em outra aba/aparelho).';
+    return;
+  }
   const status = fqStatusDia(estado, usuario);
-  if(contador)contador.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO+' hoje';
+  if(contador)contador.textContent=status.respondidas+'/'+FQ_MAX_RESPONDIDAS+' respondidas · '+status.puladas+'/'+FQ_MAX_PULADAS+' puladas';
   const btnContinuar=document.querySelector('#fqFeedback .fq-fechar');
-  if(btnContinuar&&status.respondidas>=FQ_LIMITE_DIARIO)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
+  if(btnContinuar&&status.respondidas>=FQ_MAX_RESPONDIDAS)btnContinuar.innerHTML='<span class="cruz-btn">✠</span> Fechar';
   fqAtualizarPainel();
 }
 async function fqContinuarOuFechar(){
   const usuario=fqUsuario();
   const estado = await fqLerEstado();
   const status = fqStatusDia(estado, usuario);
-  if(status.respondidas>=FQ_LIMITE_DIARIO){ fqFecharModal(); fqAtualizarPainel(); return; }
+  if(status.respondidas>=FQ_MAX_RESPONDIDAS){ fqFecharModal(); fqAtualizarPainel(); return; }
   await fqProximaPergunta(estado);
 }
 function fqFecharModal(){
@@ -786,19 +842,20 @@ async function fqAtualizarPainel(){
   const total = fqPontosTotal(estado, usuario);
   const elHoje=document.getElementById('fqHoje');
   const elTotal=document.getElementById('fqTotal');
-  if(elHoje)elHoje.textContent=status.respondidas+'/'+FQ_LIMITE_DIARIO;
+  if(elHoje)elHoje.textContent=status.respondidas+'/'+FQ_MAX_RESPONDIDAS;
   if(elTotal)elTotal.textContent=total;
   const btn=document.getElementById('fqBtnResponder');
   if(btn){
-    if(status.respondidas>=FQ_LIMITE_DIARIO){ btn.textContent='✅ Você já respondeu hoje'; btn.disabled=true; }
+    if(status.respondidas>=FQ_MAX_RESPONDIDAS){ btn.textContent='✅ Você já respondeu hoje'; btn.disabled=true; }
     else{ btn.textContent='🧠 Responder agora'; btn.disabled=false; }
   }
   const elStatus=document.getElementById('fqStatusSimples');
   if(elStatus){
-    if(status.respondidas>=FQ_LIMITE_DIARIO){
+    if(status.respondidas>=FQ_MAX_RESPONDIDAS){
       elStatus.textContent='✅ Você já respondeu hoje ('+status.acertos+'/'+status.respondidas+' certas). Volta amanhã pra mais!';
     }else{
-      elStatus.textContent='Ainda falta responder '+(FQ_LIMITE_DIARIO-status.respondidas)+' de '+FQ_LIMITE_DIARIO+' hoje.';
+      const pulRestantes=Math.max(0,FQ_MAX_PULADAS-(status.puladas||0));
+      elStatus.textContent='Ainda falta responder '+(FQ_MAX_RESPONDIDAS-status.respondidas)+' de '+FQ_MAX_RESPONDIDAS+' hoje'+(pulRestantes<FQ_MAX_PULADAS?' (pode pular mais '+pulRestantes+'x)':'')+'.';
     }
   }
   fqRenderRankingTotal(estado);
