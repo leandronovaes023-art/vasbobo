@@ -284,6 +284,18 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
   /* modal de confirmação (substitui o confirm() do navegador, bloqueado no artefato) */
   .veu{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px;z-index:600}
+  .seletor-jogador-btn{display:flex;align-items:center;gap:10px;width:100%;background:var(--carvao2);border:1px solid var(--linha);
+    border-radius:10px;padding:8px 12px;cursor:pointer;font-family:'Inter',sans-serif;text-align:left}
+  .seletor-jogador-foto-vazia{width:30px;height:30px;border-radius:50%;background:var(--carvao);border:1.5px dashed var(--linha);flex:none;display:flex;align-items:center;justify-content:center;font-size:1rem}
+  .seletor-jogador-nome{flex:1;color:var(--branco);font-weight:700;font-size:.88rem}
+  .seletor-jogador-nome.vazio{color:var(--cinza);font-weight:600}
+  .seletor-jogador-seta{color:var(--cinza);flex:none}
+  .seletor-jogador-grupo{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--cinza);
+    padding:12px 0 6px;position:sticky;top:0;background:var(--carvao);z-index:1}
+  .seletor-jogador-opcao{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;border-bottom:1px solid var(--linha);
+    padding:9px 4px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;color:var(--branco);font-size:.88rem}
+  .seletor-jogador-opcao:active{background:var(--carvao2)}
+  .seletor-jogador-opcao.ativa{background:rgba(46,139,87,.14);font-weight:800}
   .modal{background:var(--carvao);border:1px solid var(--linha);border-top:4px solid var(--azul);border-radius:14px;padding:26px;max-width:420px;width:100%;max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .destaque-sistema-pont{background:rgba(79,166,240,.08);
     border:1.5px solid var(--azul);border-radius:12px;padding:12px 16px;margin:10px 0 14px;
@@ -784,6 +796,13 @@ console.log('Firebase conectado ao Vasbobo ✓');
       <button class="btn fantasma" id="confNao">Cancelar</button>
       <button class="btn" id="confSim">Confirmar</button>
     </div>
+  </div>
+</div>
+
+<div class="veu oculto" id="modalSeletorJogador" onclick="if(event.target===this)fecharSeletorJogador()">
+  <div class="modal" style="max-height:80vh;display:flex;flex-direction:column;padding-bottom:0">
+    <h3 style="margin-bottom:10px">Escolher jogador</h3>
+    <div id="seletorJogadorLista" style="overflow-y:auto;flex:1;margin:0 -26px;padding:0 26px 26px"></div>
   </div>
 </div>
 
@@ -4278,32 +4297,57 @@ function renderMvpLinha(j){
   return '<p class="nota-rodape" style="margin-top:6px">🏆 MVP da galera até agora: <b style="color:var(--ouro)">'+esc(nomeJogador(mvp.id))+'</b> (média '+mvp.media.toFixed(1).replace('.',',')+' em '+mvp.votos+' voto'+(mvp.votos===1?'':'s')+')</p>';
 }
 
-function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
-  const opts=['<option value="">— escolher —</option>'];
-  if(incluirSemGol)opts.push('<option value="'+SEM_GOL+'" '+(valorAtual===SEM_GOL?'selected':'')+'>Vasco não marca 😢</option>');
-  let posAtual='';
-  jogadoresAtivos().filter(p=>incluirTecnico||p.pos!=='Técnico').forEach(p=>{
-    if(p.pos!==posAtual){if(posAtual)opts.push('</optgroup>');opts.push('<optgroup label="'+esc(p.pos)+'">');posAtual=p.pos;}
-    opts.push('<option value="'+p.id+'" '+(valorAtual===p.id?'selected':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome)+'</option>');
-  });
-  if(posAtual)opts.push('</optgroup>');
-  return '<select id="'+idSel+'">'+opts.join('')+'</select>';
+/* botão que abre um seletor visual (foto + posição, agrupado igual a tela de notas dos
+   jogadores) no lugar do <select> nativo. Tentativa anterior desse tipo de seletor ficou lenta
+   — dessa vez é bem mais simples: só HTML puro (sem framework/animação pesada), abre/fecha só
+   trocando uma classe CSS, e reaproveita a mesma fotoJogador() que já roda rápido na tela de
+   notas. Mantém um <input type="hidden"> com o mesmo ID de sempre, então nada mais no código
+   precisa mudar pra continuar lendo o valor escolhido. */
+function seletorJogadorHTML(idCampo,valorAtual,incluirSemGol,incluirTecnico){
+  return '<input type="hidden" id="'+idCampo+'" value="'+esc(valorAtual||'')+'">'+
+    '<button type="button" class="seletor-jogador-btn" id="'+idCampo+'_btn" data-incluisemgol="'+(incluirSemGol?1:0)+'" data-incluitecnico="'+(incluirTecnico?1:0)+'" onclick="abrirSeletorJogador(\''+idCampo+'\')">'+
+    htmlSeletorJogadorRotulo(valorAtual)+
+    '<span class="seletor-jogador-seta">▾</span></button>';
 }
-/* botão que abre um seletor visual (foto + número + nome) no lugar do <select> nativo, que não
-   consegue mostrar foto dentro das opções — usado no MVP e no "quem faz gol" do palpite */
-/* select nativo do navegador — simples, rápido, sem modal customizado (era assim antes das
-   fotos, e funcionava bem; voltando pra esse formato depois de bugs repetidos no seletor custom) */
-function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
-  const opts=['<option value="">— escolher —</option>'];
-  if(incluirSemGol)opts.push('<option value="'+SEM_GOL+'" '+(valorAtual===SEM_GOL?'selected':'')+'>Vasco não marca 😢</option>');
+function htmlSeletorJogadorRotulo(valor){
+  if(!valor)return '<span class="seletor-jogador-foto-vazia"></span><span class="seletor-jogador-nome vazio">Toque para escolher</span>';
+  if(valor===SEM_GOL)return '<span class="seletor-jogador-foto-vazia">😢</span><span class="seletor-jogador-nome">Vasco não marca</span>';
+  const p=jogadorPorId(valor);
+  if(!p)return '<span class="seletor-jogador-foto-vazia"></span><span class="seletor-jogador-nome vazio">Toque para escolher</span>';
+  return fotoJogador(valor,30)+'<span class="seletor-jogador-nome">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</span>';
+}
+function abrirSeletorJogador(idCampo){
+  const modal=document.getElementById('modalSeletorJogador');
+  const lista=document.getElementById('seletorJogadorLista');
+  const btn=document.getElementById(idCampo+'_btn');
+  if(!modal||!lista||!btn)return;
+  const incluirSemGol=btn.dataset.incluisemgol==='1';
+  const incluirTecnico=btn.dataset.incluitecnico==='1';
+  const valorAtual=document.getElementById(idCampo).value;
+  let html='';
+  if(incluirSemGol)html+='<button type="button" class="seletor-jogador-opcao'+(valorAtual===SEM_GOL?' ativa':'')+'" onclick="escolherJogadorSeletor(\''+idCampo+'\',\''+SEM_GOL+'\')"><span class="seletor-jogador-foto-vazia">😢</span><span>Vasco não marca</span></button>';
   let posAtual='';
   jogadoresAtivos().filter(p=>incluirTecnico||p.pos!=='Técnico').forEach(p=>{
     const pos=p.pos||'Outro';
-    if(pos!==posAtual){if(posAtual)opts.push('</optgroup>');opts.push('<optgroup label="'+esc(pos)+'">');posAtual=pos;}
-    opts.push('<option value="'+p.id+'" '+(valorAtual===p.id?'selected':'')+'>'+(p.num?p.num+' · ':'')+esc(p.nome||'(sem nome)')+'</option>');
+    if(pos!==posAtual){html+='<div class="seletor-jogador-grupo">'+esc(pos)+'</div>';posAtual=pos;}
+    html+='<button type="button" class="seletor-jogador-opcao'+(valorAtual===p.id?' ativa':'')+'" onclick="escolherJogadorSeletor(\''+idCampo+'\',\''+p.id+'\')">'+fotoJogador(p.id,34)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome||'(sem nome)')+'</span></button>';
   });
-  if(posAtual)opts.push('</optgroup>');
-  return '<select id="'+idSel+'">'+opts.join('')+'</select>';
+  lista.innerHTML=html;
+  modal.classList.remove('oculto');
+}
+function fecharSeletorJogador(){
+  const modal=document.getElementById('modalSeletorJogador');
+  if(modal)modal.classList.add('oculto');
+}
+function escolherJogadorSeletor(idCampo,valor){
+  const campo=document.getElementById(idCampo);
+  const btn=document.getElementById(idCampo+'_btn');
+  if(campo)campo.value=valor;
+  if(btn)btn.innerHTML=htmlSeletorJogadorRotulo(valor)+'<span class="seletor-jogador-seta">▾</span>';
+  fecharSeletorJogador();
+}
+function selectJogadores(idSel,valorAtual,incluirSemGol,incluirTecnico){
+  return seletorJogadorHTML(idSel,valorAtual,incluirSemGol,incluirTecnico);
 }
 
 function renderPalpiteCard(j,s){
@@ -4317,8 +4361,8 @@ function renderPalpiteCard(j,s){
       '<input type="number" min="0" max="20" id="ppA" value="'+(meu?meu.a:'')+'" aria-label="Gols do adversário">'+
       '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
       '<div class="grid g2" style="margin-top:12px">'+
-      '<div><label for="ppMvp">Seu MVP da partida</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
-      '<div><label for="ppGol">Quem faz gol?</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
+      '<div><label style="font-weight:800;color:var(--branco)">Seu MVP da partida</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
+      '<div><label style="font-weight:800;color:var(--branco)">Quem faz gol?</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
       '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()"><span style="color:var(--vermelho)">✠</span> '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
       (meu?'<button class="btn fantasma" style="margin-top:8px;color:var(--vermelho)" onclick="removerMeuPalpite()">🗑️ Remover meu palpite</button>':'')+
       (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
