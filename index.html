@@ -3262,12 +3262,7 @@ async function batGerarDoDiaSeNecessario(){
   for(const [a,b] of pares){
     const id=batIdBatalha(data,a,b);
     try{
-      await db.collection('batalhas_quiz').doc(id).set({
-        data,jogadores:[a,b],perguntas,
-        respostas:{[a]:[],[b]:[]},acertos:{[a]:0,[b]:0},
-        status:'aguardando',resultado:null,pontos:{[a]:0,[b]:0},
-        criadaEm:Date.now(),finalizadaEm:null
-      });
+      await batCriarDocumentoBatalha(id,[a,b],perguntas);
       fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({titulo:'⚔️ Sua batalha de hoje!',texto:cap(a)+' vs '+cap(b)+' — 5 perguntas te esperando.',
           destinatarios:[a,b],url:'/'})}).catch(()=>{});
@@ -3454,6 +3449,135 @@ async function batAtualizarEFechar(){
     if(snap.exists){batDadosAtual=snap.data();batRenderTela();return;}
   }catch(e){}
   batFecharModal();
+}
+
+/* =================== BATALHAS 1×1 — FASE 2: DESAFIOS MANUAIS =================================
+   Cada usuário pode desafiar outro diretamente, até 2 vezes por semana (semana = segunda a
+   domingo). Isso é separado das batalhas automáticas diárias — não consome nem é consumido por
+   elas. Coleção nova: desafios/{id} */
+function desChaveSemana(d){
+  d=d||new Date();
+  const br=new Date(d.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
+  const diaSemana=br.getDay(); // 0=domingo
+  const diffPraSegunda=diaSemana===0?6:diaSemana-1;
+  const segunda=new Date(br);segunda.setDate(br.getDate()-diffPraSegunda);segunda.setHours(0,0,0,0);
+  return segunda.toISOString().slice(0,10); // chave = data da segunda-feira daquela semana
+}
+const DES_MAX_POR_SEMANA=2;
+async function desContarUsadosNaSemana(usuario){
+  const chave=desChaveSemana();
+  try{
+    const snap=await db.collection('desafios').where('desafiante','==',usuario).where('semana','==',chave).get();
+    return snap.size;
+  }catch(e){return 0;}
+}
+/* cria de fato a batalha (documento em batalhas_quiz) — reaproveitado tanto pelas batalhas
+   automáticas do dia quanto pelos desafios manuais aceitos */
+async function batCriarDocumentoBatalha(idBatalha,jogadores,perguntas){
+  const [a,b]=jogadores;
+  await db.collection('batalhas_quiz').doc(idBatalha).set({
+    data:batChaveDia(),jogadores:[a,b],perguntas,
+    respostas:{[a]:[],[b]:[]},acertos:{[a]:0,[b]:0},
+    status:'aguardando',resultado:null,pontos:{[a]:0,[b]:0},
+    criadaEm:Date.now(),finalizadaEm:null
+  });
+}
+async function desEnviarDesafio(desafiado){
+  if(desafiado===eu){avisar('Você não pode desafiar a si mesmo.');return;}
+  const usados=await desContarUsadosNaSemana(eu);
+  if(usados>=DES_MAX_POR_SEMANA){avisar('Você já usou seus '+DES_MAX_POR_SEMANA+' desafios desta semana. Renova segunda-feira.');return;}
+  try{
+    const pendentesExistentes=await db.collection('desafios').where('desafiante','==',eu).where('desafiado','==',desafiado).where('status','==','pendente').get();
+    if(!pendentesExistentes.empty){avisar('Você já tem um desafio pendente pra '+cap(desafiado)+'.');return;}
+  }catch(e){}
+  if(!(await confirmar('Desafiar '+cap(desafiado)+' pra uma Batalha 1×1?')))return;
+  const chave=desChaveSemana();
+  const doc=await db.collection('desafios').add({
+    desafiante:eu,desafiado,semana:chave,status:'pendente',
+    criadoEm:Date.now(),batalhaId:null,resultado:null
+  });
+  registrarLog('desafio','Desafiou '+desafiado);
+  try{
+    await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({titulo:'⚔️ Novo desafio!',texto:cap(eu)+' te desafiou pra uma Batalha 1×1.',
+        destinatarios:[desafiado],url:'/'})});
+  }catch(e){}
+  avisar('Desafio enviado pra '+cap(desafiado)+'!',true);
+  renderListaDesafios();
+}
+async function desAceitarDesafio(idDesafio){
+  const ref=db.collection('desafios').doc(idDesafio);
+  const snap=await ref.get();
+  if(!snap.exists){avisar('Esse desafio não existe mais.');return;}
+  const d=snap.data();
+  if(d.desafiado!==eu||d.status!=='pendente'){avisar('Esse desafio não está mais disponível.');return;}
+  await fqCarregarPerguntas();
+  const cfg=await batLerConfig();
+  const perguntas=batEscolherPerguntasDoDia(cfg);
+  await batSalvarConfig(cfg);
+  const idBatalha='desafio__'+idDesafio;
+  await batCriarDocumentoBatalha(idBatalha,[d.desafiante,d.desafiado],perguntas);
+  await ref.update({status:'aceito',batalhaId:idBatalha});
+  registrarLog('desafio','Aceitou desafio de '+d.desafiante);
+  try{
+    await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({titulo:'⚔️ Desafio aceito!',texto:cap(eu)+' aceitou seu desafio — bora jogar!',
+        destinatarios:[d.desafiante],url:'/'})});
+  }catch(e){}
+  avisar('Desafio aceito! Boa sorte.',true);
+  batIdAtual=idBatalha;batDadosAtual=(await db.collection('batalhas_quiz').doc(idBatalha).get()).data();batOponenteAtual=d.desafiante;
+  document.getElementById('batModal').classList.remove('oculto');
+  batRenderTela();
+  renderListaDesafios();
+}
+async function desRecusarDesafio(idDesafio){
+  if(!(await confirmar('Recusar esse desafio?')))return;
+  const ref=db.collection('desafios').doc(idDesafio);
+  const snap=await ref.get();
+  if(!snap.exists)return;
+  const d=snap.data();
+  if(d.desafiado!==eu||d.status!=='pendente')return;
+  await ref.update({status:'recusado'});
+  registrarLog('desafio','Recusou desafio de '+d.desafiante);
+  avisar('Desafio recusado.',true);
+  renderListaDesafios();
+}
+async function desListarPendentesRecebidos(){
+  try{
+    const snap=await db.collection('desafios').where('desafiado','==',eu).where('status','==','pendente').get();
+    return snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.criadoEm-a.criadoEm);
+  }catch(e){return [];}
+}
+/* interface: lista de desafios recebidos + botão pra desafiar alguém, tudo dentro do modal de batalha */
+async function batAbrirDesafios(){
+  const modal=document.getElementById('batModal');
+  const corpo=document.getElementById('batModalCorpo');
+  if(!modal||!corpo)return;
+  corpo.innerHTML='<div class="fq-titulo">⚔️ DESAFIOS</div><div id="areaDesafios"><p style="text-align:center;margin-top:14px">Carregando…</p></div>'+
+    '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+  modal.classList.remove('oculto');
+  await renderListaDesafios();
+}
+async function renderListaDesafios(){
+  const area=document.getElementById('areaDesafios');
+  if(!area)return;
+  const [pendentes,usados,usuarios]=await Promise.all([desListarPendentesRecebidos(),desContarUsadosNaSemana(eu),Promise.resolve(batUsuariosAtivos())]);
+  let html='';
+  if(pendentes.length){
+    html+='<p style="font-weight:800;margin:10px 0 6px">Desafios recebidos</p>';
+    pendentes.forEach(d=>{
+      html+='<div class="linha-tabela" style="align-items:center"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(d.desafiante,28)+'<b class="rank-nome">'+esc(cap(d.desafiante))+'</b></span>'+
+        '<span style="display:flex;gap:6px"><button class="btn" style="padding:4px 10px;font-size:.72rem" onclick="desAceitarDesafio(\''+d.id+'\')">Aceitar</button>'+
+        '<button class="btn fantasma" style="padding:4px 10px;font-size:.72rem" onclick="desRecusarDesafio(\''+d.id+'\')">Recusar</button></span></div>';
+    });
+  }
+  html+='<p style="font-weight:800;margin:14px 0 4px">Desafiar alguém</p>'+
+    '<p class="nota-rodape" style="margin:0 0 8px">Você usou <b style="color:var(--branco)">'+usados+'/'+DES_MAX_POR_SEMANA+'</b> desafios desta semana'+(usados>=DES_MAX_POR_SEMANA?' — renova segunda-feira.':'.')+'</p>';
+  usuarios.filter(u=>u!==eu).forEach(u=>{
+    html+='<div class="linha-tabela" style="align-items:center"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,28)+'<b class="rank-nome">'+esc(cap(u))+'</b></span>'+
+      '<button class="btn fantasma" style="padding:4px 10px;font-size:.72rem" '+(usados>=DES_MAX_POR_SEMANA?'disabled':'')+' onclick="desEnviarDesafio(\''+u+'\')">⚔️ Desafiar</button></div>';
+  });
+  area.innerHTML=html||'<p class="nota-rodape">Nenhum outro usuário disponível.</p>';
 }
 
 async function zerarQuizSeNecessario(){
@@ -4434,6 +4558,7 @@ function renderListaJogos(){
       '<img src="img/embed/icone-quiz-menu.png" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:50%;flex:none">'+
       '<div style="flex:1;min-width:0"><div style="font-weight:900;font-size:.8rem;text-transform:uppercase;letter-spacing:.02em">⚔️ Sua Batalha de Hoje</div>'+
       '<div id="batCardHomeStatus" style="font-size:.76rem;color:var(--cinza);margin-top:1px">Carregando…</div></div>'+
+      '<button type="button" onclick="event.stopPropagation();batAbrirDesafios()" style="background:none;border:1px solid var(--linha);border-radius:8px;padding:6px 10px;font-size:.68rem;font-weight:800;color:var(--branco);flex:none;white-space:nowrap">⚔️ Desafiar</button>'+
       '</div></div>';
     html+='<div class="card">'+htmlCastigoRodadaBox()+'</div>';
   }
@@ -4499,6 +4624,11 @@ async function carregarBatCardHome(){
     console.error('erro no card de batalha',e);
     el.textContent='Toque pra ver sua batalha de hoje.';
   }
+  try{
+    const pendentes=await desListarPendentesRecebidos();
+    const btnDesafiar=document.querySelector('#cardBatalhaHome button[onclick*="batAbrirDesafios"]');
+    if(btnDesafiar)btnDesafiar.innerHTML=(pendentes.length?'🔴 ':'⚔️ ')+'Desafiar'+(pendentes.length?' ('+pendentes.length+')':'');
+  }catch(e){}
 }
 function renderDetalhe(){
   const sec=document.getElementById('secDetalhe');
