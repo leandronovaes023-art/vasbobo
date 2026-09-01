@@ -3621,7 +3621,7 @@ async function renderListaDesafios(){
   usuarios.filter(u=>u!==eu).forEach(u=>{
     const usadosComEsse=usosPorOponente[u]||0;
     const esgotado=usadosComEsse>=DES_MAX_POR_SEMANA;
-    html+='<div class="linha-tabela" style="align-items:center"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,28)+'<b class="rank-nome">'+esc(cap(u))+'</b><span style="font-size:.78rem;font-weight:800;color:'+(esgotado?'var(--vermelho)':'var(--cinza)')+'">'+usadosComEsse+'/'+DES_MAX_POR_SEMANA+'</span></span>'+
+    html+='<div class="linha-tabela" style="align-items:center"><span style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="abrirPerfilBatalha(\''+u+'\')">'+fotoUsuario(u,28)+'<b class="rank-nome" style="text-decoration:underline">'+esc(cap(u))+'</b><span style="font-size:.78rem;font-weight:800;color:'+(esgotado?'var(--vermelho)':'var(--cinza)')+'">'+usadosComEsse+'/'+DES_MAX_POR_SEMANA+'</span></span>'+
       '<button class="btn fantasma" style="padding:4px 10px;font-size:.72rem" '+(esgotado?'disabled':'')+' onclick="desEnviarDesafio(\''+u+'\')">Desafiar</button></div>';
   });
   area.innerHTML=html||'<p class="nota-rodape">Nenhum outro usuário disponível.</p>';
@@ -3635,6 +3635,71 @@ function batFmtDiaSimples(dataStr){
   const meses=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
   return dias[d.getDay()]+' · '+String(d.getDate()).padStart(2,'0')+' '+meses[d.getMonth()];
 }
+/* ---- perfil público de batalha de um usuário ---- */
+async function batEstatisticasUsuario(usuario){
+  const cfg=await batLerConfig();
+  let vitorias=0,derrotas=0,empates=0,pontosTotais=0;
+  const confrontosDele=[];
+  Object.entries(cfg.confrontos||{}).forEach(([chave,c])=>{
+    const [a,b]=chave.split('|');
+    if(a!==usuario&&b!==usuario)return;
+    const outro=a===usuario?b:a;
+    const minhasVitorias=(c.vitorias&&c.vitorias[usuario])||0;
+    const dele=(c.vitorias&&c.vitorias[outro])||0;
+    vitorias+=minhasVitorias;derrotas+=dele;empates+=(c.empates||0);
+    confrontosDele.push({outro,minhasVitorias,dele,empates:c.empates||0,batalhas:c.batalhas||0,
+      sequenciaEhMinha:c.sequencia&&c.sequencia.quem===usuario,sequenciaQtd:(c.sequencia&&c.sequencia.qtd)||0});
+  });
+  pontosTotais=vitorias*2+empates*1;
+  // maior freguês: contra quem ele mais venceu (diferença de vitórias a favor)
+  let freguês=null,carrasco=null;
+  confrontosDele.forEach(c=>{
+    const diff=c.minhasVitorias-c.dele;
+    if(c.minhasVitorias>0&&(!freguês||diff>freguês.diff))freguês={...c,diff};
+    if(c.dele>0&&(!carrasco||(c.dele-c.minhasVitorias)>carrasco.diff))carrasco={...c,diff:c.dele-c.minhasVitorias};
+  });
+  // sequência atual: maior sequência de vitórias em qualquer confronto (aproximação simples de "forma" geral)
+  let sequenciaAtual=0,quemSequencia=null;
+  confrontosDele.forEach(c=>{if(c.sequenciaEhMinha&&c.sequenciaQtd>sequenciaAtual){sequenciaAtual=c.sequenciaQtd;}});
+  let batalhasSnap=[];
+  try{
+    const snap=await db.collection('batalhas_quiz').where('jogadores','array-contains',usuario).get();
+    batalhasSnap=snap.docs.map(d=>d.data()).sort((a,b)=>(b.criadaEm||0)-(a.criadaEm||0)).slice(0,10);
+  }catch(e){}
+  return {vitorias,derrotas,empates,pontosTotais,freguês,carrasco,sequenciaAtual,ultimasBatalhas:batalhasSnap};
+}
+async function abrirPerfilBatalha(usuario){
+  const modal=document.getElementById('batModal');
+  const corpo=document.getElementById('batModalCorpo');
+  if(!modal||!corpo)return;
+  corpo.innerHTML='<div class="fq-titulo">PERFIL</div><p style="text-align:center;margin-top:14px">Carregando…</p>';
+  modal.classList.remove('oculto');
+  const s=await batEstatisticasUsuario(usuario);
+  let html='<div style="text-align:center;margin-bottom:14px">'+fotoUsuario(usuario,64)+
+    '<div style="font-family:Anton,sans-serif;font-size:1.2rem;text-transform:uppercase;margin-top:8px">'+esc(cap(usuario))+'</div></div>';
+  html+='<div style="display:flex;justify-content:center;gap:18px;text-align:center;margin-bottom:14px">'+
+    '<div><div style="font-family:Anton,sans-serif;font-size:1.3rem;color:#2E8B57">'+s.vitorias+'</div><div style="font-size:.68rem;color:#9B9BA4">VITÓRIAS</div></div>'+
+    '<div><div style="font-family:Anton,sans-serif;font-size:1.3rem;color:#C0392B">'+s.derrotas+'</div><div style="font-size:.68rem;color:#9B9BA4">DERROTAS</div></div>'+
+    '<div><div style="font-family:Anton,sans-serif;font-size:1.3rem;color:#9B9BA4">'+s.empates+'</div><div style="font-size:.68rem;color:#9B9BA4">EMPATES</div></div>'+
+    '<div><div style="font-family:Anton,sans-serif;font-size:1.3rem;color:#FFD24B">'+s.pontosTotais+'</div><div style="font-size:.68rem;color:#9B9BA4">PONTOS</div></div>'+
+    '</div>';
+  if(s.sequenciaAtual>1)html+='<p style="text-align:center;color:#FFD24B;font-weight:800;font-size:.85rem;margin-bottom:10px">🔥 '+s.sequenciaAtual+' vitórias seguidas contra alguém</p>';
+  if(s.freguês)html+='<p style="font-size:.82rem;margin:4px 0"><b style="color:#2E8B57">Maior freguês:</b> '+esc(cap(s.freguês.outro))+' ('+esc(cap(usuario))+' '+s.freguês.minhasVitorias+' × '+s.freguês.dele+')</p>';
+  if(s.carrasco)html+='<p style="font-size:.82rem;margin:4px 0"><b style="color:#C0392B">Maior carrasco:</b> '+esc(cap(s.carrasco.outro))+' ('+esc(cap(s.carrasco.outro))+' '+s.carrasco.dele+' × '+s.carrasco.minhasVitorias+')</p>';
+  if(s.ultimasBatalhas.length){
+    html+='<p style="font-weight:800;margin:14px 0 6px">Últimas batalhas</p>';
+    s.ultimasBatalhas.forEach(b=>{
+      if(b.status!=='finalizada')return;
+      const outro=b.jogadores.find(j=>j!==usuario);
+      const meus=b.acertos[usuario]||0, dele=b.acertos[outro]||0;
+      const resIcone=b.resultado===usuario?'🏆':(b.resultado==='empate'?'🤝':'❌');
+      html+='<div class="mini-linha"><span>'+resIcone+' '+esc(cap(usuario))+' '+meus+' × '+dele+' '+esc(cap(outro))+'</span><span class="pt" style="color:var(--cinza)">'+batFmtDiaSimples(b.data)+'</span></div>';
+    });
+  }
+  html+='<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+  corpo.innerHTML=html;
+}
+
 async function renderBatalhaAba(){
   const sec=document.getElementById('secBatalha');
   if(!sec)return;
@@ -3645,7 +3710,8 @@ async function renderBatalhaAba(){
       batLerConfig()
     ]);
     const batalhas=batalhasSnap.docs.map(d=>({id:d.id,...d.data()}));
-    let html='<div class="card"><h2>⚔️ Resultados por dia</h2>';
+    let html='<div class="card"><button class="btn claro" style="width:100%" onclick="abrirPerfilBatalha(\''+eu+'\')">Ver meu perfil de batalha</button></div>';
+    html+='<div class="card"><h2>⚔️ Resultados por dia</h2>';
     if(!batalhas.length){
       html+='<p class="nota-rodape">Nenhuma batalha registrada ainda.</p>';
     }else{
@@ -3680,7 +3746,7 @@ async function renderBatalhaAba(){
         const [a,b]=chave.split('|');
         const vA=(c.vitorias&&c.vitorias[a])||0, vB=(c.vitorias&&c.vitorias[b])||0;
         html+='<div style="border-bottom:1px solid var(--linha);padding:10px 0">'+
-          '<p style="font-weight:800;margin:0 0 4px">'+esc(cap(a))+' × '+esc(cap(b))+'</p>'+
+          '<p style="font-weight:800;margin:0 0 4px"><span style="cursor:pointer;text-decoration:underline" onclick="abrirPerfilBatalha(\''+a+'\')">'+esc(cap(a))+'</span> × <span style="cursor:pointer;text-decoration:underline" onclick="abrirPerfilBatalha(\''+b+'\')">'+esc(cap(b))+'</span></p>'+
           '<p class="nota-rodape" style="margin:0">'+c.batalhas+' batalha'+(c.batalhas===1?'':'s')+' · '+esc(cap(a))+' '+vA+' vitória'+(vA===1?'':'s')+' · '+esc(cap(b))+' '+vB+' vitória'+(vB===1?'':'s')+(c.empates?' · '+c.empates+' empate'+(c.empates===1?'':'s'):'')+'</p>'+
           (c.sequencia&&c.sequencia.quem&&c.sequencia.qtd>1?'<p class="nota-rodape" style="margin:2px 0 0;color:var(--ouro)">🔥 '+esc(cap(c.sequencia.quem))+' — '+c.sequencia.qtd+' vitórias seguidas</p>':'')+
           '</div>';
