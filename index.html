@@ -3264,7 +3264,7 @@ async function batGerarDoDiaSeNecessario(){
   for(const [a,b] of pares){
     const id=batIdBatalha(data,a,b);
     try{
-      await batCriarDocumentoBatalha(id,[a,b],perguntas);
+      await batCriarDocumentoBatalha(id,[a,b],perguntas,'diaria');
       fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({titulo:'⚔️ Sua batalha de hoje!',texto:cap(a)+' vs '+cap(b)+' — 5 perguntas te esperando.',
           destinatarios:[a,b],url:'/'})}).catch(()=>{});
@@ -3417,6 +3417,7 @@ function batRenderTela(){
   const corpo=document.getElementById('batModalCorpo');
   if(!corpo||!batDadosAtual)return;
   const b=batDadosAtual, oponente=batOponenteAtual;
+  const tituloTela=b.tipo==='desafio'?'DESAFIO':'BATALHA DO DIA';
   const minhasRespostas=(b.respostas[eu]||[]).filter(Boolean).length;
   const cabecalho='<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px">'+
     '<div style="text-align:center">'+fotoUsuario(eu,44)+'<div style="font-weight:800;font-size:.8rem;margin-top:4px">'+esc(cap(eu))+'</div></div>'+
@@ -3427,7 +3428,7 @@ function batRenderTela(){
     const meusAcertos=b.acertos[eu]||0, dele=b.acertos[oponente]||0;
     const resTxt=b.resultado==='empate'?'🤝 EMPATE!':(b.resultado===eu?'🏆 VOCÊ VENCEU!':'😔 '+cap(oponente).toUpperCase()+' VENCEU!');
     const meusPontos=b.pontos[eu]||0;
-    corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA ENCERRADA</div>'+cabecalho+
+    corpo.innerHTML='<div class="fq-titulo">'+tituloTela+' ENCERRADA</div>'+cabecalho+
       '<p style="text-align:center;font-family:Anton,sans-serif;font-size:1.4rem;margin:10px 0">'+meusAcertos+' × '+dele+'</p>'+
       '<p style="text-align:center;font-weight:900;font-size:1.1rem;color:'+(b.resultado===eu?'#2E8B57':(b.resultado==='empate'?'#B9B9C2':'#C0392B'))+'">'+resTxt+'</p>'+
       '<p style="text-align:center;color:#9B9BA4;font-size:.82rem;margin-top:4px">Você ganhou +'+meusPontos+' ponto'+(meusPontos===1?'':'s')+' de batalha.</p>'+
@@ -3436,7 +3437,7 @@ function batRenderTela(){
     return;
   }
   if(minhasRespostas>=BAT_MAX_PERGUNTAS){
-    corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA 1×1</div>'+cabecalho+
+    corpo.innerHTML='<div class="fq-titulo">'+tituloTela+'</div>'+cabecalho+
       '<p style="text-align:center;font-weight:800;margin-top:10px">Você já respondeu as '+BAT_MAX_PERGUNTAS+' perguntas!</p>'+
       '<p style="text-align:center;color:#9B9BA4;font-size:.85rem">Esperando <b>'+esc(cap(oponente))+'</b> terminar pra saber o resultado.</p>'+
       '<button class="fq-fechar" onclick="batAtualizarEFechar()"><span class="cruz-btn">✠</span> Verificar / Fechar</button>';
@@ -3447,7 +3448,7 @@ function batRenderTela(){
   const pergunta=FQ_PERGUNTAS.find(q=>q.id===perguntaId);
   if(!pergunta){corpo.innerHTML='<p style="text-align:center">Erro ao carregar a pergunta.</p>';return;}
   const opcoes=pergunta.alternativas.map((op,i)=>'<button class="fq-opcao" onclick="batResponder('+i+')">'+fqEsc(op)+'</button>').join('');
-  corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA 1×1</div>'+cabecalho+
+  corpo.innerHTML='<div class="fq-titulo">'+tituloTela+'</div>'+cabecalho+
     '<p style="text-align:center;color:#9B9BA4;font-size:.78rem;margin-bottom:4px">Pergunta '+(indice+1)+' de '+BAT_MAX_PERGUNTAS+'</p>'+
     '<div class="fq-nivel">'+fqEsc(pergunta.nivel||'')+'</div>'+
     '<div class="fq-pergunta">'+fqEsc(pergunta.pergunta)+'</div>'+
@@ -3499,10 +3500,10 @@ async function desContarUsadosNaSemana(usuario,oponente){
 }
 /* cria de fato a batalha (documento em batalhas_quiz) — reaproveitado tanto pelas batalhas
    automáticas do dia quanto pelos desafios manuais aceitos */
-async function batCriarDocumentoBatalha(idBatalha,jogadores,perguntas){
+async function batCriarDocumentoBatalha(idBatalha,jogadores,perguntas,tipo){
   const [a,b]=jogadores;
   await db.collection('batalhas_quiz').doc(idBatalha).set({
-    data:batChaveDia(),jogadores:[a,b],perguntas,
+    data:batChaveDia(),jogadores:[a,b],perguntas,tipo:tipo||'diaria',
     respostas:{[a]:[],[b]:[]},acertos:{[a]:0,[b]:0},
     status:'aguardando',resultado:null,pontos:{[a]:0,[b]:0},
     criadaEm:Date.now(),finalizadaEm:null
@@ -3543,7 +3544,7 @@ async function desAceitarDesafio(idDesafio){
   const perguntas=batEscolherPerguntasDoDia(cfg);
   await batSalvarConfig(cfg);
   const idBatalha='desafio__'+idDesafio;
-  await batCriarDocumentoBatalha(idBatalha,[d.desafiante,d.desafiado],perguntas);
+  await batCriarDocumentoBatalha(idBatalha,[d.desafiante,d.desafiado],perguntas,'desafio');
   await ref.update({status:'aceito',batalhaId:idBatalha});
   registrarLog('desafio','Aceitou desafio de '+d.desafiante);
   try{
@@ -3616,7 +3617,7 @@ async function renderListaDesafios(){
     });
   }
   html+='<p style="font-weight:800;margin:14px 0 4px">Desafiar alguém</p>'+
-    '<div style="background:var(--carvao2);border:1px solid var(--linha);border-radius:10px;padding:10px 12px;margin:0 0 10px;font-size:.86rem;line-height:1.5;color:var(--branco)">Você pode desafiar <b>cada pessoa</b> até <b style="color:var(--ouro)">'+DES_MAX_POR_SEMANA+'x por semana</b>. O número ao lado de cada nome mostra quantas vezes você já desafiou aquela pessoa.</div>';
+    '<div style="padding:10px 12px;margin:0 0 10px;font-size:.86rem;line-height:1.5;color:#F2F0EA">Você pode desafiar <b>cada pessoa</b> até <b style="color:#FFD24B">'+DES_MAX_POR_SEMANA+'x por semana</b>. O número ao lado de cada nome mostra quantas vezes você já desafiou aquela pessoa.</div>';
   usuarios.filter(u=>u!==eu).forEach(u=>{
     const usadosComEsse=usosPorOponente[u]||0;
     const esgotado=usadosComEsse>=DES_MAX_POR_SEMANA;
@@ -3658,12 +3659,13 @@ async function renderBatalhaAba(){
         html+='<p style="font-weight:800;margin:12px 0 4px;color:var(--cinza);font-size:.76rem;text-transform:uppercase">'+batFmtDiaSimples(dia)+'</p>';
         porDia[dia].forEach(b=>{
           const [a,c]=b.jogadores;
+          const marcador=(b.tipo==='desafio'?'🎯 ':'')+esc(cap(a))+' × '+esc(cap(c));
           if(b.status!=='finalizada'){
-            html+='<div class="mini-linha"><span>'+esc(cap(a))+' × '+esc(cap(c))+'</span><span class="pt" style="color:var(--cinza)">em andamento</span></div>';
+            html+='<div class="mini-linha"><span>'+marcador+'</span><span class="pt" style="color:var(--cinza)">em andamento</span></div>';
           }else{
             const acA=b.acertos[a]||0, acC=b.acertos[c]||0;
             const txt=b.resultado==='empate'?'Empate '+acA+'×'+acC:(b.resultado===a?cap(a)+' venceu '+acA+'×'+acC:cap(c)+' venceu '+acC+'×'+acA);
-            html+='<div class="mini-linha"><span>'+esc(cap(a))+' × '+esc(cap(c))+'</span><span class="pt">'+esc(txt)+'</span></div>';
+            html+='<div class="mini-linha"><span>'+marcador+'</span><span class="pt">'+esc(txt)+'</span></div>';
           }
         });
       });
@@ -4232,12 +4234,7 @@ function dicaMenuSuperiorHome(){
   const btn=document.getElementById('btnMenuSec');
   const el=document.getElementById('menuSecundario');
   if(!btn||!el)return;
-  if(aba!=='jogos'){
-    btn.classList.remove('chamando-atencao-continuo');
-    if(!el.classList.contains('oculto')){el.classList.add('oculto');btn.classList.remove('aberto');}
-    return;
-  }
-  // na Home: abre o menu e deixa aberto, sem piscar e sem sumir sozinho
+  // menu fica sempre visível, em qualquer aba — não esconde mais fora da Home
   btn.classList.add('chamando-atencao-continuo');
   if(el.classList.contains('oculto'))toggleMenuSecundario();
 }
