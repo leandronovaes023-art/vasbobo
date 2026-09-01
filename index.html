@@ -872,13 +872,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
       </div>
     </div>
   </header>
-  <div id="cruzEntradaOverlay" style="position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:none;pointer-events:none;overflow:hidden">
-    <div id="cruzEntradaTitulo" style="position:absolute;top:4%;left:0;right:0;text-align:center;opacity:0;transition:opacity .5s ease">
-      <span class="titulo-vasbobo-3d">VASBOBO</span>
-    </div>
-    <img id="cruzEntradaClara" src="img/menu/cruz-nova-grande.png" alt="" style="position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);height:min(78vh,600px);width:auto;max-width:92vw;object-fit:contain;opacity:0">
-    <img id="cruzEntradaFinal" src="img/menu/icone-menu-cruz4.png" alt="" style="position:absolute;width:170px;height:auto;opacity:0">
-  </div>
   <div class="lembrete-avaliar oculto" id="lembreteAvaliar" style="position:fixed" onclick="if(this.classList.contains('recolhido'))toggleLembreteRecolhido(event)">
     <div class="lembrete-corpo" id="lembreteAvaliarCorpo" onclick="if(!lembreteJogoId)return;abrirJogoNaAvaliacao(lembreteJogoId)">
       <span id="lembreteAvaliarTexto"></span>
@@ -1413,13 +1406,13 @@ function statusJogo(j){
 }
 function podePalpitar(j){
   if(j.resultado)return false;
-  if(modoTeste())return true;
+  if(modoTeste()&&souAdmin())return true; // só o admin ganha esse bypass — nunca o usuário comum, mesmo com modo teste ligado sem querer
   const ini=inicioJogo(j);
   if(!ini)return true;
   return new Date() < new Date(ini.getTime()-FECHA_PALPITE_MIN*60000);
 }
 function tempoDeAvaliar(j){
-  if(modoTeste())return true;
+  if(modoTeste()&&souAdmin())return true;
   const s=statusJogo(j);
   if(s!=='avaliar'&&s!=='encerrado')return false;
   if(prazoAvaliarVenceu(j))return false; // prazo de 24h já passou — não aceita mais avaliação, ponto final
@@ -1432,7 +1425,7 @@ function participouDaRodada(j){
 }
 function podeAvaliar(j){
   if(!tempoDeAvaliar(j))return false;
-  if(modoTeste())return true;
+  if(modoTeste()&&souAdmin())return true;
   if(!participouDaRodada(j))return false;
   return !!(j.emCampo&&j.emCampo.length); // só libera com a lista de quem jogou
 }
@@ -3640,7 +3633,7 @@ function entrarNoApp(loginNovo){
   zerarQuizSeNecessario();
   isentarBoboBetSeNecessario();
   atualizarBotaoNotificacao();
-  if(loginNovo)animarEntradaCruz();
+  // animação de entrada removida a pedido — login vai direto pra Home
   if('Notification' in window&&Notification.permission==='granted')ativarOuvintePrimeiroPlano();
   timerTick=setInterval(async()=>{
     const el=document.activeElement;
@@ -3675,91 +3668,6 @@ function toggleMenuSecundario(e){
 }
 /* dica visual pra ensinar que a cruz de malta abre um menu com mais opções: balança e abre
    sozinha por um instante, fecha, espera, e repete mais uma vez — só na Home, só ao entrar */
-/* animação de entrada da cruz de malta — só na primeira vez que a pessoa entra na Home depois
-   do login (não repete a cada refresh comum, só quando realmente entrou/logou agora) */
-let _cruzEntradaJaRodou=false;
-function animarEntradaCruz(){
-  if(_cruzEntradaJaRodou)return;
-  _cruzEntradaJaRodou=true;
-  const overlay=document.getElementById('cruzEntradaOverlay');
-  const clara=document.getElementById('cruzEntradaClara');
-  const final=document.getElementById('cruzEntradaFinal');
-  const btnReal=document.getElementById('btnMenuSec');
-  const titulo=document.getElementById('cruzEntradaTitulo');
-  const tituloReal=document.getElementById('logoVasboboTexto');
-  if(!overlay||!clara||!final||!btnReal||!titulo||!tituloReal)return;
-  overlay.style.display='flex';
-  btnReal.style.visibility='hidden';
-  tituloReal.style.visibility='hidden';
-  clara.style.opacity='0';final.style.opacity='0';
-  clara.style.transition='none';
-  titulo.style.transition='none';
-  titulo.style.top='4%';titulo.style.left='0';titulo.style.right='0';titulo.style.transform='none';
-  // fundo transparente (mostra a própria Home por trás, já carregada), cruz aparece já grande,
-  // bate rápido (2 batidas) e depois vai pro menu — igual antes. O que muda: o VASBOBO também
-  // "pousa" no lugar de verdade dele no cabeçalho, em vez de simplesmente sumir
-  requestAnimationFrame(()=>{
-    clara.style.transition='opacity .4s ease';
-    clara.style.opacity='1';
-    titulo.style.transition='opacity .4s ease';
-    titulo.style.opacity='1';
-  });
-  // batimento de coração rápido — só 2 batidas (cada uma já com duas pulsações, vem do CSS)
-  setTimeout(()=>{clara.classList.add('cruz-batendo');},350);
-  setTimeout(()=>{clara.classList.remove('cruz-batendo');void clara.offsetWidth;clara.classList.add('cruz-batendo');},900);
-  // diminui + sobe até a altura/posição real do botão do menu, se transformando nele — e, ao
-  // mesmo tempo, o VASBOBO gigante encolhe até o tamanho e lugar do texto de verdade do cabeçalho
-  const inicioTransicao=1500;
-  setTimeout(()=>{
-    const rAtual=clara.getBoundingClientRect();
-    clara.style.height='auto';
-    clara.style.width=rAtual.width+'px';
-    clara.style.left=(rAtual.left+rAtual.width/2)+'px';
-    clara.style.top=(rAtual.top+rAtual.height/2)+'px';
-    clara.style.transform='translate(-50%,-50%) scale(1)';
-    void clara.offsetWidth;
-    const alvo=btnReal.getBoundingClientRect();
-    const imgAlvo=btnReal.querySelector('img');
-    const larguraAlvo=imgAlvo?imgAlvo.getBoundingClientRect().width:46;
-    const cxAlvo=alvo.left+alvo.width/2, cyAlvo=alvo.top+alvo.height/2;
-    clara.classList.remove('cruz-batendo');
-    clara.style.transition='left .7s cubic-bezier(.4,0,.2,1),top .7s cubic-bezier(.4,0,.2,1),width .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)';
-    clara.style.left=cxAlvo+'px';clara.style.top=cyAlvo+'px';clara.style.width=larguraAlvo+'px';
-    final.style.left=cxAlvo+'px';final.style.top=cyAlvo+'px';final.style.width=larguraAlvo+'px';
-    final.style.transform='translate(-50%,-50%) scale(1)';
-    // o VASBOBO grande viaja até o retângulo exato do texto real no cabeçalho
-    const rTitulo=tituloReal.getBoundingClientRect();
-    titulo.style.transition='left .7s cubic-bezier(.4,0,.2,1),top .7s cubic-bezier(.4,0,.2,1),font-size .7s cubic-bezier(.4,0,.2,1)';
-    titulo.style.left=rTitulo.left+'px';
-    titulo.style.right='auto';
-    titulo.style.top=rTitulo.top+'px';
-    titulo.style.textAlign='left';
-    const spanTitulo=titulo.querySelector('.titulo-vasbobo-3d');
-    if(spanTitulo){
-      spanTitulo.style.transition='font-size .7s cubic-bezier(.4,0,.2,1),color .5s ease,-webkit-text-stroke-width .5s ease';
-      spanTitulo.style.fontSize=rTitulo.height*0.85+'px';
-    }
-    setTimeout(()=>{
-      final.style.transition='opacity .4s ease';
-      clara.style.transition=clara.style.transition+',opacity .4s ease';
-      final.style.opacity='1';
-      clara.style.opacity='0';
-      titulo.style.transition=titulo.style.transition+',opacity .3s ease';
-      titulo.style.opacity='0';
-      tituloReal.style.visibility='visible';
-    },500);
-  },inicioTransicao);
-  // termina: esconde a camada de animação, mostra o botão de verdade, batimento pequeno e abre o menu
-  setTimeout(()=>{
-    overlay.style.display='none';
-    btnReal.style.visibility='visible';
-    btnReal.classList.add('chamando-atencao');
-    setTimeout(()=>{
-      btnReal.classList.remove('chamando-atencao');
-      dicaMenuSuperiorHome();
-    },400);
-  },inicioTransicao+950);
-}
 function dicaMenuSuperiorHome(){
   const btn=document.getElementById('btnMenuSec');
   const el=document.getElementById('menuSecundario');
@@ -4354,21 +4262,24 @@ function renderPalpiteCard(j,s){
   const meu=j.palpites[eu];
   const aberto=podePalpitar(j);
   let html='<div class="card"><h2>Palpites Vasbobo</h2>';
-  if(aberto){
+  if(meu){
+    // já tem palpite registrado — só mostra, nunca mais edita nem remove. Sem exceção.
+    html+='<p style="font-size:.92rem">Seu palpite: <b class="display">Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>'+
+      '<p class="nota-rodape" style="margin-top:6px;color:var(--vermelho)">🔒 Palpite registrado — não é mais possível alterar ou remover.</p>';
+  }else if(aberto){
     html+='<div class="palpite-form"><span class="display" style="font-size:1rem">Vasco</span>'+
-      '<input type="number" min="0" max="20" id="ppV" value="'+(meu?meu.v:'')+'" aria-label="Gols do Vasco">'+
+      '<input type="number" min="0" max="20" id="ppV" value="" aria-label="Gols do Vasco">'+
       '<span class="display" style="color:var(--cinza)">×</span>'+
-      '<input type="number" min="0" max="20" id="ppA" value="'+(meu?meu.a:'')+'" aria-label="Gols do adversário">'+
+      '<input type="number" min="0" max="20" id="ppA" value="" aria-label="Gols do adversário">'+
       '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
       '<div class="grid g2" style="margin-top:12px">'+
-      '<div><label style="font-weight:800;color:var(--branco)">Seu MVP da partida</label>'+selectJogadores('ppMvp',meu?meu.mvp:'',false,true)+'</div>'+
-      '<div><label style="font-weight:800;color:var(--branco)">Quem faz gol?</label>'+selectJogadores('ppGol',meu?meu.gol:'',true,false)+'</div></div>'+
-      '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()"><span style="color:var(--vermelho)">✠</span> '+(meu?'Atualizar meu palpite':'Enviar meu palpite')+'</button>'+
-      (meu?'<button class="btn fantasma" style="margin-top:8px;color:var(--vermelho)" onclick="removerMeuPalpite()">🗑️ Remover meu palpite</button>':'')+
-      (meu&&meu.edicoes?'<p class="nota-rodape" style="margin:6px 0 0;color:'+(meu.edicoes>=3?'var(--vermelho)':'var(--cinza)')+'">'+(meu.edicoes>=3?'Você já usou as 3 alterações permitidas pra esse jogo.':'Você já alterou '+meu.edicoes+'x — restam '+(3-meu.edicoes)+' alteraç'+(3-meu.edicoes===1?'ão':'ões')+'.')+'</p>':'')+
+      '<div><label style="font-weight:800;color:var(--branco)">Seu MVP da partida</label>'+selectJogadores('ppMvp','',false,true)+'</div>'+
+      '<div><label style="font-weight:800;color:var(--branco)">Quem faz gol?</label>'+selectJogadores('ppGol','',true,false)+'</div></div>'+
+      '<button class="btn claro" style="margin-top:14px" onclick="enviarPalpite()"><span style="color:var(--vermelho)">✠</span> Enviar meu palpite</button>'+
+      '<p class="nota-rodape" style="margin:6px 0 0">Atenção: só dá pra enviar uma vez — depois de enviado, não tem como alterar nem remover.</p>'+
       tooltipPontuacao();
-  }else if(meu){
-    html+='<p style="font-size:.92rem">Seu palpite: <b class="display">Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>';
+  }else{
+    html+='<p class="nota-rodape">Os palpites deste jogo já fecharam.</p>';
   }
 
   const nomes=Object.keys(j.palpites);
@@ -4401,19 +4312,7 @@ function renderPalpiteCard(j,s){
 let mostrarTodosPalpites=false;
 function togglePalpitesTodos(){ mostrarTodosPalpites=!mostrarTodosPalpites; render(); }
 
-async function removerMeuPalpite(){
-  const id=jogoAberto;
-  const j0=dados.jogos[id];
-  if(!j0||!j0.palpites[eu]){avisar('Você não tem palpite nesse jogo.');return;}
-  if(!podePalpitar(j0)){avisar('Os palpites deste jogo já fecharam — não dá mais pra remover.');return;}
-  if(!(await confirmar('Remover seu palpite desse jogo? Você pode dar um novo depois, mas isso conta como uma das 3 alterações permitidas.')))return;
-  const ok=await mutar(()=>{
-    const j=dados.jogos[id];
-    if(j&&j.palpites[eu])delete j.palpites[eu];
-  });
-  if(ok){avisar('Palpite removido.',true);render();}
-  else avisar('Erro ao remover. Tenta de novo.');
-}
+
 async function enviarPalpite(){
   const v=document.getElementById('ppV').value,a=document.getElementById('ppA').value;
   const mvp=document.getElementById('ppMvp').value||'';
@@ -4425,19 +4324,17 @@ async function enviarPalpite(){
   if(faltando.length){avisar('Falta preencher: '+faltando.join(', ')+'. Preenche tudo antes de salvar.');return;}
   const id=jogoAberto;
   const j0=dados.jogos[id];
-  const meu0=j0&&j0.palpites[eu];
-  const edicoesAtuais=(meu0&&meu0.edicoes)||0;
-  if(meu0&&edicoesAtuais>=3){avisar('Você já alterou esse palpite 3 vezes — esse é o limite pra esse jogo.');return;}
-  let travou=false;
+  if(j0&&j0.palpites[eu]){avisar('Você já registrou seu palpite pra esse jogo — não é possível enviar de novo.');render();return;}
+  let travou=false, jaTinha=false;
   const ok=await mutar(()=>{
     const j=dados.jogos[id];
-    if(j&&podePalpitar(j)){
-      const antes=j.palpites[eu];
-      j.palpites[eu]={v:+v,a:+a,mvp,gol,ts:Date.now(),edicoes:antes?(antes.edicoes||0)+1:0};
-    }else travou=true;
+    if(!j||!podePalpitar(j)){travou=true;return;}
+    if(j.palpites[eu]){jaTinha=true;return;} // proteção extra contra corrida: reconfere com dado fresco antes de gravar
+    j.palpites[eu]={v:+v,a:+a,mvp,gol,ts:Date.now()};
   });
   if(travou){avisar('Os palpites deste jogo já fecharam.');render();return;}
-  if(ok){avisar('Palpite salvo! Boa sorte. 🍀',true);mostrarFraseResultado(+v,+a);}
+  if(jaTinha){avisar('Você já tinha registrado esse palpite (provavelmente em outra aba/aparelho).');render();return;}
+  if(ok){avisar('Palpite salvo! Boa sorte. 🍀',true);mostrarFraseResultado(+v,+a);registrarLog('palpite','Palpitou em '+id+': Vasco '+v+' x '+a+' · MVP: '+nomeJogador(mvp)+' · Gol: '+(gol===SEM_GOL?'Vasco não marca':nomeJogador(gol)));}
   render();
 }
 
@@ -4505,10 +4402,12 @@ function renderAvaliacaoCard(j,s){
       '<div class="notas-botoes">'+Array.from({length:11},(_,i)=>i).map(n=>'<button type="button" class="btn-nota" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\''+n+'\')">'+n+'</button>').join('')+
       '<button type="button" class="btn-nota btn-na" onclick="salvarAvaliacao(\''+p.id+'\',\'nota\',\'NA\')" title="Jogou pouco / sem nota definida">N/A</button></div>';
     const comentarios=coletarComentarios(j,p.id);
+    const liberado=pontuacaoLiberada(j); // só mostra a média de todos e os comentários da galera depois que a rodada fecha — enquanto está rolando, cada um só vê a própria nota, sem se influenciar
     html+='<div class="aval-bloco" id="jogb_'+p.id+'"><div class="aval-topo">'+
       '<span class="aval-nome" style="display:flex;align-items:center;gap:8px">'+fotoJogador(p.id,32)+'<span>'+(p.num?p.num+' · ':'')+esc(p.nome)+'<small>'+esc(p.pos)+'</small></span></span>'+
       '<span style="display:flex;align-items:center;gap:12px"><span class="salvo-tick" id="tick_'+p.id+'">salvo ✓</span>'+
-      '<span class="media-chip '+(media&&media.media!==null?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'<small id="votos_'+p.id+'">'+(media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos')+'</small></span></span></div>'+
+      (liberado?'<span class="media-chip '+(media&&media.media!==null?classeNota(media.media):'')+'" id="media_'+p.id+'">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'<small id="votos_'+p.id+'">'+(media?(media.n||0)+' voto'+(media.n===1?'':'s')+(media.na?' + '+media.na+' N/A':''):'sem votos')+'</small></span>':'<span class="media-chip" style="opacity:.55" title="Libera quando a rodada fechar">🔒 <small>até fechar</small></span>')+
+      '</span></div>'+
       botoesNota+
       '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="btn-elogio-critica" id="btnElogio_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'elogio\')">Elogio</button><button type="button" class="btn-elogio-critica" id="btnCritica_'+p.id+'" onclick="toggleFrasesRapidas(\''+p.id+'\',\'critica\')">Crítica</button></div>'+
       '<div id="frasesRapidas_'+p.id+'" class="oculto"></div>'+
@@ -4523,7 +4422,7 @@ function renderAvaliacaoCard(j,s){
       ' <button type="button" onclick="removerComentario(\''+p.id+'\')" style="background:none;border:none;color:var(--vermelho);text-decoration:underline;cursor:pointer;font-size:.78rem">remover</button></div>'+
       '<button type="button" class="btn-mic" id="mic_'+p.id+'" onclick="alternarGravacao(\''+p.id+'\')" title="Gravar um áudio de até 15s sobre esse jogador">'+ICONE_MIC+' <span style="font-size:.72rem;font-weight:700">Gravar áudio</span></button>'+
       '</div>'+
-      (comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':'')+
+      (liberado&&comentarios.length?'<details style="margin-top:8px"><summary>Ver '+comentarios.length+' avaliação(ões) da galera</summary><div style="margin-top:6px">'+comentarios.map(c=>'<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span><span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span><span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com):'<i style="color:var(--cinza)">sem comentário</i>')+'</span></div>').join('')+'</div></details>':(!liberado&&comentarios.length?'<p class="nota-rodape" style="margin-top:8px">🔒 As avaliações da galera pra esse jogador aparecem quando a rodada fechar (todos votarem ou o prazo de 24h vencer).</p>':''))+
       '</div>';
   });
   html+='<button class="btn" style="width:100%;margin-top:6px" onclick="finalizarAvaliacao()"><span style="color:var(--vermelho)">✠</span> Finalizar avaliação</button>';
@@ -5201,6 +5100,7 @@ async function excluirJogoId(id){
 function mediasJogador(pid){
   let sT=0,nT=0,sM=0,nM=0;
   Object.values(dados.jogos).forEach(j=>{
+    if(!pontuacaoLiberada(j))return; // rodada ainda rolando — não conta ainda pra média geral do jogador
     Object.entries(j.avaliacoes||{}).forEach(([user,porJog])=>{
       const av=porJog[pid];
       if(av&&av.nota!==undefined&&av.nota!==null&&av.nota!==''&&av.nota!=='NA'){
@@ -5452,6 +5352,7 @@ function renderRankingGeralJogadores(){
   const mvpCount={},worstCount={};
   jogosOrdenados().forEach(([id,j])=>{
     if(!j.avaliacoes||!Object.keys(j.avaliacoes).length)return;
+    if(!pontuacaoLiberada(j))return; // rodada ainda rolando — não entra no histórico ainda, evita vazar nota parcial
     const idsAvaliados=[...new Set(Object.values(j.avaliacoes).flatMap(porJog=>Object.keys(porJog||{})))];
     const comMedia=idsAvaliados.map(pid=>({pid,media:mediaJogadorNoJogo(j,pid)}))
       .filter(x=>x.media&&x.media.media!==null);
