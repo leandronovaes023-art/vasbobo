@@ -1409,7 +1409,14 @@ function podePalpitar(j){
   if(j.resultado)return false;
   if(modoTeste()&&souAdmin())return true; // só o admin ganha esse bypass — nunca o usuário comum, mesmo com modo teste ligado sem querer
   const ini=inicioJogo(j);
-  if(!ini)return true;
+  if(!ini){
+    // sem horário cadastrado ainda: só libera enquanto a DATA do jogo não chegou — assim que
+    // chega o dia, trava por segurança (evita brecha de ficar aberto pra sempre se o admin
+    // esquecer de cadastrar a hora, inclusive com o jogo já rolando)
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const dataJogo=new Date(j.data+'T00:00:00');
+    return dataJogo>hoje;
+  }
   return new Date() < new Date(ini.getTime()-FECHA_PALPITE_MIN*60000);
 }
 function tempoDeAvaliar(j){
