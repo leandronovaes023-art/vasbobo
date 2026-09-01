@@ -6502,6 +6502,7 @@ async function renderAdmin(){
   '<p class="nota-rodape" style="margin:0 0 12px">Uma foto da pontuação de cada usuário no quiz, tirada a cada hora — só pra ter um histórico recente caso apareça algo estranho na pontuação. Guarda só as últimas 12h, depois disso apaga sozinho.</p>'+
   '<button class="btn fantasma" style="margin-bottom:12px" onclick="fazerBackupManualQuiz()">💾 Fazer backup permanente agora (antes de mudanças grandes)</button>'+
   '<div id="listaBackupsQuiz">Carregando…</div><div id="detalheBackupQuiz" style="margin-top:12px"></div></div></details></div>'+
+  '<div class="card"><details ontoggle="if(this.open)carregarAdminBatalhas()"><summary>⚔️ Batalhas — histórico e dashboard</summary><div style="margin-top:12px" id="areaAdminBatalhas">Carregando…</div></details></div>'+
   '<div class="card"><details ontoggle="if(this.open)prepararLogs()"><summary>🗂️ Logs de acesso e ações</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Login/logout, navegação, ações administrativas, notificações enviadas e eventos do sistema (backups, atualização do site) — guardado pra sempre. Escolha o dia e, se quiser, refine com os filtros abaixo.</p>'+
   '<div class="grid g2" style="margin-bottom:10px">'+
@@ -6829,6 +6830,113 @@ async function fazerBackupManualQuiz(){
     else avisar('Erro ao criar backup.');
   }catch(e){avisar('Erro ao criar backup: '+e.message);}
 }
+/* =================== ADMIN — DASHBOARD E HISTÓRICO DE BATALHAS =================== */
+let _adminBatalhasCache=null;
+async function carregarAdminBatalhas(){
+  const area=document.getElementById('areaAdminBatalhas');
+  if(!area)return;
+  area.innerHTML='<p class="nota-rodape">Carregando…</p>';
+  try{
+    const [snap,cfg]=await Promise.all([
+      db.collection('batalhas_quiz').orderBy('criadaEm','desc').limit(300).get(),
+      batLerConfig()
+    ]);
+    _adminBatalhasCache={batalhas:snap.docs.map(d=>({id:d.id,...d.data()})),cfg};
+    renderAdminBatalhasDashboard();
+  }catch(e){
+    console.error('erro ao carregar admin batalhas',e);
+    area.innerHTML='<p class="nota-rodape">Erro ao carregar.</p>';
+  }
+}
+function renderAdminBatalhasDashboard(){
+  const area=document.getElementById('areaAdminBatalhas');
+  if(!area||!_adminBatalhasCache)return;
+  const {batalhas,cfg}=_adminBatalhasCache;
+  const hoje=batChaveDia();
+  const seteDiasAtras=new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+  const batalhasHoje=batalhas.filter(b=>b.data===hoje).length;
+  const batalhasSemana=batalhas.filter(b=>b.data>=seteDiasAtras).length;
+  const usuariosAtivos=batUsuariosAtivos().length;
+  const finalizadas=batalhas.filter(b=>b.status==='finalizada');
+  let somaAcertos=0,totalRespostas=0;
+  finalizadas.forEach(b=>{
+    b.jogadores.forEach(j=>{
+      somaAcertos+=(b.acertos[j]||0);
+      totalRespostas++;
+    });
+  });
+  const mediaAcertos=totalRespostas?(somaAcertos/totalRespostas).toFixed(1):'–';
+  const vitoriasPorUsuario={};
+  finalizadas.forEach(b=>{if(b.resultado&&b.resultado!=='empate')vitoriasPorUsuario[b.resultado]=(vitoriasPorUsuario[b.resultado]||0)+1;});
+  const maisVitorias=Object.entries(vitoriasPorUsuario).sort((a,b)=>b[1]-a[1])[0];
+  const rivalidades=Object.entries(cfg.confrontos||{}).sort((a,b)=>(b[1].batalhas||0)-(a[1].batalhas||0))[0];
+  const descansos=Object.entries(cfg.descansos||{}).sort((a,b)=>(b[1].qtd||0)-(a[1].qtd||0))[0];
+
+  let html='<div class="grid g2" style="gap:8px;margin-bottom:14px">'+
+    dashCard('Batalhas hoje',batalhasHoje)+
+    dashCard('Batalhas na semana',batalhasSemana)+
+    dashCard('Usuários ativos',usuariosAtivos)+
+    dashCard('Média de acertos',mediaAcertos+'/5')+
+    dashCard('Mais vitórias',maisVitorias?cap(maisVitorias[0])+' ('+maisVitorias[1]+')':'–')+
+    dashCard('Maior rivalidade',rivalidades?rivalidades[0].split('|').map(cap).join(' × ')+' ('+rivalidades[1].batalhas+'x)':'–')+
+    dashCard('Mais vezes sem jogar',descansos?cap(descansos[0])+' ('+descansos[1].qtd+'x)':'–')+
+    '</div>';
+
+  const usuarios=batUsuariosAtivos();
+  html+='<div class="grid g2" style="margin-bottom:10px">'+
+    '<div><label for="fBatData">Data</label><input id="fBatData" type="date" onchange="renderAdminBatalhasLista()"></div>'+
+    '<div><label for="fBatUsuario">Usuário</label><select id="fBatUsuario" onchange="renderAdminBatalhasLista()"><option value="">Todos</option>'+usuarios.map(u=>'<option value="'+u+'">'+esc(cap(u))+'</option>').join('')+'</select></div>'+
+    '<div><label for="fBatResultado">Resultado</label><select id="fBatResultado" onchange="renderAdminBatalhasLista()"><option value="">Todos</option><option value="empate">Empates</option><option value="pendente">Em andamento</option></select></div>'+
+    '<div><label for="fBatTipo">Tipo</label><select id="fBatTipo" onchange="renderAdminBatalhasLista()"><option value="">Todos</option><option value="diaria">Batalha do dia</option><option value="desafio">Desafio</option></select></div>'+
+    '</div>'+
+    '<button class="btn fantasma" style="width:100%;margin-bottom:10px" onclick="document.getElementById(\'fBatData\').value=\'\';document.getElementById(\'fBatUsuario\').value=\'\';document.getElementById(\'fBatResultado\').value=\'\';document.getElementById(\'fBatTipo\').value=\'\';renderAdminBatalhasLista()">Limpar filtros</button>'+
+    '<div id="listaAdminBatalhas"></div>';
+  area.innerHTML=html;
+  renderAdminBatalhasLista();
+}
+function dashCard(rotulo,valor){
+  return '<div style="background:var(--carvao2);border:1px solid var(--linha);border-radius:10px;padding:10px 12px">'+
+    '<div style="font-family:Anton,sans-serif;font-size:1.15rem;color:var(--branco)">'+esc(String(valor))+'</div>'+
+    '<div style="font-size:.66rem;color:var(--cinza);text-transform:uppercase;letter-spacing:.03em">'+esc(rotulo)+'</div></div>';
+}
+function renderAdminBatalhasLista(){
+  const alvo=document.getElementById('listaAdminBatalhas');
+  if(!alvo||!_adminBatalhasCache)return;
+  const fData=document.getElementById('fBatData').value;
+  const fUsuario=document.getElementById('fBatUsuario').value;
+  const fResultado=document.getElementById('fBatResultado').value;
+  const fTipo=document.getElementById('fBatTipo').value;
+  let lista=_adminBatalhasCache.batalhas.filter(b=>{
+    if(fData&&b.data!==fData)return false;
+    if(fUsuario&&!b.jogadores.includes(fUsuario))return false;
+    if(fResultado==='empate'&&b.resultado!=='empate')return false;
+    if(fResultado==='pendente'&&b.status==='finalizada')return false;
+    if(fTipo&&(b.tipo||'diaria')!==fTipo)return false;
+    return true;
+  });
+  if(!lista.length){alvo.innerHTML='<p class="nota-rodape">Nenhuma batalha encontrada com esses filtros.</p>';return;}
+  let html='<p class="nota-rodape" style="margin-bottom:8px">'+lista.length+' batalha'+(lista.length===1?'':'s')+' encontrada'+(lista.length===1?'':'s')+'.</p>';
+  lista.forEach(b=>{
+    const [a,c]=b.jogadores;
+    const situacao=b.status==='finalizada'?(b.resultado==='empate'?'Empate':cap(b.resultado)+' venceu'):'Em andamento';
+    html+='<details style="border-bottom:1px solid var(--linha);padding:8px 0">'+
+      '<summary style="cursor:pointer"><b>'+esc(cap(a))+' × '+esc(cap(c))+'</b> — '+esc(batFmtDiaSimples(b.data))+' · '+(b.tipo==='desafio'?'🎯 desafio':'🔄 diária')+' · '+esc(situacao)+'</summary>'+
+      '<div style="margin-top:8px;font-size:.8rem">'+
+      '<p><b>Status:</b> '+esc(b.status)+' · <b>ID:</b> '+esc(b.id)+'</p>'+
+      '<p><b>Criada em:</b> '+new Date(b.criadaEm).toLocaleString('pt-BR')+(b.finalizadaEm?' · <b>Finalizada em:</b> '+new Date(b.finalizadaEm).toLocaleString('pt-BR'):'')+'</p>'+
+      '<p><b>Perguntas usadas (IDs):</b> '+b.perguntas.join(', ')+'</p>'+
+      b.jogadores.map(j=>{
+        const resp=(b.respostas[j]||[]);
+        const acertos=b.acertos[j]||0;
+        const erros=resp.filter(r=>r&&!r.correta).length;
+        return '<p style="margin-top:6px"><b>'+esc(cap(j))+':</b> '+acertos+' acerto'+(acertos===1?'':'s')+', '+erros+' erro'+(erros===1?'':'s')+', '+(b.pontos[j]||0)+' ponto'+((b.pontos[j]||0)===1?'':'s')+' de batalha'+
+          '<br><span style="color:var(--cinza)">Respostas: '+resp.map((r,i)=>r?('P'+(i+1)+':'+(r.correta?'✓':'✗')+' às '+new Date(r.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})):('P'+(i+1)+':—')).join(' · ')+'</span></p>';
+      }).join('')+
+      '</div></details>';
+  });
+  alvo.innerHTML=html;
+}
+
 async function carregarBackupsQuiz(){
   const alvo=document.getElementById('listaBackupsQuiz');
   if(!alvo)return;
