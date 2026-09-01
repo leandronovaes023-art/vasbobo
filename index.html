@@ -5852,6 +5852,7 @@ async function renderAdmin(){
   '<div id="listaBackupsAuto">Carregando…</div></div></details></div>'+
   '<div class="card"><details ontoggle="if(this.open)carregarBackupsQuiz()"><summary>🧠 Histórico recente do Quiz</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Uma foto da pontuação de cada usuário no quiz, tirada a cada hora — só pra ter um histórico recente caso apareça algo estranho na pontuação. Guarda só as últimas 12h, depois disso apaga sozinho.</p>'+
+  '<button class="btn fantasma" style="margin-bottom:12px" onclick="fazerBackupManualQuiz()">💾 Fazer backup permanente agora (antes de mudanças grandes)</button>'+
   '<div id="listaBackupsQuiz">Carregando…</div><div id="detalheBackupQuiz" style="margin-top:12px"></div></div></details></div>'+
   '<div class="card"><details ontoggle="if(this.open)prepararLogs()"><summary>🗂️ Logs de acesso e ações</summary><div style="margin-top:12px">'+
   '<p class="nota-rodape" style="margin:0 0 12px">Login/logout, navegação, ações administrativas, notificações enviadas e eventos do sistema (backups, atualização do site) — guardado pra sempre. Escolha o dia e, se quiser, refine com os filtros abaixo.</p>'+
@@ -6168,6 +6169,17 @@ async function carregarBackupsAutomaticos(){
     });
     alvo.innerHTML=h;
   }catch(e){ alvo.innerHTML='<p class="nota-rodape">Erro ao carregar backups.</p>'; console.error(e); }
+}
+async function fazerBackupManualQuiz(){
+  if(!(await confirmar('Fazer um backup permanente do quiz agora? Ele fica guardado pra sempre (não apaga sozinho), como ponto de restauração antes de mudanças grandes.')))return;
+  avisar('Fazendo backup…',true);
+  try{
+    const rotulo=prompt('Dê um nome pra esse backup (ex: pre-batalhas-1x1):','pre-batalhas-1x1')||'manual';
+    const r=await fetch('/.netlify/functions/backup-quiz-manual?rotulo='+encodeURIComponent(rotulo));
+    const j=await r.json();
+    if(j.ok){avisar('Backup permanente criado: '+j.id,true);registrarLog('admin','Criou backup manual permanente do quiz: '+j.id);}
+    else avisar('Erro ao criar backup.');
+  }catch(e){avisar('Erro ao criar backup: '+e.message);}
 }
 async function carregarBackupsQuiz(){
   const alvo=document.getElementById('listaBackupsQuiz');
