@@ -3777,7 +3777,13 @@ async function renderBatalhaAba(){
       batLerConfig()
     ]);
     const batalhas=batalhasSnap.docs.map(d=>({id:d.id,...d.data()}));
-    let html='<div class="card"><button class="btn claro" style="width:100%" onclick="abrirPerfilBatalha(\''+eu+'\')">Ver meu perfil de batalha</button></div>';
+    let html='<div class="card">'+
+      '<h2 style="margin-bottom:8px">⚔️ Como funciona</h2>'+
+      '<p style="font-size:.85rem;line-height:1.6;margin-bottom:6px">O antigo quiz individual ("O Que Mais Entende de Futebol") virou o <b>Quiz x1</b>: todo dia o sistema escolhe automaticamente um adversário pra você — os dois respondem as <b>mesmas 5 perguntas</b>, sem ver a resposta um do outro até os dois terminarem. Quem acerta mais, vence. Prazo: até <b>23:59 do mesmo dia</b>, senão quem respondeu leva por W.O.</p>'+
+      '<p style="font-size:.85rem;line-height:1.6;margin-bottom:6px">O <b>Desafio</b> é parecido, mas quem escolhe o adversário é <b>você</b> — pode desafiar qualquer pessoa até <b>3x por semana cada</b>. Pontua igual ao Quiz x1 (vitória=2, empate=1, derrota=0), mas o prazo pra responder é de <b>24h</b> depois que o desafio é aceito.</p>'+
+      '<p style="font-size:.85rem;line-height:1.6">Os dois tipos aparecem juntos aqui embaixo — 🎯 marca os Desafios, o resto é Quiz x1.</p>'+
+      '</div>';
+    html+='<div class="card"><button class="btn claro" style="width:100%" onclick="abrirPerfilBatalha(\''+eu+'\')">Ver meu perfil de batalha</button></div>';
     html+='<div class="card"><h2>⚔️ Resultados por dia</h2>';
     if(!batalhas.length){
       html+='<p class="nota-rodape">Nenhuma batalha registrada ainda.</p>';
@@ -4371,11 +4377,9 @@ function dicaMenuSuperiorHome(){
   btn.classList.add('chamando-atencao-continuo');
   if(el.classList.contains('oculto'))toggleMenuSecundario();
 }
-document.addEventListener('click',(e)=>{
-  const el=document.getElementById('menuSecundario');
-  const btn=document.getElementById('btnMenuSec');
-  if(el&&!el.classList.contains('oculto')&&!el.contains(e.target)&&e.target!==btn){el.classList.add('oculto');if(btn)btn.classList.remove('aberto');}
-});
+/* o menu superior agora fica sempre visível (ver dicaMenuSuperiorHome) — removido o fechar
+   automático ao clicar fora, que brigava com esse comportamento e escondia o menu em QUALQUER
+   clique na página */
 function mudarAba(a,semHistorico){
   if(a!==aba)registrarLog('aba','Abriu aba: '+a);
   aba=a;jogoAberto=null;
