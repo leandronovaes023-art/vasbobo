@@ -116,6 +116,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   }
   html.tema-claro .card,html.tema-claro .rodada-box,html.tema-claro .jog-linha,html.tema-claro .mini-linha{box-shadow:0 1px 4px rgba(0,0,0,.06)}
   *{box-sizing:border-box;margin:0;padding:0}
+  [onclick]{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable;font-size:106%}
   body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5;background:var(--preto)}
   .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
@@ -3615,11 +3616,11 @@ async function renderListaDesafios(){
     });
   }
   html+='<p style="font-weight:800;margin:14px 0 4px">Desafiar alguém</p>'+
-    '<p class="nota-rodape" style="margin:0 0 8px">Você pode desafiar cada pessoa até <b style="color:var(--branco)">'+DES_MAX_POR_SEMANA+'x por semana</b> — o número ao lado mostra quantas vezes você já desafiou cada um.</p>';
+    '<div style="background:var(--carvao2);border:1px solid var(--linha);border-radius:10px;padding:10px 12px;margin:0 0 10px;font-size:.86rem;line-height:1.5;color:var(--branco)">Você pode desafiar <b>cada pessoa</b> até <b style="color:var(--ouro)">'+DES_MAX_POR_SEMANA+'x por semana</b>. O número ao lado de cada nome mostra quantas vezes você já desafiou aquela pessoa.</div>';
   usuarios.filter(u=>u!==eu).forEach(u=>{
     const usadosComEsse=usosPorOponente[u]||0;
     const esgotado=usadosComEsse>=DES_MAX_POR_SEMANA;
-    html+='<div class="linha-tabela" style="align-items:center"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,28)+'<b class="rank-nome">'+esc(cap(u))+'</b><small style="color:var(--cinza)">'+usadosComEsse+'/'+DES_MAX_POR_SEMANA+'</small></span>'+
+    html+='<div class="linha-tabela" style="align-items:center"><span style="display:flex;align-items:center;gap:8px">'+fotoUsuario(u,28)+'<b class="rank-nome">'+esc(cap(u))+'</b><span style="font-size:.78rem;font-weight:800;color:'+(esgotado?'var(--vermelho)':'var(--cinza)')+'">'+usadosComEsse+'/'+DES_MAX_POR_SEMANA+'</span></span>'+
       '<button class="btn fantasma" style="padding:4px 10px;font-size:.72rem" '+(esgotado?'disabled':'')+' onclick="desEnviarDesafio(\''+u+'\')">Desafiar</button></div>';
   });
   area.innerHTML=html||'<p class="nota-rodape">Nenhum outro usuário disponível.</p>';
