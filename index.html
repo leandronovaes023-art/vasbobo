@@ -3273,6 +3273,54 @@ async function batGerarDoDiaSeNecessario(){
   registrarLog('sistema','Batalhas do dia '+data+' geradas: '+pares.map(p=>p.join(' x ')).join(', ')+(descansando?' · descansa: '+descansando:''));
   return infoDia;
 }
+/* prazo pra responder: Quiz x1 (batalha do dia) tem até 23:59 do MESMO dia em que começou;
+   Desafio tem até 24h depois de criado. Passou do prazo e um dos dois não terminou as 5? Quem
+   terminou ganha por W.O. Se NINGUÉM terminou nada, a batalha só expira sem pontos pra ninguém. */
+function batPrazoVenceu(b){
+  if(b.tipo==='desafio'){
+    return Date.now()>(b.criadaEm+24*3600000);
+  }
+  // diária: vence às 23:59:59 (horário de Brasília) do dia b.data
+  const fimDoDia=new Date(b.data+'T23:59:59-03:00').getTime();
+  return Date.now()>fimDoDia;
+}
+/* checa e, se for o caso, decide a batalha por W.O. — transação atômica, protegida contra
+   duas pessoas resolvendo isso ao mesmo tempo (ex: os dois abrindo o app na mesma hora) */
+async function batVerificarWO(idBatalha){
+  const ref=db.collection('batalhas_quiz').doc(idBatalha);
+  let resultado=null;
+  await db.runTransaction(async(tx)=>{
+    const snap=await tx.get(ref);
+    if(!snap.exists)return;
+    const b=snap.data();
+    if(b.status==='finalizada')return;
+    if(!batPrazoVenceu(b))return;
+    const [a,c]=b.jogadores;
+    const completouA=(b.respostas[a]||[]).filter(Boolean).length>=BAT_MAX_PERGUNTAS;
+    const completouC=(b.respostas[c]||[]).filter(Boolean).length>=BAT_MAX_PERGUNTAS;
+    if(completouA&&completouC)return; // os dois terminaram — deveria já estar finalizada, não mexe
+    if(!completouA&&!completouC){
+      // ninguém respondeu nada (ou nem todas) — expira sem W.O. pra ninguém
+      b.status='expirada';b.resultado=null;b.pontos={[a]:0,[c]:0};b.finalizadaEm=Date.now();b.motivoEncerramento='sem_resposta';
+    }else{
+      const vencedor=completouA?a:c;
+      b.status='finalizada';b.resultado=vencedor;b.pontos={[vencedor]:2,[(vencedor===a?c:a)]:0};
+      b.finalizadaEm=Date.now();b.motivoEncerramento='wo';
+    }
+    tx.set(ref,b);
+    resultado=b;
+  });
+  if(resultado&&resultado.motivoEncerramento==='wo'){
+    await batAtualizarConfrontoHistorico(resultado);
+    try{
+      await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({titulo:'⚔️ Vitória por W.O.!',
+          texto:cap(resultado.resultado)+' venceu por W.O. — o adversário não respondeu a tempo.',
+          destinatarios:resultado.jogadores,url:'/'})});
+    }catch(e){}
+  }
+  return resultado;
+}
 async function batMinhaBatalhaHoje(){
   const data=batChaveDia();
   const cfg=await batLerConfig();
@@ -3283,8 +3331,12 @@ async function batMinhaBatalhaHoje(){
   if(!par)return {status:'sem_batalha'};
   const outro=par.find(u=>u!==eu);
   const id=batIdBatalha(data,eu,outro);
-  const snap=await db.collection('batalhas_quiz').doc(id).get();
+  let snap=await db.collection('batalhas_quiz').doc(id).get();
   if(!snap.exists)return {status:'sem_batalha'};
+  if(snap.data().status!=='finalizada'&&batPrazoVenceu(snap.data())){
+    await batVerificarWO(id);
+    snap=await db.collection('batalhas_quiz').doc(id).get();
+  }
   return {status:'ok',id,batalha:snap.data(),oponente:outro};
 }
 /* responde uma pergunta da batalha — transação atômica, protegida contra responder 2x a mesma.
@@ -3397,11 +3449,15 @@ async function batAbrirBatalhaEspecifica(idBatalha){
   corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div><p style="text-align:center;margin-top:14px">Carregando…</p>';
   modal.classList.remove('oculto');
   await fqCarregarPerguntas();
-  const snap=await db.collection('batalhas_quiz').doc(idBatalha).get();
+  let snap=await db.collection('batalhas_quiz').doc(idBatalha).get();
   if(!snap.exists){
     corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div><p style="text-align:center;margin-top:14px">Essa batalha não existe mais.</p>'+
       '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
     return;
+  }
+  if(snap.data().status!=='finalizada'&&batPrazoVenceu(snap.data())){
+    await batVerificarWO(idBatalha);
+    snap=await db.collection('batalhas_quiz').doc(idBatalha).get();
   }
   const b=snap.data();
   const oponente=b.jogadores.find(j=>j!==eu);
@@ -3417,22 +3473,31 @@ function batRenderTela(){
   const corpo=document.getElementById('batModalCorpo');
   if(!corpo||!batDadosAtual)return;
   const b=batDadosAtual, oponente=batOponenteAtual;
-  const tituloTela=b.tipo==='desafio'?'DESAFIO':'BATALHA DO DIA';
+  const tituloTela=b.tipo==='desafio'?'DESAFIO':'QUIZ X1';
   const minhasRespostas=(b.respostas[eu]||[]).filter(Boolean).length;
   const cabecalho='<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px">'+
     '<div style="text-align:center">'+fotoUsuario(eu,44)+'<div style="font-weight:800;font-size:.8rem;margin-top:4px">'+esc(cap(eu))+'</div></div>'+
     '<div style="font-family:Anton,sans-serif;font-size:1.1rem;color:var(--cinza)">×</div>'+
     '<div style="text-align:center">'+fotoUsuario(oponente,44)+'<div style="font-weight:800;font-size:.8rem;margin-top:4px">'+esc(cap(oponente))+'</div></div>'+
     '</div>';
+  if(b.status==='expirada'){
+    corpo.innerHTML='<div class="fq-titulo">'+tituloTela+' EXPIRADA</div>'+cabecalho+
+      '<p style="text-align:center;font-weight:800;margin-top:10px">Ninguém respondeu a tempo.</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.85rem">Essa passou do prazo sem ninguém completar — não valeu ponto pra nenhum dos dois.</p>'+
+      '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+    return;
+  }
   if(b.status==='finalizada'){
     const meusAcertos=b.acertos[eu]||0, dele=b.acertos[oponente]||0;
-    const resTxt=b.resultado==='empate'?'🤝 EMPATE!':(b.resultado===eu?'🏆 VOCÊ VENCEU!':'😔 '+cap(oponente).toUpperCase()+' VENCEU!');
+    const foiWO=b.motivoEncerramento==='wo';
+    const resTxt=b.resultado==='empate'?'🤝 EMPATE!':(b.resultado===eu?(foiWO?'🏆 VOCÊ VENCEU POR W.O.!':'🏆 VOCÊ VENCEU!'):(foiWO?'😔 '+cap(oponente).toUpperCase()+' VENCEU POR W.O.':'😔 '+cap(oponente).toUpperCase()+' VENCEU!'));
     const meusPontos=b.pontos[eu]||0;
     corpo.innerHTML='<div class="fq-titulo">'+tituloTela+' ENCERRADA</div>'+cabecalho+
-      '<p style="text-align:center;font-family:Anton,sans-serif;font-size:1.4rem;margin:10px 0">'+meusAcertos+' × '+dele+'</p>'+
+      (foiWO?'':'<p style="text-align:center;font-family:Anton,sans-serif;font-size:1.4rem;margin:10px 0">'+meusAcertos+' × '+dele+'</p>')+
       '<p style="text-align:center;font-weight:900;font-size:1.1rem;color:'+(b.resultado===eu?'#2E8B57':(b.resultado==='empate'?'#B9B9C2':'#C0392B'))+'">'+resTxt+'</p>'+
+      (foiWO?'<p style="text-align:center;color:#9B9BA4;font-size:.82rem;margin-top:4px">'+(b.resultado===eu?'Seu adversário':'Você')+' não respondeu a tempo.</p>':'')+
       '<p style="text-align:center;color:#9B9BA4;font-size:.82rem;margin-top:4px">Você ganhou +'+meusPontos+' ponto'+(meusPontos===1?'':'s')+' de batalha.</p>'+
-      '<p style="text-align:center;color:#9B9BA4;font-size:.78rem">Você acertou '+meusAcertos+' de '+BAT_MAX_PERGUNTAS+' perguntas.</p>'+
+      (foiWO?'':'<p style="text-align:center;color:#9B9BA4;font-size:.78rem">Você acertou '+meusAcertos+' de '+BAT_MAX_PERGUNTAS+' perguntas.</p>')+
       '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
     return;
   }
@@ -3448,8 +3513,10 @@ function batRenderTela(){
   const pergunta=FQ_PERGUNTAS.find(q=>q.id===perguntaId);
   if(!pergunta){corpo.innerHTML='<p style="text-align:center">Erro ao carregar a pergunta.</p>';return;}
   const opcoes=pergunta.alternativas.map((op,i)=>'<button class="fq-opcao" onclick="batResponder('+i+')">'+fqEsc(op)+'</button>').join('');
+  const prazoTxto=b.tipo==='desafio'?'Prazo: até 24h após o desafio ter sido aceito, ou o adversário leva por W.O.':'Prazo: até 23:59 de hoje, ou o adversário leva por W.O.';
   corpo.innerHTML='<div class="fq-titulo">'+tituloTela+'</div>'+cabecalho+
-    '<p style="text-align:center;color:#9B9BA4;font-size:.78rem;margin-bottom:4px">Pergunta '+(indice+1)+' de '+BAT_MAX_PERGUNTAS+'</p>'+
+    '<p style="text-align:center;color:#9B9BA4;font-size:.78rem;margin-bottom:2px">Pergunta '+(indice+1)+' de '+BAT_MAX_PERGUNTAS+'</p>'+
+    '<p style="text-align:center;color:#C0392B;font-size:.7rem;margin-bottom:4px">⏱️ '+prazoTxto+'</p>'+
     '<div class="fq-nivel">'+fqEsc(pergunta.nivel||'')+'</div>'+
     '<div class="fq-pergunta">'+fqEsc(pergunta.pergunta)+'</div>'+
     '<div id="batOpcoes">'+opcoes+'</div>'+
@@ -4811,7 +4878,7 @@ async function carregarBatCardHome(){
     }
   }catch(e){
     console.error('erro no card de batalha',e);
-    el.textContent='Toque pra ver sua batalha de hoje.';
+    el.textContent='Toque pra ver seu Quiz x1 hoje.';
   }
   try{
     const pendentes=await desListarPendentesRecebidos();
