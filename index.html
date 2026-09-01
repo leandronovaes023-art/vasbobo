@@ -655,6 +655,9 @@ console.log('Firebase conectado ao Vasbobo ✓');
 <div class="fq-veu oculto" id="fqModal" onclick="if(event.target===this)fqFecharModal()">
   <div class="fq-modal" id="fqModalCorpo"></div>
 </div>
+<div class="fq-veu oculto" id="batModal" onclick="if(event.target===this)batFecharModal()">
+  <div class="fq-modal" id="batModalCorpo"></div>
+</div>
 
 <div class="aviso" id="aviso"></div>
 
@@ -982,7 +985,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <button class="btn-hamburger" id="btnMenuSec" onclick="toggleMenuSecundario(event)" aria-label="Mais opções"><img src="img/menu/icone-menu-cruz4.png" alt=""></button>
     <div class="menu-secundario oculto" id="menuSecundario">
       <a href="/ogrupo.html" class="tab">🍻 O Grupo</a>
-      <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
+      <a href="/" class="tab">⚔️ Batalha 1×1</a>
       <button class="tab" id="tabCastigos" onclick="mudarAba('castigos',true);toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores',true);toggleMenuSecundario()">🗣️ Jogadores</button>
       <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico',true);toggleMenuSecundario()">🧠 Perfil Psicótico</button>
@@ -3140,6 +3143,319 @@ function fqFecharModal(){
   fqTokenPergunta++;
   document.getElementById('fqModal').classList.add('oculto');
 }
+
+/* =================== BATALHAS 1×1 (FASE 1) =================================================
+   Substitui o quiz individual por confrontos diários entre dois usuários, com as mesmas 5
+   perguntas do dia pra todo mundo. Os pontos de ACERTO continuam alimentando o porJogo de
+   sempre (Ranking da Rodada / BoboBet, via fqRegistrarResposta) — só o "quem venceu a batalha"
+   é uma pontuação nova e separada.
+   Coleções novas no Firestore:
+   - shared/vasbobo_batalhas_config: fila de perguntas do dia, pareamento de cada dia, contador
+     de descansos por usuário, histórico agregado de confrontos por dupla
+   - batalhas_quiz/{data}__{userA}__{userB}: uma batalha específica (perguntas, respostas de
+     cada um, acertos, resultado, pontos)
+   FASES SEGUINTES (não implementadas ainda): desafio manual entre usuários, perfil público,
+   aba administrativa com filtros/dashboard completo. */
+const BAT_MAX_PERGUNTAS=5;
+function batChaveDia(d){
+  d=d||new Date();
+  const br=new Date(d.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
+  if(br.getHours()<6)br.setDate(br.getDate()-1); // dia da batalha começa às 6h, igual o quiz antigo
+  return br.toISOString().slice(0,10);
+}
+function batUsuariosAtivos(){
+  return Object.keys(dados.usuarios||{}).sort();
+}
+async function batLerConfig(){
+  try{
+    const snap=await db.collection('shared').doc('vasbobo_batalhas_config').get();
+    if(snap.exists){
+      const v=snap.data();
+      return {diario:v.diario||{},descansos:v.descansos||{},confrontos:v.confrontos||{},filaPerguntas:v.filaPerguntas||[]};
+    }
+  }catch(e){}
+  return {diario:{},descansos:{},confrontos:{},filaPerguntas:[]};
+}
+async function batSalvarConfig(cfg){
+  await db.collection('shared').doc('vasbobo_batalhas_config').set(cfg);
+}
+function batGruposUnicosPerguntas(){
+  const grupos={};
+  FQ_PERGUNTAS.forEach(q=>{
+    const chave=(q.pergunta||'').trim();
+    if(!grupos[chave])grupos[chave]=[];
+    grupos[chave].push(q.id);
+  });
+  return grupos;
+}
+/* escolhe as 5 perguntas OFICIAIS do dia — uma fila compartilhada só (não por usuário), pra
+   todo mundo usar as mesmas perguntas, sem repetir enquanto sobrarem perguntas novas na fila */
+function batEscolherPerguntasDoDia(cfg){
+  const grupos=batGruposUnicosPerguntas();
+  const textosUnicos=Object.keys(grupos);
+  let fila=cfg.filaPerguntas||[];
+  if(!fila.length)fila=fqEmbaralhar(textosUnicos);
+  else{
+    const jaNaFila=new Set(fila);
+    const novas=textosUnicos.filter(t=>!jaNaFila.has(t));
+    if(novas.length)fila=fila.concat(fqEmbaralhar(novas));
+  }
+  const escolhidas=[];
+  for(let i=0;i<BAT_MAX_PERGUNTAS&&fila.length;i++){
+    const texto=fila.shift();
+    fila.push(texto);
+    const variantes=grupos[texto]||[];
+    escolhidas.push(variantes[Math.floor(Math.random()*variantes.length)]);
+  }
+  cfg.filaPerguntas=fila;
+  return escolhidas;
+}
+function batChaveDupla(a,b){return [a,b].sort().join('|');}
+function batIdBatalha(data,a,b){return data+'__'+[a,b].sort().join('__');}
+/* pareamento justo: quem descansa é sempre quem descansou menos vezes (e há mais tempo, em
+   caso de empate) — depois monta os pares priorizando quem nunca se enfrentou / está há mais
+   tempo sem se enfrentar / tem menos confrontos entre si */
+function batGerarPares(usuarios,cfg){
+  const pool=[...usuarios];
+  let descansando=null;
+  if(pool.length%2===1){
+    pool.sort((a,b)=>{
+      const da=cfg.descansos[a]||{qtd:0,ultimaVez:0}, db_=cfg.descansos[b]||{qtd:0,ultimaVez:0};
+      return (da.qtd-db_.qtd)||(da.ultimaVez-db_.ultimaVez);
+    });
+    descansando=pool.shift();
+  }
+  const restantes=[...pool];
+  const pares=[];
+  while(restantes.length>=2){
+    const a=restantes.shift();
+    let melhor=null,melhorScore=null;
+    restantes.forEach(b=>{
+      const c=cfg.confrontos[batChaveDupla(a,b)]||{batalhas:0,ultimaData:null};
+      const diasDesde=c.ultimaData?(Date.now()-new Date(c.ultimaData+'T00:00:00').getTime()):Infinity;
+      const score=[c.batalhas,-diasDesde];
+      if(!melhor||score[0]<melhorScore[0]||(score[0]===melhorScore[0]&&score[1]<melhorScore[1])){melhor=b;melhorScore=score;}
+    });
+    pares.push([a,melhor]);
+    restantes.splice(restantes.indexOf(melhor),1);
+  }
+  return {pares,descansando};
+}
+/* gera as batalhas do dia se ainda não existirem — chamado ao entrar na Home */
+async function batGerarDoDiaSeNecessario(){
+  const data=batChaveDia();
+  const cfg=await batLerConfig();
+  if(cfg.diario[data])return cfg.diario[data];
+  await fqCarregarPerguntas();
+  const usuarios=batUsuariosAtivos();
+  if(usuarios.length<2)return null;
+  const perguntas=batEscolherPerguntasDoDia(cfg);
+  const {pares,descansando}=batGerarPares(usuarios,cfg);
+  const infoDia={perguntas,pares,descansando,criadoEm:Date.now()};
+  cfg.diario[data]=infoDia;
+  if(descansando){
+    if(!cfg.descansos[descansando])cfg.descansos[descansando]={qtd:0,ultimaVez:0};
+    cfg.descansos[descansando].qtd++;
+    cfg.descansos[descansando].ultimaVez=Date.now();
+  }
+  await batSalvarConfig(cfg);
+  for(const [a,b] of pares){
+    const id=batIdBatalha(data,a,b);
+    try{
+      await db.collection('batalhas_quiz').doc(id).set({
+        data,jogadores:[a,b],perguntas,
+        respostas:{[a]:[],[b]:[]},acertos:{[a]:0,[b]:0},
+        status:'aguardando',resultado:null,pontos:{[a]:0,[b]:0},
+        criadaEm:Date.now(),finalizadaEm:null
+      });
+      fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({titulo:'⚔️ Sua batalha de hoje!',texto:cap(a)+' vs '+cap(b)+' — 5 perguntas te esperando.',
+          destinatarios:[a,b],url:'/'})}).catch(()=>{});
+    }catch(e){console.error('erro ao criar batalha',id,e);}
+  }
+  registrarLog('sistema','Batalhas do dia '+data+' geradas: '+pares.map(p=>p.join(' x ')).join(', ')+(descansando?' · descansa: '+descansando:''));
+  return infoDia;
+}
+async function batMinhaBatalhaHoje(){
+  const data=batChaveDia();
+  const cfg=await batLerConfig();
+  const infoDia=cfg.diario[data];
+  if(!infoDia)return {status:'sem_config'};
+  if(infoDia.descansando===eu)return {status:'descansando'};
+  const par=infoDia.pares.find(p=>p.includes(eu));
+  if(!par)return {status:'sem_batalha'};
+  const outro=par.find(u=>u!==eu);
+  const id=batIdBatalha(data,eu,outro);
+  const snap=await db.collection('batalhas_quiz').doc(id).get();
+  if(!snap.exists)return {status:'sem_batalha'};
+  return {status:'ok',id,batalha:snap.data(),oponente:outro};
+}
+/* responde uma pergunta da batalha — transação atômica, protegida contra responder 2x a mesma.
+   O acerto/erro TAMBÉM alimenta o porJogo de sempre, exatamente como o quiz antigo fazia, pra
+   não mudar nada no Ranking da Rodada / BoboBet — só o resultado da batalha em si é novo. */
+async function batResponderPergunta(idBatalha,indice,alternativa){
+  const usuario=eu;
+  const ref=db.collection('batalhas_quiz').doc(idBatalha);
+  let resultado=null,eraCorreta=null,finalizouAgora=false;
+  await db.runTransaction(async(tx)=>{
+    const snap=await tx.get(ref);
+    if(!snap.exists)return;
+    const b=snap.data();
+    if(!b.jogadores.includes(usuario))return;
+    const respostasUsuario=(b.respostas[usuario]||[]).slice();
+    if(respostasUsuario[indice])return; // já respondeu essa
+    const perguntaId=b.perguntas[indice];
+    const pergunta=FQ_PERGUNTAS.find(q=>q.id===perguntaId);
+    const correta=!!(pergunta&&pergunta.alternativas[alternativa]===pergunta.resposta_correta);
+    eraCorreta=correta;
+    respostasUsuario[indice]={alt:alternativa,correta,ts:Date.now()};
+    b.respostas[usuario]=respostasUsuario;
+    b.acertos[usuario]=respostasUsuario.filter(r=>r&&r.correta).length;
+    const outro=b.jogadores.find(j=>j!==usuario);
+    const respOutroCompletas=(b.respostas[outro]||[]).filter(Boolean).length;
+    const respUsuarioCompletas=respostasUsuario.filter(Boolean).length;
+    if(respUsuarioCompletas>=BAT_MAX_PERGUNTAS&&respOutroCompletas>=BAT_MAX_PERGUNTAS){
+      const acA=b.acertos[usuario],acB=b.acertos[outro];
+      if(acA>acB){b.resultado=usuario;b.pontos[usuario]=2;b.pontos[outro]=0;}
+      else if(acB>acA){b.resultado=outro;b.pontos[outro]=2;b.pontos[usuario]=0;}
+      else{b.resultado='empate';b.pontos[usuario]=1;b.pontos[outro]=1;}
+      b.status='finalizada';b.finalizadaEm=Date.now();
+      finalizouAgora=true;
+    }else{
+      b.status='em_andamento';
+    }
+    tx.set(ref,b);
+    resultado=b;
+  });
+  if(resultado&&eraCorreta!==null){
+    // mesmo porJogo de sempre, não muda nada no ranking da rodada/bobobet
+    try{await fqRegistrarResposta(usuario,eraCorreta);}catch(e){}
+  }
+  if(finalizouAgora&&resultado){
+    await batAtualizarConfrontoHistorico(resultado);
+    const outro=resultado.jogadores.find(j=>j!==usuario);
+    try{
+      await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({titulo:'⚔️ Batalha encerrada!',
+          texto:cap(resultado.jogadores[0])+' '+resultado.acertos[resultado.jogadores[0]]+' × '+resultado.acertos[resultado.jogadores[1]]+' '+cap(resultado.jogadores[1])+
+            (resultado.resultado==='empate'?' — empate!':' — '+cap(resultado.resultado)+' venceu!'),
+          destinatarios:resultado.jogadores,url:'/'})});
+    }catch(e){}
+  }
+  return resultado;
+}
+/* atualiza o histórico agregado de confrontos entre a dupla (usado no perfil, em fases futuras) */
+async function batAtualizarConfrontoHistorico(batalha){
+  const [a,b]=batalha.jogadores;
+  const chave=batChaveDupla(a,b);
+  const cfg=await batLerConfig();
+  const c=cfg.confrontos[chave]||{batalhas:0,vitorias:{},empates:0,ultimaData:null,sequencia:{quem:null,qtd:0}};
+  c.batalhas=(c.batalhas||0)+1;
+  c.ultimaData=batalha.data;
+  if(!c.vitorias)c.vitorias={};
+  if(batalha.resultado==='empate'){
+    c.empates=(c.empates||0)+1;
+    c.sequencia={quem:null,qtd:0};
+  }else{
+    c.vitorias[batalha.resultado]=(c.vitorias[batalha.resultado]||0)+1;
+    if(c.sequencia&&c.sequencia.quem===batalha.resultado)c.sequencia.qtd++;
+    else c.sequencia={quem:batalha.resultado,qtd:1};
+  }
+  cfg.confrontos[chave]=c;
+  await batSalvarConfig(cfg);
+}
+
+/* ---- interface da tela de batalha ---- */
+let batIdAtual=null, batDadosAtual=null, batOponenteAtual=null;
+async function batAbrirTelaBatalha(){
+  const modal=document.getElementById('batModal');
+  const corpo=document.getElementById('batModalCorpo');
+  if(!modal||!corpo)return;
+  corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA 1×1</div><p style="text-align:center;margin-top:14px">Carregando…</p>';
+  modal.classList.remove('oculto');
+  await fqCarregarPerguntas();
+  const info=await batMinhaBatalhaHoje();
+  if(info.status==='descansando'){
+    corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA 1×1</div>'+
+      '<p style="text-align:center;font-weight:800;margin-top:14px">Hoje é sua folga no rodízio.</p>'+
+      '<p style="text-align:center;color:#B9B9C2;font-size:.85rem">Sem batalha pra você hoje — volta amanhã!</p>'+
+      '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+    return;
+  }
+  if(info.status!=='ok'){
+    corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA 1×1</div>'+
+      '<p style="text-align:center;margin-top:14px">Nenhuma batalha disponível hoje.</p>'+
+      '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+    return;
+  }
+  batIdAtual=info.id;batDadosAtual=info.batalha;batOponenteAtual=info.oponente;
+  batRenderTela();
+}
+function batFecharModal(){
+  document.getElementById('batModal').classList.add('oculto');
+  batIdAtual=null;batDadosAtual=null;batOponenteAtual=null;
+}
+function batRenderTela(){
+  const corpo=document.getElementById('batModalCorpo');
+  if(!corpo||!batDadosAtual)return;
+  const b=batDadosAtual, oponente=batOponenteAtual;
+  const minhasRespostas=(b.respostas[eu]||[]).filter(Boolean).length;
+  const cabecalho='<div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px">'+
+    '<div style="text-align:center">'+fotoUsuario(eu,44)+'<div style="font-weight:800;font-size:.8rem;margin-top:4px">'+esc(cap(eu))+'</div></div>'+
+    '<div style="font-family:Anton,sans-serif;font-size:1.1rem;color:var(--cinza)">×</div>'+
+    '<div style="text-align:center">'+fotoUsuario(oponente,44)+'<div style="font-weight:800;font-size:.8rem;margin-top:4px">'+esc(cap(oponente))+'</div></div>'+
+    '</div>';
+  if(b.status==='finalizada'){
+    const meusAcertos=b.acertos[eu]||0, dele=b.acertos[oponente]||0;
+    const resTxt=b.resultado==='empate'?'🤝 EMPATE!':(b.resultado===eu?'🏆 VOCÊ VENCEU!':'😔 '+cap(oponente).toUpperCase()+' VENCEU!');
+    const meusPontos=b.pontos[eu]||0;
+    corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA ENCERRADA</div>'+cabecalho+
+      '<p style="text-align:center;font-family:Anton,sans-serif;font-size:1.4rem;margin:10px 0">'+meusAcertos+' × '+dele+'</p>'+
+      '<p style="text-align:center;font-weight:900;font-size:1.1rem;color:'+(b.resultado===eu?'#2E8B57':(b.resultado==='empate'?'#B9B9C2':'#C0392B'))+'">'+resTxt+'</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.82rem;margin-top:4px">Você ganhou +'+meusPontos+' ponto'+(meusPontos===1?'':'s')+' de batalha.</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.78rem">Você acertou '+meusAcertos+' de '+BAT_MAX_PERGUNTAS+' perguntas.</p>'+
+      '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+    return;
+  }
+  if(minhasRespostas>=BAT_MAX_PERGUNTAS){
+    corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA 1×1</div>'+cabecalho+
+      '<p style="text-align:center;font-weight:800;margin-top:10px">Você já respondeu as '+BAT_MAX_PERGUNTAS+' perguntas!</p>'+
+      '<p style="text-align:center;color:#9B9BA4;font-size:.85rem">Esperando <b>'+esc(cap(oponente))+'</b> terminar pra saber o resultado.</p>'+
+      '<button class="fq-fechar" onclick="batAtualizarEFechar()"><span class="cruz-btn">✠</span> Verificar / Fechar</button>';
+    return;
+  }
+  const indice=minhasRespostas;
+  const perguntaId=b.perguntas[indice];
+  const pergunta=FQ_PERGUNTAS.find(q=>q.id===perguntaId);
+  if(!pergunta){corpo.innerHTML='<p style="text-align:center">Erro ao carregar a pergunta.</p>';return;}
+  const opcoes=pergunta.alternativas.map((op,i)=>'<button class="fq-opcao" onclick="batResponder('+i+')">'+fqEsc(op)+'</button>').join('');
+  corpo.innerHTML='<div class="fq-titulo">⚔️ BATALHA 1×1</div>'+cabecalho+
+    '<p style="text-align:center;color:#9B9BA4;font-size:.78rem;margin-bottom:4px">Pergunta '+(indice+1)+' de '+BAT_MAX_PERGUNTAS+'</p>'+
+    '<div class="fq-nivel">'+fqEsc(pergunta.nivel||'')+'</div>'+
+    '<div class="fq-pergunta">'+fqEsc(pergunta.pergunta)+'</div>'+
+    '<div id="batOpcoes">'+opcoes+'</div>'+
+    '<div id="batFeedback"></div>';
+}
+async function batResponder(alternativa){
+  if(!batIdAtual)return;
+  document.querySelectorAll('#batOpcoes button').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('batFeedback');
+  if(fb)fb.innerHTML='<p style="text-align:center;color:#9B9BA4;font-size:.78rem;margin-top:8px">salvando…</p>';
+  const resultado=await batResponderPergunta(batIdAtual,(batDadosAtual.respostas[eu]||[]).filter(Boolean).length,alternativa);
+  if(resultado){
+    batDadosAtual=resultado;
+    setTimeout(()=>batRenderTela(),350); // pequena pausa pra dar sensação de resposta registrada
+  }
+}
+async function batAtualizarEFechar(){
+  if(!batIdAtual)return;
+  try{
+    const snap=await db.collection('batalhas_quiz').doc(batIdAtual).get();
+    if(snap.exists){batDadosAtual=snap.data();batRenderTela();return;}
+  }catch(e){}
+  batFecharModal();
+}
+
 async function zerarQuizSeNecessario(){
   // limpeza definitiva do quiz (não só filtrar na exibição) — dispara uma vez só, só pelo admin,
   // pra não ter vários usuários tentando escrever ao mesmo tempo
@@ -4113,11 +4429,11 @@ function renderListaJogos(){
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px"><button class="btn" '+corBtn+' style="padding:5px 12px;font-size:.76rem;display:inline-flex;align-items:center;gap:5px" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho);display:inline-flex;align-items:center;line-height:1">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
-    html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+
+    html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="batAbrirTelaBatalha()" id="cardBatalhaHome">'+
       '<div style="display:flex;align-items:center;gap:10px;width:100%">'+
       '<img src="img/embed/icone-quiz-menu.png" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:50%;flex:none">'+
-      '<div style="flex:1;min-width:0"><div style="font-weight:900;font-size:.8rem;text-transform:uppercase;letter-spacing:.02em">O Que Mais Entende de Futebol</div>'+
-      '<div id="quizCardHomeStatus" style="font-size:.76rem;color:var(--cinza);margin-top:1px">Carregando…</div></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:900;font-size:.8rem;text-transform:uppercase;letter-spacing:.02em">⚔️ Sua Batalha de Hoje</div>'+
+      '<div id="batCardHomeStatus" style="font-size:.76rem;color:var(--cinza);margin-top:1px">Carregando…</div></div>'+
       '</div></div>';
     html+='<div class="card">'+htmlCastigoRodadaBox()+'</div>';
   }
@@ -4152,23 +4468,36 @@ function renderListaJogos(){
   atualizarCronometro();
   atualizarCronometroAvaliar();
   carregarPremioMesSimples();
-  carregarQuizCardHome();
+  carregarBatCardHome();
 }
-/* card simples do quiz na Home — uma linha só, direto ao ponto */
-async function carregarQuizCardHome(){
-  const el=document.getElementById('quizCardHomeStatus');
+/* card da batalha do dia na Home — gera as batalhas do dia (se ainda não existirem) e mostra
+   o status: aguardando oponente, sua vez, empatado, vencendo, perdendo, ou descansando hoje */
+async function carregarBatCardHome(){
+  const el=document.getElementById('batCardHomeStatus');
   if(!el||!eu)return;
   try{
-    const estado=await fqLerEstado();
-    ESTADO_QUIZ=estado;
-    const status=fqStatusDia(estado,eu);
-    if(fqQuizAcabouHoje(status)){
-      el.innerHTML='<span style="color:var(--verde);font-weight:800">✅ Respondido hoje</span> — acertou '+status.acertos+' de '+status.respondidas+'. Volta amanhã pra mais!';
+    await batGerarDoDiaSeNecessario();
+    const info=await batMinhaBatalhaHoje();
+    if(info.status==='descansando'){
+      el.innerHTML='Hoje é sua folga no rodízio — sem batalha. Volta amanhã!';
+    }else if(info.status==='sem_batalha'||info.status==='sem_config'){
+      el.innerHTML='Nenhuma batalha disponível hoje.';
     }else{
-      el.innerHTML='Faltam <b style="color:var(--branco)">'+(FQ_MAX_RESPONDIDAS-status.respondidas)+' de '+FQ_MAX_RESPONDIDAS+'</b> perguntas de hoje.';
+      const b=info.batalha;
+      const meusAcertos=b.acertos[eu]||0, dele=b.acertos[info.oponente]||0;
+      const minhasRespostas=(b.respostas[eu]||[]).filter(Boolean).length;
+      if(b.status==='finalizada'){
+        const resTxt=b.resultado===eu?'🏆 Você venceu!':(b.resultado==='empate'?'🤝 Empate!':'Você perdeu essa.');
+        el.innerHTML='<b style="color:var(--branco)">'+cap(eu)+' '+meusAcertos+' × '+dele+' '+cap(info.oponente)+'</b> — '+resTxt;
+      }else if(minhasRespostas>=BAT_MAX_PERGUNTAS){
+        el.innerHTML='Você já respondeu — esperando <b style="color:var(--branco)">'+cap(info.oponente)+'</b> terminar.';
+      }else{
+        el.innerHTML='Contra <b style="color:var(--branco)">'+cap(info.oponente)+'</b> — '+(minhasRespostas?minhasRespostas+'/'+BAT_MAX_PERGUNTAS+' respondidas':'toque pra jogar')+'.';
+      }
     }
   }catch(e){
-    el.textContent='Toque pra responder o quiz do dia.';
+    console.error('erro no card de batalha',e);
+    el.textContent='Toque pra ver sua batalha de hoje.';
   }
 }
 function renderDetalhe(){
