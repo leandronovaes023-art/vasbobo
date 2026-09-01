@@ -937,6 +937,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
       <div id="frCard" style="background:#17171B;color:#fff;border-radius:14px;padding:32px 20px;text-align:center">
         <div id="frTexto" style="font-family:'Anton',sans-serif;font-size:1.35rem;text-transform:uppercase;line-height:1.5"></div>
         <p style="color:var(--verde);font-size:.8rem;margin-top:14px">✓ Palpite salvo com sucesso</p>
+        <p style="color:#E0293B;font-size:.76rem;margin-top:6px;font-weight:800">🔒 Registrado — não é mais possível alterar ou remover</p>
       </div>
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
         <button class="btn fantasma" style="flex:1" onclick="frPrintTela()">📸 Print a toda Tela</button>
@@ -4334,7 +4335,7 @@ async function enviarPalpite(){
   });
   if(travou){avisar('Os palpites deste jogo já fecharam.');render();return;}
   if(jaTinha){avisar('Você já tinha registrado esse palpite (provavelmente em outra aba/aparelho).');render();return;}
-  if(ok){avisar('Palpite salvo! Boa sorte. 🍀',true);mostrarFraseResultado(+v,+a);registrarLog('palpite','Palpitou em '+id+': Vasco '+v+' x '+a+' · MVP: '+nomeJogador(mvp)+' · Gol: '+(gol===SEM_GOL?'Vasco não marca':nomeJogador(gol)));}
+  if(ok){avisar('Palpite salvo e travado — não dá mais pra alterar. Boa sorte! 🍀',true);mostrarFraseResultado(+v,+a);registrarLog('palpite','Palpitou em '+id+': Vasco '+v+' x '+a+' · MVP: '+nomeJogador(mvp)+' · Gol: '+(gol===SEM_GOL?'Vasco não marca':nomeJogador(gol)));}
   render();
 }
 
