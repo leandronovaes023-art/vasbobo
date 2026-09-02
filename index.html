@@ -3322,6 +3322,26 @@ async function batVerificarWO(idBatalha){
   }
   return resultado;
 }
+/* junta a geração do dia + a busca da minha batalha numa função só, fazendo UMA leitura de
+   configuração em vez de duas em sequência — isso é o que fazia a tela demorar mais que o
+   necessário pra aparecer a pergunta */
+async function batObterMinhaBatalhaGarantida(){
+  const infoDia=await batGerarDoDiaSeNecessario();
+  if(!infoDia)return {status:'sem_config'};
+  if(infoDia.descansando===eu)return {status:'descansando'};
+  const par=infoDia.pares.find(p=>p.includes(eu));
+  if(!par)return {status:'sem_batalha'};
+  const outro=par.find(u=>u!==eu);
+  const data=batChaveDia();
+  const id=batIdBatalha(data,eu,outro);
+  let snap=await db.collection('batalhas_quiz').doc(id).get();
+  if(!snap.exists)return {status:'sem_batalha'};
+  if(snap.data().status!=='finalizada'&&batPrazoVenceu(snap.data())){
+    await batVerificarWO(id);
+    snap=await db.collection('batalhas_quiz').doc(id).get();
+  }
+  return {status:'ok',id,batalha:snap.data(),oponente:outro};
+}
 async function batMinhaBatalhaHoje(){
   const data=batChaveDia();
   const cfg=await batLerConfig();
@@ -3423,24 +3443,30 @@ async function batAbrirTelaBatalha(){
   if(!modal||!corpo)return;
   corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div><p style="text-align:center;margin-top:14px">Carregando…</p>';
   modal.classList.remove('oculto');
-  await fqCarregarPerguntas();
-  await batGerarDoDiaSeNecessario(); // garante que as batalhas de hoje já existem, mesmo se o card ainda não tinha terminado de gerar em segundo plano
-  const info=await batMinhaBatalhaHoje();
-  if(info.status==='descansando'){
+  try{
+    await fqCarregarPerguntas();
+    const info=await batObterMinhaBatalhaGarantida();
+    if(info.status==='descansando'){
+      corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
+        '<p style="text-align:center;font-weight:800;margin-top:14px">Hoje é sua folga no rodízio.</p>'+
+        '<p style="text-align:center;color:#B9B9C2;font-size:.85rem">Sem batalha pra você hoje — volta amanhã!</p>'+
+        '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+      return;
+    }
+    if(info.status!=='ok'){
+      corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
+        '<p style="text-align:center;margin-top:14px">Nenhuma batalha disponível hoje.</p>'+
+        '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+      return;
+    }
+    batIdAtual=info.id;batDadosAtual=info.batalha;batOponenteAtual=info.oponente;
+    batRenderTela();
+  }catch(e){
+    console.error('erro ao abrir Quiz x1',e);
     corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
-      '<p style="text-align:center;font-weight:800;margin-top:14px">Hoje é sua folga no rodízio.</p>'+
-      '<p style="text-align:center;color:#B9B9C2;font-size:.85rem">Sem batalha pra você hoje — volta amanhã!</p>'+
-      '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
-    return;
+      '<p style="text-align:center;margin-top:14px">Não deu pra carregar agora. Confere sua internet e tenta de novo.</p>'+
+      '<button class="fq-fechar" onclick="batAbrirTelaBatalha()"><span class="cruz-btn">✠</span> Tentar de novo</button>';
   }
-  if(info.status!=='ok'){
-    corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
-      '<p style="text-align:center;margin-top:14px">Nenhuma batalha disponível hoje.</p>'+
-      '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
-    return;
-  }
-  batIdAtual=info.id;batDadosAtual=info.batalha;batOponenteAtual=info.oponente;
-  batRenderTela();
 }
 /* abre uma batalha específica pelo ID — usado pelos desafios manuais (o desafiante usa isso
    pra acessar a batalha depois que o desafiado aceita, já que não é a batalha automática do dia) */
@@ -3450,21 +3476,28 @@ async function batAbrirBatalhaEspecifica(idBatalha){
   if(!modal||!corpo)return;
   corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div><p style="text-align:center;margin-top:14px">Carregando…</p>';
   modal.classList.remove('oculto');
-  await fqCarregarPerguntas();
-  let snap=await db.collection('batalhas_quiz').doc(idBatalha).get();
-  if(!snap.exists){
-    corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div><p style="text-align:center;margin-top:14px">Essa batalha não existe mais.</p>'+
-      '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
-    return;
+  try{
+    await fqCarregarPerguntas();
+    let snap=await db.collection('batalhas_quiz').doc(idBatalha).get();
+    if(!snap.exists){
+      corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div><p style="text-align:center;margin-top:14px">Essa batalha não existe mais.</p>'+
+        '<button class="fq-fechar" onclick="batFecharModal()"><span class="cruz-btn">✠</span> Fechar</button>';
+      return;
+    }
+    if(snap.data().status!=='finalizada'&&batPrazoVenceu(snap.data())){
+      await batVerificarWO(idBatalha);
+      snap=await db.collection('batalhas_quiz').doc(idBatalha).get();
+    }
+    const b=snap.data();
+    const oponente=b.jogadores.find(j=>j!==eu);
+    batIdAtual=idBatalha;batDadosAtual=b;batOponenteAtual=oponente;
+    batRenderTela();
+  }catch(e){
+    console.error('erro ao abrir batalha específica',e);
+    corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
+      '<p style="text-align:center;margin-top:14px">Não deu pra carregar agora. Confere sua internet e tenta de novo.</p>'+
+      '<button class="fq-fechar" onclick="batAbrirBatalhaEspecifica(\''+idBatalha+'\')"><span class="cruz-btn">✠</span> Tentar de novo</button>';
   }
-  if(snap.data().status!=='finalizada'&&batPrazoVenceu(snap.data())){
-    await batVerificarWO(idBatalha);
-    snap=await db.collection('batalhas_quiz').doc(idBatalha).get();
-  }
-  const b=snap.data();
-  const oponente=b.jogadores.find(j=>j!==eu);
-  batIdAtual=idBatalha;batDadosAtual=b;batOponenteAtual=oponente;
-  batRenderTela();
 }
 function batFecharModal(){
   clearInterval(batTimerInterval);
