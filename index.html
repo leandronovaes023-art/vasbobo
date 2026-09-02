@@ -3159,6 +3159,7 @@ function fqFecharModal(){
    FASES SEGUINTES (não implementadas ainda): desafio manual entre usuários, perfil público,
    aba administrativa com filtros/dashboard completo. */
 const BAT_MAX_PERGUNTAS=5;
+const BAT_SEGUNDOS=12; // tempo pra responder cada pergunta, no Quiz x1 e no Desafio
 function batChaveDia(d){
   d=d||new Date();
   const br=new Date(d.toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
@@ -3423,6 +3424,7 @@ async function batAbrirTelaBatalha(){
   corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div><p style="text-align:center;margin-top:14px">Carregando…</p>';
   modal.classList.remove('oculto');
   await fqCarregarPerguntas();
+  await batGerarDoDiaSeNecessario(); // garante que as batalhas de hoje já existem, mesmo se o card ainda não tinha terminado de gerar em segundo plano
   const info=await batMinhaBatalhaHoje();
   if(info.status==='descansando'){
     corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
@@ -3465,6 +3467,7 @@ async function batAbrirBatalhaEspecifica(idBatalha){
   batRenderTela();
 }
 function batFecharModal(){
+  clearInterval(batTimerInterval);
   document.getElementById('batModal').classList.add('oculto');
   batIdAtual=null;batDadosAtual=null;batOponenteAtual=null;
   carregarBatCardHome();
@@ -3514,16 +3517,33 @@ function batRenderTela(){
   if(!pergunta){corpo.innerHTML='<p style="text-align:center">Erro ao carregar a pergunta.</p>';return;}
   const opcoes=pergunta.alternativas.map((op,i)=>'<button class="fq-opcao" onclick="batResponder('+i+')">'+fqEsc(op)+'</button>').join('');
   const prazoTxto=b.tipo==='desafio'?'Prazo: até 24h após o desafio ter sido aceito, ou o adversário leva por W.O.':'Prazo: até 23:59 de hoje, ou o adversário leva por W.O.';
-  corpo.innerHTML='<div class="fq-titulo">'+tituloTela+'</div>'+cabecalho+
+  corpo.innerHTML='<div class="fq-topo"><div class="fq-titulo">'+tituloTela+'</div><div class="fq-timer" id="batTimer">'+BAT_SEGUNDOS+'</div></div>'+
+    '<div class="fq-barra"><div class="fq-barra-fill" id="batBarra" style="width:100%"></div></div>'+
+    cabecalho+
     '<p style="text-align:center;color:#9B9BA4;font-size:.78rem;margin-bottom:2px">Pergunta '+(indice+1)+' de '+BAT_MAX_PERGUNTAS+'</p>'+
     '<p style="text-align:center;color:#C0392B;font-size:.7rem;margin-bottom:4px">⏱️ '+prazoTxto+'</p>'+
     '<div class="fq-nivel">'+fqEsc(pergunta.nivel||'')+'</div>'+
     '<div class="fq-pergunta">'+fqEsc(pergunta.pergunta)+'</div>'+
     '<div id="batOpcoes">'+opcoes+'</div>'+
     '<div id="batFeedback"></div>';
+  batIniciarTimer();
+}
+let batTimerInterval=null;
+function batIniciarTimer(){
+  let restante=BAT_SEGUNDOS;
+  const timerEl=document.getElementById('batTimer'), barraEl=document.getElementById('batBarra');
+  clearInterval(batTimerInterval);
+  batTimerInterval=setInterval(()=>{
+    restante--;
+    if(timerEl)timerEl.textContent=Math.max(restante,0);
+    if(barraEl)barraEl.style.width=Math.max(restante,0)/BAT_SEGUNDOS*100+'%';
+    if(timerEl&&restante<=3)timerEl.classList.add('urgente');
+    if(restante<=0){clearInterval(batTimerInterval);batResponder(-1);}
+  },1000);
 }
 async function batResponder(alternativa){
   if(!batIdAtual)return;
+  clearInterval(batTimerInterval);
   document.querySelectorAll('#batOpcoes button').forEach(b=>b.disabled=true);
   const fb=document.getElementById('batFeedback');
   if(fb)fb.innerHTML='<p style="text-align:center;color:#9B9BA4;font-size:.78rem;margin-top:8px">salvando…</p>';
@@ -4317,6 +4337,7 @@ function entrarNoApp(loginNovo){
   aba='jogos';jogoAberto=null;
   atualizarMenuFixo('jogos');
   render();
+  dicaMenuSuperiorHome();
   sincronizarJogos();
   // veio de uma notificação de "saiu a escalação" (clique abre o app com ?abrirEscalacao=ID)
   try{
