@@ -3170,13 +3170,14 @@ function batUsuariosAtivos(){
   return Object.keys(dados.usuarios||{}).sort();
 }
 async function batLerConfig(){
-  try{
-    const snap=await db.collection('shared').doc('vasbobo_batalhas_config').get();
-    if(snap.exists){
-      const v=snap.data();
-      return {diario:v.diario||{},descansos:v.descansos||{},confrontos:v.confrontos||{},filaPerguntas:v.filaPerguntas||[]};
-    }
-  }catch(e){}
+  // IMPORTANTE: não engole erro aqui — se a leitura falhar, deixa o erro subir. Se devolvesse
+  // uma configuração vazia por engano, quem chama essa função ia achar que não existe
+  // pareamento/histórico NENHUM e recriaria tudo do zero, apagando o histórico de verdade
+  const snap=await db.collection('shared').doc('vasbobo_batalhas_config').get();
+  if(snap.exists){
+    const v=snap.data();
+    return {diario:v.diario||{},descansos:v.descansos||{},confrontos:v.confrontos||{},filaPerguntas:v.filaPerguntas||[]};
+  }
   return {diario:{},descansos:{},confrontos:{},filaPerguntas:[]};
 }
 async function batSalvarConfig(cfg){
@@ -3465,6 +3466,7 @@ async function batAbrirTelaBatalha(){
     console.error('erro ao abrir Quiz x1',e);
     corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
       '<p style="text-align:center;margin-top:14px">Não deu pra carregar agora. Confere sua internet e tenta de novo.</p>'+
+      '<p style="text-align:center;color:#666;font-size:.68rem;margin-top:6px">'+esc(String(e&&e.message||e))+'</p>'+
       '<button class="fq-fechar" onclick="batAbrirTelaBatalha()"><span class="cruz-btn">✠</span> Tentar de novo</button>';
   }
 }
@@ -3496,6 +3498,7 @@ async function batAbrirBatalhaEspecifica(idBatalha){
     console.error('erro ao abrir batalha específica',e);
     corpo.innerHTML='<div class="fq-titulo">O QUE MAIS ENTENDE</div>'+
       '<p style="text-align:center;margin-top:14px">Não deu pra carregar agora. Confere sua internet e tenta de novo.</p>'+
+      '<p style="text-align:center;color:#666;font-size:.68rem;margin-top:6px">'+esc(String(e&&e.message||e))+'</p>'+
       '<button class="fq-fechar" onclick="batAbrirBatalhaEspecifica(\''+idBatalha+'\')"><span class="cruz-btn">✠</span> Tentar de novo</button>';
   }
 }
