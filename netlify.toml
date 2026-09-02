@@ -14,8 +14,5 @@
 [functions."backup-quiz"]
   schedule = "0 * * * *"
 
-[functions."verificar-wo-batalhas"]
-  schedule = "*/30 * * * *"
-
 [functions."backup-logs"]
   schedule = "0 6 * * *"
