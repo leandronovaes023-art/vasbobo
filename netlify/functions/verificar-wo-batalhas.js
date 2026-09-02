@@ -53,22 +53,25 @@ exports.handler = async () => {
       await ref.update({ status: 'finalizada', resultado: vencedor, pontos: { [vencedor]: 2, [perdedor]: 0 }, finalizadaEm: agora, motivoEncerramento: 'wo' });
       resolvidasWO++;
 
-      // atualiza o histórico de confrontos, igual o app faz no cliente
+      // atualiza o histórico de confrontos com transação atômica — mesma proteção do cliente,
+      // evita perder dado se essa varredura rodar ao mesmo tempo que alguém no app
       try {
         const configRef = db.collection('shared').doc('vasbobo_batalhas_config');
-        const configSnap = await configRef.get();
-        const cfg = configSnap.exists ? configSnap.data() : { confrontos: {} };
-        const chave = [a, c].sort().join('|');
-        const cAtual = (cfg.confrontos && cfg.confrontos[chave]) || { batalhas: 0, vitorias: {}, empates: 0, ultimaData: null, sequencia: { quem: null, qtd: 0 } };
-        cAtual.batalhas = (cAtual.batalhas || 0) + 1;
-        cAtual.ultimaData = b.data;
-        if (!cAtual.vitorias) cAtual.vitorias = {};
-        cAtual.vitorias[vencedor] = (cAtual.vitorias[vencedor] || 0) + 1;
-        if (cAtual.sequencia && cAtual.sequencia.quem === vencedor) cAtual.sequencia.qtd++;
-        else cAtual.sequencia = { quem: vencedor, qtd: 1 };
-        if (!cfg.confrontos) cfg.confrontos = {};
-        cfg.confrontos[chave] = cAtual;
-        await configRef.set(cfg);
+        await db.runTransaction(async (tx) => {
+          const configSnap = await tx.get(configRef);
+          const cfg = configSnap.exists ? configSnap.data() : { diario: {}, descansos: {}, confrontos: {}, filaPerguntas: [] };
+          if (!cfg.confrontos) cfg.confrontos = {};
+          const chave = [a, c].sort().join('|');
+          const cAtual = cfg.confrontos[chave] || { batalhas: 0, vitorias: {}, empates: 0, ultimaData: null, sequencia: { quem: null, qtd: 0 } };
+          cAtual.batalhas = (cAtual.batalhas || 0) + 1;
+          cAtual.ultimaData = b.data;
+          if (!cAtual.vitorias) cAtual.vitorias = {};
+          cAtual.vitorias[vencedor] = (cAtual.vitorias[vencedor] || 0) + 1;
+          if (cAtual.sequencia && cAtual.sequencia.quem === vencedor) cAtual.sequencia.qtd++;
+          else cAtual.sequencia = { quem: vencedor, qtd: 1 };
+          cfg.confrontos[chave] = cAtual;
+          tx.set(configRef, cfg);
+        });
       } catch (e) { /* não deixa isso quebrar o resto */ }
 
       try {

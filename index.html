@@ -3180,9 +3180,10 @@ async function batLerConfig(){
   }
   return {diario:{},descansos:{},confrontos:{},filaPerguntas:[]};
 }
-async function batSalvarConfig(cfg){
-  await db.collection('shared').doc('vasbobo_batalhas_config').set(cfg);
-}
+/* batSalvarConfig (leitura-depois-escrita direta) foi removida de propósito — todas as escritas
+   na config compartilhada agora passam por transação atômica (ver batGerarDoDiaSeNecessario,
+   batAtualizarConfrontoHistorico, desAceitarDesafio), pra nunca mais correr risco de duas
+   pessoas mexendo ao mesmo tempo apagarem o trabalho uma da outra */
 function batGruposUnicosPerguntas(){
   const grupos={};
   FQ_PERGUNTAS.forEach(q=>{
@@ -3246,34 +3247,54 @@ function batGerarPares(usuarios,cfg){
   return {pares,descansando};
 }
 /* gera as batalhas do dia se ainda não existirem — chamado ao entrar na Home */
+/* ANTES: lia a config, decidia se precisava gerar, e escrevia depois — se DUAS pessoas abrissem
+   o app ao mesmo tempo (bem comum, é o cenário mais provável de todos: o dia começa e várias
+   pessoas abrem o app perto da mesma hora), as duas podiam gerar pareamentos DIFERENTES e a
+   segunda escrita apagava a primeira, deixando batalhas "orfãs" criadas à toa. Agora é tudo
+   dentro de uma ÚNICA transação atômica do Firestore — a config E as batalhas de cada par são
+   criadas juntas, garantidamente sem essa corrida, não importa quantas pessoas abram ao mesmo tempo */
 async function batGerarDoDiaSeNecessario(){
   const data=batChaveDia();
-  const cfg=await batLerConfig();
-  if(cfg.diario[data])return cfg.diario[data];
   await fqCarregarPerguntas();
-  const usuarios=batUsuariosAtivos();
-  if(usuarios.length<2)return null;
-  const perguntas=batEscolherPerguntasDoDia(cfg);
-  const {pares,descansando}=batGerarPares(usuarios,cfg);
-  const infoDia={perguntas,pares,descansando,criadoEm:Date.now()};
-  cfg.diario[data]=infoDia;
-  if(descansando){
-    if(!cfg.descansos[descansando])cfg.descansos[descansando]={qtd:0,ultimaVez:0};
-    cfg.descansos[descansando].qtd++;
-    cfg.descansos[descansando].ultimaVez=Date.now();
-  }
-  await batSalvarConfig(cfg);
-  for(const [a,b] of pares){
-    const id=batIdBatalha(data,a,b);
-    try{
-      await batCriarDocumentoBatalha(id,[a,b],perguntas,'diaria');
+  const configRef=db.collection('shared').doc('vasbobo_batalhas_config');
+  let infoDiaResultado=null,jaExistia=false,paresGerados=null;
+  await db.runTransaction(async(tx)=>{
+    const snap=await tx.get(configRef);
+    const v=snap.exists?snap.data():{};
+    const cfg={diario:v.diario||{},descansos:v.descansos||{},confrontos:v.confrontos||{},filaPerguntas:v.filaPerguntas||[]};
+    if(cfg.diario[data]){infoDiaResultado=cfg.diario[data];jaExistia=true;return;}
+    const usuarios=batUsuariosAtivos();
+    if(usuarios.length<2){infoDiaResultado=null;return;}
+    const perguntas=batEscolherPerguntasDoDia(cfg);
+    const {pares,descansando}=batGerarPares(usuarios,cfg);
+    const infoDia={perguntas,pares,descansando,criadoEm:Date.now()};
+    cfg.diario[data]=infoDia;
+    if(descansando){
+      if(!cfg.descansos[descansando])cfg.descansos[descansando]={qtd:0,ultimaVez:0};
+      cfg.descansos[descansando].qtd++;
+      cfg.descansos[descansando].ultimaVez=Date.now();
+    }
+    tx.set(configRef,cfg);
+    pares.forEach(([a,b])=>{
+      const id=batIdBatalha(data,a,b);
+      tx.set(db.collection('batalhas_quiz').doc(id),{
+        data,jogadores:[a,b],perguntas,tipo:'diaria',
+        respostas:{[a]:[],[b]:[]},acertos:{[a]:0,[b]:0},
+        status:'aguardando',resultado:null,pontos:{[a]:0,[b]:0},
+        criadaEm:Date.now(),finalizadaEm:null
+      });
+    });
+    infoDiaResultado=infoDia;paresGerados=pares;
+  });
+  if(!jaExistia&&infoDiaResultado&&paresGerados){
+    paresGerados.forEach(([a,b])=>{
       fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({titulo:'⚔️ Sua batalha de hoje!',texto:cap(a)+' vs '+cap(b)+' — 5 perguntas te esperando.',
           destinatarios:[a,b],url:'/'})}).catch(()=>{});
-    }catch(e){console.error('erro ao criar batalha',id,e);}
+    });
+    registrarLog('sistema','Batalhas do dia '+data+' geradas: '+paresGerados.map(p=>p.join(' x ')).join(', '));
   }
-  registrarLog('sistema','Batalhas do dia '+data+' geradas: '+pares.map(p=>p.join(' x ')).join(', ')+(descansando?' · descansa: '+descansando:''));
-  return infoDia;
+  return infoDiaResultado;
 }
 /* prazo pra responder: Quiz x1 (batalha do dia) tem até 23:59 do MESMO dia em que começou;
    Desafio tem até 24h depois de criado. Passou do prazo e um dos dois não terminou as 5? Quem
@@ -3416,24 +3437,32 @@ async function batResponderPergunta(idBatalha,indice,alternativa){
   return resultado;
 }
 /* atualiza o histórico agregado de confrontos entre a dupla (usado no perfil, em fases futuras) */
+/* mesma correção: transação atômica em vez de ler-depois-escrever, protegendo contra duas
+   batalhas finalizando ao mesmo tempo (ex: a varredura de W.O. rodando junto com alguém
+   terminando de responder manualmente) */
 async function batAtualizarConfrontoHistorico(batalha){
   const [a,b]=batalha.jogadores;
   const chave=batChaveDupla(a,b);
-  const cfg=await batLerConfig();
-  const c=cfg.confrontos[chave]||{batalhas:0,vitorias:{},empates:0,ultimaData:null,sequencia:{quem:null,qtd:0}};
-  c.batalhas=(c.batalhas||0)+1;
-  c.ultimaData=batalha.data;
-  if(!c.vitorias)c.vitorias={};
-  if(batalha.resultado==='empate'){
-    c.empates=(c.empates||0)+1;
-    c.sequencia={quem:null,qtd:0};
-  }else{
-    c.vitorias[batalha.resultado]=(c.vitorias[batalha.resultado]||0)+1;
-    if(c.sequencia&&c.sequencia.quem===batalha.resultado)c.sequencia.qtd++;
-    else c.sequencia={quem:batalha.resultado,qtd:1};
-  }
-  cfg.confrontos[chave]=c;
-  await batSalvarConfig(cfg);
+  const configRef=db.collection('shared').doc('vasbobo_batalhas_config');
+  await db.runTransaction(async(tx)=>{
+    const snap=await tx.get(configRef);
+    const v=snap.exists?snap.data():{};
+    const cfg={diario:v.diario||{},descansos:v.descansos||{},confrontos:v.confrontos||{},filaPerguntas:v.filaPerguntas||[]};
+    const c=cfg.confrontos[chave]||{batalhas:0,vitorias:{},empates:0,ultimaData:null,sequencia:{quem:null,qtd:0}};
+    c.batalhas=(c.batalhas||0)+1;
+    c.ultimaData=batalha.data;
+    if(!c.vitorias)c.vitorias={};
+    if(batalha.resultado==='empate'){
+      c.empates=(c.empates||0)+1;
+      c.sequencia={quem:null,qtd:0};
+    }else{
+      c.vitorias[batalha.resultado]=(c.vitorias[batalha.resultado]||0)+1;
+      if(c.sequencia&&c.sequencia.quem===batalha.resultado)c.sequencia.qtd++;
+      else c.sequencia={quem:batalha.resultado,qtd:1};
+    }
+    cfg.confrontos[chave]=c;
+    tx.set(configRef,cfg);
+  });
 }
 
 /* ---- interface da tela de batalha ---- */
@@ -3623,15 +3652,9 @@ async function desContarUsadosNaSemana(usuario,oponente){
 }
 /* cria de fato a batalha (documento em batalhas_quiz) — reaproveitado tanto pelas batalhas
    automáticas do dia quanto pelos desafios manuais aceitos */
-async function batCriarDocumentoBatalha(idBatalha,jogadores,perguntas,tipo){
-  const [a,b]=jogadores;
-  await db.collection('batalhas_quiz').doc(idBatalha).set({
-    data:batChaveDia(),jogadores:[a,b],perguntas,tipo:tipo||'diaria',
-    respostas:{[a]:[],[b]:[]},acertos:{[a]:0,[b]:0},
-    status:'aguardando',resultado:null,pontos:{[a]:0,[b]:0},
-    criadaEm:Date.now(),finalizadaEm:null
-  });
-}
+/* batCriarDocumentoBatalha (escrita direta) foi removida — a criação da batalha agora acontece
+   sempre dentro das transações (batGerarDoDiaSeNecessario, desAceitarDesafio), junto com a
+   config, garantindo que as duas coisas aconteçam juntas ou nenhuma delas aconteça */
 async function desEnviarDesafio(desafiado){
   if(desafiado===eu){avisar('Você não pode desafiar a si mesmo.');return;}
   const usados=await desContarUsadosNaSemana(eu,desafiado);
@@ -3663,11 +3686,24 @@ async function desAceitarDesafio(idDesafio){
   const d=snap.data();
   if(d.desafiado!==eu||d.status!=='pendente'){avisar('Esse desafio não está mais disponível.');return;}
   await fqCarregarPerguntas();
-  const cfg=await batLerConfig();
-  const perguntas=batEscolherPerguntasDoDia(cfg);
-  await batSalvarConfig(cfg);
   const idBatalha='desafio__'+idDesafio;
-  await batCriarDocumentoBatalha(idBatalha,[d.desafiante,d.desafiado],perguntas,'desafio');
+  // mesma proteção por transação: escolhe as perguntas, avança a fila compartilhada e cria a
+  // batalha, tudo atômico — evita perder o avanço da fila se dois desafios forem aceitos quase
+  // ao mesmo tempo por pessoas diferentes
+  const configRef=db.collection('shared').doc('vasbobo_batalhas_config');
+  await db.runTransaction(async(tx)=>{
+    const configSnap=await tx.get(configRef);
+    const v=configSnap.exists?configSnap.data():{};
+    const cfg={diario:v.diario||{},descansos:v.descansos||{},confrontos:v.confrontos||{},filaPerguntas:v.filaPerguntas||[]};
+    const perguntas=batEscolherPerguntasDoDia(cfg);
+    tx.set(configRef,cfg);
+    tx.set(db.collection('batalhas_quiz').doc(idBatalha),{
+      data:batChaveDia(),jogadores:[d.desafiante,d.desafiado],perguntas,tipo:'desafio',
+      respostas:{[d.desafiante]:[],[d.desafiado]:[]},acertos:{[d.desafiante]:0,[d.desafiado]:0},
+      status:'aguardando',resultado:null,pontos:{[d.desafiante]:0,[d.desafiado]:0},
+      criadaEm:Date.now(),finalizadaEm:null
+    });
+  });
   await ref.update({status:'aceito',batalhaId:idBatalha});
   registrarLog('desafio','Aceitou desafio de '+d.desafiante);
   try{
