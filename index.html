@@ -1415,7 +1415,7 @@ function podePalpitar(j){
     // esquecer de cadastrar a hora, inclusive com o jogo já rolando)
     const hoje=new Date();hoje.setHours(0,0,0,0);
     const dataJogo=new Date(j.data+'T00:00:00');
-    return dataJogo>hoje;
+    return dataJogo>=hoje;
   }
   return new Date() < new Date(ini.getTime()-FECHA_PALPITE_MIN*60000);
 }
