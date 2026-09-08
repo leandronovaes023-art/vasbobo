@@ -1410,6 +1410,9 @@ function statusJogo(j){
 function podePalpitar(j){
   if(j.resultado)return false;
   if(modoTeste()&&souAdmin())return true; // só o admin ganha esse bypass — nunca o usuário comum, mesmo com modo teste ligado sem querer
+  // liberação especial temporária, criada pelo admin pra uma janela curta e específica — vence
+  // sozinha no horário marcado, sem precisar de nenhuma ação extra pra "fechar" depois
+  if(j.liberacaoEspecial&&Date.now()<j.liberacaoEspecial.fim)return true;
   const ini=inicioJogo(j);
   if(!ini){
     // sem horário cadastrado ainda: só libera enquanto a DATA do jogo não chegou — assim que
@@ -4694,6 +4697,9 @@ function renderAdminJogo(j,s){
   let html='<div class="card"><h2>Área do admin</h2><p class="nota-rodape" style="margin-top:0">O placar, os goleadores e a transmissão são registrados <b>automaticamente</b> via busca na web. Use esta área só para forçar ou corrigir algo.</p>'+
     '<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px"><div style="flex:1;min-width:200px"><label for="admTv">Onde assistir (corrigir manualmente)</label><input id="admTv" placeholder="Ex.: Paramount+ e ESPN" value="'+esc(j.ondeAssistir||'')+'"></div>'+
     '<button class="btn fantasma" onclick="salvarTransmissao()">salvar</button></div>'+
+    (!j.resultado?('<div style="margin-bottom:14px"><button class="btn" onclick="liberarPalpiteTemporario()">🔓 Liberar palpite por 2 min agora</button>'+
+      (j.liberacaoEspecial&&Date.now()<j.liberacaoEspecial.fim?'<p class="nota-rodape" style="margin-top:6px;color:var(--verde)">Liberado até '+new Date(j.liberacaoEspecial.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</p>':'')+
+      '</div>'):'')+
     (!j.resultado?('<div style="margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn fantasma" onclick="abrirEscalacaoAdmin(\''+jogoAberto+'\')">📋 '+(j.escalacaoPreJogo?'Corrigir escalação pré-jogo':'Definir escalação pré-jogo (e notificar todo mundo)')+'</button>'+
       (j.escalacaoPreJogo?'<button class="btn fantasma" style="color:var(--vermelho);border-color:var(--vermelho)" onclick="adminRemoverEscalacaoPreJogo(\''+jogoAberto+'\')">🗑️ Remover escalação</button>':'')+'</div>'):'');
   if(!j.resultado){
@@ -4851,6 +4857,24 @@ async function salvarGoleadoresCorrigidos(id){
     }
   },100);
   avisar('Goleadores atualizados: '+(nomesNovos.length?nomesNovos.join(', '):'nenhum')+' — pontos de todo mundo já recalculados.',true);
+}
+/* libera o palpite desse jogo por uma janela curta e exata (2 minutos a partir de agora),
+   mesmo que o prazo normal já tenha passado — vence sozinha, sem precisar de ação extra pra
+   "fechar" de novo depois (podePalpitar já para de aceitar assim que o relógio passar do fim) */
+async function liberarPalpiteTemporario(){
+  const id=jogoAberto;
+  const agora=Date.now();
+  const fim=agora+2*60000;
+  if(!(await confirmar('Liberar o palpite desse jogo por 2 minutos, a partir de agora? Fecha sozinho às '+new Date(fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'.')))return;
+  const ok=await mutar(()=>{
+    const j=dados.jogos[id];
+    if(j)j.liberacaoEspecial={inicio:agora,fim};
+  });
+  if(ok){
+    avisar('Palpite liberado por 2 minutos — fecha sozinho às '+new Date(fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'.',true);
+    registrarLog('admin','Liberou palpite temporário (2 min) de '+id);
+  }
+  render();
 }
 async function reabrirResultado(){
   if(!(await confirmar('Remover o resultado e reabrir o jogo?')))return;
