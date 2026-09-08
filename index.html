@@ -1143,10 +1143,12 @@ const JOGOS_INICIAIS=[
  ['g260829','Cruzeiro','casa','2026-08-29',null,'Campeonato Brasileiro',''],
  ['g260902','Vitória','fora','2026-09-02','21:30','Copa do Brasil','Volta'],
  ['g260905','Fluminense','fora','2026-09-05',null,'Campeonato Brasileiro',''],
- ['g260912','Grêmio','fora','2026-09-12',null,'Campeonato Brasileiro',''],
- ['g260919','Coritiba','casa','2026-09-19',null,'Campeonato Brasileiro',''],
- ['g261007','Botafogo','fora','2026-10-07',null,'Campeonato Brasileiro',''],
- ['g261010','Remo','casa','2026-10-10',null,'Campeonato Brasileiro',''],
+ ['g260908','Independiente Santa Fe','fora','2026-09-08','19:00','CONMEBOL Sudamericana','Ida'],
+ ['g260912','Grêmio','fora','2026-09-12','16:00','Campeonato Brasileiro',''],
+ ['g260915','Independiente Santa Fe','casa','2026-09-15','19:00','CONMEBOL Sudamericana','Volta'],
+ ['g260919','Coritiba','casa','2026-09-19','20:30','Campeonato Brasileiro',''],
+ ['g261007','Botafogo','fora','2026-10-07','20:30','Campeonato Brasileiro',''],
+ ['g261010','Remo','casa','2026-10-10','17:00','Campeonato Brasileiro',''],
  ['g261017','São Paulo','fora','2026-10-17',null,'Campeonato Brasileiro',''],
  ['g261024','Corinthians','casa','2026-10-24',null,'Campeonato Brasileiro',''],
  ['g261028','Flamengo','casa','2026-10-28',null,'Campeonato Brasileiro',''],
@@ -2624,9 +2626,10 @@ const ADICIONAR_P2=[
  ['p_spinelli','99','Spinelli','Centroavante'],
 ];
 const PATCH_TV_V=2;
-const PATCH_JOGOS_FALTANTES_V=1;
+const PATCH_JOGOS_FALTANTES_V=2;
 const PATCH_ELENCO2_V=2;
 const PATCH_ZERAR_TEMPORADA_V=1;
+const PATCH_HORARIOS_SET_V=1;
 function migrar(){
   let mudou=false;
   if(!dados.config){dados.config={modoTeste:false};mudou=true;}
@@ -2679,6 +2682,16 @@ function migrar(){
       }
     });
     dados.patchJogosFaltantesV=PATCH_JOGOS_FALTANTES_V;
+    mudou=true;
+  }
+  /* horários que a CBF/CONMEBOL confirmaram depois (jogos que já existiam cadastrados só com a
+     data, "a definir") — atualiza sem mexer em resultado/palpites/avaliações já existentes */
+  if((dados.patchHorariosSetV||0)<PATCH_HORARIOS_SET_V){
+    if(dados.jogos.g260912&&!dados.jogos.g260912.hora)dados.jogos.g260912.hora='16:00';
+    if(dados.jogos.g260919&&!dados.jogos.g260919.hora)dados.jogos.g260919.hora='20:30';
+    if(dados.jogos.g261007&&!dados.jogos.g261007.hora)dados.jogos.g261007.hora='20:30';
+    if(dados.jogos.g261010&&!dados.jogos.g261010.hora)dados.jogos.g261010.hora='17:00';
+    dados.patchHorariosSetV=PATCH_HORARIOS_SET_V;
     mudou=true;
   }
   Object.values(dados.jogos).forEach(j=>{
