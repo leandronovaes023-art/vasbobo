@@ -104,17 +104,17 @@ console.log('Firebase conectado ao Vasbobo ✓');
   html.tema-claro{
     --preto:#FFFFFF;
     --carvao:#FFFFFF;
-    --carvao2:#F1F2F4;
+    --carvao2:#F8F9FB;
     --branco:#15181D;
     --vermelho:#C81F30;
     --cinza:#5B6169;
-    --linha:#D9DCE1;
+    --linha:#E7E9ED;
     --ouro:#9A6F0E;
     --verde:#178C63;
     --azul:#1D6FC2;
     --laranja:#9A430B;
   }
-  html.tema-claro .card,html.tema-claro .rodada-box,html.tema-claro .jog-linha,html.tema-claro .mini-linha{box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  html.tema-claro .card,html.tema-claro .rodada-box,html.tema-claro .jog-linha,html.tema-claro .mini-linha{box-shadow:0 2px 10px rgba(20,23,28,.05),0 1px 2px rgba(20,23,28,.04)}
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:var(--preto);overflow-y:scroll;overflow-x:hidden;scrollbar-gutter:stable;font-size:106%}
   body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5;background:var(--preto);overflow-x:hidden;width:100%}
@@ -251,7 +251,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(217,174,78,.1);border:1px solid var(--ouro);color:var(--ouro);border-radius:9px;padding:8px 14px;font-size:.78rem}
 
-  .card{background:var(--carvao);border:1px solid var(--linha);border-radius:14px;padding:10px 10px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .card{background:var(--carvao);border:1px solid rgba(20,23,28,.06);border-radius:18px;padding:16px 16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(20,23,28,.05),0 1px 2px rgba(20,23,28,.04)}
   .icone-piscando{animation:piscarChamativo 1.8s ease-in-out infinite}
   @keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(224,41,59,.7)}50%{opacity:.7;transform:scale(1.12);box-shadow:0 0 0 5px rgba(224,41,59,0)}}
   .btn-toque-expandir{display:block;width:100%;background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);
@@ -271,12 +271,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .g3{grid-template-columns:1fr 1fr 1fr}
   @media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
   .btn{background:var(--branco);color:var(--preto);border:none;border-radius:9px;padding:11px 20px;font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:.92rem;cursor:pointer}
-  .btn-3d{background:linear-gradient(180deg,#FFFFFF 0%,#E9E9EE 100%);color:#17171B;border:none;border-radius:12px;
-    padding:12px 20px;font-family:'Inter',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.04em;
-    font-size:.85rem;cursor:pointer;box-shadow:0 4px 0 #C7C7D1,0 7px 14px rgba(0,0,0,.22);
+  .btn-3d{background:linear-gradient(180deg,#FFFFFF 0%,#F1F1F4 55%,#E1E1E7 100%);color:#17171B;border:1px solid rgba(0,0,0,.05);border-radius:13px;
+    padding:10px 18px;font-family:'Inter',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.04em;
+    font-size:.8rem;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 5px 0 #C2C2CB,0 9px 16px rgba(20,23,28,.25);
     transition:transform .08s ease,box-shadow .08s ease;display:inline-flex;align-items:center;gap:6px}
-  .btn-3d:active{transform:translateY(3px);box-shadow:0 1px 0 #C7C7D1,0 2px 5px rgba(0,0,0,.18)}
-  .btn-3d.feito{background:linear-gradient(180deg,#E7F5EC 0%,#CFEBDA 100%);color:#1F5C39;box-shadow:0 4px 0 #A9D4BB,0 7px 14px rgba(0,0,0,.16)}
+  .btn-3d:active{transform:translateY(4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 #C2C2CB,0 2px 6px rgba(20,23,28,.2)}
+  .btn-3d.feito{background:linear-gradient(180deg,#EFFAF4 0%,#D9F0E2 55%,#C2E6D1 100%);color:#1F5C39;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 5px 0 #9FD1B4,0 9px 16px rgba(20,23,28,.18)}
   .btn:hover{filter:brightness(1.12)}
   .btn.claro{background:var(--branco);color:var(--preto)}
   .btn.fantasma{background:none;border:1px solid var(--linha);color:var(--cinza);font-size:.78rem;padding:8px 14px}
@@ -3868,7 +3868,7 @@ function htmlRodadaBox(semTitulo){
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
         nomeJogoComEscudos(rj,42,'.95rem')+htmlInfoDireitaJogo(rj,true)+
       '</div>'+
-      '<div style="margin-top:6px">'+
+      '<div style="margin:14px 0 6px">'+
       (pontuacaoLiberada(rj)?'':(avaliou(rj,eu)?'<button class="btn-3d feito" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span style="color:var(--vermelho)">✠</span> Avaliação realizada (Alterar)</button>':'<button class="btn-3d" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span style="color:var(--vermelho)">✠</span> Avaliar Jogadores</button>'))+
       '</div>'+
       '</div>';
@@ -4032,7 +4032,7 @@ function renderListaJogos(){
       '</div>'+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
         '<p style="font-size:.84rem;margin:6px 0 6px;color:var(--branco)">'+chamada+'</p>')+
-      '<div style="margin-top:6px"><button class="'+classeBtn3d+'" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button></div>'+
+      '<div style="margin:14px 0 6px"><button class="'+classeBtn3d+'" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
     html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+
