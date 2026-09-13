@@ -367,11 +367,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .cal-filtros{display:flex;gap:6px;flex-wrap:wrap}
   .cal-filtro{background:var(--carvao2);border:1px solid var(--linha);color:var(--cinza);border-radius:99px;padding:6px 13px;font-size:.74rem;font-weight:700;letter-spacing:.02em;cursor:pointer;font-family:'Inter',sans-serif}
   .cal-filtro.ativa{background:var(--branco);border-color:var(--branco);color:var(--preto)}
-  .cal-mes{color:var(--cinza);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;border-bottom:1px solid var(--linha);padding-bottom:5px}
+  .cal-mes{color:var(--cinza);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px;padding-bottom:2px}
   .cal-mes:first-child{margin-top:0}
-  .cal-linha{display:flex;flex-direction:column;gap:1px;padding:8px 0;border-bottom:1px solid var(--linha);font-size:.76rem;color:var(--branco)}
+  .cal-linha{display:flex;flex-direction:column;gap:1px;padding:8px 0;border-bottom:1px solid rgba(120,120,130,.18);font-size:.76rem;color:var(--branco)}
   .cal-linha:last-child{border-bottom:none}
   .cal-linha-txt{font-weight:700;line-height:1.35}
+  .cal-linha-jogo{font-weight:400;line-height:1.35}
   .cal-comp{color:var(--cinza);font-size:.66rem}
   .jogo-item:hover{border-color:var(--cinza)}
   .jogo-nome{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;text-transform:uppercase;letter-spacing:.01em}
@@ -4911,7 +4912,7 @@ function renderPartidas(){
       const mes=nomeMes(j.data);
       if(mes!==mesAtual){mesAtual=mes;linhasCal+='<div class="cal-mes">'+mesAtual+'</div>';}
       linhasCal+='<div class="cal-linha"><span class="cal-linha-txt" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+fmtDataCal(j)+' · '+(j.hora||'a definir')+'</span>'+
-        '<span class="cal-linha-txt" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nomeJogo(j)+'</span>'+
+        '<span class="cal-linha-jogo" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nomeJogo(j)+'</span>'+
         '<span class="cal-comp" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+esc(j.competicao)+(j.fase?' ('+esc(j.fase)+')':'')+badgeTransmissao(j,true)+'</span></div>';
     });
   }
@@ -4921,9 +4922,9 @@ function renderPartidas(){
       comps.map(c=>'<button class="cal-filtro'+(filtroCalendarioComp===c?' ativa':'')+'" onclick="mudarFiltroCalendario(\''+c.replace(/'/g,"\\'")+'\')">'+esc(c)+'</button>').join('')+
     '</div>'+
     '<div id="calendarioParaImagem" style="background:#F8F6F1;padding:16px;border-radius:12px;margin-top:12px;border:1px solid var(--linha);color:#17171B">'+
-      '<style>#calendarioParaImagem .cal-mes{color:#6C6C74!important;border-bottom-color:#DAD7D0!important}#calendarioParaImagem .cal-linha{color:#17171B!important;border-bottom-color:#DAD7D0!important}#calendarioParaImagem .cal-comp{color:#6C6C74!important}</style>'+
+      '<style>#calendarioParaImagem .cal-mes{color:#6C6C74!important}#calendarioParaImagem .cal-linha{color:#17171B!important;border-bottom-color:#E4E1DA!important}#calendarioParaImagem .cal-linha-jogo{color:#17171B!important}#calendarioParaImagem .cal-comp{color:#6C6C74!important}</style>'+
       '<div style="font-family:\'Anton\',sans-serif;text-transform:uppercase;letter-spacing:.03em;color:#17171B;text-align:center;margin-bottom:12px">'+
-        '✠ Calendário — Vasco da Gama<span style="display:block;font-family:Inter,sans-serif;text-transform:none;letter-spacing:0;color:#6C6C74;font-size:.7rem;margin-top:3px;font-weight:400">Direto do Bar da Tia · Vasbobo</span>'+
+        '✠ Calendário — Vasco da Gama'+
       '</div>'+
       linhasCal+
     '</div>'+

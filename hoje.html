@@ -471,14 +471,14 @@ function sairSatelite(){
   </div>
 
   <div class="card" style="padding-bottom:6px">
-    <h3 style="font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">⚽ Todos os jogos do dia</h3>
-    <div class="comp-tabs" id="compTabs">
+    <h3 style="font-family:'Anton',sans-serif;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px">Jogos do dia e os próximos</h3>
+    <p class="nota-rodape" style="margin:0 0 8px">Escolha abaixo o campeonato se preferir.</p>
+    <div class="comp-tabs" id="compTabs" style="margin-bottom:4px">
       <button class="comp-tab ativa" onclick="mudarCompeticao('brasileirao')">Brasileirão</button>
       <button class="comp-tab" onclick="mudarCompeticao('copa-brasil')">Copa do Brasil</button>
       <button class="comp-tab" onclick="mudarCompeticao('libertadores')">Libertadores</button>
       <button class="comp-tab" onclick="mudarCompeticao('sulamericana')">Sul-Americana</button>
     </div>
-    <p class="nota-rodape" style="margin:6px 0 0">Dados fornecidos em tempo real pela 365Scores. Jogos de hoje, próximos jogos e resultados.</p>
     <div class="admin-aba-toggle oculto" data-tab="admin" id="adminAbaToggle" style="margin-bottom:12px;padding:10px;background:rgba(255,255,255,.05);border:1px dashed var(--linha);border-radius:8px">
       <label style="font-size:.75rem;color:var(--cinza);display:block;margin-bottom:6px">⚙️ Admin: aba que abre por padrão nos widgets</label>
       <select id="selectAbaPadrao" onchange="mudarAbaPadrao(this.value)" style="background:#111;color:#fff;border:1px solid var(--linha);border-radius:6px;padding:6px 10px;font-size:.82rem">
