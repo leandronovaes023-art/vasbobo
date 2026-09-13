@@ -271,6 +271,12 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .g3{grid-template-columns:1fr 1fr 1fr}
   @media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
   .btn{background:var(--branco);color:var(--preto);border:none;border-radius:9px;padding:11px 20px;font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:.92rem;cursor:pointer}
+  .btn-3d{background:linear-gradient(180deg,#FFFFFF 0%,#E9E9EE 100%);color:#17171B;border:none;border-radius:12px;
+    padding:12px 20px;font-family:'Inter',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.04em;
+    font-size:.85rem;cursor:pointer;box-shadow:0 4px 0 #C7C7D1,0 7px 14px rgba(0,0,0,.22);
+    transition:transform .08s ease,box-shadow .08s ease;display:inline-flex;align-items:center;gap:6px}
+  .btn-3d:active{transform:translateY(3px);box-shadow:0 1px 0 #C7C7D1,0 2px 5px rgba(0,0,0,.18)}
+  .btn-3d.feito{background:linear-gradient(180deg,#E7F5EC 0%,#CFEBDA 100%);color:#1F5C39;box-shadow:0 4px 0 #A9D4BB,0 7px 14px rgba(0,0,0,.16)}
   .btn:hover{filter:brightness(1.12)}
   .btn.claro{background:var(--branco);color:var(--preto)}
   .btn.fantasma{background:none;border:1px solid var(--linha);color:var(--cinza);font-size:.78rem;padding:8px 14px}
@@ -1124,12 +1130,12 @@ const JOGADORES_INICIAIS=[
  ['p_joaovitor','60','João Vitor','Ponta/Atacante'],
  ['p_brenner','20','Brenner','Centroavante'],
  ['p_spinelli','77','Spinelli','Centroavante'],
- ['p_lescano','','Alan Lescano','Meia'],
- ['p_avellar','','Riquelme Avellar','Lateral-esquerdo'],
+ ['p_lescano','22','Alan Lescano','Meia'],
+ ['p_avellar','82','Riquelme Avellar','Lateral-esquerdo'],
  ['p_sosa','5','Santiago Sosa','Volante'],
- ['p_bduarte','','Bruno Duarte','Centroavante'],
+ ['p_bduarte','19','Bruno Duarte','Centroavante'],
  ['p_colidio','9','Colidio','Centroavante'],
- ['p_gpereira','','Gabriel Pereira','Zagueiro'],
+ ['p_gpereira','55','Gabriel Pereira','Zagueiro'],
 ];
 
 const JOGOS_INICIAIS=[
@@ -2636,6 +2642,7 @@ const ADICIONAR_P2=[
 const PATCH_TV_V=2;
 const PATCH_JOGOS_FALTANTES_V=2;
 const PATCH_ELENCO2_V=3;
+const PATCH_MERGE_JOGADORES_V=1;
 const PATCH_ZERAR_TEMPORADA_V=1;
 const PATCH_HORARIOS_SET_V=1;
 function migrar(){
@@ -2664,6 +2671,45 @@ function migrar(){
     // (assim para de aparecer nas listas de avaliação, mas continua contando pontuação antiga)
     ['p_estrella','p_lucaseduardo'].forEach(id=>{ if(porId[id])porId[id].ativo=false; });
     dados.patchElenco2V=PATCH_ELENCO2_V;
+    mudou=true;
+  }
+  /* funde jogadores duplicados: Sosa, Bruno Duarte, Avellar e Colidio já tinham sido cadastrados
+     manualmente antes (com outro id, sem foto/posição certa) — o patch acima criou uma segunda
+     entrada nova (com foto e posição corretas). Aqui, migra TUDO que já tinha sido votado na
+     entrada antiga (avaliações, MVP, quem fez gol, quem entrou em campo) pra entrada nova, e
+     remove a antiga — garantindo um só jogador, com o histórico inteiro preservado */
+  if((dados.patchMergeJogadoresV||0)<PATCH_MERGE_JOGADORES_V){
+    const fusoes=[
+      {novo:'p_sosa',nomes:['sosa','santiago sosa']},
+      {novo:'p_bduarte',nomes:['bruno duarte']},
+      {novo:'p_avellar',nomes:['avellar','riquelme avellar']},
+      {novo:'p_colidio',nomes:['colidio','colidio','facundo colidio']},
+    ];
+    fusoes.forEach(({novo,nomes})=>{
+      const antigo=dados.jogadores.find(p=>p.id!==novo&&nomes.includes(normalizar(p.nome||'')));
+      if(!antigo)return;
+      const idAntigo=antigo.id;
+      Object.values(dados.jogos).forEach(j=>{
+        if(j.avaliacoes){
+          Object.values(j.avaliacoes).forEach(porUsuario=>{
+            if(porUsuario[idAntigo]){
+              if(!porUsuario[novo])porUsuario[novo]=porUsuario[idAntigo];
+              delete porUsuario[idAntigo];
+            }
+          });
+        }
+        if(j.palpites){
+          Object.values(j.palpites).forEach(p=>{
+            if(p.mvp===idAntigo)p.mvp=novo;
+            if(p.gol===idAntigo)p.gol=novo;
+          });
+        }
+        if(Array.isArray(j.goleadores))j.goleadores=j.goleadores.map(g=>g===idAntigo?novo:g);
+        if(Array.isArray(j.emCampo))j.emCampo=j.emCampo.map(g=>g===idAntigo?novo:g);
+      });
+      dados.jogadores=dados.jogadores.filter(p=>p.id!==idAntigo);
+    });
+    dados.patchMergeJogadoresV=PATCH_MERGE_JOGADORES_V;
     mudou=true;
   }
   /* transmissão confirmada (MKT Esportivo, Máquina do Esporte, NetVasco, Olympics.com) */
@@ -3819,8 +3865,8 @@ function htmlRodadaBox(semTitulo){
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
         nomeJogoComEscudos(rj,42,'.95rem')+htmlInfoDireitaJogo(rj,true)+
       '</div>'+
-      '<div style="display:flex;justify-content:flex-start;margin-top:6px">'+
-      (pontuacaoLiberada(rj)?'':'<span style="display:inline-flex;align-items:center;gap:5px;background:var(--branco);color:var(--preto);border-radius:99px;padding:3px 11px;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--vermelho)">✠</span> Avalie os jogadores</span>')+
+      '<div style="margin-top:6px">'+
+      (pontuacaoLiberada(rj)?'':(avaliou(rj,eu)?'<button class="btn-3d feito" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span style="color:var(--vermelho)">✠</span> Avaliação realizada (Alterar)</button>':'<button class="btn-3d" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span style="color:var(--vermelho)">✠</span> Avaliar Jogadores</button>'))+
       '</div>'+
       '</div>';
     if(rj.resultado&&rj.palpites&&rj.palpites[eu]&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
@@ -3829,8 +3875,6 @@ function htmlRodadaBox(semTitulo){
         '<div class="meta"><b>Toque</b> e avalie e comente (texto/áudio). Vamos definir o MVP da rodada. <b style="color:var(--vermelho)">Penalidade -2 pontos</b></div></span></button>';
     }
     if(rj.resultado&&!pontuacaoLiberada(rj)){
-      html+='<p class="nota-rodape" style="margin:10px 0 2px"><b>Pontuação provisória — aguardando avaliações.</b></p>'+
-        '<p style="margin:0 0 8px;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--ouro)">Confira o G4</span> <span style="color:#9A430B">· Último Colocado</span></p>';
       if(tabela.length){
         const ordenada=tabela.slice().sort((a,b)=>b.pts-a.pts||a.u.localeCompare(b.u));
         const top5=ordenada.slice(0,4), resto=ordenada.slice(4);
@@ -3863,7 +3907,6 @@ function htmlRodadaBox(semTitulo){
           linhas.push('<div class="mini-linha'+(ehUltimoGrupo?' mini-linha-ultimo':'')+'" style="padding:1px 0'+(ehPrimeiro?';color:var(--ouro)':'')+'"><span>'+(i+1)+'º <b class="rank-nome" style="font-size:.86em'+(ehPrimeiro?';color:var(--ouro)':'')+'">'+esc(cap(nome))+'</b>'+(ehPrimeiro?' '+ICON_REI:'')+(nome===eu?' (você)':'')+'</span><span class="pt"'+(ehPrimeiro?' style="color:var(--ouro)"':'')+'>'+g.pts+' pt'+(g.pts===1?'':'s')+(rj.resultado?'':' *')+'</span></div>');
         });
       });
-      html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--ouro)">Confira o G4</span> <span style="color:#9A430B">· Último Colocado</span></p>';
       const top4=linhas.slice(0,4), resto=linhas.slice(4,-1), ultima=linhas.length>4?linhas[linhas.length-1]:null;
       html+=top4.join('');
       html+=resto.join('');
@@ -3948,18 +3991,18 @@ function renderListaJogos(){
   if(dest){
     const [id,j]=dest;
     const s=statusJogo(j);
-    const [cls,txt]=textoSelo(s);
     const jaVotei=!!(j.palpites&&j.palpites[eu]);
     const jaAvaliei=!!(j.avaliacoes&&j.avaliacoes[eu]&&Object.keys(j.avaliacoes[eu]).length);
-    let chamada,rotuloBtn,corBtn='';
+    let chamada,rotuloBtn,classeBtn3d='btn-3d';
     if(s==='aberto'){
       if(jaVotei){
         const meu=j.palpites[eu];
-        chamada='✅ Seu palpite já está registrado: <b>'+meu.golsVasco+' x '+meu.golsAdv+'</b>. Pode alterar até fechar.';
-        rotuloBtn='Ver/alterar palpite';
+        chamada='✅ Palpite realizado: <b>'+meu.golsVasco+' x '+meu.golsAdv+'</b>.';
+        rotuloBtn='Palpite realizado';
+        classeBtn3d+=' feito';
       }else{
         chamada='Deixe seu palpite, escolha o MVP e quem balança a rede — fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar.';
-        rotuloBtn='Dar meu palpite';
+        rotuloBtn='Deixar palpite';
       }
     }else if(s==='andamento'){
       chamada='🔴 Bola rolando! Placar atualizando ao vivo — avaliação libera no apito final.';
@@ -3967,11 +4010,11 @@ function renderListaJogos(){
     }else if(s==='avaliar'){
       if(jaAvaliei){
         chamada='✅ Você já avaliou! Falta só o resto da galera terminar.';
-        rotuloBtn='Ver avaliação';
+        rotuloBtn='Avaliação realizada (Alterar)';
+        classeBtn3d+=' feito';
       }else{
         chamada='⭐ Fim de jogo: avalie os jogadores e escolha o MVP antes que o prazo feche.';
-        rotuloBtn='⭐ Avaliar agora';
-        corBtn='style="background:var(--ouro);color:#1a1400;border-color:var(--ouro)"';
+        rotuloBtn='Avaliar Jogadores';
       }
     }else{
       chamada='Veja como a galera se saiu.';
@@ -3986,7 +4029,7 @@ function renderListaJogos(){
       '</div>'+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
         '<p style="font-size:.84rem;margin:6px 0 6px;color:var(--branco)">'+chamada+'</p>')+
-      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px"><button class="btn" '+corBtn+' style="padding:5px 12px;font-size:.76rem;display:inline-flex;align-items:center;gap:5px" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho);display:inline-flex;align-items:center;line-height:1">✠</span> '+rotuloBtn+'</button><span class="selo '+cls+'" style="font-size:.66rem;padding:3px 9px">'+txt+'</span></div>'+
+      '<div style="margin-top:6px"><button class="'+classeBtn3d+'" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
     html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+
@@ -4066,7 +4109,6 @@ function renderDetalhe(){
   if(j.resultado&&souAdmin())html+='<div class="auto-info">⚽ Placar registrado em '+(j.resultadoEm?new Date(j.resultadoEm).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'sem data registrada')+(j.fonteAuto?' (via '+esc(j.fonteAuto.fonte||'busca automática')+')':' (lançado manualmente)')+'. <span class="adm">admin</span></div>';
   if(j.emCampoInfo&&souAdmin())html+='<div class="auto-info">📋 Lista de quem entrou em campo registrada em '+new Date(j.emCampoInfo.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' ('+esc(j.emCampoInfo.fonte)+'). <span class="adm">admin</span></div>';
   if(!j.fonteAuto&&j.parcial)html+='<div class="auto-info">⚙️ Placar parcial obtido automaticamente às '+new Date(j.parcial.quando).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' (fonte: '+esc(j.parcial.fonte)+'), atualizando a cada poucos minutos.</div>';
-  html+=renderMvpLinha(j);
   html+=renderRodadaDetalhe(j);
   html+='</div>';
 
@@ -4147,7 +4189,9 @@ function renderPalpiteCard(j,s){
   let html='<div class="card"><h2>Palpites Vasbobo</h2>';
   if(meu){
     // já tem palpite registrado — só mostra, nunca mais edita nem remove. Sem exceção.
-    html+='<p style="font-size:.92rem">Seu palpite: <b class="display">Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>'+
+    const casaR=j.local!=='fora';
+    const placarTxt=casaR?('Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)):(esc(j.adversario)+' '+meu.a+' × '+meu.v+' Vasco');
+    html+='<p style="font-size:.92rem">Palpite realizado: <b class="display">'+placarTxt+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>'+
       '<p class="nota-rodape" style="margin-top:6px;color:var(--vermelho)">🔒 Palpite registrado — não é mais possível alterar ou remover.</p>';
   }else if(aberto){
     const casaP=j.local!=='fora';
