@@ -251,7 +251,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .bar-teste{max-width:1320px;margin:10px auto 0;padding:0 20px}
   .bar-teste div{background:rgba(217,174,78,.1);border:1px solid var(--ouro);color:var(--ouro);border-radius:9px;padding:8px 14px;font-size:.78rem}
 
-  .card{background:var(--carvao);border:1px solid rgba(20,23,28,.06);border-radius:18px;padding:16px 16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(20,23,28,.05),0 1px 2px rgba(20,23,28,.04)}
+  .card{background:var(--carvao);border:1.5px solid #B8BCC4;border-radius:18px;padding:16px 16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(20,23,28,.05),0 1px 2px rgba(20,23,28,.04)}
   .icone-piscando{animation:piscarChamativo 1.8s ease-in-out infinite}
   @keyframes piscarChamativo{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(224,41,59,.7)}50%{opacity:.7;transform:scale(1.12);box-shadow:0 0 0 5px rgba(224,41,59,0)}}
   .btn-toque-expandir{display:block;width:100%;background:var(--carvao2);border:1px solid var(--linha);color:var(--branco);
@@ -274,7 +274,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .btn-3d{background:linear-gradient(180deg,#FFFFFF 0%,#F1F1F4 55%,#E1E1E7 100%);color:#17171B;border:1px solid rgba(0,0,0,.05);border-radius:13px;
     padding:10px 18px;font-family:'Inter',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.04em;
     font-size:.8rem;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 5px 0 #C2C2CB,0 9px 16px rgba(20,23,28,.25);
-    transition:transform .08s ease,box-shadow .08s ease;display:inline-flex;align-items:center;gap:6px}
+    transition:transform .08s ease,box-shadow .08s ease;display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;max-width:260px}
   .btn-3d:active{transform:translateY(4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 #C2C2CB,0 2px 6px rgba(20,23,28,.2)}
   .btn-3d.feito{background:linear-gradient(180deg,#EFFAF4 0%,#D9F0E2 55%,#C2E6D1 100%);color:#1F5C39;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 5px 0 #9FD1B4,0 9px 16px rgba(20,23,28,.18)}
   .btn:hover{filter:brightness(1.12)}
@@ -327,7 +327,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .data-grande{font-family:'Anton',sans-serif;font-size:clamp(1.05rem,3.2vw,1.5rem);letter-spacing:.04em;text-transform:uppercase;color:var(--branco);margin-top:6px}
   .cronometro{font-family:'Anton',sans-serif;font-size:clamp(1.2rem,4vw,1.8rem);letter-spacing:.06em;color:var(--ouro);margin-top:4px}
   .cronometro small{display:block;font-family:'Inter';font-size:.62rem;letter-spacing:.18em;color:var(--cinza)}
-  .rodada-box{background:var(--carvao2);border:1px solid var(--linha);border-radius:12px;padding:3px 5px}
+  .rodada-box{background:none;border:none;border-radius:0;padding:3px 5px}
   .rx-card{background:#F3EEDD;border:2px dashed #8A7F5E;border-radius:10px;overflow:hidden;margin-bottom:18px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.12)}
   .rx-selo{display:inline-block;background:var(--vermelho);color:#fff;font-family:'Anton',sans-serif;font-size:.58rem;
     letter-spacing:.08em;padding:3px 10px;border-radius:99px;margin-bottom:6px}
@@ -3869,7 +3869,7 @@ function htmlRodadaBox(semTitulo){
         nomeJogoComEscudos(rj,42,'.95rem')+htmlInfoDireitaJogo(rj,true)+
       '</div>'+
       '<div style="margin:14px 0 6px">'+
-      (pontuacaoLiberada(rj)?'':(avaliou(rj,eu)?'<button class="btn-3d feito" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span style="color:var(--vermelho)">✠</span> Avaliação realizada (Alterar)</button>':'<button class="btn-3d" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span style="color:var(--vermelho)">✠</span> Avaliar Jogadores</button>'))+
+      (pontuacaoLiberada(rj)?'':(avaliou(rj,eu)?'<button class="btn-3d feito" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span>Avaliação realizada (Alterar)</span><span style="color:var(--vermelho)">✠</span></button>':'<button class="btn-3d" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span>Avaliar Jogadores</span><span style="color:var(--vermelho)">✠</span></button>'))+
       '</div>'+
       '</div>';
     if(rj.resultado&&rj.palpites&&rj.palpites[eu]&&!(rj.avaliacoes&&rj.avaliacoes[eu]&&Object.keys(rj.avaliacoes[eu]).length)){
@@ -4032,7 +4032,7 @@ function renderListaJogos(){
       '</div>'+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
         '<p style="font-size:.84rem;margin:6px 0 6px;color:var(--branco)">'+chamada+'</p>')+
-      '<div style="margin:14px 0 6px"><button class="'+classeBtn3d+'" onclick="abrirJogo(\''+id+'\')"><span style="color:var(--vermelho)">✠</span> '+rotuloBtn+'</button></div>'+
+      '<div style="margin:14px 0 6px"><button class="'+classeBtn3d+'" onclick="abrirJogo(\''+id+'\')"><span>'+rotuloBtn+'</span><span style="color:var(--vermelho)">✠</span></button></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
     html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+
@@ -4921,8 +4921,8 @@ function renderPartidas(){
       '<button class="cal-filtro'+(filtroCalendarioComp==='todas'?' ativa':'')+'" onclick="mudarFiltroCalendario(\'todas\')">Todos</button>'+
       comps.map(c=>'<button class="cal-filtro'+(filtroCalendarioComp===c?' ativa':'')+'" onclick="mudarFiltroCalendario(\''+c.replace(/'/g,"\\'")+'\')">'+esc(c)+'</button>').join('')+
     '</div>'+
-    '<div id="calendarioParaImagem" style="background:#F8F6F1;padding:16px;border-radius:12px;margin-top:12px;border:1px solid var(--linha);color:#17171B">'+
-      '<style>#calendarioParaImagem .cal-mes{color:#6C6C74!important}#calendarioParaImagem .cal-linha{color:#17171B!important;border-bottom-color:#E4E1DA!important}#calendarioParaImagem .cal-linha-jogo{color:#17171B!important}#calendarioParaImagem .cal-comp{color:#6C6C74!important}</style>'+
+    '<div id="calendarioParaImagem" style="background:#FFFFFF;padding:16px;border-radius:12px;margin-top:12px;border:1.5px solid #B8BCC4;color:#17171B">'+
+      '<style>#calendarioParaImagem .cal-mes{color:#17171B!important;font-weight:900!important}#calendarioParaImagem .cal-linha{color:#17171B!important;border-bottom-color:#E4E1DA!important}#calendarioParaImagem .cal-linha-jogo{color:#17171B!important}#calendarioParaImagem .cal-comp{color:#6C6C74!important}</style>'+
       '<div style="font-family:\'Anton\',sans-serif;text-transform:uppercase;letter-spacing:.03em;color:#17171B;text-align:center;margin-bottom:12px">'+
         '✠ Calendário — Vasco da Gama'+
       '</div>'+
