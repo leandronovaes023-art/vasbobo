@@ -116,8 +116,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
   }
   html.tema-claro .card,html.tema-claro .rodada-box,html.tema-claro .jog-linha,html.tema-claro .mini-linha{box-shadow:0 1px 4px rgba(0,0,0,.06)}
   *{box-sizing:border-box;margin:0;padding:0}
-  html{background:var(--preto);overflow-y:scroll;scrollbar-gutter:stable;font-size:106%}
-  body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5;background:var(--preto)}
+  html{background:var(--preto);overflow-y:scroll;overflow-x:hidden;scrollbar-gutter:stable;font-size:106%}
+  body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5;background:var(--preto);overflow-x:hidden;width:100%}
   .display{font-family:'Anton',sans-serif;letter-spacing:.02em;text-transform:uppercase}
   .titulo-vasbobo{display:flex;justify-content:space-between;align-items:center;width:100%}
   .titulo-vasbobo .cruz{flex:none}
@@ -467,8 +467,8 @@ console.log('Firebase conectado ao Vasbobo ✓');
 
   /* janela de mídia flutuante */
   .midia-janela{position:fixed;right:6px;bottom:calc(58px + env(safe-area-inset-bottom,0));width:min(115px,32vw);height:18vh;max-height:165px;
-    background:#FFFFFF;border:1px solid var(--linha);border-radius:12px;overflow:hidden;
-    box-shadow:0 14px 44px rgba(23,23,27,.28);z-index:395;display:flex;flex-direction:column}
+    background:#FFFFFF;border:2px solid var(--vermelho);border-radius:12px;overflow:hidden;
+    box-shadow:0 14px 44px rgba(23,23,27,.4);z-index:395;display:flex;flex-direction:column}
   .midia-top{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;
     font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cinza);
     border-bottom:1px solid var(--linha);background:rgba(255,255,255,.95);flex:none}
@@ -983,7 +983,6 @@ console.log('Firebase conectado ao Vasbobo ✓');
     <div class="menu-secundario oculto" id="menuSecundario">
       <a href="/ogrupo.html" class="tab">🍻 O Grupo</a>
       <a href="/futebol.html" class="tab">🎯 O Que Mais Entende</a>
-      <button class="tab" id="tabCastigos" onclick="mudarAba('castigos',true);toggleMenuSecundario()"><img src="img/embed/castigo-cartao.png" alt="" style="height:1em;vertical-align:-0.15em"> Castigos</button>
       <button class="tab oculto" id="tabJogadores" onclick="mudarAba('jogadores',true);toggleMenuSecundario()">🗣️ Jogadores</button>
       <button class="tab oculto" id="tabRaioX" onclick="mudarAba('perfilpsicotico',true);toggleMenuSecundario()">🧠 Perfil Psicótico</button>
       <button class="tab oculto" id="tabMotivacional" onclick="mudarAba('motivacional',true);toggleMenuSecundario()">📣 Motivacional</button>
@@ -1125,6 +1124,12 @@ const JOGADORES_INICIAIS=[
  ['p_joaovitor','60','João Vitor','Ponta/Atacante'],
  ['p_brenner','20','Brenner','Centroavante'],
  ['p_spinelli','77','Spinelli','Centroavante'],
+ ['p_lescano','','Alan Lescano','Meia'],
+ ['p_avellar','','Riquelme Avellar','Lateral-esquerdo'],
+ ['p_sosa','5','Santiago Sosa','Volante'],
+ ['p_bduarte','','Bruno Duarte','Centroavante'],
+ ['p_colidio','9','Colidio','Centroavante'],
+ ['p_gpereira','','Gabriel Pereira','Zagueiro'],
 ];
 
 const JOGOS_INICIAIS=[
@@ -2630,7 +2635,7 @@ const ADICIONAR_P2=[
 ];
 const PATCH_TV_V=2;
 const PATCH_JOGOS_FALTANTES_V=2;
-const PATCH_ELENCO2_V=2;
+const PATCH_ELENCO2_V=3;
 const PATCH_ZERAR_TEMPORADA_V=1;
 const PATCH_HORARIOS_SET_V=1;
 function migrar(){
@@ -3286,35 +3291,8 @@ function mapearGoleadores(nomes){
   });
   return ids;
 }
-async function sincronizarEscalacao(id){
-  const agora=Date.now();
-  const j=dados.jogos[id];
-  if(!j)return;
-  if(j.emCampo&&j.emCampo.length)return;
-  if(j.escSyncEm&&agora-j.escSyncEm<SYNC_POS_MS)return;
-  await mutar(()=>{const x=dados.jogos[id];if(x)x.escSyncEm=agora;});
-  let r=null;
-  try{r=await consultarEscalacaoIA(j);}catch(e){}
-  if(!r||!r.encontrado||!Array.isArray(r.jogadores))return;
-  const ids=mapearGoleadores(r.jogadores);
-  if(ids.length<7)return; // sanidade: escalação incompleta não libera votação
-  let avisarAgora=false;
-  await mutar(()=>{
-    const x=dados.jogos[id];
-    if(x&&(!x.emCampo||!x.emCampo.length)){
-      x.emCampo=ids;
-      x.emCampoInfo={quando:Date.now(),fonte:r.fonte||'busca na web'};
-      avisarAgora=true;
-    }
-  });
-  if(avisarAgora){
-    try{
-      await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({titulo:'Já dá pra avaliar! 📝',texto:'Já sabemos quem jogou em '+nomeJogo(j).replace(/<[^>]+>/g,'')+' — avalia os jogadores e escolhe o MVP!',url:'/?avaliarJogo='+id})});
-    }catch(e){}
-  }
-  render();
-}
+/* sincronizarEscalacao (busca automática de quem jogou) foi removida junto com o resto da
+   sincronização automática — agora "quem entrou em campo" é definido manualmente pelo admin */
 async function consultarTransmissaoIA(j){
   const nome=j.local==='fora'?esc(j.adversario)+' x Vasco da Gama':'Vasco da Gama x '+esc(j.adversario);
   const prompt='Hoje é '+new Date().toLocaleDateString('pt-BR')+'. Onde assistir AO VIVO no Brasil o jogo '+nome+
@@ -3351,111 +3329,9 @@ async function sincronizarJogos(){
         body:JSON.stringify({titulo:'👑 Reizinho da Rodada!',texto:nomes+' fechou a rodada de '+nomeJogo(j).replace(/<[^>]+>/g,'')+' com '+prem.max+' pontos!',url:'/#rank'})});
     }catch(e){}
   }
-  // escalação PRÉ-jogo (titulares anunciados antes da bola rolar) — Brasileirão, Sudamericana e
-  // Libertadores por enquanto (as competições que já mapeamos no servidor), só na janela de 45min
-  // antes até o início, e só se ainda não tiver sido registrada
-  for(const [id,j] of jogosOrdenados()){
-    if(j.resultado||!j.hora||j.escalacaoPreJogo)continue;
-    if(!/brasileir[ãa]o|campeonato brasileiro|sul[ -]?americana|sudamericana|libertadores|copa do brasil/i.test(j.competicao||''))continue;
-    const ini=inicioJogo(j).getTime();
-    if(agora<ini-45*60000||agora>=ini)continue; // janela: dos 45min antes até o início (sai por padrão aos 30min)
-    if(j.escSyncPreJogoEm&&agora-j.escSyncPreJogoEm<30000)continue; // nessa janela quente, insiste a cada ~30s (o mesmo ritmo do relógio do app)
-    await mutar(()=>{const x=dados.jogos[id];if(x)x.escSyncPreJogoEm=agora;});
-    try{
-      const casa=j.local!=='fora';
-      const timeCasa=casa?'Vasco':j.adversario, timeFora=casa?j.adversario:'Vasco';
-      const r=await fetch(`/.netlify/functions/futebol?acao=escalacaoPreJogo&data=${j.data}&timeCasa=${encodeURIComponent(timeCasa)}&timeFora=${encodeURIComponent(timeFora)}&competicao=${encodeURIComponent(j.competicao||'')}`);
-      const info=await r.json();
-      if(info.encontrada&&info.escalacao){
-        const nomes=casa?info.escalacao.casa:info.escalacao.fora;
-        if(nomes&&nomes.length===11){
-          await mutar(()=>{const x=dados.jogos[id];if(x&&!x.escalacaoPreJogo)x.escalacaoPreJogo={jogadores:nomes,tecnicoId:'p_pedroemanuel',quando:Date.now(),fonte:info.fonte||'uol'};});
-          try{
-            await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-              body:JSON.stringify({titulo:'SAIU A ESCALAÇÃO!',texto:nomeJogo(j).replace(/<[^>]+>/g,'')+'. Clique!',url:'/?abrirEscalacao='+id})});
-          }catch(e){}
-        }
-      }
-    }catch(e){}
-  }
-  // escalação de quem jogou: para jogos já encerrados/no fim, nas últimas 48h — via TheSportsDB (grátis)
-  for(const [id,j] of jogosOrdenados()){
-    const s=statusJogo(j);
-    const ini=j.hora?inicioJogo(j).getTime():null;
-    const janela=ini?(agora-ini>0&&agora-ini<=48*3600000):!!j.resultado;
-    if((s==='avaliar'||s==='encerrado')&&janela)await sincronizarEscalacao(id);
-  }
-  // placar (parcial e final) — via TheSportsDB (grátis)
-  for(const [id,j] of jogosOrdenados()){
-    if(j.resultado||!j.hora)continue;
-    const ini=inicioJogo(j).getTime();
-    // só olha jogos que já começaram, e continua tentando por até 5 dias
-    // (algumas competições demoram a aparecer na fonte de dados gratuita)
-    if(agora<ini||agora-ini>5*24*3600000)continue;
-    const fimEsperado=ini+DURACAO_JOGO_MIN*60000;
-    let intervaloSync;
-    if(agora<fimEsperado) intervaloSync=SYNC_INTERVALO_MS;
-    else if(agora-fimEsperado<=SYNC_POS_LIMITE_MIN*60000) intervaloSync=SYNC_POS_MS;
-    else intervaloSync=SYNC_FALLBACK_MS;
-    if(j.syncEm&&agora-j.syncEm<intervaloSync)continue;
-    // marca a tentativa antes (evita buscas duplicadas de vários usuários)
-    await mutar(()=>{const x=dados.jogos[id];if(x)x.syncEm=agora;});
-    let r=null;
-    try{r=await consultarPlacarIA(j);}catch(e){}
-    if(!r||!r.encontrado)continue;
-    const gv=+r.gols_vasco,ga=+r.gols_adversario;
-    if(isNaN(gv)||isNaN(ga))continue;
-    let disparaGol=false,placarGolTexto='',novasSubs=[];
-    await mutar(()=>{
-      const x=dados.jogos[id];if(!x||x.resultado)return;
-      const registro={quando:Date.now(),v:gv,a:ga,fonte:r.fonte||'busca na web'};
-      if(!x.historicoAuto)x.historicoAuto=[];
-      x.historicoAuto.push(registro);
-      if(r.encerrado){
-        x.resultado={v:gv,a:ga};x.resultadoEm=Date.now();
-        x.goleadores=mapearGoleadores(r.goleadores_vasco);
-        x.fonteAuto=registro;
-        x.parcial=null;
-      }else{
-        const golAnteriorVasco=x.parcial?x.parcial.v:0;
-        x.parcial={v:gv,a:ga,quando:Date.now(),fonte:r.fonte||'busca na web'};
-        // trava contra notificação duplicada: só dispara se ESSA contagem de gol específica
-        // ainda não tiver sido notificada (mesmo se vários usuários detectarem quase juntos)
-        if(gv>golAnteriorVasco&&(x.ultimoGolNotificado||0)<gv){
-          x.ultimoGolNotificado=gv;
-          disparaGol=true;
-          const casa=j.local!=='fora';
-          placarGolTexto=casa?('Vasco '+gv+' x '+ga+' '+j.adversario):(j.adversario+' '+ga+' x '+gv+' Vasco');
-        }
-      }
-      // substituições do Vasco (mesma trava contra duplicata: cada substituição só notifica 1x,
-      // mesmo se vários usuários com o app aberto detectarem quase ao mesmo tempo)
-      const subsVasco=substituicoesDoVasco(r.substituicoes);
-      if(subsVasco.length){
-        if(!x.substituicoesNotificadas)x.substituicoesNotificadas=[];
-        subsVasco.forEach(s=>{
-          const assinatura=(s.minuto||'?')+'|'+(s.entra||'')+'|'+(s.sai||'');
-          if(x.substituicoesNotificadas.includes(assinatura))return;
-          x.substituicoesNotificadas.push(assinatura);
-          novasSubs.push(s);
-        });
-      }
-    });
-    if(disparaGol){
-      try{
-        const frase=escolherFraseGol(placarGolTexto);
-        await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({titulo:'GOL DO VASCO! ⚽',texto:frase,url:'/?abrirJogo='+id})});
-      }catch(e){}
-    }
-    for(const s of novasSubs){
-      try{
-        await fetch('/.netlify/functions/enviar-broadcast',{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({titulo:'SUBSTITUIÇÃO NO VASCO! 🔄',texto:'SAIU: '+(s.sai||'?')+' ➜ ENTROU: '+(s.entra||'?')+(s.minuto?' ('+s.minuto+'\')':''),url:'/'})});
-      }catch(e){}
-    }
-    render();
-  }
+  // escalação pré-jogo, escalação de quem jogou e placar automático foram REMOVIDOS a pedido —
+  // deram problema recorrente; agora tudo isso é feito manualmente pelo admin (lançar resultado,
+  // definir escalação/quem entrou em campo pelos botões da área do admin de cada jogo)
   // transmissão (onde assistir): depende de busca via IA, só roda se a chave da Anthropic estiver configurada
   if(!ANTHROPIC_API_KEY||ANTHROPIC_API_KEY==='COLE_SUA_CHAVE_AQUI')return;
   for(const [id,j] of jogosOrdenados()){
@@ -3640,6 +3516,7 @@ function entrarNoApp(loginNovo){
   aba='jogos';jogoAberto=null;
   atualizarMenuFixo('jogos');
   render();
+  dicaMenuSuperiorHome();
   sincronizarJogos();
   // veio de uma notificação de "saiu a escalação" (clique abre o app com ?abrirEscalacao=ID)
   try{
@@ -3696,20 +3573,12 @@ function dicaMenuSuperiorHome(){
   const btn=document.getElementById('btnMenuSec');
   const el=document.getElementById('menuSecundario');
   if(!btn||!el)return;
-  if(aba!=='jogos'){
-    btn.classList.remove('chamando-atencao-continuo');
-    if(!el.classList.contains('oculto')){el.classList.add('oculto');btn.classList.remove('aberto');}
-    return;
-  }
-  // na Home: abre o menu e deixa aberto, sem piscar e sem sumir sozinho
+  // menu fica sempre visível, em qualquer aba — não esconde mais fora da Home
   btn.classList.add('chamando-atencao-continuo');
   if(el.classList.contains('oculto'))toggleMenuSecundario();
 }
-document.addEventListener('click',(e)=>{
-  const el=document.getElementById('menuSecundario');
-  const btn=document.getElementById('btnMenuSec');
-  if(el&&!el.classList.contains('oculto')&&!el.contains(e.target)&&e.target!==btn){el.classList.add('oculto');if(btn)btn.classList.remove('aberto');}
-});
+/* o menu superior fica sempre visível (ver dicaMenuSuperiorHome) — removido o fechar automático
+   ao clicar fora, que escondia o menu em QUALQUER clique na página */
 function mudarAba(a,semHistorico){
   if(a!==aba)registrarLog('aba','Abriu aba: '+a);
   aba=a;jogoAberto=null;
@@ -3977,10 +3846,7 @@ function htmlRodadaBox(semTitulo){
             '</span></span><span class="pt">'+l.pts+' pt'+(l.pts===1?'':'s')+' *</span></div>';
         };
         html+=top5.map(linhaP).join('');
-        if(resto.length){
-          if(mostrarRankingRodadaHome)html+=resto.map(linhaP).join('');
-          else html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▲ Ver mais '+resto.length+' Vasbobo'+(resto.length===1?'':'s')+'</button>';
-        }
+        html+=resto.map(linhaP).join('');
       }
       html+='<button class="btn-toque-expandir" style="margin-top:8px" onclick="mudarAba(\'rank\')">🏆 Ver ranking geral completo</button>';
       return html+'</div>';
@@ -4000,13 +3866,7 @@ function htmlRodadaBox(semTitulo){
       html+='<p style="margin:0 0 4px;font-size:.78rem;font-weight:900;text-transform:uppercase;letter-spacing:.03em"><span style="color:var(--ouro)">Confira o G4</span> <span style="color:#9A430B">· Último Colocado</span></p>';
       const top4=linhas.slice(0,4), resto=linhas.slice(4,-1), ultima=linhas.length>4?linhas[linhas.length-1]:null;
       html+=top4.join('');
-      if(mostrarRankingRodadaHome){
-        html+=resto.join('');
-        if(ultima)html+=ultima;
-      }else{
-        if(ultima)html+=ultima;
-        if(resto.length)html+='<button class="btn-toque-expandir" onclick="toggleRankingRodadaHome()">▲ Ver todos os Vasbobos</button>';
-      }
+      html+=resto.join('');
       if(ultima)html+=ultima;
       if(!rj.resultado)html+='<p class="nota-rodape" style="margin:6px 0 0">* pontos parciais, mudando em tempo real com o placar.</p>';
       const prem=premiacaoJogo(rj);
@@ -4135,7 +3995,6 @@ function renderListaJogos(){
       '<div style="flex:1;min-width:0"><div style="font-weight:900;font-size:.8rem;text-transform:uppercase;letter-spacing:.02em">O Que Mais Entende de Futebol</div>'+
       '<div id="quizCardHomeStatus" style="font-size:.76rem;color:var(--cinza);margin-top:1px">Carregando…</div></div>'+
       '</div></div>';
-    html+='<div class="card">'+htmlCastigoRodadaBox()+'</div>';
   }
 
   const destId=dest?dest[0]:null;
@@ -4291,11 +4150,15 @@ function renderPalpiteCard(j,s){
     html+='<p style="font-size:.92rem">Seu palpite: <b class="display">Vasco '+meu.v+' × '+meu.a+' '+esc(j.adversario)+'</b>'+(meu.mvp?' · MVP: <b>'+esc(nomeJogador(meu.mvp))+'</b>':'')+(meu.gol?' · Gol de: <b>'+esc(nomeJogador(meu.gol))+'</b>':'')+'</p>'+
       '<p class="nota-rodape" style="margin-top:6px;color:var(--vermelho)">🔒 Palpite registrado — não é mais possível alterar ou remover.</p>';
   }else if(aberto){
-    html+='<div class="palpite-form"><span class="display" style="font-size:1rem">Vasco</span>'+
-      '<input type="number" min="0" max="20" id="ppV" value="" aria-label="Gols do Vasco">'+
-      '<span class="display" style="color:var(--cinza)">×</span>'+
-      '<input type="number" min="0" max="20" id="ppA" value="" aria-label="Gols do adversário">'+
-      '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
+    const casaP=j.local!=='fora';
+    const escAdvP=escudoLocalPara(j.adversario)||j.escudoAdversario||'';
+    const labelVascoP='<div style="text-align:center;flex:none">'+(ESCUDO_VASCO?'<img src="'+ESCUDO_VASCO+'" style="width:20px;height:20px;object-fit:contain;display:block;margin:0 auto 3px">':'')+'<span class="display" style="font-size:1.15rem;font-weight:900">Vasco</span></div>';
+    const labelAdvP='<div style="text-align:center;flex:none">'+(escAdvP?'<img src="'+escAdvP+'" style="width:20px;height:20px;object-fit:contain;display:block;margin:0 auto 3px">':'')+'<span class="display" style="font-size:.88rem;font-weight:400;color:var(--cinza)">'+esc(j.adversario)+'</span></div>';
+    const inputVascoP='<input type="number" min="0" max="20" id="ppV" value="" aria-label="Gols do Vasco">';
+    const inputAdvP='<input type="number" min="0" max="20" id="ppA" value="" aria-label="Gols do adversário">';
+    html+='<div class="palpite-form">'+(casaP?
+      (labelVascoP+inputVascoP+'<span class="display" style="color:var(--cinza)">×</span>'+inputAdvP+labelAdvP):
+      (labelAdvP+inputAdvP+'<span class="display" style="color:var(--cinza)">×</span>'+inputVascoP+labelVascoP))+'</div>'+
       '<div class="grid g2" style="margin-top:12px">'+
       '<div><label style="font-weight:800;color:var(--branco)">Seu MVP da partida</label>'+selectJogadores('ppMvp','',false,true)+'</div>'+
       '<div><label style="font-weight:800;color:var(--branco)">Quem faz gol?</label>'+selectJogadores('ppGol','',true,false)+'</div></div>'+
@@ -4704,11 +4567,15 @@ function renderAdminJogo(j,s){
       (j.escalacaoPreJogo?'<button class="btn fantasma" style="color:var(--vermelho);border-color:var(--vermelho)" onclick="adminRemoverEscalacaoPreJogo(\''+jogoAberto+'\')">🗑️ Remover escalação</button>':'')+'</div>'):'');
   if(!j.resultado){
     const golsChecks=jogadoresAtivos().map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;text-transform:none;letter-spacing:0;color:var(--branco);margin:0">'+fotoJogador(p.id,26)+'<input type="checkbox" style="width:auto" value="'+p.id+'" class="chkGol">'+(p.num?p.num+' · ':'')+esc(p.nome)+'</label>').join('');
-    html+='<div class="palpite-form"><span class="display" style="font-size:1rem">Vasco</span>'+
-      '<input type="number" min="0" max="20" id="rrV" aria-label="Gols do Vasco">'+
-      '<span class="display" style="color:var(--cinza)">×</span>'+
-      '<input type="number" min="0" max="20" id="rrA" aria-label="Gols do adversário">'+
-      '<span class="display" style="font-size:1rem">'+esc(j.adversario)+'</span></div>'+
+    const casaA=j.local!=='fora';
+    const escAdvA=escudoLocalPara(j.adversario)||j.escudoAdversario||'';
+    const labelVascoA='<div style="text-align:center;flex:none">'+(ESCUDO_VASCO?'<img src="'+ESCUDO_VASCO+'" style="width:20px;height:20px;object-fit:contain;display:block;margin:0 auto 3px">':'')+'<span class="display" style="font-size:1.15rem;font-weight:900">Vasco</span></div>';
+    const labelAdvA='<div style="text-align:center;flex:none">'+(escAdvA?'<img src="'+escAdvA+'" style="width:20px;height:20px;object-fit:contain;display:block;margin:0 auto 3px">':'')+'<span class="display" style="font-size:.88rem;font-weight:400;color:var(--cinza)">'+esc(j.adversario)+'</span></div>';
+    const inputVascoA='<input type="number" min="0" max="20" id="rrV" aria-label="Gols do Vasco">';
+    const inputAdvA='<input type="number" min="0" max="20" id="rrA" aria-label="Gols do adversário">';
+    html+='<div class="palpite-form">'+(casaA?
+      (labelVascoA+inputVascoA+'<span class="display" style="color:var(--cinza)">×</span>'+inputAdvA+labelAdvA):
+      (labelAdvA+inputAdvA+'<span class="display" style="color:var(--cinza)">×</span>'+inputVascoA+labelVascoA))+'</div>'+
       '<details style="margin-top:10px"><summary>Quem marcou pelo Vasco? (para o bônus de gol)</summary><div class="grid g3" style="margin-top:10px">'+golsChecks+'</div></details>'+
       '<button class="btn" style="margin-top:14px" onclick="lancarResultado()">Forçar resultado manualmente</button>'+
       '<button class="btn fantasma" style="margin-top:14px;margin-left:10px" onclick="buscarAgora()">🔎 Buscar placar na web agora</button>';
@@ -5077,6 +4944,7 @@ const ESCUDOS_LOCAIS={
   'clube de remo':'remo.png','remo':'remo.png','mirassol':'mirassol.png',
   'red bull bragantino':'red_bull_bragantino.png','bragantino':'red_bull_bragantino.png',
   'vitoria':'vitoria.png','olimpia':'olimpia.png','club olimpia':'olimpia.png',
+  'santa fe':'independiente_santa_fe.png','independiente santa fe':'independiente_santa_fe.png',
 };
 function escudoLocalPara(nomeTime){
   const norm=normalizar(nomeTime||'');
@@ -5111,16 +4979,27 @@ function nomeJogoComEscudos(j,tamEscudo,tamFonte){
   const r=j.resultado||j.parcial;
   const meioTxt=r?((casa?r.v:r.a)+' × '+(casa?r.a:r.v)):'×';
   const imgTag=(url)=>url?'<img src="'+esc(url)+'" alt="" style="width:'+tamEscudo+'px;height:'+tamEscudo+'px;object-fit:contain" onerror="this.style.display=\'none\'">':'';
+  // nomes de adversário muito compridos (ex.: "Independiente Santa Fe") estouravam a caixa
+  // porque o texto nunca quebra linha (nowrap) — reduz a fonte proporcionalmente pra caber
+  const fontePara=(nome)=>{
+    const base=parseFloat(tamFonte)||1.15;
+    const unidade=String(tamFonte).replace(/^[0-9.]+/,'')||'em';
+    const n=(nome||'').length;
+    if(n<=10)return base+unidade;
+    const fator=Math.max(0.58,10/n);
+    return (base*fator).toFixed(2)+unidade;
+  };
+  const fonteCasa=fontePara(nomeCasa), fonteFora=fontePara(nomeFora);
   /* grade única (mesmas linhas pros dois lados) — garante que os DOIS escudos fiquem na mesma
      "reta" de baixo (linha 1) e os DOIS nomes comecem exatamente na mesma altura (linha 2).
      Escudos e fonte do MESMO tamanho pros dois times (padrão do Vasco pros dois) */
-  return '<div style="display:inline-grid;grid-template-columns:auto auto auto;align-items:end;justify-items:center;column-gap:10px;row-gap:0px">'+
+  return '<div style="display:inline-grid;grid-template-columns:auto auto auto;align-items:end;justify-items:center;column-gap:10px;row-gap:0px;max-width:100%">'+
     '<div style="grid-column:1;grid-row:1">'+imgTag(escCasa)+'</div>'+
     '<div style="grid-column:2;grid-row:1"></div>'+
     '<div style="grid-column:3;grid-row:1">'+imgTag(escFora)+'</div>'+
-    '<div style="grid-column:1;grid-row:2;font-weight:'+pesoCasa+';font-size:'+tamFonte+';white-space:nowrap;line-height:1;align-self:baseline">'+esc(nomeCasa)+'</div>'+
+    '<div style="grid-column:1;grid-row:2;font-weight:'+pesoCasa+';font-size:'+fonteCasa+';white-space:nowrap;line-height:1;align-self:baseline;max-width:100%;overflow:hidden;text-overflow:ellipsis">'+esc(nomeCasa)+'</div>'+
     '<div style="grid-column:2;grid-row:2;font-weight:900;font-size:'+tamFonte+';white-space:nowrap;line-height:1;align-self:baseline;color:'+(r?'var(--branco)':'var(--cinza)')+'">'+meioTxt+'</div>'+
-    '<div style="grid-column:3;grid-row:2;font-weight:'+pesoFora+';font-size:'+tamFonte+';white-space:nowrap;line-height:1;align-self:baseline">'+esc(nomeFora)+'</div>'+
+    '<div style="grid-column:3;grid-row:2;font-weight:'+pesoFora+';font-size:'+fonteFora+';white-space:nowrap;line-height:1;align-self:baseline;max-width:100%;overflow:hidden;text-overflow:ellipsis">'+esc(nomeFora)+'</div>'+
   '</div>';
 }
 
@@ -5331,9 +5210,6 @@ function renderRank(){
 
   // 4) RANKING DO QUIZ
   html+=htmlRankingQuizTotal();
-
-  // 5) CASTIGO DA RODADA — sempre por último
-  html+='<div class="card" style="margin-bottom:0">'+htmlCastigoRodadaBox()+'</div>';
 
   html+='</div>';
   sec.innerHTML=html;
