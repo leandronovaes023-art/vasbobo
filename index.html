@@ -114,7 +114,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     --azul:#1D6FC2;
     --laranja:#9A430B;
   }
-  html.tema-claro .card,html.tema-claro .rodada-box,html.tema-claro .jog-linha,html.tema-claro .mini-linha{box-shadow:0 2px 10px rgba(20,23,28,.05),0 1px 2px rgba(20,23,28,.04)}
+  html.tema-claro .card{box-shadow:0 2px 10px rgba(20,23,28,.05),0 1px 2px rgba(20,23,28,.04)}
   *{box-sizing:border-box;margin:0;padding:0}
   html{background:var(--preto);overflow-y:scroll;overflow-x:hidden;scrollbar-gutter:stable;font-size:106%}
   body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;position:relative;line-height:1.5;background:var(--preto);overflow-x:hidden;width:100%}
@@ -271,11 +271,11 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .g3{grid-template-columns:1fr 1fr 1fr}
   @media(max-width:600px){.g2,.g3{grid-template-columns:1fr}}
   .btn{background:var(--branco);color:var(--preto);border:none;border-radius:9px;padding:11px 20px;font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:.92rem;cursor:pointer}
-  .btn-3d{background:linear-gradient(180deg,#FFFFFF 0%,#F1F1F4 55%,#E1E1E7 100%);color:#17171B;border:1px solid rgba(0,0,0,.05);border-radius:13px;
-    padding:10px 18px;font-family:'Inter',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.04em;
-    font-size:.8rem;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 5px 0 #C2C2CB,0 9px 16px rgba(20,23,28,.25);
+  .btn-3d{background:linear-gradient(180deg,#FFFFFF 0%,#F1F1F4 55%,#E1E1E7 100%);color:#17171B;border:1px solid rgba(0,0,0,.05);border-radius:11px;
+    padding:7px 16px;font-family:'Inter',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:.04em;
+    font-size:.8rem;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 0 #C2C2CB,0 7px 13px rgba(20,23,28,.25);
     transition:transform .08s ease,box-shadow .08s ease;display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;max-width:260px}
-  .btn-3d:active{transform:translateY(4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 #C2C2CB,0 2px 6px rgba(20,23,28,.2)}
+  .btn-3d:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 1px 0 #C2C2CB,0 2px 5px rgba(20,23,28,.2)}
   .btn-3d.feito{background:linear-gradient(180deg,#EFFAF4 0%,#D9F0E2 55%,#C2E6D1 100%);color:#1F5C39;box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 5px 0 #9FD1B4,0 9px 16px rgba(20,23,28,.18)}
   .btn:hover{filter:brightness(1.12)}
   .btn.claro{background:var(--branco);color:var(--preto)}
@@ -316,7 +316,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .modal p{font-size:.95rem;line-height:1.55;margin-bottom:18px}
   .modal .acoes{display:flex;gap:10px;justify-content:flex-end}
 
-  .destaque{border:1px solid var(--linha);background:var(--carvao)}
+  .destaque{background:var(--carvao)}
   .selo-destaque{font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--branco);font-weight:900;margin-bottom:2px}
   .selo-destaque .cruz{color:var(--vermelho)}
   .dest-grid{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:16px;align-items:start}
@@ -3868,7 +3868,7 @@ function htmlRodadaBox(semTitulo){
       '<div style="margin-top:0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'+
         nomeJogoComEscudos(rj,42,'.95rem')+htmlInfoDireitaJogo(rj,true)+
       '</div>'+
-      '<div style="margin:14px 0 6px">'+
+      '<div style="margin:6px 0 14px">'+
       (pontuacaoLiberada(rj)?'':(avaliou(rj,eu)?'<button class="btn-3d feito" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span>Avaliação realizada (Alterar)</span><span style="color:var(--vermelho)">✠</span></button>':'<button class="btn-3d" onclick="abrirJogoNaAvaliacao(\''+rid+'\')"><span>Avaliar Jogadores</span><span style="color:var(--vermelho)">✠</span></button>'))+
       '</div>'+
       '</div>';
@@ -4032,7 +4032,7 @@ function renderListaJogos(){
       '</div>'+
       (s==='aberto'&&j.hora?'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0"><div class="cronometro" id="cronoDest" data-jogo="'+id+'" data-sem-segundos="1" style="font-size:.95rem;margin:0">…</div><span style="font-size:.76rem;color:var(--branco);font-weight:700">Fecha '+FECHA_PALPITE_MIN+' min antes da bola rolar</span></div>':
         '<p style="font-size:.84rem;margin:6px 0 6px;color:var(--branco)">'+chamada+'</p>')+
-      '<div style="margin:14px 0 6px"><button class="'+classeBtn3d+'" onclick="abrirJogo(\''+id+'\')"><span>'+rotuloBtn+'</span><span style="color:var(--vermelho)">✠</span></button></div>'+
+      '<div style="margin:6px 0 14px"><button class="'+classeBtn3d+'" onclick="abrirJogo(\''+id+'\')"><span>'+rotuloBtn+'</span><span style="color:var(--vermelho)">✠</span></button></div>'+
       '</div></div>';
     html+='<div class="card" style="margin-top:-2px">'+htmlRodadaBox()+'</div>';
     html+='<div class="card" style="cursor:pointer;padding:12px 14px" onclick="fqAbrirQuiz()">'+
