@@ -1163,7 +1163,9 @@ const JOGOS_INICIAIS=[
  ['g261017','São Paulo','fora','2026-10-17',null,'Campeonato Brasileiro',''],
  ['g261024','Corinthians','casa','2026-10-24',null,'Campeonato Brasileiro',''],
  ['g261028','Flamengo','casa','2026-10-28',null,'Campeonato Brasileiro',''],
+ ['g261101','Palmeiras','fora','2026-11-01',null,'Copa do Brasil','Semifinal - Ida'],
  ['g261104','Athletico Paranaense','fora','2026-11-04',null,'Campeonato Brasileiro',''],
+ ['g261108','Palmeiras','casa','2026-11-08',null,'Copa do Brasil','Semifinal - Volta'],
  ['g261118','Internacional','casa','2026-11-18',null,'Campeonato Brasileiro',''],
  ['g261121','Red Bull Bragantino','fora','2026-11-21',null,'Campeonato Brasileiro',''],
  ['g261128','Atlético-MG','fora','2026-11-28',null,'Campeonato Brasileiro',''],
@@ -2640,7 +2642,7 @@ const ADICIONAR_P2=[
  ['p_spinelli','99','Spinelli','Centroavante'],
 ];
 const PATCH_TV_V=2;
-const PATCH_JOGOS_FALTANTES_V=2;
+const PATCH_JOGOS_FALTANTES_V=3;
 const PATCH_ELENCO2_V=3;
 const PATCH_MERGE_JOGADORES_V=1;
 const PATCH_ZERAR_TEMPORADA_V=1;
@@ -5338,7 +5340,7 @@ function renderRankingGeralJogadores(){
   const linha=(x,extra)=>'<div class="linha-tabela"><span class="rank-nome">'+(x.p.num?x.p.num+' · ':'')+esc(x.p.nome)+'</span>'+
     '<span class="pontos '+classeNota(x.m.geral)+'" style="font-size:.9rem">'+x.m.geral.toFixed(1).replace('.',',')+'</span>'+
     (extra||'')+'</div>';
-  return '<div class="card"><details><summary>🏆 Ranking Geral e Comentários</summary><div style="margin-top:12px">'+
+  return '<div class="card"><details><summary>🏆 Ranking Geral Avaliação Jogadores + Comentários</summary><div style="margin-top:12px">'+
     '<div class="pos-titulo">👑 Melhores médias (e quantas vezes foi o melhor em campo)</div>'+
     porMedia.slice(0,15).map(x=>linha(x,x.mvp?' <span style="color:var(--ouro);font-size:.78rem;margin-left:8px">👑 ×'+x.mvp+'</span>':'')).join('')+
     '<div class="pos-titulo" style="margin-top:16px">🥶 Piores médias (e quantas vezes foi o pior em campo)</div>'+
@@ -5377,8 +5379,6 @@ function renderJogadores(){
     html+='</div></details></div>';
   }
 
-  html+='<div class="card"><h2>💬 Dicionário da Resenha</h2><p class="nota-rodape" style="margin:0">Toque num jogo pra ver o que a galera falou (texto ou áudio) sobre cada jogador — o mais recente aparece já aberto.</p></div>';
-
   html+=renderRankingGeralJogadores();
 
   const jogosComAval=jogosOrdenados().filter(([id,j])=>j.avaliacoes&&Object.keys(j.avaliacoes).some(u=>Object.keys(j.avaliacoes[u]||{}).length)).reverse();
@@ -5388,23 +5388,31 @@ function renderJogadores(){
   }
   jogosComAval.forEach(([id,j],i)=>{
     const idsAvaliados=[...new Set(Object.values(j.avaliacoes||{}).flatMap(porJog=>Object.keys(porJog||{})))];
-    const jogadoresDoJogo=idsAvaliados.map(pid=>jogadorPorId(pid)).filter(Boolean)
-      .sort((a,b)=>posIndex(a.pos)-posIndex(b.pos)||a.nome.localeCompare(b.nome,'pt-BR'));
+    const liberado=pontuacaoLiberada(j); // enquanto a rodada não fecha (todos avaliaram ou o prazo venceu), não mostra nota de ninguém — só depois
+    html+='<div class="card" style="padding:0"><details class="jogo-resenha"><summary><span class="display" style="font-size:1.02rem">'+nomeJogo(j)+'</span> <small style="font-weight:400;color:var(--cinza)">— '+fmtData(j)+'</small></summary>'+
+      '<div style="padding:0 16px 14px">';
+    if(!liberado){
+      html+='<p class="nota-rodape" style="margin:10px 0">🔒 As notas dessa rodada aparecem quando todo mundo avaliar (ou o prazo de 24h vencer).</p></div></details></div>';
+      return;
+    }
+    const jogadoresDoJogo=idsAvaliados.map(pid=>jogadorPorId(pid)).filter(Boolean);
     const resumo=jogadoresDoJogo.map(p=>({p,media:mediaJogadorNoJogo(j,p.id)}))
       .sort((a,b)=>(b.media&&b.media.media!==null?b.media.media:-1)-(a.media&&a.media.media!==null?a.media.media:-1));
     const mvpMedia=resumo.length&&resumo[0].media&&resumo[0].media.media!==null?resumo[0].media.media:null;
-    html+='<div class="card" style="padding:0"><details'+(i===0?' open':'')+' class="jogo-resenha"><summary>'+nomeJogo(j)+' <small style="font-weight:400;color:var(--cinza)">— '+fmtData(j)+'</small></summary>'+
-      '<div style="padding:0 16px 14px">'+
-      '<div style="margin-bottom:10px"><div class="pos-titulo" style="margin-bottom:6px">Médias e MVP até agora</div>'+
+    html+='<div style="margin-bottom:10px"><div class="pos-titulo" style="margin-bottom:6px">Médias e MVP</div>'+
       resumo.map(({p,media})=>{
         const ehMvp=mvpMedia!==null&&media&&media.media===mvpMedia;
         return '<div class="linha-tabela"><span class="rank-nome">'+(ehMvp?'👑 ':'')+(p.num?p.num+' · ':'')+esc(p.nome)+'</span>'+
           '<span class="pontos '+(media&&media.media!==null?classeNota(media.media):'')+'" style="font-size:.9rem">'+(media&&media.media!==null?media.media.toFixed(1).replace('.',','):(media&&media.na?'N/A':'–'))+'</span></div>';
       }).join('')+
       '</div>';
-    jogadoresDoJogo.forEach(p=>{
-      const comentarios=coletarComentarios(j,p.id);
+    resumo.forEach(({p})=>{
+      const comentarios=coletarComentarios(j,p.id).filter(c=>(c.com||'').trim()); // só entra quem realmente comentou (texto ou áudio) — sem isso, nem aparece o menu suspenso
       const info=palavrasDoJogador(p.id);
+      if(!comentarios.length){
+        html+='<div class="jogador-resenha-sem-comentario" style="padding:8px 0;border-bottom:1px solid var(--linha);font-size:.88rem">'+(p.num?p.num+' · ':'')+esc(p.nome)+' <small style="font-weight:400;color:var(--cinza)">'+esc(p.pos)+'</small></div>';
+        return;
+      }
       html+='<details class="jogador-resenha"><summary>'+(p.num?p.num+' · ':'')+esc(p.nome)+' <small style="font-weight:400;color:var(--cinza)">'+esc(p.pos)+' · '+comentarios.length+' avaliação(ões)</small></summary>'+
         '<div style="padding:8px 0 4px">'+
         comentarios.map(c=>{
@@ -5412,7 +5420,7 @@ function renderJogadores(){
           const audioId=('au'+id+p.id+c.user).replace(/[^a-zA-Z0-9]/g,'');
           return '<div class="linha-tabela"><span class="rank-nome">'+esc(c.user)+'</span>'+
             '<span class="pontos '+classeNota(c.nota)+'" style="font-size:.95rem">'+fmtNota(c.nota)+'</span>'+
-            '<span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+(c.com?esc(c.com.replace('🎙️','').trim()):'<i style="color:var(--cinza)">sem comentário</i>')+
+            '<span style="flex-basis:100%;font-size:.85rem;color:#3A3A40">'+esc(c.com.replace('🎙️','').trim())+
             (temAudio?' <button type="button" id="'+audioId+'" class="btn fantasma" style="padding:3px 10px;font-size:.68rem" onclick="tocarAudioComentario(\''+id+'\',\''+p.id+'\',\''+c.user.replace(/'/g,"\\'")+'\',\''+audioId+'\')">🔊 Tocar áudio</button>':'')+
             '</span></div>';
         }).join('')+
