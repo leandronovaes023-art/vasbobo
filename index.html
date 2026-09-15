@@ -189,7 +189,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .adm{font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro);border:1px solid var(--ouro);border-radius:99px;padding:2px 8px}
   .who button{background:none;border:none;color:var(--cinza);cursor:pointer;font-size:.75rem;text-decoration:underline;font-family:inherit}
 
-  .linha-menu-topo{position:relative;padding:8px 0 2px 0}
+  .linha-menu-topo{position:fixed;left:0;right:0;top:70px;padding:8px 16px 2px;z-index:375;background:var(--preto)}
   .btn-hamburger{width:50px;height:38px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:flex-start;padding:0;margin-left:0;
     background:none;box-shadow:none}
   .btn-hamburger img{width:46px;height:auto;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
@@ -3672,8 +3672,17 @@ function voltarLista(){jogoAberto=null;render();}
 
 function ajustarEspacoHeaderFixo(){
   const h=document.querySelector('header');
+  const barra=document.querySelector('.linha-menu-topo');
   const m=document.querySelector('main');
-  if(h&&m)m.style.paddingTop=(h.offsetHeight+10)+'px';
+  if(!h)return;
+  const alturaHeader=h.offsetHeight;
+  if(barra){
+    barra.style.top=alturaHeader+'px';
+    const alturaBarra=barra.offsetHeight;
+    if(m)m.style.paddingTop=(alturaHeader+alturaBarra+10)+'px';
+  }else if(m){
+    m.style.paddingTop=(alturaHeader+10)+'px';
+  }
 }
 window.addEventListener('resize',ajustarEspacoHeaderFixo);
 function render(){
