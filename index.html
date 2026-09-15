@@ -157,7 +157,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
     box-shadow:0 0 6px 1px rgba(255,210,61,.8);animation:particulaVoa .9s ease-out forwards}
   @keyframes particulaVoa{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
 
-  header{border-bottom:1px solid var(--linha);background:var(--preto);position:sticky;top:0;z-index:380}
+  header{border-bottom:1px solid var(--linha);background:var(--preto);position:fixed;top:0;left:0;right:0;z-index:380}
   .header-inner{max-width:1320px;margin:0 auto;padding:5px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
   .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none;text-transform:uppercase}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px}
@@ -234,7 +234,7 @@ console.log('Firebase conectado ao Vasbobo ✓');
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;white-space:nowrap}
   .tab.ativa{background:var(--branco);color:var(--preto)}
   .tab:focus-visible,button:focus-visible{outline:none}
-  main{max-width:1320px;margin:0 auto;padding:6px 8px 102px}
+  main{max-width:1320px;margin:0 auto;padding:130px 8px 102px}
   .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:var(--carvao);border-top:1px solid var(--linha);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
@@ -3670,6 +3670,12 @@ function atualizarMenuFixo(abaAtual){
 function abrirJogo(id){aba='jogos';jogoAberto=id;mostrarAvaliacaoDetalhe=false;jogadoresExpandidos.clear();atualizarMenuFixo('jogos');render();window.scrollTo({top:0});}
 function voltarLista(){jogoAberto=null;render();}
 
+function ajustarEspacoHeaderFixo(){
+  const h=document.querySelector('header');
+  const m=document.querySelector('main');
+  if(h&&m)m.style.paddingTop=(h.offsetHeight+10)+'px';
+}
+window.addEventListener('resize',ajustarEspacoHeaderFixo);
 function render(){
   document.getElementById('barTeste').classList.toggle('oculto',!modoTeste());
   document.getElementById('secJogos').classList.toggle('oculto',!(aba==='jogos'&&!jogoAberto));
@@ -3694,6 +3700,7 @@ function render(){
   if(aba==='vasbolao')renderVasbolaoAba();
   desenharPreviasRoleta();
   atualizarLembreteAvaliar();
+  setTimeout(ajustarEspacoHeaderFixo,0);
 }
 
 /* =================== DESTAQUE E LISTA =================== */

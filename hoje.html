@@ -211,7 +211,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
 .titulo-vasbobo .cruz{flex:none}
   .oculto{display:none!important}
 
-  header{border-bottom:1px solid var(--linha);background:var(--preto);position:sticky;top:0;z-index:380}
+  header{border-bottom:1px solid var(--linha);background:var(--preto);position:fixed;top:0;left:0;right:0;z-index:380}
   .header-inner{max-width:1320px;margin:0 auto;padding:8px 16px;display:flex;align-items:stretch;justify-content:space-between;gap:10px;flex-wrap:nowrap}
 .btn-vasbolao-header{background:rgba(47,208,142,.14);border:1px solid var(--verde);color:var(--branco);border-radius:7px;padding:6px 12px;cursor:pointer;font-size:.76rem;letter-spacing:.03em;font-family:'Inter',sans-serif;font-weight:800;flex:none;text-transform:uppercase}
   .header-right-stack{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px}
@@ -261,7 +261,7 @@ body{min-height:100vh;color:var(--branco);font-family:'Inter',sans-serif;-webkit
   .tab{font-family:'Inter',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.02em;font-size:.72rem;padding:8px 10px;background:var(--carvao);color:var(--cinza);border:1px solid var(--linha);border-bottom:none;border-radius:9px 9px 0 0;cursor:pointer;backdrop-filter:blur(6px);white-space:nowrap}
   .tab.ativa{background:var(--branco);color:var(--preto)}
   .tab:focus-visible,button:focus-visible{outline:none}
-  main{max-width:1320px;margin:0 auto;padding:6px 8px 102px}
+  main{max-width:1320px;margin:0 auto;padding:130px 8px 102px}
   .menu-fixo{position:fixed;left:0;right:0;bottom:0;z-index:390;background:var(--carvao);border-top:1px solid var(--linha);
     display:flex;justify-content:space-around;align-items:stretch;box-shadow:0 -4px 20px rgba(0,0,0,.35);
     padding-bottom:env(safe-area-inset-bottom,0)}
@@ -1053,6 +1053,17 @@ function fmCompartilharWhats(frase){
   window.open('https://wa.me/?text='+encodeURIComponent(frase+' — via Vasbobo'),'_blank');
 }
 
+</script>
+<script>
+function ajustarEspacoHeaderFixo(){
+  const h=document.querySelector('header');
+  const m=document.querySelector('main');
+  if(h&&m)m.style.paddingTop=(h.offsetHeight+10)+'px';
+}
+window.addEventListener('load',ajustarEspacoHeaderFixo);
+window.addEventListener('resize',ajustarEspacoHeaderFixo);
+setTimeout(ajustarEspacoHeaderFixo,300);
+setTimeout(ajustarEspacoHeaderFixo,1000);
 </script>
 </body>
 </html>
