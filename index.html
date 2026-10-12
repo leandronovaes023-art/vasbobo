@@ -1161,12 +1161,14 @@ const JOGOS_INICIAIS=[
  ['g260919','Coritiba','casa','2026-09-19','20:30','Campeonato Brasileiro',''],
  ['g261007','Botafogo','fora','2026-10-07','20:30','Campeonato Brasileiro',''],
  ['g261010','Remo','casa','2026-10-10','17:00','Campeonato Brasileiro',''],
- ['g261017','São Paulo','fora','2026-10-17',null,'Campeonato Brasileiro',''],
- ['g261024','Corinthians','casa','2026-10-24',null,'Campeonato Brasileiro',''],
- ['g261028','Flamengo','casa','2026-10-28',null,'Campeonato Brasileiro',''],
- ['g261101','Palmeiras','fora','2026-11-01',null,'Copa do Brasil','Semifinal - Ida'],
- ['g261104','Athletico Paranaense','fora','2026-11-04',null,'Campeonato Brasileiro',''],
- ['g261108','Palmeiras','casa','2026-11-08',null,'Copa do Brasil','Semifinal - Volta'],
+ ['g261013','Boca Juniors','fora','2026-10-13','21:30','CONMEBOL Sudamericana','Ida'],
+ ['g261017','São Paulo','fora','2026-10-17','21:00','Campeonato Brasileiro',''],
+ ['g261020','Boca Juniors','casa','2026-10-20','21:30','CONMEBOL Sudamericana','Volta'],
+ ['g261024','Corinthians','casa','2026-10-24','18:30','Campeonato Brasileiro',''],
+ ['g261029','Flamengo','casa','2026-10-29','20:00','Campeonato Brasileiro',''],
+ ['g261101','Palmeiras','fora','2026-11-01','16:00','Copa do Brasil','Semifinal - Ida'],
+ ['g261104','Athletico Paranaense','fora','2026-11-04','19:30','Campeonato Brasileiro',''],
+ ['g261108','Palmeiras','casa','2026-11-08','17:00','Copa do Brasil','Semifinal - Volta'],
  ['g261118','Internacional','casa','2026-11-18',null,'Campeonato Brasileiro',''],
  ['g261121','Red Bull Bragantino','fora','2026-11-21',null,'Campeonato Brasileiro',''],
  ['g261128','Atlético-MG','fora','2026-11-28',null,'Campeonato Brasileiro',''],
@@ -2643,11 +2645,12 @@ const ADICIONAR_P2=[
  ['p_spinelli','99','Spinelli','Centroavante'],
 ];
 const PATCH_TV_V=2;
-const PATCH_JOGOS_FALTANTES_V=3;
+const PATCH_JOGOS_FALTANTES_V=4;
 const PATCH_ELENCO2_V=3;
 const PATCH_MERGE_JOGADORES_V=1;
 const PATCH_ZERAR_TEMPORADA_V=1;
 const PATCH_HORARIOS_SET_V=1;
+const PATCH_CALENDARIO_OUT2026_V=1;
 function migrar(){
   let mudou=false;
   if(!dados.config){dados.config={modoTeste:false};mudou=true;}
@@ -2749,6 +2752,29 @@ function migrar(){
     if(dados.jogos.g261007&&!dados.jogos.g261007.hora)dados.jogos.g261007.hora='20:30';
     if(dados.jogos.g261010&&!dados.jogos.g261010.hora)dados.jogos.g261010.hora='17:00';
     dados.patchHorariosSetV=PATCH_HORARIOS_SET_V;
+    mudou=true;
+  }
+  /* calendário oficial out-dez/2026 confirmado (fonte: ESPN) — corrige a data do jogo com o
+     Flamengo (estava cadastrado como 28/10, o jogo real é 29/10), preenche horários que já
+     foram confirmados pela CBF/CONMEBOL e os dois jogos contra o Boca Juniors pela Sudamericana
+     entram pelo patch de jogos faltantes abaixo, já que são jogos novos no calendário */
+  if((dados.patchCalendarioOut2026V||0)<PATCH_CALENDARIO_OUT2026_V){
+    if(dados.jogos.g261028&&!dados.jogos.g261029){
+      dados.jogos.g261029=dados.jogos.g261028;
+      delete dados.jogos.g261028;
+    }else if(dados.jogos.g261028){
+      delete dados.jogos.g261028;
+    }
+    if(dados.jogos.g261029){
+      dados.jogos.g261029.data='2026-10-29';
+      if(!dados.jogos.g261029.hora)dados.jogos.g261029.hora='20:00';
+    }
+    if(dados.jogos.g261017&&!dados.jogos.g261017.hora)dados.jogos.g261017.hora='21:00';
+    if(dados.jogos.g261024&&!dados.jogos.g261024.hora)dados.jogos.g261024.hora='18:30';
+    if(dados.jogos.g261101&&!dados.jogos.g261101.hora)dados.jogos.g261101.hora='16:00';
+    if(dados.jogos.g261104&&!dados.jogos.g261104.hora)dados.jogos.g261104.hora='19:30';
+    if(dados.jogos.g261108&&!dados.jogos.g261108.hora)dados.jogos.g261108.hora='17:00';
+    dados.patchCalendarioOut2026V=PATCH_CALENDARIO_OUT2026_V;
     mudou=true;
   }
   Object.values(dados.jogos).forEach(j=>{
