@@ -1169,7 +1169,7 @@ const JOGOS_INICIAIS=[
  ['g261101','Palmeiras','fora','2026-11-01','16:00','Copa do Brasil','Semifinal - Ida'],
  ['g261104','Athletico Paranaense','fora','2026-11-04','19:30','Campeonato Brasileiro',''],
  ['g261108','Palmeiras','casa','2026-11-08','17:00','Copa do Brasil','Semifinal - Volta'],
- ['g261118','Internacional','casa','2026-11-18',null,'Campeonato Brasileiro',''],
+ ['g261119','Internacional','casa','2026-11-19','19:30','Campeonato Brasileiro',''],
  ['g261121','Red Bull Bragantino','fora','2026-11-21',null,'Campeonato Brasileiro',''],
  ['g261128','Atlético-MG','fora','2026-11-28',null,'Campeonato Brasileiro',''],
  ['g261202','Vitória','casa','2026-12-02',null,'Campeonato Brasileiro',''],
@@ -2651,6 +2651,7 @@ const PATCH_MERGE_JOGADORES_V=1;
 const PATCH_ZERAR_TEMPORADA_V=1;
 const PATCH_HORARIOS_SET_V=1;
 const PATCH_CALENDARIO_OUT2026_V=1;
+const PATCH_INTER_1911_V=1;
 function migrar(){
   let mudou=false;
   if(!dados.config){dados.config={modoTeste:false};mudou=true;}
@@ -2730,6 +2731,25 @@ function migrar(){
     if(dados.jogos.g260820&&!dados.jogos.g260820.ondeAssistir)dados.jogos.g260820.ondeAssistir='Paramount+';
     if(dados.jogos.g260823&&!dados.jogos.g260823.ondeAssistir)dados.jogos.g260823.ondeAssistir='Globo e Premiere';
     dados.patchTvV=PATCH_TV_V;
+    mudou=true;
+  }
+  /* Vasco x Internacional foi remarcado de 18/11 pra quinta 19/11, 19h30, em São Januário, com
+     transmissão no SporTV e no Premiere. Move o jogo que já existe (id g261118) pro novo id,
+     preservando palpites/avaliações, e roda ANTES do patch de jogos faltantes pra ele não criar
+     um jogo vazio duplicado em g261119. */
+  if((dados.patchInter1911V||0)<PATCH_INTER_1911_V){
+    if(dados.jogos.g261118&&!dados.jogos.g261119){
+      dados.jogos.g261119=dados.jogos.g261118;
+      delete dados.jogos.g261118;
+    }else if(dados.jogos.g261118){
+      delete dados.jogos.g261118;
+    }
+    if(dados.jogos.g261119){
+      dados.jogos.g261119.data='2026-11-19';
+      dados.jogos.g261119.hora='19:30';
+      dados.jogos.g261119.ondeAssistir='SporTV e Premiere';
+    }
+    dados.patchInter1911V=PATCH_INTER_1911_V;
     mudou=true;
   }
   /* garante que TODOS os jogos da lista JOGOS_INICIAIS (o calendário oficial) existam no banco —
